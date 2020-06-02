@@ -40,7 +40,7 @@ class SubjectConfigurer {
 
     private void parseLine(String line, Subject subject) throws IOException {
         line = line.trim();
-        if (line.isEmpty()) {
+        if (line.isEmpty() || line.startsWith(";")) {
             return;
         }
         String[] parts = line.split("\\s");
