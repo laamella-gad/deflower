@@ -14,4 +14,17 @@ class DataBlock extends Block {
     public String toString() {
         return super.toString() + " " + type.name().toLowerCase() + (isSystem ? " system" : "");
     }
+
+    @Override
+    public String labelFor(int address, Subject subject) {
+        int offset = address - this.address;
+        String label = subject.memory[this.address].label;
+        if (label == null) {
+            return null;
+        }
+        if (offset == 0) {
+            return label;
+        }
+        return String.format("%s + %d", label, offset);
+    }
 }

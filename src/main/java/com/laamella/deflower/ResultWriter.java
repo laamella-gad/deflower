@@ -4,12 +4,11 @@ import com.laamella.mpu6502.specification.Instruction;
 
 import java.io.*;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Objects;
 
 import static com.laamella.Printing.*;
 import static com.laamella.mpu6502.ByteManipulation.toSignedByte;
-import static com.laamella.mpu6502.specification.Opcode.OPCODE_NAME;
+import static com.laamella.mpu6502.ByteManipulation.word;
 import static java.lang.String.format;
 
 class AssemblyFileFormat {
@@ -91,18 +90,19 @@ class AssemblyFileFormat {
         Instruction instruction = block.instruction;
         int byte1 = subject.memory[block.address + 1].data;
         int byte2 = subject.memory[block.address + 2].data;
+        int word = word(byte1, byte2);
         String operand = switch (instruction.addressingMode) {
-            case IND_X -> format("($%02X, X)", byte1);
-            case IND_Y -> format("($%02X), Y", byte1);
-            case RELATIVE -> format("$%04X", block.address + toSignedByte(byte1) + 2);
-            case INDIRECT -> format("($%02X%02X)", byte2, byte1);
-            case ABSOLUTE -> format("$%02X%02X", byte2, byte1);
-            case ABSOLUTE_X -> format("$%02X%02X, X", byte2, byte1);
-            case ABSOLUTE_Y -> format("$%02X%02X, Y", byte2, byte1);
+            case IND_X -> format("(%s, X)", nameForAddress(byte1, "$%02X", subject));
+            case IND_Y -> format("(%s), Y", nameForAddress(byte1, "$%02X", subject));
+            case RELATIVE -> format("%s", nameForAddress(block.address + toSignedByte(byte1) + 2, "$%04X", subject));
+            case INDIRECT -> format("(%s)", nameForAddress(word, "$%04X", subject));
+            case ABSOLUTE -> format("%s", nameForAddress(word, "$%04X", subject));
+            case ABSOLUTE_X -> format("%s, X", nameForAddress(word, "$%04X", subject));
+            case ABSOLUTE_Y -> format("%s, Y", nameForAddress(word, "$%04X", subject));
             case IMMEDIATE -> format("#$%02X", byte1);
-            case ZERO_PAGE -> format("$%02X", byte1);
-            case ZERO_PAGE_X -> format("$%02X, X", byte1);
-            case ZERO_PAGE_Y -> format("$%02X, Y", byte1);
+            case ZERO_PAGE -> format("%s", nameForAddress(byte1, "$%02X", subject));
+            case ZERO_PAGE_X -> format("%s, X", nameForAddress(byte1, "$%02X", subject));
+            case ZERO_PAGE_Y -> format("%s, Y", nameForAddress(byte1, "$%02X", subject));
             case JAM, ACCUMULATOR, NONE -> "";
         };
         newLine();
@@ -112,6 +112,18 @@ class AssemblyFileFormat {
         print(operand);
 
         lastBlock = block;
+    }
+
+    private String nameForAddress(int address, String formatWhenNumeric, Subject subject) {
+        Block block = subject.memory[address].block;
+        if (block == null) {
+            return String.format(formatWhenNumeric, address);
+        }
+        String label = block.labelFor(address, subject);
+        if (label == null) {
+            return String.format(formatWhenNumeric, address);
+        }
+        return label;
     }
 }
 

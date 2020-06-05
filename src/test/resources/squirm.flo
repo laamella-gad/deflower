@@ -1,174 +1,188 @@
 deflower squirm.vsf
-2800-2ff9
-0fa0-23f3
-23f9-23fa
-243e-243f
-2572-2680
-3e81-3ee3
-3ee3-3f46
-3db8-3e7f
-35e7-35e8
-2682-26ac
-26df-2800
-
-26ac-26bf
-26c2-26c8
-26cb-26dc
+$2800-$2ff9  data
+$0fa0-$23f3  data
+$23f9-$23fa  data
+$243e-$243f  data
+$2572-$2680  data
+$3e81-$3ee3  data
+$3ee3-$3f46  data
+$3db8-$3e7f  data
+$35e7-$35e8  data
+$2682-$26ac data
+$26df-$2800 data
+$26ac-$26bf       data
+$26c2-$26c8       data
+$26cb-$26dc       data
 
 ; 3b20 screen 0400 charset 2800
 
-0057 code player_direction
-0058 code joy_dir_for_move
-00a2 code jiffy_timer
-00c5 code last_key_pressed
-00fb code new_loc_lo
-00fc code new_loc_hi
-00fd code tmp_loc_lo
-00fe code tmp_loc_hi
-0400 code screen_ram
-0424 code var?_init_b1
-0755 code bonus_guy_2_start
-07de code bonus_timer_digit_1
-07df code bonus_timer_digit_2
-07e0 code bonus_timer_digit_3
-0fa0 code top_line
-0fa4 code hi_text
-0ff1 code empty_line
-1019 code bottom_line
-1041 code high_score_screen
-10f0 code high_score_table_1
-1140 code high_score_table_2
-1190 code high_score_table_3
-11e0 code high_score_table_4
-1230 code high_score_table_5
-1234 code hiscore?
-138a code title
-1687 code rest_of_title
-16d2 code level_1
-1a1a code level_2
-1d62 code level_3
-20ab code title_screen_colors
-23fa code set_top_bottom_text
-23fc code more_chars
-240e code set_top_bottom_red
-2410 code more_colors
-2441 code draw_title_screen
-246a code draw_level_1
-2491 code draw_level_2
-24b8 code draw_level_3
-24df code draw_screen_colors
-2508 code animate_player_chars
-2542 code color_lines
-2648 code word?_1_048e
-264a code word?_2_048e
-264c code word?_3_048e
-264e code word?_4_048e
-2650 code word?_5_048e
-2652 code word?_6_048e
-2654 code word?_7_048e
-2656 code word?_8_048e
-2658 code snk_head_loc_lo
-2659 code snk_head_loc_hi
-265a code snake_pos_tbl_lo
-265b code snake_pos_tbl_hi
-2662 code snake_pos_tbl
-266a code clear_snake_lo
-266b code clear_snake_hi
-2681 code var7_init_0
-2682 code level_nr
-2683 code irq_delay_counter
-2684 code bonus_guy_char
-2685 code lives
-2688 code var2_init_with_1
-2689 code some_bonus_timer
-268a code bon_gy_loc_lo
-268b code bon_gy_loc_hi
-268d code var5_init_with_0
-268e code bonus_guy_char
-2690 code dots_eaten
-2691 code bonus_points_char
-2692 code note_idx
-26ac code press_fire_to_start_
-26c0 code get_ready_text
-26ca code bonus_run_text
-26d4 code bonus_text
-2800 code charset
-2a00 code arrow_char_1
-2a08 code arrow_char_2
-2a10 code arrow_char_3
-2a30 code dot_char
-2a38 code bonus_gy_1_char_1
-2a40 code bonus_gy_1_char_2
-2a48 code bonus_gy_2_char_1
-2a50 code bonus_gy_2_char_2
-2a70 code player_char_1
-2a78 code player_char_2
-2a80 code player_char_3
-2a88 code player_char_4
-2a90 code player_char_5
-2a98 code player_char_6
-2aa0 code player_char_7
-2aa8 code player_char_8
-2ff9 code check_move_possible
-3011 code move_is_possible
-3014 code check_move_up
-3028 code check_move_down
-303c code check_move_right
-304e code check_move_left
-3060 code check_fire
-306e code try_move
-30a2 code sfx_hi_char_entry
-30b8 code move_hi_from_scr_to_
-30de code update_hi?
-3429 code draw_snakes
-3433 code draw_snake_tail
-3435 code draw_snake_ball
-346e code rotate_snake_pos
-35e8 code colorize_maze
-360b code colorize_maze_2
-362a code colorize_maze_3
-3649 code colorize_maze_4
-3669 code initialize_pointers
-3724 code inc_score_digit_x
-373b code bonus_guy_hit_handle
-3742 code no_bonus
-3752 code bonus_10_points?
-376b code bonus_100_points
-3780 code bonus_round
-378f code burp_bonus_text
-37c7 code start_next_level
-37f1 code bonus_round_loop
-37f8 code bonus_walk_on_44?
-3809 code bonus_walk_on_43?
-381f code bonus_walk_on_46
-3862 code end_bonus_round
-3879 code end_level
-3a46 code var_2_stuff
-3a7d code life_lost_handler
-3b0c code restart_to_title
-3b1d code entry:
-3b25 code reset_everything
-3bb4 code play_music_loop
-3bc4 code play_music_wait_loop
-3bcf code check_space
-3bf6 code game_loop
-3c00 code check_hit_dot
-3c1c code check_hit_bonus_guy
-3c2c code check_hit_snake
-3c34 code hit_snake
-3c41 code life_lost
-3c44 code nothing_hit
-3c52 code player_not_moving
-3c73 code pause
-3cb3 code irq
-3cc4 code animate_charset
-3d08 code skip_irq
-3d0b code setup_irq
-3d27 code countdown_irq
-3d4b code ???
-3d5c code play_next_note
-3d76 code quiet
-3db8 code bonus_notes
-3e80 code voice_1_notes
-3ee4 code voice_2_notes
-d800 code color_ram
+$0057 data player_direction
+$0058 data joy_dir_for_move
+$00a2 data jiffy_timer
+$00c5 data last_key_pressed
+$00fb data new_loc_lo
+$00fc data new_loc_hi
+$00fd data tmp_loc_lo
+$00fe data tmp_loc_hi
+$0400 data screen_ram
+# ???
+$0424 data var_init_b1
+$0755 data bonus_guy_2_start
+$07de data bonus_timer_digit_1
+$07df data bonus_timer_digit_2
+$07e0 data bonus_timer_digit_3
+$0fa0 data top_line
+$0fa4 data hi_text
+$0ff1 data empty_line
+$1019 data bottom_line
+$1041 data high_score_screen
+$10f0 data high_score_table_1
+$1140 data high_score_table_2
+$1190 data high_score_table_3
+$11e0 data high_score_table_4
+$1230 data high_score_table_5
+# ???
+$1234 data hiscore
+$138a 40x25 bytes title
+$1687 data rest_of_title
+$16d2 data level_1
+$1a1a data level_2
+$1d62 data level_3
+$20ab data title_screen_colors
+$23fa code set_top_bottom_text
+$23fc code more_chars
+$240e code set_top_bottom_red
+$2410 code more_colors
+$2441 code draw_title_screen
+$246a code draw_level_1
+$2491 code draw_level_2
+$24b8 code draw_level_3
+$24df code draw_screen_colors
+$2508 code animate_player_chars
+$2542 code color_lines
+# ???
+$2648 data word_1_048e
+# ???
+$264a data word_2_048e
+# ???
+$264c data word_3_048e
+# ???
+$264e data word_4_048e
+# ???
+$2650 data word_5_048e
+# ???
+$2652 data word_6_048e
+# ???
+$2654 data word_7_048e
+# ???
+$2656 data word_8_048e
+$2658 data snk_head_loc_lo
+$2659 data snk_head_loc_hi
+$265a data snake_pos_tbl_lo
+$265b data snake_pos_tbl_hi
+$2662 data snake_pos_tbl
+$266a data clear_snake_lo
+$266b data clear_snake_hi
+$2681 data var7_init_0
+$2682 data level_nr
+$2683 data irq_delay_counter
+$2684 data bonus_guy_char
+$2685 data lives
+$2688 data var2_init_with_1
+$2689 data some_bonus_timer
+$268a data bon_gy_loc_lo
+$268b data bon_gy_loc_hi
+$268d data var5_init_with_0
+$268e data bonus_guy_char
+$2690 data dots_eaten
+$2691 data bonus_points_char
+$2692 data note_idx
+$26ac data press_fire_to_start_
+$26c0 data get_ready_text
+$26ca data bonus_run_text
+$26d4 data bonus_text
+$2800 data charset
+$2a00 data arrow_char_1
+$2a08 data arrow_char_2
+$2a10 data arrow_char_3
+$2a30 data dot_char
+$2a38 data bonus_gy_1_char_1
+$2a40 data bonus_gy_1_char_2
+$2a48 data bonus_gy_2_char_1
+$2a50 data bonus_gy_2_char_2
+$2a70 data player_char_1
+$2a78 data player_char_2
+$2a80 data player_char_3
+$2a88 data player_char_4
+$2a90 data player_char_5
+$2a98 data player_char_6
+$2aa0 data player_char_7
+$2aa8 data player_char_8
+$2ff9 code check_move_possible
+$3011 code move_is_possible
+$3014 code check_move_up
+$3028 code check_move_down
+$303c code check_move_right
+$304e code check_move_left
+$3060 code check_fire
+$306e code try_move
+$30a2 code sfx_hi_char_entry
+$30b8 code move_hi_from_scr_to_
+# ???
+$30de code update_hi
+$3429 code draw_snakes
+$3433 code draw_snake_tail
+$3435 code draw_snake_ball
+$346e code rotate_snake_pos
+$35e8 code colorize_maze
+$360b code colorize_maze_2
+$362a code colorize_maze_3
+$3649 code colorize_maze_4
+$3669 code initialize_pointers
+$3724 code inc_score_digit_x
+$373b code bonus_guy_hit_handle
+$3742 code no_bonus
+# ???
+$3752 code bonus_10_points
+$376b code bonus_100_points
+$3780 code bonus_round
+$378f code burp_bonus_text
+$37c7 code start_next_level
+$37f1 code bonus_round_loop
+# ???
+$37f8 code bonus_walk_on_44
+# ???
+$3809 code bonus_walk_on_43
+$381f code bonus_walk_on_46
+$3862 code end_bonus_round
+$3879 code end_level
+$3a46 code var_2_stuff
+$3a7d code life_lost_handler
+$3b0c code restart_to_title
+$3b1d code entry
+$3b25 code reset_everything
+$3bb4 code play_music_loop
+$3bc4 code play_music_wait_loop
+$3bcf code check_space
+$3bf6 code game_loop
+$3c00 code check_hit_dot
+$3c1c code check_hit_bonus_guy
+$3c2c code check_hit_snake
+$3c34 code hit_snake
+$3c41 code life_lost
+$3c44 code nothing_hit
+$3c52 code player_not_moving
+$3c73 code pause
+$3cb3 code irq
+$3cc4 code animate_charset
+$3d08 code skip_irq
+$3d0b code setup_irq
+$3d27 code countdown_irq
+# ???
+$3d4b code
+$3d5c code play_next_note
+$3d76 code quiet
+$3db8 data bonus_notes
+$3e80 data voice_1_notes
+$3ee4 byte voice_2_notes
+$d800 system bytes color_ram

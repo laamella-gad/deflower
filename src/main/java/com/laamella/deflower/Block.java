@@ -17,4 +17,6 @@ abstract class Block {
     public String toString() {
         return asAddress(address) + " " + size;
     }
+
+    public abstract String labelFor(int address, Subject subject);
 }

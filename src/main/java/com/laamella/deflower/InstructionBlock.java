@@ -9,4 +9,17 @@ public class InstructionBlock extends Block {
         super(address, instruction.addressingMode.totalBytes);
         this.instruction = instruction;
     }
+
+    @Override
+    public String labelFor(int address, Subject subject) {
+        int offset = address - this.address;
+        String label = subject.memory[this.address].label;
+        if (label == null) {
+            return null;
+        }
+        if (offset == 0) {
+            return label;
+        }
+        return String.format("%s + %d", label, offset);
+    }
 }
