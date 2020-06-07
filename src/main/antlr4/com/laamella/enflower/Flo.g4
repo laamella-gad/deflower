@@ -10,19 +10,20 @@ statement: COMMENT # comment
 expr:	expr '*' expr     # mul
     |	expr '+' expr                   # plus
     |	expr '-' expr               # memoryRange
-    | expr linetype                 # setSize
+    | expr datatype                 # setSize
     | number                        # address
     | 'system'                      # setSystem
     | 'export' ID                   # export
     | ID                                    # setLabel
     ;
 
-linetype: BYTE|WORD|DWORD|CODE;
+datatype: (BYTE|WORD|DWORD) ARRAY?;
 number: INT|HEX;
 
 BYTE: 'byte'|'bytes';
 WORD: 'word'|'words';
 DWORD: 'dword'|'dwords';
+ARRAY: 'array';
 CODE: 'code';
 COMMENT: (';'| '#')  ~[\r\n]*;
 WS: [ \t]+ -> skip;

@@ -2,8 +2,6 @@ package com.laamella.deflower;
 
 import com.laamella.mpu6502.specification.Instruction;
 
-import javax.xml.crypto.Data;
-
 import static com.laamella.mpu6502.ByteManipulation.toSignedByte;
 import static com.laamella.mpu6502.ByteManipulation.word;
 
@@ -23,9 +21,9 @@ class FlowAnalyser {
 
     private void analyseCodeFlow(int startAddress, Subject subject) {
         MemoryLocation memoryLocation = subject.memory[startAddress];
-        if (memoryLocation.block != null) {
-            if (memoryLocation.block instanceof DataBlock) {
-                System.out.println("Jumping into non-code area " + memoryLocation.block.toString());
+        if (memoryLocation.area != null) {
+            if (memoryLocation.area instanceof DataArea) {
+                System.out.println("Jumping into non-code area " + memoryLocation.area.toString());
             }
             return;
         }
@@ -36,7 +34,7 @@ class FlowAnalyser {
             System.out.println("Jumped into a JAM");
             return;
         }
-        InstructionBlock instructionBlock = new InstructionBlock(address, instruction);
+        InstructionArea instructionBlock = new InstructionArea(address, instruction);
         subject.registerBlock(instructionBlock);
         switch (instruction.opcode) {
             case RTS:

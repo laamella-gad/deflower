@@ -1,13 +1,18 @@
 package com.laamella.deflower;
 
-import com.laamella.mpu6502.specification.Instruction;
+class DataArea extends Area {
+    final DataType type;
+    boolean isSystem;
 
-public class InstructionBlock extends Block {
-    public Instruction instruction;
+    DataArea(int address, DataType type, boolean isSystem) {
+        super(address, type.sizeInBytes);
+        this.type = type;
+        this.isSystem = isSystem;
+    }
 
-    InstructionBlock(int address, Instruction instruction) {
-        super(address, instruction.addressingMode.totalBytes);
-        this.instruction = instruction;
+    @Override
+    public String toString() {
+        return super.toString() + " " + type.name().toLowerCase() + (isSystem ? " system" : "");
     }
 
     @Override

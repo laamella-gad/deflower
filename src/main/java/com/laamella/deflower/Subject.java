@@ -14,7 +14,7 @@ import static java.nio.file.Files.*;
 class MemoryLocation {
     final int address;
     final int data;
-    Block block = null;
+    Area area = null;
     String label = null;
 
     MemoryLocation(int address, int data) {
@@ -54,8 +54,8 @@ class Subject {
         createDirectories(directory);
     }
 
-    Block peek(int address) {
-        return memory[address].block;
+    Area peek(int address) {
+        return memory[address].area;
     }
 
     int byteAt(int address) {
@@ -70,9 +70,9 @@ class Subject {
         return wordAt(address) + 256 * 256 * wordAt(address + 2);
     }
 
-    void registerBlock(Block block) {
-        for (int a = 0; a < block.size; a++) {
-            memory[a + block.address].block = block;
+    void registerBlock(Area area) {
+        for (int a = 0; a < area.size; a++) {
+            memory[a + area.address].area = area;
         }
     }
 
@@ -81,7 +81,7 @@ class Subject {
         if (labelIt) {
             ensureLabelled(address, "CODE");
         }
-        if (location.block == null) {
+        if (location.area == null) {
             potentialCodeLocations.add(address);
         }
     }

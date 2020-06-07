@@ -2,7 +2,6 @@ package com.laamella.deflower;
 
 import com.laamella.enflower.FloBaseListener;
 import com.laamella.enflower.FloLexer;
-import com.laamella.enflower.FloListener;
 import com.laamella.enflower.FloParser;
 import com.laamella.vicevcf.C64MemModule;
 import com.laamella.vicevcf.C64MemModuleHandler;
@@ -119,7 +118,7 @@ class SubjectConfigurer {
                             amount = (addressEnd - address) / type.dataType.sizeInBytes;
                         }
                         for (int i = 0; i < amount; i++) {
-                            subject.registerBlock(new DataBlock(address + i * type.dataType.sizeInBytes, type.dataType, isSystem));
+                            subject.registerBlock(new DataArea(address + i * type.dataType.sizeInBytes, type.dataType, isSystem));
                         }
                     }
                     default -> throw new RuntimeException("No data type");
@@ -200,7 +199,7 @@ class SubjectConfigurer {
                     amount = (addressEnd - address) / type.dataType.sizeInBytes;
                 }
                 for (int i = 0; i < amount; i++) {
-                    subject.registerBlock(new DataBlock(address + i * type.dataType.sizeInBytes, type.dataType, isSystem));
+                    subject.registerBlock(new DataArea(address + i * type.dataType.sizeInBytes, type.dataType, isSystem));
                 }
                 break;
         }

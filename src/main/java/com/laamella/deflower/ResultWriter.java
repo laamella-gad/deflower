@@ -13,7 +13,7 @@ import static java.lang.String.format;
 
 class AssemblyFileFormat {
     private final Writer w;
-    private Block lastBlock = null;
+    private Area lastArea = null;
     boolean needsToReOrg = true;
 
     AssemblyFileFormat(PrintWriter w) {
@@ -42,12 +42,12 @@ class AssemblyFileFormat {
 
     private int column = 0;
 
-    public void print(DataBlock block, int address, Subject subject) throws IOException {
+    public void print(DataArea block, int address, Subject subject) throws IOException {
         if (block.isSystem) {
             return;
         }
         considerReOrg(address);
-        if ((!(lastBlock instanceof DataBlock)) || block.type != ((DataBlock) lastBlock).type) {
+        if ((!(lastArea instanceof DataArea)) || block.type != ((DataArea) lastArea).type) {
             newLine();
         }
         switch (block.type) {
@@ -55,7 +55,7 @@ class AssemblyFileFormat {
                 tabularPrint(".BYTE", asHexByte(subject.byteAt(address)));
                 break;
         }
-        lastBlock = block;
+        lastArea = block;
     }
 
     private void considerReOrg(int address) throws IOException {
@@ -82,9 +82,9 @@ class AssemblyFileFormat {
         column++;
     }
 
-    public void printInstruction(InstructionBlock block, Subject subject) throws IOException {
+    public void printInstruction(InstructionArea block, Subject subject) throws IOException {
         considerReOrg(block.address);
-        if (Objects.equals(block, lastBlock)) {
+        if (Objects.equals(block, lastArea)) {
             return;
         }
         Instruction instruction = block.instruction;
@@ -111,15 +111,15 @@ class AssemblyFileFormat {
         print(" ");
         print(operand);
 
-        lastBlock = block;
+        lastArea = block;
     }
 
     private String nameForAddress(int address, String formatWhenNumeric, Subject subject) {
-        Block block = subject.memory[address].block;
-        if (block == null) {
+        Area area = subject.memory[address].area;
+        if (area == null) {
             return String.format(formatWhenNumeric, address);
         }
-        String label = block.labelFor(address, subject);
+        String label = area.labelFor(address, subject);
         if (label == null) {
             return String.format(formatWhenNumeric, address);
         }
@@ -135,18 +135,18 @@ class ResultWriter {
             AssemblyFileFormat assemblyFile = new AssemblyFileFormat(pw);
             for (int address = 0; address < 0x10000; address++) {
 
-                Block currentBlock = subject.peek(address);
+                Area currentArea = subject.peek(address);
 
                 // Is there a label here? Print it.
                 String label = subject.memory[address].label;
                 if (label != null) {
                     assemblyFile.printLabel(label, address);
                 }
-                if (currentBlock != null) {
-                    if (currentBlock instanceof DataBlock) {
-                        assemblyFile.print((DataBlock) currentBlock, address, subject);
-                    } else if (currentBlock instanceof InstructionBlock) {
-                        InstructionBlock instructionBlock = (InstructionBlock) currentBlock;
+                if (currentArea != null) {
+                    if (currentArea instanceof DataArea) {
+                        assemblyFile.print((DataArea) currentArea, address, subject);
+                    } else if (currentArea instanceof InstructionArea) {
+                        InstructionArea instructionBlock = (InstructionArea) currentArea;
                         assemblyFile.printInstruction(instructionBlock, subject);
                     }
                 } else {
