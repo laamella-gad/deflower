@@ -17,7 +17,7 @@ expr:	expr '*' expr     # mul
     | ID                                    # setLabel
     ;
 
-datatype: (BYTE|WORD|DWORD) ARRAY?;
+datatype: (BYTE|WORD|DWORD|CODE) ARRAY?;
 number: INT|HEX;
 
 BYTE: 'byte'|'bytes';

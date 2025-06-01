@@ -71,7 +71,7 @@ class SubjectConfigurer {
             }
 
             @Override
-            public void enterLinetype(FloParser.LinetypeContext ctx) {
+            public void enterDatatype(FloParser.DatatypeContext ctx) {
                 if (ctx.BYTE() != null) {
                     type = BYTE_BLOCK;
                 } else if (ctx.WORD() != null) {

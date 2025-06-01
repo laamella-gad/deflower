@@ -7,7 +7,12 @@ import java.net.URISyntaxException;
 
 class DeflowerTest {
     @Test
-    void run() throws IOException, URISyntaxException {
+    void deflowerSquirm() throws IOException, URISyntaxException {
         new Deflower().deflower("squirm.flo");
+    }
+
+    @Test
+    void deflowerZwark() throws IOException, URISyntaxException {
+        new Deflower().deflower("zwark.flo");
     }
 }
