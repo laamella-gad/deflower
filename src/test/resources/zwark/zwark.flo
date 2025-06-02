@@ -2,13 +2,14 @@ deflower zwark.vsf
 
 $9000 code start_game
 $9009 code actual_start_game
+$9010 code main_loop
 
-$904a bytes player_sprite
-$9080 bytes bullet_sprite
-$90c8 bytes enemy_sprite
-$9107 bytes explosion_sprite_1
-$9146 bytes explosion_sprite_2
-# $9146 bytes explosion_sprite_4
+$904a byte[63] player_sprite
+$9089 byte[63] bullet_sprite
+$90c8 byte[63] enemy_sprite
+$9107 byte[63] explosion_sprite_1
+$9146 byte[63] explosion_sprite_2
+$9185 byte[63] explosion_sprite_3
 
 $9201 code check_joystick
 $9205 code check_right
@@ -56,13 +57,14 @@ $9E2C code no_trainer
 $9f1c code install_trainer
 $9E40 bytes crack_trainer_msg
 
-$0400 system byte vic_screen
+$0400 system byte[1000] vic_screen
+$07f8 system byte[8] sprite_pointers
 $d015 system byte vic_sprite_enable
 $d01e system byte vic_sprite_coll
-$d800 system byte vic_color_ram
-$D000 system byte vic_sprite_coords
+$d800 system byte[1000] vic_color_ram
+$D000 system byte[16] vic_sprite_coords
 $D010 system byte vic_sprite_x_high_bits
-$D027 system byte vic_sprite_colors
+$D027 system byte[8] vic_sprite_colors
 $DC01 system byte vic_joystick1
 $DC04 system byte vic_timer_a
 $d400 system byte sid_base
