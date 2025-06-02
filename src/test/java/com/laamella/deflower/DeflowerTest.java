@@ -8,11 +8,11 @@ import java.net.URISyntaxException;
 class DeflowerTest {
     @Test
     void deflowerSquirm() throws IOException, URISyntaxException {
-        new Deflower().deflower("squirm.flo");
+        new Deflower().deflower("squirm/squirm.flo");
     }
 
     @Test
     void deflowerZwark() throws IOException, URISyntaxException {
-        new Deflower().deflower("zwark.flo");
+        new Deflower().deflower("zwark/zwark.flo");
     }
 }

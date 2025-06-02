@@ -23,8 +23,8 @@ class AssemblyFileFormat {
     void printLabel(String label, int address) throws IOException {
         considerReOrg(address);
         newLine();
-        print(label + ":");
         newLine();
+        print(label + ":");
     }
 
     void print(String s) throws IOException {

@@ -26,7 +26,7 @@ public class ViceVcfFileReader {
         Version version = new Version(vcfFileContents.get(), vcfFileContents.get());
         int size = readDword(vcfFileContents) - 22;
         byte[] content = getByteArray(vcfFileContents, size);
-        System.out.println(format("Found %s %s block of size %d.", moduleType, version, size));
+        System.out.printf("Found %s %s block of size %d.%n", moduleType, version, size);
 
         for (ModuleHandler moduleHandler : moduleHandlers) {
             Module module = moduleHandler.handle(moduleType, version, content);
@@ -43,10 +43,21 @@ public class ViceVcfFileReader {
         if (!Arrays.equals(expectedFormat, header)) {
             throw new IOException("Not a VICE snapshot file");
         }
+
         Version version = new Version(vcfFileContents.get(), vcfFileContents.get());
         byte[] machineNameBytes = getByteArray(vcfFileContents, 16);
         String machineName = paddedString(machineNameBytes, 0);
-        System.out.println(format("Vice dump found, format %s %s.", machineName, version));
+        System.out.printf("Vice dump found, format %s %s.%n", machineName, version);
+
+        byte[] expectedViceVersionHeader = "VICE Version\032".getBytes(US_ASCII);
+        byte[] viceVersionHeader = getByteArray(vcfFileContents, expectedViceVersionHeader.length);
+        if (!Arrays.equals(expectedViceVersionHeader, viceVersionHeader)) {
+            throw new IOException("Old VICE snapshot file");
+        }
+        int viceVersion = readDword(vcfFileContents);
+        int viceSubversionRevisionNumber = readDword(vcfFileContents);
+        System.out.printf("Vice version %s, SVN revision %s.%n", viceVersion, viceSubversionRevisionNumber);
+
         return new Header(machineName, version);
     }
 }

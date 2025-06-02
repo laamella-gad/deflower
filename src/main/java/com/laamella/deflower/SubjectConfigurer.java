@@ -16,19 +16,19 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Objects;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.laamella.Assert.assertState;
 import static com.laamella.deflower.DataType.*;
 import static com.laamella.deflower.SubjectConfigurer.LineType.*;
 import static java.nio.file.Files.readAllBytes;
-import static java.nio.file.Files.readAllLines;
 
 class SubjectConfigurer {
     enum LineType {
-        BYTE_BLOCK(BYTE), CODE_ENTRY(null), WORD_BLOCK(WORD), DWORD_BLOCK(DWORD);
-        DataType dataType;
+        CHAR_BLOCK(CHAR), BYTE_BLOCK(BYTE), CODE_ENTRY(null), WORD_BLOCK(WORD), DWORD_BLOCK(DWORD);
+        final DataType dataType;
 
         LineType(DataType dataType) {
             this.dataType = dataType;
@@ -72,7 +72,9 @@ class SubjectConfigurer {
 
             @Override
             public void enterDatatype(FloParser.DatatypeContext ctx) {
-                if (ctx.BYTE() != null) {
+                if (ctx.CHAR() != null) {
+                    type = CHAR_BLOCK;
+                } else if (ctx.BYTE() != null) {
                     type = BYTE_BLOCK;
                 } else if (ctx.WORD() != null) {
                     type = WORD_BLOCK;
@@ -80,6 +82,9 @@ class SubjectConfigurer {
                     type = DWORD_BLOCK;
                 } else if (ctx.CODE() != null) {
                     type = CODE_ENTRY;
+                }
+                if (ctx.arraySize != null) {
+                    amount = parseNumber(ctx.arraySize.getText()).orElse(amount);
                 }
             }
 
@@ -90,14 +95,14 @@ class SubjectConfigurer {
 
             @Override
             public void enterMemoryRange(FloParser.MemoryRangeContext ctx) {
-                address = parseNumber(ctx.expr(0).getText()).orElseThrow();
-                addressEnd = parseNumber(ctx.expr(1).getText()).orElseThrow();
+                address = parseNumber(ctx.number(0).getText()).orElseThrow();
+                addressEnd = parseNumber(ctx.number(1).getText()).orElseThrow();
             }
 
             @Override
             public void enterMul(FloParser.MulContext ctx) {
-                int left = parseNumber(ctx.expr(0).getText()).orElseThrow();
-                int right = parseNumber(ctx.expr(1).getText()).orElseThrow();
+                int left = parseNumber(ctx.number(0).getText()).orElseThrow();
+                int right = parseNumber(ctx.number(1).getText()).orElseThrow();
                 addressEnd = address + left * right * type.dataType.sizeInBytes;
             }
 
@@ -113,10 +118,10 @@ class SubjectConfigurer {
                         System.out.format("Will disassemble from %X\n", address);
                     }
                     case BYTE_BLOCK, WORD_BLOCK, DWORD_BLOCK -> {
-                        System.out.format("Marking block of %d %s at %X \"%s\"\n", amount, type.dataType.name().toLowerCase(), address, name);
                         if (addressEnd != null) {
                             amount = (addressEnd - address) / type.dataType.sizeInBytes;
                         }
+                        System.out.format("Marking block of %d %s at %X \"%s\"\n", amount, type.dataType.name().toLowerCase(), address, name);
                         for (int i = 0; i < amount; i++) {
                             subject.registerBlock(new DataArea(address + i * type.dataType.sizeInBytes, type.dataType, isSystem));
                         }
@@ -225,13 +230,20 @@ class SubjectConfigurer {
         }
     }
 
+    private static final Set<String> supportedMachines = new HashSet<>();
+
+    static {
+        supportedMachines.add("C64");
+        supportedMachines.add("C64SC");
+    }
+
     private byte[] readSnapshot(Path c64File) {
         try {
             ByteBuffer c64Dump = ByteBuffer.wrap(readAllBytes(c64File));
             ViceVcfFile vcfFile = new ViceVcfFileReader().read(c64Dump, new C64MemModuleHandler());
             System.out.println(vcfFile);
 
-            if (!Objects.equals(vcfFile.header.machineName, "C64")) {
+            if (!supportedMachines.contains(vcfFile.header.machineName)) {
                 throw new IllegalArgumentException("Only C64 dumps supported.");
             }
             return vcfFile.modules.stream()

@@ -8,6 +8,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 
+import static com.laamella.Printing.asHexWord;
 import static java.nio.file.FileVisitResult.CONTINUE;
 import static java.nio.file.Files.*;
 
@@ -76,21 +77,21 @@ class Subject {
         }
     }
 
-    public void addPotentialCodeLocation(int address, boolean labelIt) {
+    public void addPotentialCodeLocation(int address, boolean labelIt, int referencingAddress) {
         MemoryLocation location = memory[address];
         if (labelIt) {
-            ensureLabelled(address, "CODE");
+            ensureLabelled(address, "CODE", referencingAddress);
         }
         if (location.area == null) {
             potentialCodeLocations.add(address);
         }
     }
 
-    public void ensureLabelled(int address, String contentHint) {
+    public void ensureLabelled(int address, String contentHint, int referencedFromAddress) {
         MemoryLocation location = memory[address];
         if (location.label == null) {
             location.label = String.format("_%04X_%s", address, contentHint);
-            System.out.println("Unnamed target: " + location.label);
+            System.out.println("Unnamed target: " + location.label + " from address " + asHexWord(referencedFromAddress));
         }
     }
 }

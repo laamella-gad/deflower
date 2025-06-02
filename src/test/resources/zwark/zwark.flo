@@ -1,0 +1,69 @@
+deflower zwark.vsf
+
+$9000 code start_game
+$9009 code actual_start_game
+
+$904a bytes player_sprite
+$9080 bytes bullet_sprite
+$90c8 bytes enemy_sprite
+$9107 bytes explosion_sprite_1
+$9146 bytes explosion_sprite_2
+# $9146 bytes explosion_sprite_4
+
+$9201 code check_joystick
+$9205 code check_right
+$9216 code check_left
+$924e code fire_pressed
+
+$93B6 code flash_sprite
+
+$9549 code update_vic_sprite_positions
+
+$9753 code sid_clear_loop
+$9803 code draw_turns
+$9819 code show_top_score_line
+$982D code show_copyright
+$9841 code make_scores_red
+$984a bytes robert_copyright
+$986c bytes top_score_line
+
+$9985 code hi_score_draw
+
+$9ab7 bytes f1_1_player_text
+$9acb bytes f3_2_player_text
+
+$9b02 code show_top_score_line
+
+$9b42 bytes game_over_text
+$9bcc draw_logo
+$9C45 logo0
+$9c61 logo1
+$9c7d logo2
+$9C98 logo3
+$9CB7 logo4
+$9DA4 init_sprite_coords
+$9D3A byte[16] init_sprite_ptrs
+$9D4A byte[16] sprite_ptrs
+$9D5A byte sprite_x_high_bits
+
+$9D88 joystick_state
+$9D89 sprite_coll_state
+$9D0C code nothing_just_rts
+$9D76 byte[8] table_with_timers
+$9D6E byte[8] table_with_timed_stuff
+$9E00 code start
+$9E2C code no_trainer
+$9f1c code install_trainer
+$9E40 bytes crack_trainer_msg
+
+$0400 system byte vic_screen
+$d015 system byte vic_sprite_enable
+$d01e system byte vic_sprite_coll
+$d800 system byte vic_color_ram
+$D000 system byte vic_sprite_coords
+$D010 system byte vic_sprite_x_high_bits
+$D027 system byte vic_sprite_colors
+$DC01 system byte vic_joystick1
+$DC04 system byte vic_timer_a
+$d400 system byte sid_base
+$d418 system byte sid_vol_filter

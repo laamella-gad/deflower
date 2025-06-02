@@ -1,15 +1,16 @@
 grammar Flo;
 prog:	(statement NEWLINE)*;
 
+// TODO add comments to disassembly
 statement: COMMENT # comment
     | 'deflower' ID         # setFileName
     | expr+ '{'?                # line
     | '}'                           # endBlock
     ;
 
-expr:	expr '*' expr     # mul
-    |	expr '+' expr                   # plus
-    |	expr '-' expr               # memoryRange
+expr:	number '*' number     # mul
+    |	number '+' number                   # plus
+    |	number '-' number               # memoryRange
     | expr datatype                 # setSize
     | number                        # address
     | 'system'                      # setSystem
@@ -17,13 +18,13 @@ expr:	expr '*' expr     # mul
     | ID                                    # setLabel
     ;
 
-datatype: (BYTE|WORD|DWORD|CODE) ARRAY?;
+datatype: (CHAR|BYTE|WORD|DWORD|CODE) ( '[' arraySize=INT? ']')?;
 number: INT|HEX;
 
-BYTE: 'byte'|'bytes';
-WORD: 'word'|'words';
-DWORD: 'dword'|'dwords';
-ARRAY: 'array';
+CHAR: 'char';
+BYTE: 'byte';
+WORD: 'word';
+DWORD: 'dword';
 CODE: 'code';
 COMMENT: (';'| '#')  ~[\r\n]*;
 WS: [ \t]+ -> skip;

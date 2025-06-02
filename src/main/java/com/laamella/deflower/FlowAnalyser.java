@@ -41,9 +41,9 @@ class FlowAnalyser {
             case BRK:
                 break;
             case JSR:
-                subject.addPotentialCodeLocation(address + instruction.addressingMode.totalBytes, true);
+                subject.addPotentialCodeLocation(address + instruction.addressingMode.totalBytes, false, address);
             case JMP:
-                subject.addPotentialCodeLocation(getAbsoluteAddressOperand(address, subject), true);
+                subject.addPotentialCodeLocation(getAbsoluteAddressOperand(address, subject), true, address);
                 break;
             case BCC:
             case BCS:
@@ -53,13 +53,16 @@ class FlowAnalyser {
             case BPL:
             case BVC:
             case BVS:
-                subject.addPotentialCodeLocation(getRelativeAddressOperand(address, subject), true);
-                subject.addPotentialCodeLocation(address + instruction.addressingMode.totalBytes, false);
+                subject.addPotentialCodeLocation(getRelativeAddressOperand(address, subject), true, address);
+                subject.addPotentialCodeLocation(address + instruction.addressingMode.totalBytes, false, address);
                 break;
             case LDA:
-                subject.ensureLabelled(getAbsoluteAddressOperand(address, subject), "DATA");
+                switch (instruction.addressingMode) {
+                    case ABSOLUTE ->
+                            subject.ensureLabelled(getAbsoluteAddressOperand(address, subject), "DATA", address);
+                }
             default:
-                subject.addPotentialCodeLocation(address + instruction.addressingMode.totalBytes, false);
+                subject.addPotentialCodeLocation(address + instruction.addressingMode.totalBytes, false, address);
         }
     }
 
