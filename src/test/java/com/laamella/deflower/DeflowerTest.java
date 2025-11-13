@@ -12,6 +12,11 @@ class DeflowerTest {
     }
 
     @Test
+    void deflowerTCMine() throws IOException, URISyntaxException {
+        new Deflower().deflower("tcmine/tcmine.flo");
+    }
+
+    @Test
     void deflowerZwark() throws IOException, URISyntaxException {
         new Deflower().deflower("zwark/zwark.flo");
     }
