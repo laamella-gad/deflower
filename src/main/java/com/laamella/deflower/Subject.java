@@ -36,6 +36,13 @@ class Subject {
         recreateDirectory(outputPath);
     }
 
+    void storeAt(int startAddress, byte[] bytes) {
+        for (int i = 0; i < bytes.length; i++) {
+            System.out.println(""+(startAddress+i)+" "+(bytes[i] & 0xff));
+            memory[startAddress+i] = new MemoryLocation(startAddress + i, bytes[i] & 0xff);
+        }
+    }
+
     private void recreateDirectory(Path directory) throws IOException {
         if (Files.exists(directory)) {
             walkFileTree(directory, new SimpleFileVisitor<>() {

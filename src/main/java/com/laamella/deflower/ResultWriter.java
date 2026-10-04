@@ -131,6 +131,7 @@ class ResultWriter {
 
     void write(Subject subject) throws IOException {
         Path asmFile = subject.outputPath.resolve("deflowered.asm");
+        System.out.println("Writing "+asmFile);
         try (Writer w = new FileWriter(asmFile.toFile()); BufferedWriter bw = new BufferedWriter(w); PrintWriter pw = new PrintWriter(bw)) {
             AssemblyFileFormat assemblyFile = new AssemblyFileFormat(pw);
             for (int address = 0; address < 0x10000; address++) {

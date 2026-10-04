@@ -3,6 +3,7 @@ package com.laamella.deflower;
 import com.laamella.enflower.FloBaseListener;
 import com.laamella.enflower.FloLexer;
 import com.laamella.enflower.FloParser;
+import com.laamella.mpu6502.ByteManipulation;
 import com.laamella.vicevcf.C64MemModule;
 import com.laamella.vicevcf.C64MemModuleHandler;
 import com.laamella.vicevcf.ViceVcfFile;
@@ -61,8 +62,26 @@ class SubjectConfigurer {
             @Override
             public void enterSetFileName(FloParser.SetFileNameContext ctx) {
                 Path snapshotName = subject.basePath.resolve(ctx.ID().getText());
-                System.out.println("Reading snapshot " + snapshotName);
-                subject.memory = convertToIntArray(readSnapshot(snapshotName));
+                System.out.println("Reading " + snapshotName);
+                Path filename = subject.basePath.resolve(snapshotName);
+                String filenameString = filename.toString();
+                clearMemory();
+                if (filenameString.endsWith("vsf")) {
+                    System.out.println("Reading snapshot " + filename);
+                    readSnapshot(filename, subject);
+                } else if (filenameString.endsWith("prg")) {
+                    System.out.println("Reading prg " + filename);
+                    readPrgFile(filename, subject);
+                } else {
+                    throw new RuntimeException("Unsupported input format");
+                }
+            }
+
+            private void clearMemory() {
+                subject.memory = new MemoryLocation[0x10000];
+                for (int i = 0; i < subject.memory.length; i++) {
+                    subject.memory[i] = new MemoryLocation(i, 0);
+                }
             }
 
             @Override
@@ -147,9 +166,14 @@ class SubjectConfigurer {
         }
         String[] parts = line.split("\\s");
         if (parts[0].toLowerCase().equals("deflower")) {
-            Path snapshotName = subject.basePath.resolve(parts[1]);
-            System.out.println("Reading snapshot " + snapshotName);
-            subject.memory = convertToIntArray(readSnapshot(snapshotName));
+            Path filename = subject.basePath.resolve(parts[1]);
+            if (filename.endsWith("vsf")) {
+                System.out.println("Reading snapshot " + filename);
+//                storeAt(0, readSnapshot(filename));
+            } else if (filename.endsWith("prg")) {
+                System.out.println("Reading prg " + filename);
+                 readPrgFile(filename, subject);
+            }
             return;
         }
         Integer address = null;
@@ -210,14 +234,6 @@ class SubjectConfigurer {
         }
     }
 
-    private MemoryLocation[] convertToIntArray(byte[] bytes) {
-        MemoryLocation[] ints = new MemoryLocation[bytes.length];
-        for (int i = 0; i < bytes.length; i++) {
-            ints[i] = new MemoryLocation(i, bytes[i] & 0xff);
-        }
-        return ints;
-    }
-
     private Optional<Integer> parseNumber(String part) {
         try {
             if (part.startsWith("$")) {
@@ -237,7 +253,7 @@ class SubjectConfigurer {
         supportedMachines.add("C64SC");
     }
 
-    private byte[] readSnapshot(Path c64File) {
+    private void readSnapshot(Path c64File, Subject subject) {
         try {
             ByteBuffer c64Dump = ByteBuffer.wrap(readAllBytes(c64File));
             ViceVcfFile vcfFile = new ViceVcfFileReader().read(c64Dump, new C64MemModuleHandler());
@@ -246,12 +262,27 @@ class SubjectConfigurer {
             if (!supportedMachines.contains(vcfFile.header.machineName)) {
                 throw new IllegalArgumentException("Only C64 dumps supported.");
             }
-            return vcfFile.modules.stream()
+            subject.storeAt(0, vcfFile.modules.stream()
                     .filter(C64MemModule.class::isInstance)
                     .map(C64MemModule.class::cast)
                     .map(module -> module.ram)
                     .findAny()
-                    .orElseThrow(() -> new IllegalArgumentException("No C64MEM found."));
+                    .orElseThrow(() -> new IllegalArgumentException("No C64MEM found.")));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void readPrgFile(Path c64File, Subject subject) {
+        try {
+            ByteBuffer c64Dump = ByteBuffer.wrap(readAllBytes(c64File));
+            int lo = c64Dump.get();
+            int hi = c64Dump.get();
+            int loadAddress = ByteManipulation.word(lo, hi);
+            System.out.println("load address " + loadAddress);
+            byte[] b = new byte[c64Dump.remaining()];
+            c64Dump.get(b);
+            subject.storeAt(loadAddress, b);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
