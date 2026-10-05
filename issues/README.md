@@ -27,3 +27,13 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0004](0004-tests-have-no-assertions.md) | open | Tests only smoke-run the pipeline |
 | [0005](0005-debug-output-everywhere.md) | open | Excessive `System.out` tracing |
 | [0006](0006-dead-parseline.md) | open | Unused legacy `parseLine` in `SubjectConfigurer` |
+| [0007](0007-range-end-off-by-one.md) | open | Address range end is off by one |
+| [0008](0008-mul-ignores-datatype.md) | open | `n*m` size ignores the datatype |
+| [0009](0009-annotation-before-deflower-npe.md) | open | Annotations before the deflower line throw NullPointerException |
+| [0010](0010-second-deflower-wipes-annotations.md) | open | A second deflower line wipes earlier annotations |
+| [0011](0011-indirect-jmp-followed-as-absolute.md) | open | `JMP (indirect)` is followed as if it were absolute |
+| [0012](0012-printing-bounds-off-by-one.md) | open | Printing bounds checks admit out-of-range values |
+| [0013](0013-asHexDword-always-throws.md) | open | `asHexDword` always throws |
+| [0014](0014-storeAt-no-bounds-check.md) | open | `storeAt` does not check bounds |
+| [0015](0015-lda-labelling-only-absolute.md) | open | LDA labels data only for absolute addressing |
+| [0016](0016-duplicate-path-resolution.md) | open | Snapshot path is resolved twice |
