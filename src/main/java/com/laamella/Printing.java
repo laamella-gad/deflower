@@ -19,7 +19,7 @@ public class Printing {
     }
 
     public static String asHexDword(int value) {
-        assertState(value >= 0 && value <= 0xFFFFFFFF, "Invalid dword %d", value);
+        assertState(value >= 0 && value <= 0xFFFFFFFFL, "Invalid dword %d", value);
         return String.format("$%08X", value);
     }
 }
