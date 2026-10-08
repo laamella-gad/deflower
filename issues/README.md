@@ -46,4 +46,5 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0023](0023-instruction-partially-overlaps-later-area.md) | done | A decoded instruction partially overlapping a later area corrupts it |
 | [0024](0024-no-label-plus-offset-for-access-inside-block.md) | done | No "label + offset" for an access that lands inside a larger labeled block |
 | [0025](0025-adopt-assertj.md) | done | Adopt AssertJ to clean up ugly asserts |
-| [0026](0026-array-as-one-area-not-one-per-element.md) | open | Model an array annotation as one Area, not one per element |
+| [0026](0026-array-as-one-area-not-one-per-element.md) | rejected | Model an array annotation as one Area, not one per element |
+| [0027](0027-label-mid-block-fragments-byte-output.md) | open | A label in the middle of a data block breaks up its .BYTE output |
