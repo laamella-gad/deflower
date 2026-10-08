@@ -19,7 +19,7 @@ Maven project, Java 14 source/target (JDK 23 installed locally works). Depends o
 - Run the tool on a flow file: `Deflower.main` takes a classpath-relative path (e.g. `squirm/squirm.flo`). The file must be on the classpath, so it lives under `src/test/resources`. There is no exec plugin configured, so run it from an IDE or with a manually assembled classpath.
 - No linter or formatter is configured.
 
-Known state: `deflowerSquirm` currently fails with `Old VICE snapshot file`. `squirm.vsf` is not in the VICE format the reader expects (`VICE Version` header check in `ViceVcfFileReader.readHeader`). `deflowerZwark` and `deflowerTCMine` pass.
+All three `DeflowerTest` cases pass.
 
 ## Architecture
 
@@ -34,7 +34,7 @@ The pipeline is: **flow file → ANTLR parse → memory image → code-flow anal
 - **`vicevcf`** parses VICE snapshot files (`ViceVcfFileReader` → `Header` + `Module`s). `C64MemModuleHandler` extracts the `C64MEM` module, which provides the 64K RAM image. Other modules are kept as `UnhandledModule`.
 - **`Assert`, `Printing`, `ByteBufferAccess`** in `com.laamella` are small helpers (`assertState`, hex formatting, buffer reads).
 
-Test-driven workflow: `DeflowerTest` runs the full pipeline on the three fixtures in `src/test/resources/{squirm,zwark,tcmine}`. Each run writes its output to `src/test/resources/<name>/out/` under `target/test-classes`, so inspect the generated `deflowered.asm` there, not in the source tree.
+Test-driven workflow: `DeflowerTest` runs the full pipeline on the three fixtures in `src/test/resources/{squirm,zwark,tcmine}`. Each run writes its output to `src/test/resources/<name>/out/` under `target/test-classes`, so inspect the generated `deflowered.asm` there, not in the source tree. Each test then compares that output against a versioned expectation at `src/test/resources/<fixture>/expected.asm`, using `com.laamella:snippets-test-junit5-core`'s `Snipsertions.snipsert` (manual: https://github.com/laamella-gad/snippets-test-junit5). A changed expectation file in a diff means the generated output changed; review it like any other test failure. To accept a new fixture or a deliberate output change, delete the matching `expected.asm` and rerun the test — it creates the file and fails once so you can review it before committing.
 
 ## Notes
 

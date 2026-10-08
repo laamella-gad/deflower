@@ -24,7 +24,7 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0001](0001-squirm-snapshot-rejected.md) | done | `squirm.vsf` rejected as "Old VICE snapshot file" |
 | [0002](0002-only-byte-data-emitted.md) | open | Output only emits `BYTE` data |
 | [0003](0003-flo-comments-dropped.md) | open | `.flo` comments are parsed but not carried to the output |
-| [0004](0004-tests-have-no-assertions.md) | open | Tests only smoke-run the pipeline |
+| [0004](0004-tests-have-no-assertions.md) | done | Tests only smoke-run the pipeline |
 | [0005](0005-debug-output-everywhere.md) | open | Excessive `System.out` tracing |
 | [0006](0006-dead-parseline.md) | open | Unused legacy `parseLine` in `SubjectConfigurer` |
 | [0007](0007-range-end-off-by-one.md) | open | Address range end is off by one |

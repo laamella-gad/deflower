@@ -1,11 +1,11 @@
 ---
 title: Tests only smoke-run the pipeline
-status: open
+status: done
 labels: test
 ---
 
-`src/test/java/com/laamella/deflower/DeflowerTest.java` calls `new Deflower().deflower(...)` for three fixtures and asserts nothing. A regression in the generated output would pass unnoticed.
+`src/test/java/com/laamella/deflower/DeflowerTest.java` called `new Deflower().deflower(...)` for three fixtures and asserted nothing. A regression in the generated output would have passed unnoticed.
 
-Done when: each test checks something about `out/deflowered.asm` (for example, expected labels or a known instruction sequence) for at least `zwark` and `tcmine`.
+Fix: added `com.laamella:snippets-test-junit5-core:1.0` (test scope) and used `Snipsertions.snipsert` to compare each fixture's generated `deflowered.asm` against a versioned expectation at `src/test/resources/<fixture>/expected.asm`. `Deflower.deflower` now returns the `Subject` so the test can find `subject.outputPath`.
 
-Use https://github.com/laamella-gad/snippets-test-junit5 to assert the output to a versioned file.
+The three expectation files were generated from the current (reviewed) output and committed. A future regression changes one of these files, which `git diff` will show; to accept a change, delete the file and rerun the test, or rerun with `-DREGENERATE_EXPECTATIONS` and review the diff before committing.
