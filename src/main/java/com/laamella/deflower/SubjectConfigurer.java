@@ -66,9 +66,8 @@ class SubjectConfigurer {
 
             @Override
             public void enterSetFileName(FloParser.SetFileNameContext ctx) {
-                Path snapshotName = subject.basePath.resolve(ctx.ID().getText());
-                System.out.println("Reading " + snapshotName);
-                Path filename = subject.basePath.resolve(snapshotName);
+                Path filename = subject.basePath.resolve(ctx.ID().getText());
+                System.out.println("Reading " + filename);
                 String filenameString = filename.toString();
                 clearMemory();
                 if (filenameString.endsWith("vsf")) {
