@@ -7,3 +7,5 @@ labels: test
 `src/test/java/com/laamella/deflower/DeflowerTest.java` calls `new Deflower().deflower(...)` for three fixtures and asserts nothing. A regression in the generated output would pass unnoticed.
 
 Done when: each test checks something about `out/deflowered.asm` (for example, expected labels or a known instruction sequence) for at least `zwark` and `tcmine`.
+
+Use https://github.com/laamella-gad/snippets-test-junit5 to assert the output to a versioned file.
