@@ -423,17 +423,17 @@ _241C_CODE:
 		LDX #$00
 
 _241E_CODE:
-		LDA $1042, X
+		LDA high_score_screen + $1, X
 		STA $0450, X
-		LDA $1141, X
+		LDA high_score_table_2 + $1, X
 		STA $054F, X
-		LDA $1240, X
+		LDA hiscore + $C, X
 		STA $064E, X
 		INX 
 		CPX #$FF
 		BNE _241E_CODE
 		LDX #$00
-		LDA $133F, X
+		LDA hiscore + $10B, X
 		STA $074D, X
 		INX 
 
@@ -448,9 +448,9 @@ draw_title_screen:
 _2445_CODE:
 		LDA title, X
 		STA $0450, X
-		LDA $1489, X
+		LDA title + $FF, X
 		STA $054F, X
-		LDA $1588, X
+		LDA title + $1FE, X
 		STA $064E, X
 		INX 
 		CPX #$FF
@@ -471,9 +471,9 @@ draw_level_1:
 _246C_CODE:
 		LDA level_1, X
 		STA $0450, X
-		LDA $17D1, X
+		LDA level_1 + $FF, X
 		STA $054F, X
-		LDA $18D0, X
+		LDA level_1 + $1FE, X
 		STA $064E, X
 		INX 
 		CPX #$FF
@@ -481,7 +481,7 @@ _246C_CODE:
 		LDX #$00
 
 _2485_CODE:
-		LDA $19CF, X
+		LDA level_1 + $2FD, X
 		STA $074D, X
 		INX 
 		CPX #$4B
@@ -494,9 +494,9 @@ draw_level_2:
 _2493_CODE:
 		LDA level_2, X
 		STA $0450, X
-		LDA $1B19, X
+		LDA level_2 + $FF, X
 		STA $054F, X
-		LDA $1C18, X
+		LDA level_2 + $1FE, X
 		STA $064E, X
 		INX 
 		CPX #$FF
@@ -504,7 +504,7 @@ _2493_CODE:
 		LDX #$00
 
 _24AC_CODE:
-		LDA $1D17, X
+		LDA level_2 + $2FD, X
 		STA $074D, X
 		INX 
 		CPX #$4B
@@ -517,9 +517,9 @@ draw_level_3:
 _24BA_CODE:
 		LDA level_3, X
 		STA $0450, X
-		LDA $1E61, X
+		LDA level_3 + $FF, X
 		STA $054F, X
-		LDA $1F60, X
+		LDA level_3 + $1FE, X
 		STA $064E, X
 		INX 
 		CPX #$FF
@@ -527,7 +527,7 @@ _24BA_CODE:
 		LDX #$00
 
 _24D3_CODE:
-		LDA $205F, X
+		LDA level_3 + $2FD, X
 		STA $074D, X
 		INX 
 		CPX #$4B
@@ -540,9 +540,9 @@ draw_screen_colors:
 _24E1_CODE:
 		LDA title_screen_colors, X
 		STA $D850, X
-		LDA $21AA, X
+		LDA title_screen_colors + $FF, X
 		STA $D94F, X
-		LDA $22A9, X
+		LDA title_screen_colors + $1FE, X
 		STA $DA4E, X
 		INX 
 		CPX #$FF
@@ -550,7 +550,7 @@ _24E1_CODE:
 		LDX #$00
 
 _24FA_CODE:
-		LDA $23A8, X
+		LDA title_screen_colors + $2FD, X
 		STA $DB4D, X
 		INX 
 		CPX #$4B
@@ -1487,7 +1487,7 @@ _33AE_CODE:
 _33B0_CODE:
 		LDA word_2_048e, X
 		STA tmp_loc_lo
-		LDA $264B, X
+		LDA word_2_048e + $1, X
 		STA tmp_loc_hi
 		LDA #$44
 		STA (tmp_loc_lo), Y
@@ -1585,7 +1585,7 @@ _3457_CODE:
 
 rotate_snake_pos:
 		LDA snake_pos_tbl, X
-		STA $2664, X
+		STA _2663_DATA + $1, X
 		DEX 
 		CPX #$FF
 		BNE rotate_snake_pos
@@ -1623,9 +1623,9 @@ _34B8_CODE:
 		LDX #$00
 
 _34BA_CODE:
-		LDA $2664, X
+		LDA _2663_DATA + $1, X
 		STA tmp_loc_lo
-		LDA $2665, X
+		LDA _2663_DATA + $2, X
 		STA tmp_loc_hi
 		LDA #$44
 		STA (tmp_loc_lo), Y
@@ -1652,7 +1652,7 @@ _34BA_CODE:
 
 _34F3_CODE:
 		LDA _266C_DATA, X
-		STA $266E, X
+		STA _266D_DATA + $1, X
 		DEX 
 		CPX #$FF
 		BNE _34F3_CODE
@@ -1690,9 +1690,9 @@ _353D_CODE:
 		LDX #$00
 
 _353F_CODE:
-		LDA $266E, X
+		LDA _266D_DATA + $1, X
 		STA tmp_loc_lo
-		LDA $266F, X
+		LDA _266D_DATA + $2, X
 		STA tmp_loc_hi
 		LDA #$44
 		STA (tmp_loc_lo), Y
@@ -1719,7 +1719,7 @@ _353F_CODE:
 
 _3578_CODE:
 		LDA _2676_DATA, X
-		STA $2678, X
+		STA _2677_DATA + $1, X
 		DEX 
 		CPX #$FF
 		BNE _3578_CODE
@@ -1757,9 +1757,9 @@ _35C2_CODE:
 		LDX #$00
 
 _35C4_CODE:
-		LDA $2678, X
+		LDA _2677_DATA + $1, X
 		STA tmp_loc_lo
-		LDA $2679, X
+		LDA _2677_DATA + $2, X
 		STA tmp_loc_hi
 		LDA #$44
 		STA (tmp_loc_lo), Y
@@ -1887,59 +1887,59 @@ initialize_pointers:
 		STA word_8_048e
 		LDA #$04
 		STA _2649_DATA
-		STA $264B
-		STA $264D
-		STA $264F
-		STA $2651
-		STA $2653
-		STA $2655
+		STA word_2_048e + $1
+		STA word_3_048e + $1
+		STA word_4_048e + $1
+		STA word_5_048e + $1
+		STA word_6_048e + $1
+		STA word_7_048e + $1
 		STA _2657_DATA
 		STA _2663_DATA
-		STA $2665
-		STA $2667
-		STA $2669
+		STA _2663_DATA + $2
+		STA _2663_DATA + $4
+		STA _2663_DATA + $6
 		STA clear_snake_hi
 		LDA #$55
 		STA snk_head_loc_lo
 		STA snake_pos_tbl_lo
-		STA $265C
-		STA $265E
+		STA snake_pos_tbl_hi + $1
+		STA snake_pos_tbl_hi + $3
 		STA _2660_DATA
 		LDA #$07
 		STA snk_head_loc_hi
 		STA snake_pos_tbl_hi
-		STA $265D
-		STA $265F
+		STA snake_pos_tbl_hi + $2
+		STA snake_pos_tbl_hi + $4
 		STA _2661_DATA
 		LDA #$CB
-		STA $2664
+		STA _2663_DATA + $1
 		STA snake_pos_tbl
-		STA $2666
-		STA $2668
+		STA _2663_DATA + $3
+		STA _2663_DATA + $5
 		STA clear_snake_lo
 		LDA #$75
 		STA _266C_DATA
-		STA $266E
-		STA $2670
-		STA $2672
+		STA _266D_DATA + $1
+		STA _266D_DATA + $3
+		STA _266D_DATA + $5
 		STA _2674_DATA
 		LDA #$05
 		STA _266D_DATA
-		STA $266F
-		STA $2671
-		STA $2673
+		STA _266D_DATA + $2
+		STA _266D_DATA + $4
+		STA _266D_DATA + $6
 		STA _2675_DATA
 		LDA #$FB
-		STA $2678
+		STA _2677_DATA + $1
 		STA _2676_DATA
-		STA $267A
-		STA $267C
+		STA _2677_DATA + $3
+		STA _2677_DATA + $5
 		STA _267E_DATA
 		LDA #$06
-		STA $2679
+		STA _2677_DATA + $2
 		STA _2677_DATA
-		STA $267B
-		STA $267D
+		STA _2677_DATA + $4
+		STA _2677_DATA + $6
 		STA _267F_DATA
 		RTS 
 
@@ -2795,7 +2795,7 @@ _3D4F_CODE:
 		BMI _3D4F_CODE
 		LDA #$00
 		STA note_idx
-		STA $2693
+		STA note_idx + $1
 		RTS 
 
 play_next_note:

@@ -116,6 +116,19 @@ class DeflowerTest {
     }
 
     /**
+     * `byte[48] screen` at $400 registers 48 separate one-element
+     * DataAreas (issue 0024), so an operand pointing into the middle of
+     * the block, e.g. `STA $422` (offset $22), must still resolve against
+     * the block's label - "screen + $22" - instead of falling back to a
+     * bare hex address just because that particular element has no label
+     * of its own.
+     */
+    @Test
+    void resolvesAnOperandInsideALabeledArrayToLabelPlusOffset() throws IOException, URISyntaxException {
+        assertDeflowered("blockoffset");
+    }
+
+    /**
      * A 3-byte LDA_ABS at $C000 would run into a single-byte DataArea
      * declared at $C002 (its last operand byte), so the entry point must
      * not be disassembled at all (issue 0023) - the mirror case of jumping

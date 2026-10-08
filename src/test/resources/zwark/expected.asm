@@ -320,7 +320,7 @@ _92FA_CODE:
 		LDA #$00
 		STA $9D7E, X
 		LDA #$01
-		STA $9D42, X
+		STA init_sprite_ptrs + $8, X
 		LDX #$01
 		LDA #$01
 		BIT $9D98
@@ -352,7 +352,7 @@ _9338_CODE:
 _9345_CODE:
 		LDA #$05
 		JSR _989C_CODE
-		DEC $9D42, X
+		DEC init_sprite_ptrs + $8, X
 		BEQ _9352_CODE
 		JMP _93D5_CODE
 
@@ -420,7 +420,7 @@ _93CA_CODE:
 		JSR _94DE_CODE
 		LDX $9D99
 		LDA #$1E
-		STA $9D42, X
+		STA init_sprite_ptrs + $8, X
 
 _93D5_CODE:
 		LDA #$01
@@ -908,7 +908,7 @@ _96FF_CODE:
 		LDX #$00
 
 _9712_CODE:
-		STA $9D42, X
+		STA init_sprite_ptrs + $8, X
 		INX 
 		CPX #$08
 		BCC _9712_CODE
@@ -988,7 +988,7 @@ _9795_CODE:
 
 _97A5_CODE:
 		LDY $9DA0
-		STA $0428, Y
+		STA vic_screen + $28, Y
 		LDY $9D9F
 		LDA $9D8D, Y
 		JSR _9D0D_CODE
@@ -1005,21 +1005,21 @@ _97A5_CODE:
 _97C8_CODE:
 		LDY $9DA0
 		INY 
-		STA $0428, Y
+		STA vic_screen + $28, Y
 		INY 
 		LDA $9D9E
-		STA $0428, Y
+		STA vic_screen + $28, Y
 		INY 
 		LDA #$30
-		STA $0428, Y
+		STA vic_screen + $28, Y
 		INY 
-		STA $0428, Y
+		STA vic_screen + $28, Y
 		LDX $9D8C
 		LDA $9D8A, X
 		CLC 
 		ADC #$30
 		LDX #$06
-		STA $0496, X
+		STA vic_screen + $96, X
 		LDA $9D9F
 		BNE _97FF_CODE
 		LDA #$01
@@ -1038,9 +1038,9 @@ draw_turns:
 _9805_CODE:
 		LDA $9894, X
 		AND #$BF
-		STA $0496, X
+		STA vic_screen + $96, X
 		LDA #$06
-		STA $D896, X
+		STA vic_color_ram + $96, X
 		INX 
 		CPX #$07
 		BCC _9805_CODE
@@ -1059,9 +1059,9 @@ show_top_score_line:
 
 show_copyright:
 		LDA robert_copyright, X
-		STA $07C0, X
+		STA vic_screen + $3C0, X
 		LDA #$06
-		STA $DBC0, X
+		STA vic_color_ram + $3C0, X
 		INX 
 		CPX #$21
 		BCC show_copyright
@@ -1069,7 +1069,7 @@ show_copyright:
 		LDA #$02
 
 make_scores_red:
-		STA $D828, X
+		STA vic_color_ram + $28, X
 		INX 
 		CPX #$28
 		BCC make_scores_red
@@ -1184,7 +1184,7 @@ _995F_CODE:
 
 _996C_CODE:
 		LDY #$11
-		STA $0428, Y
+		STA vic_screen + $28, Y
 		LDA $9D91
 		JSR _9D0D_CODE
 		TYA 
@@ -1197,15 +1197,15 @@ _996C_CODE:
 
 hi_score_draw:
 		LDY #$12
-		STA $0428, Y
+		STA vic_screen + $28, Y
 		INY 
 		TXA 
-		STA $0428, Y
+		STA vic_screen + $28, Y
 		INY 
 		LDA #$30
-		STA $0428, Y
+		STA vic_screen + $28, Y
 		INY 
-		STA $0428, Y
+		STA vic_screen + $28, Y
 		RTS 
 
 _999A_CODE:
@@ -1258,7 +1258,7 @@ _99EB_CODE:
 		LDA #$20
 
 _99EF_CODE:
-		STA $05E0, X
+		STA vic_screen + $1E0, X
 		INX 
 		CPX #$28
 		BCC _99EF_CODE
@@ -1279,8 +1279,8 @@ _99F7_CODE:
 		LDX #$00
 
 _9A19_CODE:
-		STA $05E0, X
-		STA $0630, X
+		STA vic_screen + $1E0, X
+		STA vic_screen + $230, X
 		INX 
 		CPX #$28
 		BCC _9A19_CODE
@@ -1313,9 +1313,9 @@ _9A4B_CODE:
 		LDA #$1D
 		STA $9D5B
 		LDA #$06
-		STA $D02A
+		STA vic_sprite_colors + $3
 		LDA #$0C
-		STA $D02B
+		STA vic_sprite_colors + $4
 		LDA #$0E
 		STA $9D95
 
@@ -1370,9 +1370,9 @@ _9ADF_CODE:
 _9AE3_CODE:
 		LDA game_over_text, X
 		LDA game_over_text, X
-		STA $05E0, Y
+		STA vic_screen + $1E0, Y
 		LDA #$08
-		STA $D9E0, Y
+		STA vic_color_ram + $1E0, Y
 		INX 
 		INY 
 		CPX #$09
@@ -1388,9 +1388,9 @@ _9AF7_CODE:
 show_top_score_line:
 		LDA top_score_line, X
 		AND #$BF
-		STA $0630, Y
+		STA vic_screen + $230, Y
 		LDA #$08
-		STA $DA30, Y
+		STA vic_color_ram + $230, Y
 		INY 
 		INX 
 		CPY #$19
