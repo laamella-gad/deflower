@@ -37,3 +37,5 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0014](0014-storeAt-no-bounds-check.md) | open | `storeAt` does not check bounds |
 | [0015](0015-lda-labelling-only-absolute.md) | open | LDA labels data only for absolute addressing |
 | [0016](0016-duplicate-path-resolution.md) | open | Snapshot path is resolved twice |
+| [0017](0017-annotations-applied-as-side-effects-during-parse.md) | open | Annotations are applied as side effects during the parse walk |
+| [0018](0018-area-conflicts-silently-overwritten.md) | open | Area conflicts are silently overwritten |
