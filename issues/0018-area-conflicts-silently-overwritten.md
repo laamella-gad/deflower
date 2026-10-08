@@ -9,3 +9,5 @@ labels: enhancement
 For a semi-automatic tool this is the main feedback loop: the user needs to know when their annotation disagrees with what the tracer found, or with another annotation. Right now there is no signal either way.
 
 Done when: `registerBlock` reports (at minimum logs, ideally fails loudly) when it overwrites an existing non-null `Area`, naming both areas and the address.
+
+See also [0023](0023-instruction-partially-overlaps-later-area.md), a concrete case of this: a decoded instruction's own length carrying it into a later area mid-decode.
