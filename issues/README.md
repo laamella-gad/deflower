@@ -41,4 +41,4 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0018](0018-area-conflicts-silently-overwritten.md) | open | Area conflicts are silently overwritten |
 | [0019](0019-ship-as-single-executable.md) | open | Project should ship as a single executable, not a Java jar |
 | [0020](0020-pretty-data-formats.md) | open | Add pretty disassembly formats for known data shapes (charset, screen, sprite) |
-| [0021](0021-parse-errors-not-collected.md) | open | Parse errors are printed to stderr and ignored, not collected and failed on |
+| [0021](0021-parse-errors-not-collected.md) | done | Parse errors are printed to stderr and ignored, not collected and failed on |

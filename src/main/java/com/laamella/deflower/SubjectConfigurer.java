@@ -8,8 +8,11 @@ import com.laamella.vicevcf.C64MemModule;
 import com.laamella.vicevcf.C64MemModuleHandler;
 import com.laamella.vicevcf.ViceVcfFile;
 import com.laamella.vicevcf.ViceVcfFileReader;
+import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import java.io.IOException;
@@ -17,7 +20,9 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -39,8 +44,8 @@ class SubjectConfigurer {
     Subject configure(String flowerFile) throws URISyntaxException, IOException {
         Path path = Paths.get(Deflower.class.getResource("/" + flowerFile).toURI()).toAbsolutePath();
         Subject subject = new Subject(path.getParent());
-        FloLexer lexer = new FloLexer(CharStreams.fromPath(path));
-        FloParser parser = new FloParser(new CommonTokenStream(lexer));
+        List<String> parseErrors = new ArrayList<>();
+        FloParser parser = createParser(parseErrors, path);
         ParseTreeWalker walker = new ParseTreeWalker();
         FloBaseListener listener = new FloBaseListener() {
             Integer address = null;
@@ -155,9 +160,27 @@ class SubjectConfigurer {
                 name = ctx.ID().getText();
             }
         };
-        walker.walk(listener, parser.prog());
+        FloParser.ProgContext tree = parser.prog();
+        assertState(parseErrors.isEmpty(), "Failed to parse %s:%n%s", flowerFile, String.join("\n", parseErrors));
+        walker.walk(listener, tree);
 
         return subject;
+    }
+
+    private static FloParser createParser(List<String> parseErrors, Path path) throws IOException {
+        BaseErrorListener errorCollector = new BaseErrorListener() {
+            @Override
+            public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+                parseErrors.add(String.format("line %d:%d %s", line, charPositionInLine, msg));
+            }
+        };
+        FloLexer lexer = new FloLexer(CharStreams.fromPath(path));
+        lexer.removeErrorListeners();
+        lexer.addErrorListener(errorCollector);
+        FloParser parser = new FloParser(new CommonTokenStream(lexer));
+        parser.removeErrorListeners();
+        parser.addErrorListener(errorCollector);
+        return parser;
     }
 
     private void parseLine(String line, Subject subject) {

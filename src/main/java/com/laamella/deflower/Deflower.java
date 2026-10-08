@@ -15,13 +15,18 @@ public class Deflower {
         new Deflower().deflower(args[0]);
     }
 
-    public Subject deflower(String flowerFile) throws IOException, URISyntaxException {
-        Subject subject = subjectConfigurer.configure(flowerFile);
+    public void deflower(String flowerFile) throws IOException, URISyntaxException {
+        Subject subject;
+        try {
+            subject = subjectConfigurer.configure(flowerFile);
+        } catch (IllegalStateException e) {
+            System.err.println(e.getMessage());
+            return;
+        }
         flowAnalyser.analyseCodeFlows(subject);
 //        do {
             resultWriter.write(subject);
 //            System.out.println(System.currentTimeMillis());
 //        } while (true);
-        return subject;
     }
 }
