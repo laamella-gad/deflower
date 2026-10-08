@@ -127,6 +127,7 @@ class SubjectConfigurer {
 
             @Override
             public void exitLine(FloParser.LineContext ctx) {
+                assertState(subject.memory != null, "Start the file with a 'deflower <file>' line.", ctx.getStart().getLine(), ctx.getText());
                 assertState(address != null, "Require an address: %s", ctx);
                 if (name != null) {
                     subject.memory[address].label = name;
