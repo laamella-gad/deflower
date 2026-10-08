@@ -18,19 +18,13 @@ class PrintingTest {
     }
 
     @Test
-    void asAddressAdmitsOneAboveRange() {
-        // Bug (issue 0012): the bounds check is `<= 0x10000`, one past the last valid address.
-        assertEquals("$10000", asAddress(0x10000));
-    }
-
-    @Test
     void asAddressRejectsNegativeValues() {
         assertThrows(IllegalStateException.class, () -> asAddress(-1));
     }
 
     @Test
     void asAddressRejectsValuesAboveRange() {
-        assertThrows(IllegalStateException.class, () -> asAddress(0x10001));
+        assertThrows(IllegalStateException.class, () -> asAddress(0x10000));
     }
 
     @Test
@@ -41,19 +35,13 @@ class PrintingTest {
     }
 
     @Test
-    void asHexByteAdmitsOneAboveRange() {
-        // Bug (issue 0012): the bounds check is `<= 0x100`, one past the last valid byte.
-        assertEquals("$100", asHexByte(0x100));
-    }
-
-    @Test
     void asHexByteRejectsNegativeValues() {
         assertThrows(IllegalStateException.class, () -> asHexByte(-1));
     }
 
     @Test
     void asHexByteRejectsValuesAboveRange() {
-        assertThrows(IllegalStateException.class, () -> asHexByte(0x101));
+        assertThrows(IllegalStateException.class, () -> asHexByte(0x100));
     }
 
     @Test
@@ -64,19 +52,13 @@ class PrintingTest {
     }
 
     @Test
-    void asHexWordAdmitsOneAboveRange() {
-        // Bug (issue 0012): the bounds check is `<= 0x10000`, one past the last valid word.
-        assertEquals("$10000", asHexWord(0x10000));
-    }
-
-    @Test
     void asHexWordRejectsNegativeValues() {
         assertThrows(IllegalStateException.class, () -> asHexWord(-1));
     }
 
     @Test
     void asHexWordRejectsValuesAboveRange() {
-        assertThrows(IllegalStateException.class, () -> asHexWord(0x10001));
+        assertThrows(IllegalStateException.class, () -> asHexWord(0x10000));
     }
 
     @Test
