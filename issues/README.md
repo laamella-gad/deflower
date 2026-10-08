@@ -31,7 +31,7 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0008](0008-mul-ignores-datatype.md) | done | `n*m` size ignores the datatype |
 | [0009](0009-annotation-before-deflower-npe.md) | done | Annotations before the deflower line throw NullPointerException |
 | [0010](0010-second-deflower-wipes-annotations.md) | done | A second deflower line wipes earlier annotations |
-| [0011](0011-indirect-jmp-followed-as-absolute.md) | open | `JMP (indirect)` is followed as if it were absolute |
+| [0011](0011-indirect-jmp-followed-as-absolute.md) | done | `JMP (indirect)` is followed as if it were absolute |
 | [0012](0012-printing-bounds-off-by-one.md) | done | Printing bounds checks admit out-of-range values |
 | [0013](0013-asHexDword-always-throws.md) | done | `asHexDword` always throws |
 | [0014](0014-storeAt-no-bounds-check.md) | open | `storeAt` does not check bounds |

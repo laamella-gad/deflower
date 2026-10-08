@@ -48,6 +48,17 @@ class DeflowerTest {
         snipsert(b, "src/test/resources/multi/expected-b.asm");
     }
 
+    /**
+     * JMP (indirect)'s operand is a pointer, not the destination (issue
+     * 0011): the fixture's entry does JMP ($C010), where $C010-$C011 holds
+     * $C020, the real target. The analyser must follow $C020 (and decode
+     * the LDA/RTS there), not try to decode the pointer bytes as code.
+     */
+    @Test
+    void followsIndirectJmpTarget() throws IOException, URISyntaxException {
+        assertDeflowered("indirectjmp");
+    }
+
     @Test
     void rejectsUnrecognizedTokens() throws IOException, URISyntaxException {
         assertFailsToParse("invalid/garbage-tokens.flo");

@@ -1,0 +1,14 @@
+
+*=$C000
+
+entry:
+		JMP (_C010_POINTER)
+*=$C010
+
+_C010_POINTER:
+
+*=$C020
+
+_C020_CODE:
+		LDA #$42
+		RTS 

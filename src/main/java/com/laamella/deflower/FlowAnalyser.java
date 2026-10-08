@@ -1,5 +1,6 @@
 package com.laamella.deflower;
 
+import com.laamella.mpu6502.specification.AddressingMode;
 import com.laamella.mpu6502.specification.Instruction;
 
 import static com.laamella.mpu6502.ByteManipulation.toSignedByte;
@@ -42,7 +43,16 @@ class FlowAnalyser {
             case JSR:
                 subject.addPotentialCodeLocation(address + instruction.addressingMode.totalBytes, false, address);
             case JMP:
-                subject.addPotentialCodeLocation(getAbsoluteAddressOperand(address, subject), true, address);
+                if (instruction.addressingMode == AddressingMode.INDIRECT) {
+                    // The operand is a pointer, not the destination: label the
+                    // pointer cell as data and follow the address stored there.
+                    int pointerAddress = getAbsoluteAddressOperand(address, subject);
+                    subject.ensureLabelled(pointerAddress, "POINTER", address);
+                    subject.registerBlock(new DataArea(pointerAddress, DataType.POINTER, false));
+                    subject.addPotentialCodeLocation(subject.wordAt(pointerAddress), true, address);
+                } else {
+                    subject.addPotentialCodeLocation(getAbsoluteAddressOperand(address, subject), true, address);
+                }
                 break;
             case BCC:
             case BCS:
