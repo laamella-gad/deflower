@@ -1,0 +1,4 @@
+deflower midblocklabel.prg
+$c000 byte[3] before
+$c003 byte middle
+$c004 byte[2] after

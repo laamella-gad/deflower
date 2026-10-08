@@ -151,6 +151,18 @@ class DeflowerTest {
         assertDeflowered("comments");
     }
 
+    /**
+     * A label landing on an address that merely continues a contiguous
+     * same-type data run (issue 0027) must not fragment the run into
+     * separate, blank-line-separated .BYTE blocks: the dump keeps running
+     * as one block, with each label on its own line right above the data
+     * that continues beneath it.
+     */
+    @Test
+    void labelInsideDataRunDoesNotFragmentIt() throws IOException, URISyntaxException {
+        assertDeflowered("midblocklabel");
+    }
+
     @Test
     void rejectsUnrecognizedTokens() throws IOException, URISyntaxException {
         assertFailsToParse("invalid/garbage-tokens.flo");

@@ -33,11 +33,39 @@ class AssemblyFileFormat {
      * address. Comment and label share one blank-line separator above
      * them, so a commented label doesn't get a blank line wedged between
      * the comment and the label it belongs to.
+     * <p>
+     * Exception (issue 0027): when this address merely continues the same
+     * contiguous same-type data run as the address before it, skip the
+     * blank-line separator and put the label/comment on its own line
+     * instead, so a label landing inside a big array doesn't fragment it
+     * into separate .BYTE groups.
+     * <p>
+     * Within that, whether the label's own line glues onto its data or
+     * gets its own line (issue 0029) depends on how much data actually
+     * follows before the run breaks again: a single value glues (reads
+     * fine on one line), several values get their own line so the
+     * tabular dump underneath stays readable.
      */
-    void printAnnotation(int address, String comment, String label) throws IOException {
+    void printAnnotation(int address, String comment, String label, Area currentArea, Subject subject) throws IOException {
         considerReOrg(address);
-        newLine();
-        newLine();
+        // Same kind of data as whatever was printed right before this
+        // address: print(DataArea, ...) below won't insert its own
+        // newline for that case (it only breaks on a kind change), so
+        // this method is the one responsible for any line break between
+        // the label and its data.
+        boolean sameKindAsPrevious = currentArea instanceof DataArea
+                && !((DataArea) currentArea).isSystem
+                && lastArea instanceof DataArea
+                && ((DataArea) lastArea).type == ((DataArea) currentArea).type;
+        boolean continuesRun = sameKindAsPrevious && lastArea.lastOccupiedAddress == address - 1;
+        if (continuesRun) {
+            if (column != 0) {
+                newLine();
+            }
+        } else {
+            newLine();
+            newLine();
+        }
         if (comment != null) {
             for (String line : comment.split("\n", -1)) {
                 print("; " + line);
@@ -46,7 +74,39 @@ class AssemblyFileFormat {
         }
         if (label != null) {
             print(label + ":");
+            // Issue 0029: among same-kind labels, glue a single value onto
+            // the label's line; several values get their own line so the
+            // tabular dump underneath stays readable. A label that starts
+            // a genuinely new kind of area always gets its own line -
+            // print(DataArea, ...)'s own kind-change check already does
+            // that, so doing it again here would double the newline.
+            if (sameKindAsPrevious && !isSingleValueRun(address, (DataArea) currentArea, subject)) {
+                newLine();
+            }
         }
+    }
+
+    /**
+     * True when printing `block` at `address` produces just one value
+     * before the run breaks (the next address has its own label/comment,
+     * isn't the same kind of data, or isn't there at all) - the case
+     * where gluing the label onto its one data value (issue 0029) reads
+     * better than putting the label on its own line.
+     */
+    private boolean isSingleValueRun(int address, DataArea block, Subject subject) {
+        int next = address + block.size;
+        if (next >= subject.memory.length) {
+            return true;
+        }
+        if (subject.memory[next].label != null || subject.memory[next].comment != null) {
+            return true;
+        }
+        Area nextArea = subject.peek(next);
+        if (!(nextArea instanceof DataArea) || nextArea.address != next) {
+            return true;
+        }
+        DataArea nextBlock = (DataArea) nextArea;
+        return nextBlock.type != block.type || nextBlock.isSystem;
     }
 
     void print(String s) throws IOException {
@@ -221,7 +281,7 @@ class ResultWriter {
                 String comment = subject.memory[address].comment;
                 String label = subject.memory[address].label;
                 if (comment != null || label != null) {
-                    assemblyFile.printAnnotation(address, comment, label);
+                    assemblyFile.printAnnotation(address, comment, label, currentArea, subject);
                 }
                 if (currentArea != null) {
                     if (currentArea instanceof DataArea) {

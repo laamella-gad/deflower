@@ -47,4 +47,7 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0024](0024-no-label-plus-offset-for-access-inside-block.md) | done | No "label + offset" for an access that lands inside a larger labeled block |
 | [0025](0025-adopt-assertj.md) | done | Adopt AssertJ to clean up ugly asserts |
 | [0026](0026-array-as-one-area-not-one-per-element.md) | rejected | Model an array annotation as one Area, not one per element |
-| [0027](0027-label-mid-block-fragments-byte-output.md) | open | A label in the middle of a data block breaks up its .BYTE output |
+| [0027](0027-label-mid-block-fragments-byte-output.md) | done | A label in the middle of a data block breaks up its .BYTE output |
+| [0028](0028-mid-block-labels-as-address-defines.md) | open | Emit a label inside a larger area as an address define, not inline |
+| [0029](0029-first-label-in-run-still-glued.md) | done | First label of a run still glues onto its .BYTE line, inconsistent with the rest of the run |
+| [0030](0030-ai-friendliness-of-flo-grammar.md) | open | Investigate whether the .flo format/grammar is easy to use, including for an AI writing it |
