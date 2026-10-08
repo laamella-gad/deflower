@@ -6,70 +6,70 @@ import static com.laamella.Printing.asAddress;
 import static com.laamella.Printing.asHexByte;
 import static com.laamella.Printing.asHexDword;
 import static com.laamella.Printing.asHexWord;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PrintingTest {
     @Test
     void asAddressFormatsValidValues() {
-        assertEquals("$0000", asAddress(0));
-        assertEquals("$00FF", asAddress(0xFF));
-        assertEquals("$FFFF", asAddress(0xFFFF));
+        assertThat(asAddress(0)).isEqualTo("$0000");
+        assertThat(asAddress(0xFF)).isEqualTo("$00FF");
+        assertThat(asAddress(0xFFFF)).isEqualTo("$FFFF");
     }
 
     @Test
     void asAddressRejectsNegativeValues() {
-        assertThrows(IllegalStateException.class, () -> asAddress(-1));
+        assertThatThrownBy(() -> asAddress(-1)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void asAddressRejectsValuesAboveRange() {
-        assertThrows(IllegalStateException.class, () -> asAddress(0x10000));
+        assertThatThrownBy(() -> asAddress(0x10000)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void asHexByteFormatsValidValues() {
-        assertEquals("$00", asHexByte(0));
-        assertEquals("$7F", asHexByte(0x7F));
-        assertEquals("$FF", asHexByte(0xFF));
+        assertThat(asHexByte(0)).isEqualTo("$00");
+        assertThat(asHexByte(0x7F)).isEqualTo("$7F");
+        assertThat(asHexByte(0xFF)).isEqualTo("$FF");
     }
 
     @Test
     void asHexByteRejectsNegativeValues() {
-        assertThrows(IllegalStateException.class, () -> asHexByte(-1));
+        assertThatThrownBy(() -> asHexByte(-1)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void asHexByteRejectsValuesAboveRange() {
-        assertThrows(IllegalStateException.class, () -> asHexByte(0x100));
+        assertThatThrownBy(() -> asHexByte(0x100)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void asHexWordFormatsValidValues() {
-        assertEquals("$0000", asHexWord(0));
-        assertEquals("$00FF", asHexWord(0xFF));
-        assertEquals("$FFFF", asHexWord(0xFFFF));
+        assertThat(asHexWord(0)).isEqualTo("$0000");
+        assertThat(asHexWord(0xFF)).isEqualTo("$00FF");
+        assertThat(asHexWord(0xFFFF)).isEqualTo("$FFFF");
     }
 
     @Test
     void asHexWordRejectsNegativeValues() {
-        assertThrows(IllegalStateException.class, () -> asHexWord(-1));
+        assertThatThrownBy(() -> asHexWord(-1)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void asHexWordRejectsValuesAboveRange() {
-        assertThrows(IllegalStateException.class, () -> asHexWord(0x10000));
+        assertThatThrownBy(() -> asHexWord(0x10000)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void asHexDwordFormatsValidValues() {
-        assertEquals("$00000000", asHexDword(0));
-        assertEquals("$12345678", asHexDword(0x12345678));
-        assertEquals("$7FFFFFFF", asHexDword(0x7FFFFFFF));
+        assertThat(asHexDword(0)).isEqualTo("$00000000");
+        assertThat(asHexDword(0x12345678)).isEqualTo("$12345678");
+        assertThat(asHexDword(0x7FFFFFFF)).isEqualTo("$7FFFFFFF");
     }
 
     @Test
     void asHexDwordRejectsNegativeValues() {
-        assertThrows(IllegalStateException.class, () -> asHexDword(-1));
+        assertThatThrownBy(() -> asHexDword(-1)).isInstanceOf(IllegalStateException.class);
     }
 }

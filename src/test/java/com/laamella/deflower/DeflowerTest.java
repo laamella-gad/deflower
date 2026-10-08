@@ -11,8 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static com.laamella.snippets_test_junit5.core.Snipsertions.snipsert;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class DeflowerTest {
     @Test
@@ -91,11 +90,11 @@ class DeflowerTest {
         } finally {
             System.setErr(originalErr);
         }
-        String err = capturedErr.toString();
-        assertTrue(err.contains("Area conflict at $C001"), "Expected a conflict report, got: " + err);
-        assertTrue(err.contains("byte") && err.contains("word"), "Expected both area kinds named, got: " + err);
-        assertTrue(err.contains("Errors detected"), "Expected a skip notice, got: " + err);
-        assertTrue(isEmpty(outDir(flowerFile)), "Should not have written output for a subject with an area conflict");
+        assertThat(capturedErr.toString())
+                .contains("Area conflict at $C001")
+                .contains("byte", "word")
+                .contains("Errors detected");
+        assertThat(isEmpty(outDir(flowerFile))).as("output directory for a subject with an area conflict").isTrue();
     }
 
     /**
@@ -113,7 +112,7 @@ class DeflowerTest {
         } finally {
             System.setErr(originalErr);
         }
-        assertFalse(capturedErr.toString().contains("Area conflict"), "Should not report a conflict for datatypes fixture");
+        assertThat(capturedErr.toString()).doesNotContain("Area conflict");
     }
 
     @Test
@@ -141,8 +140,8 @@ class DeflowerTest {
         } finally {
             System.setErr(originalErr);
         }
-        assertTrue(capturedErr.toString().contains("Failed to parse"), "Unexpected stderr: " + capturedErr);
-        assertTrue(isEmpty(outDir(flowerFile)), "Should not have written output for a file that failed to parse");
+        assertThat(capturedErr.toString()).contains("Failed to parse");
+        assertThat(isEmpty(outDir(flowerFile))).as("output directory for a file that failed to parse").isTrue();
     }
 
     /**
