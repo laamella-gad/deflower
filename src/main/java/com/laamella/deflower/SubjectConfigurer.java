@@ -41,13 +41,16 @@ class SubjectConfigurer {
         }
     }
 
-    Subject configure(String flowerFile) throws URISyntaxException, IOException {
+    List<Subject> configure(String flowerFile) throws URISyntaxException, IOException {
         Path path = Paths.get(Deflower.class.getResource("/" + flowerFile).toURI()).toAbsolutePath();
-        Subject subject = new Subject(path.getParent());
+        Path basePath = path.getParent();
+        Subject.prepareOutputDirectory(basePath);
+        List<Subject> subjects = new ArrayList<>();
         List<String> parseErrors = new ArrayList<>();
         FloParser parser = createParser(parseErrors, path);
         ParseTreeWalker walker = new ParseTreeWalker();
         FloBaseListener listener = new FloBaseListener() {
+            Subject subject = null;
             Integer address = null;
             Integer addressEnd = null;
             LineType type = BYTE_BLOCK;
@@ -66,10 +69,13 @@ class SubjectConfigurer {
 
             @Override
             public void enterSetFileName(FloParser.SetFileNameContext ctx) {
-                Path filename = subject.basePath.resolve(ctx.ID().getText());
+                String targetName = ctx.ID().getText();
+                Path filename = basePath.resolve(targetName);
                 System.out.println("Reading " + filename);
+                subject = new Subject(basePath);
+                subject.outputFileName = outputFileNameFor(targetName);
+                subjects.add(subject);
                 String filenameString = filename.toString();
-                clearMemory();
                 if (filenameString.endsWith("vsf")) {
                     System.out.println("Reading snapshot " + filename);
                     readSnapshot(filename, subject);
@@ -78,13 +84,6 @@ class SubjectConfigurer {
                     readPrgFile(filename, subject);
                 } else {
                     throw new RuntimeException("Unsupported input format");
-                }
-            }
-
-            private void clearMemory() {
-                subject.memory = new MemoryLocation[0x10000];
-                for (int i = 0; i < subject.memory.length; i++) {
-                    subject.memory[i] = new MemoryLocation(i, 0);
                 }
             }
 
@@ -131,7 +130,7 @@ class SubjectConfigurer {
 
             @Override
             public void exitLine(FloParser.LineContext ctx) {
-                assertState(subject.memory != null, "Start the file with a 'deflower <file>' line.", ctx.getStart().getLine(), ctx.getText());
+                assertState(subject != null, "Start the file with a 'deflower <file>' line.", ctx.getStart().getLine(), ctx.getText());
                 assertState(address != null, "Require an address: %s", ctx);
                 if (name != null) {
                     subject.memory[address].label = name;
@@ -163,7 +162,13 @@ class SubjectConfigurer {
         assertState(parseErrors.isEmpty(), "Failed to parse %s:%n%s", flowerFile, String.join("\n", parseErrors));
         walker.walk(listener, tree);
 
-        return subject;
+        return subjects;
+    }
+
+    private static String outputFileNameFor(String targetFileName) {
+        String baseName = Paths.get(targetFileName).getFileName().toString();
+        int dot = baseName.lastIndexOf('.');
+        return (dot > 0 ? baseName.substring(0, dot) : baseName) + ".asm";
     }
 
     private static FloParser createParser(List<String> parseErrors, Path path) throws IOException {

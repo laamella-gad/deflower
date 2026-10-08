@@ -16,14 +16,13 @@ public class Deflower {
     }
 
     public void deflower(String flowerFile) throws IOException, URISyntaxException {
-        Subject subject;
         try {
-            subject = subjectConfigurer.configure(flowerFile);
+            for (Subject subject : subjectConfigurer.configure(flowerFile)) {
+                flowAnalyser.analyseCodeFlows(subject);
+                resultWriter.write(subject);
+            }
         } catch (IllegalStateException e) {
             System.err.println(e.getMessage());
-            return;
         }
-        flowAnalyser.analyseCodeFlows(subject);
-        resultWriter.write(subject);
     }
 }

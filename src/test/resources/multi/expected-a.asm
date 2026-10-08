@@ -1,0 +1,84 @@
+
+*=$C000
+
+entry_a:
+		LDA #$40
+		STA $FB
+		LDA #$04
+		STA $FD
+		LDA #$00
+		JSR _C40E_CODE
+		NOP 
+		STA $FE
+		STA $FF
+		LDX $033F
+
+_C015_CODE:
+		BEQ _C028_CODE
+		LDA $FA
+		CLC 
+		ADC #$59
+		STA $FA
+		LDA $FB
+		ADC #$01
+		STA $FB
+		DEX 
+		JMP _C015_CODE
+
+_C028_CODE:
+		LDX #$00
+
+_C02A_CODE:
+		LDY #$00
+		LDA ($FA), Y
+		LSR 
+		LSR 
+		LSR 
+		LSR 
+		TAY 
+		LDA $C076, Y
+		LDY $FE
+		STA ($FC), Y
+		LDY #$00
+		LDA ($FA), Y
+		AND #$0F
+		TAY 
+		LDA $C080, Y
+		INC $FE
+		LDY $FE
+		STA ($FC), Y
+		INC $FE
+		INX 
+		LDA $FA
+		CLC 
+		ADC #$01
+		STA $FA
+		BCC _C058_CODE
+		INC $FB
+
+_C058_CODE:
+		CPX #$0E
+		BCC _C02A_CODE
+		INC $FF
+		LDA $FC
+		CLC 
+		ADC #$28
+		STA $FC
+		BCC _C069_CODE
+		INC $FD
+
+_C069_CODE:
+		LDX #$00
+		STX $FE
+		LDX $FF
+		CPX #$18
+		BCC _C028_CODE
+		RTS 
+*=$C40E
+
+_C40E_CODE:
+		LDA #$29
+		STA $FC
+		LDA #$00
+		STA $FA
+		RTS 

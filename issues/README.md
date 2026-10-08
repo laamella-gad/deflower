@@ -30,7 +30,7 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0007](0007-range-end-off-by-one.md) | invalid | Address range end is off by one |
 | [0008](0008-mul-ignores-datatype.md) | done | `n*m` size ignores the datatype |
 | [0009](0009-annotation-before-deflower-npe.md) | done | Annotations before the deflower line throw NullPointerException |
-| [0010](0010-second-deflower-wipes-annotations.md) | open | A second deflower line wipes earlier annotations |
+| [0010](0010-second-deflower-wipes-annotations.md) | done | A second deflower line wipes earlier annotations |
 | [0011](0011-indirect-jmp-followed-as-absolute.md) | open | `JMP (indirect)` is followed as if it were absolute |
 | [0012](0012-printing-bounds-off-by-one.md) | done | Printing bounds checks admit out-of-range values |
 | [0013](0013-asHexDword-always-throws.md) | done | `asHexDword` always throws |
@@ -42,3 +42,4 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0019](0019-ship-as-single-executable.md) | open | Project should ship as a single executable, not a Java jar |
 | [0020](0020-pretty-data-formats.md) | open | Add pretty disassembly formats for known data shapes (charset, screen, sprite) |
 | [0021](0021-parse-errors-not-collected.md) | done | Parse errors are printed to stderr and ignored, not collected and failed on |
+| [0022](0022-export-region-to-binary.md) | open | Mark regions for export to a binary file, included from the generated asm |

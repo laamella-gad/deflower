@@ -29,11 +29,24 @@ class Subject {
     MemoryLocation[] memory;
     final Path basePath;
     final Stack<Integer> potentialCodeLocations = new Stack<>();
+    String outputFileName = "deflowered.asm";
 
-    Subject(Path basePath) throws IOException {
+    Subject(Path basePath) {
         this.basePath = basePath;
         this.outputPath = basePath.resolve("out");
-        recreateDirectory(outputPath);
+        this.memory = new MemoryLocation[0x10000];
+        for (int i = 0; i < memory.length; i++) {
+            memory[i] = new MemoryLocation(i, 0);
+        }
+    }
+
+    /**
+     * Clears and recreates the shared output directory. Called once per
+     * .flo file, before any of its (possibly several) Subjects are written,
+     * so that one deflower line's run doesn't delete another's output.
+     */
+    static void prepareOutputDirectory(Path basePath) throws IOException {
+        recreateDirectory(basePath.resolve("out"));
     }
 
     void storeAt(int startAddress, byte[] bytes) {
@@ -42,7 +55,7 @@ class Subject {
         }
     }
 
-    private void recreateDirectory(Path directory) throws IOException {
+    private static void recreateDirectory(Path directory) throws IOException {
         if (Files.exists(directory)) {
             walkFileTree(directory, new SimpleFileVisitor<>() {
                 @Override

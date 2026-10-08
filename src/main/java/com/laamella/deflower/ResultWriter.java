@@ -130,7 +130,7 @@ class AssemblyFileFormat {
 class ResultWriter {
 
     void write(Subject subject) throws IOException {
-        Path asmFile = subject.outputPath.resolve("deflowered.asm");
+        Path asmFile = subject.outputPath.resolve(subject.outputFileName);
         System.out.println("Writing "+asmFile);
         try (Writer w = new FileWriter(asmFile.toFile()); BufferedWriter bw = new BufferedWriter(w); PrintWriter pw = new PrintWriter(bw)) {
             AssemblyFileFormat assemblyFile = new AssemblyFileFormat(pw);
