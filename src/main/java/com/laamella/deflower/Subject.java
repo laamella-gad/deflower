@@ -23,6 +23,7 @@ class Subject {
     final Path basePath;
     final Stack<Integer> potentialCodeLocations = new Stack<>();
     String outputFileName = "deflowered.asm";
+    final List<String> errors = new ArrayList<>();
 
     Subject(Path basePath) {
         this.basePath = basePath;
@@ -57,7 +58,12 @@ class Subject {
 
     void registerBlock(Area area) {
         for (int a = 0; a < area.size; a++) {
-            memory[a + area.address].area = area;
+            int address = a + area.address;
+            Area existing = memory[address].area;
+            if (existing != null && !existing.equals(area)) {
+                errors.add(String.format("Area conflict at %s: %s overwrites %s", asHexWord(address), area, existing));
+            }
+            memory[address].area = area;
         }
     }
 

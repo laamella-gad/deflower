@@ -25,6 +25,11 @@ public class Deflower {
             resultWriter.prepareOutputDirectory(subjects.get(0).basePath);
             for (Subject subject : subjects) {
                 flowAnalyser.analyseCodeFlows(subject);
+                if (!subject.errors.isEmpty()) {
+                    subject.errors.forEach(System.err::println);
+                    System.err.println("Errors detected for " + subject.outputFileName + ", not writing output.");
+                    continue;
+                }
                 resultWriter.write(subject);
             }
         } catch (IllegalStateException e) {

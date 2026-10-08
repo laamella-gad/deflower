@@ -10,6 +10,6 @@ labels: bug
 
 This is the mirror case of what's already handled at the *start* of an instruction (jumping into an area that already exists is caught and logged as "Jumping into non-code area"). Nothing catches the case where decoding starts cleanly but the instruction's own length carries it into a later area.
 
-Related to [0018](0018-area-conflicts-silently-overwritten.md), which wants `registerBlock` itself to report any overwrite of a non-null `Area`. Fixing 0018 generally would catch this case too; keeping this filed separately since it names a concrete, easy-to-miss trigger (instruction length crossing into a later area mid-decode) worth its own test regardless of where the fix lands.
+Related to [0018](0018-area-conflicts-silently-overwritten.md) (now done): `registerBlock` logs this conflict as of that fix, so it's no longer silent. Still open here because logging isn't enough — the done criterion below (the data area surviving untouched) needs the instruction to actually stop short of overwriting it, which 0018 didn't add.
 
 Done when: `registerBlock`, or a check before it in `FlowAnalyser`, detects an area boundary crossed mid-instruction and stops/logs instead of silently overwriting, and a test (e.g. a single-byte `DataArea` placed where a 3-byte instruction's operand bytes would land) confirms the data area survives untouched.

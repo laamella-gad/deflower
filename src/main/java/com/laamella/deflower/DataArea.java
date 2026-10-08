@@ -1,5 +1,7 @@
 package com.laamella.deflower;
 
+import java.util.Objects;
+
 class DataArea extends Area {
     final DataType type;
     boolean isSystem;
@@ -13,6 +15,18 @@ class DataArea extends Area {
     @Override
     public String toString() {
         return super.toString() + " " + type.name().toLowerCase() + (isSystem ? " system" : "");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!super.equals(o)) return false;
+        DataArea other = (DataArea) o;
+        return type == other.type && isSystem == other.isSystem;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), type, isSystem);
     }
 
     @Override

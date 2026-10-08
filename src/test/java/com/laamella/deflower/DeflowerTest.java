@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static com.laamella.snippets_test_junit5.core.Snipsertions.snipsert;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DeflowerTest {
@@ -68,6 +69,51 @@ class DeflowerTest {
     @Test
     void emitsWordDwordAndCharData() throws IOException, URISyntaxException {
         assertDeflowered("datatypes");
+    }
+
+    /**
+     * registerBlock collects an error when one area overwrites a genuinely
+     * different one (Subject.errors), and Deflower refuses to write an
+     * (illegal) asm file for a subject that has any (issue 0018).
+     * overlap.flo declares a 2-byte word at $C000, then a byte at $C001
+     * landing inside it: the second annotation disagrees with the first, so
+     * it must be reported (naming both areas and the address) on stderr,
+     * and overlap.asm must not be written.
+     */
+    @Test
+    void reportsAreaConflictAndSkipsOutputOnOverlap() throws IOException, URISyntaxException {
+        String flowerFile = "overlap/overlap.flo";
+        ByteArrayOutputStream capturedErr = new ByteArrayOutputStream();
+        PrintStream originalErr = System.err;
+        System.setErr(new PrintStream(capturedErr));
+        try {
+            new Deflower().deflower(flowerFile);
+        } finally {
+            System.setErr(originalErr);
+        }
+        String err = capturedErr.toString();
+        assertTrue(err.contains("Area conflict at $C001"), "Expected a conflict report, got: " + err);
+        assertTrue(err.contains("byte") && err.contains("word"), "Expected both area kinds named, got: " + err);
+        assertTrue(err.contains("Errors detected"), "Expected a skip notice, got: " + err);
+        assertTrue(isEmpty(outDir(flowerFile)), "Should not have written output for a subject with an area conflict");
+    }
+
+    /**
+     * Areas that describe themselves identically (same address, size and
+     * kind) are a redundant re-annotation, not a disagreement, so they must
+     * not be reported as a conflict.
+     */
+    @Test
+    void doesNotLogIdenticalReRegistration() throws IOException, URISyntaxException {
+        ByteArrayOutputStream capturedErr = new ByteArrayOutputStream();
+        PrintStream originalErr = System.err;
+        System.setErr(new PrintStream(capturedErr));
+        try {
+            new Deflower().deflower("datatypes/datatypes.flo");
+        } finally {
+            System.setErr(originalErr);
+        }
+        assertFalse(capturedErr.toString().contains("Area conflict"), "Should not report a conflict for datatypes fixture");
     }
 
     @Test
