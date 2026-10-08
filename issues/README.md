@@ -39,3 +39,5 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0016](0016-duplicate-path-resolution.md) | open | Snapshot path is resolved twice |
 | [0017](0017-annotations-applied-as-side-effects-during-parse.md) | open | Annotations are applied as side effects during the parse walk |
 | [0018](0018-area-conflicts-silently-overwritten.md) | open | Area conflicts are silently overwritten |
+| [0019](0019-ship-as-single-executable.md) | open | Project should ship as a single executable, not a Java jar |
+| [0020](0020-pretty-data-formats.md) | open | Add pretty disassembly formats for known data shapes (charset, screen, sprite) |
