@@ -139,7 +139,7 @@ class SubjectConfigurer {
                         subject.potentialCodeLocations.add(address);
                         System.out.format("Will disassemble from %X\n", address);
                     }
-                    case BYTE_BLOCK, WORD_BLOCK, DWORD_BLOCK -> {
+                    case CHAR_BLOCK, BYTE_BLOCK, WORD_BLOCK, DWORD_BLOCK -> {
                         if (addressEnd != null) {
                             amount = (addressEnd - address) / type.dataType.sizeInBytes;
                         }

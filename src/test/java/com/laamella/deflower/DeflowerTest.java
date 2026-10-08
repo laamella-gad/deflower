@@ -59,6 +59,17 @@ class DeflowerTest {
         assertDeflowered("indirectjmp");
     }
 
+    /**
+     * AssemblyFileFormat.print(DataArea, ...) used to only handle BYTE,
+     * silently skipping WORD/DWORD/CHAR areas (issue 0002). Covers all three:
+     * two WORDs, one DWORD, and three CHARs (printable as character
+     * literals).
+     */
+    @Test
+    void emitsWordDwordAndCharData() throws IOException, URISyntaxException {
+        assertDeflowered("datatypes");
+    }
+
     @Test
     void rejectsUnrecognizedTokens() throws IOException, URISyntaxException {
         assertFailsToParse("invalid/garbage-tokens.flo");

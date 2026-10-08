@@ -50,6 +50,11 @@ class AssemblyFileFormat {
     private int column = 0;
 
     public void print(DataArea block, int address, Subject subject) throws IOException {
+        // A multi-byte area (WORD, DWORD, POINTER) owns several consecutive
+        // addresses but is one value: print it once, at its first address.
+        if (address != block.address) {
+            return;
+        }
         if (block.isSystem) {
             return;
         }
@@ -61,8 +66,32 @@ class AssemblyFileFormat {
             case BYTE:
                 tabularPrint(".BYTE", asHexByte(subject.byteAt(address)));
                 break;
+            case CHAR:
+                tabularPrint(".BYTE", asChar(subject.byteAt(address)));
+                break;
+            case WORD:
+                tabularPrint(".WORD", asHexWord(subject.wordAt(address)));
+                break;
+            case DWORD:
+                tabularPrint(".DWORD", asHexDword(subject.dwordAt(address)));
+                break;
+            case POINTER:
+                tabularPrint(".WORD", nameForAddress(subject.wordAt(address), "$%04X", subject));
+                break;
         }
         lastArea = block;
+    }
+
+    /**
+     * A printable, unambiguous character as an assembler character literal
+     * (e.g. 'A'), or a hex byte for anything that isn't (control codes,
+     * quotes, backslashes).
+     */
+    private String asChar(int value) {
+        if (value >= 0x20 && value <= 0x7E && value != '\'' && value != '\\') {
+            return "'" + (char) value + "'";
+        }
+        return asHexByte(value);
     }
 
     private void considerReOrg(int address) throws IOException {
