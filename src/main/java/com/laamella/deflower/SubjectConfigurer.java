@@ -120,11 +120,6 @@ class SubjectConfigurer {
 
             @Override
             public void enterMul(FloParser.MulContext ctx) {
-                // The walker enters this expr before the sibling `datatype`
-                // node, so `type` is still the line's default here. Set the
-                // element count directly instead of an addressEnd computed
-                // from a size we don't know yet; exitLine multiplies by the
-                // correct size once the datatype has been seen.
                 int left = parseNumber(ctx.number(0).getText()).orElseThrow();
                 int right = parseNumber(ctx.number(1).getText()).orElseThrow();
                 amount = left * right;

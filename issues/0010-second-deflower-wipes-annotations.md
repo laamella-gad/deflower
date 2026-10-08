@@ -9,3 +9,5 @@ labels: bug
 Found by reading the code. Not reproduced.
 
 Done when: a second `deflower` line either keeps earlier annotations or is rejected with a clear error, and a test covers the chosen behaviour.
+
+There should only be one "deflower" line per file, and it should be the first line. Can this be fixed in the grammar?
