@@ -43,6 +43,6 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0020](0020-pretty-data-formats.md) | open | Add pretty disassembly formats for known data shapes (charset, screen, sprite) |
 | [0021](0021-parse-errors-not-collected.md) | done | Parse errors are printed to stderr and ignored, not collected and failed on |
 | [0022](0022-export-region-to-binary.md) | open | Mark regions for export to a binary file, included from the generated asm |
-| [0023](0023-instruction-partially-overlaps-later-area.md) | open | A decoded instruction partially overlapping a later area corrupts it |
+| [0023](0023-instruction-partially-overlaps-later-area.md) | done | A decoded instruction partially overlapping a later area corrupts it |
 | [0024](0024-no-label-plus-offset-for-access-inside-block.md) | open | No "label + offset" for an access that lands inside a larger labeled block |
 | [0025](0025-adopt-assertj.md) | done | Adopt AssertJ to clean up ugly asserts |

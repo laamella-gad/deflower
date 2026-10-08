@@ -116,6 +116,18 @@ class DeflowerTest {
     }
 
     /**
+     * A 3-byte LDA_ABS at $C000 would run into a single-byte DataArea
+     * declared at $C002 (its last operand byte), so the entry point must
+     * not be disassembled at all (issue 0023) - the mirror case of jumping
+     * straight into a non-code area. guard's .BYTE must come through
+     * untouched, and nothing gets printed as code at $C000/$C001.
+     */
+    @Test
+    void doesNotDisassembleIntoAnExistingArea() throws IOException, URISyntaxException {
+        assertDeflowered("partialoverlap");
+    }
+
+    /**
      * A standalone ';'/'#' comment line attaches to the address of the
      * annotation line that follows it (issue 0003): it's printed as a
      * "; ..." line right above the label/data it documents. Consecutive

@@ -3,6 +3,7 @@ package com.laamella.deflower;
 import com.laamella.mpu6502.specification.AddressingMode;
 import com.laamella.mpu6502.specification.Instruction;
 
+import static com.laamella.Printing.asHexWord;
 import static com.laamella.mpu6502.ByteManipulation.toSignedByte;
 import static com.laamella.mpu6502.ByteManipulation.word;
 
@@ -32,6 +33,9 @@ class FlowAnalyser {
         int address = memoryLocation.address;
         if (instruction == null) {
             System.out.println("Jumped into a JAM");
+            return;
+        }
+        if (runsIntoExistingArea(address, instruction, subject)) {
             return;
         }
         InstructionArea instructionBlock = new InstructionArea(address, instruction);
@@ -73,6 +77,24 @@ class FlowAnalyser {
             default:
                 subject.addPotentialCodeLocation(address + instruction.addressingMode.totalBytes, false, address);
         }
+    }
+
+    /**
+     * Decoding started cleanly at a free address, but a 2- or 3-byte
+     * instruction's own length can still run into an address another Area
+     * already owns - typically a .flo-declared DataArea (issue 0023). Don't
+     * disassemble into it: this is the mirror case of jumping straight into
+     * a non-code area, caught the same way.
+     */
+    private boolean runsIntoExistingArea(int address, Instruction instruction, Subject subject) {
+        for (int offset = 1; offset < instruction.addressingMode.totalBytes; offset++) {
+            Area existing = subject.memory[address + offset].area;
+            if (existing != null) {
+                System.out.println("Instruction at " + asHexWord(address) + " would run into " + existing + ", not disassembling");
+                return true;
+            }
+        }
+        return false;
     }
 
     private Integer getRelativeAddressOperand(int address, Subject subject) {
