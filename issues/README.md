@@ -8,7 +8,7 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
   ```
   ---
   title: One-line summary
-  status: open | in-progress | done
+  status: open | in-progress | done | invalid
   labels: bug, enhancement, cleanup, test
   ---
   ```
@@ -27,7 +27,7 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0004](0004-tests-have-no-assertions.md) | done | Tests only smoke-run the pipeline |
 | [0005](0005-debug-output-everywhere.md) | open | Excessive `System.out` tracing |
 | [0006](0006-dead-parseline.md) | open | Unused legacy `parseLine` in `SubjectConfigurer` |
-| [0007](0007-range-end-off-by-one.md) | open | Address range end is off by one |
+| [0007](0007-range-end-off-by-one.md) | invalid | Address range end is off by one |
 | [0008](0008-mul-ignores-datatype.md) | open | `n*m` size ignores the datatype |
 | [0009](0009-annotation-before-deflower-npe.md) | open | Annotations before the deflower line throw NullPointerException |
 | [0010](0010-second-deflower-wipes-annotations.md) | open | A second deflower line wipes earlier annotations |
