@@ -44,7 +44,6 @@ class SubjectConfigurer {
     List<Subject> configure(String flowerFile) throws URISyntaxException, IOException {
         Path path = Paths.get(Deflower.class.getResource("/" + flowerFile).toURI()).toAbsolutePath();
         Path basePath = path.getParent();
-        Subject.prepareOutputDirectory(basePath);
         List<Subject> subjects = new ArrayList<>();
         List<String> parseErrors = new ArrayList<>();
         FloParser parser = createParser(parseErrors, path);

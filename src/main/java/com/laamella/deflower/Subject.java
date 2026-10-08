@@ -1,16 +1,9 @@
 package com.laamella.deflower;
 
-import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 
 import static com.laamella.Printing.asHexWord;
-import static java.nio.file.FileVisitResult.CONTINUE;
-import static java.nio.file.Files.*;
 
 class MemoryLocation {
     final int address;
@@ -40,38 +33,10 @@ class Subject {
         }
     }
 
-    /**
-     * Clears and recreates the shared output directory. Called once per
-     * .flo file, before any of its (possibly several) Subjects are written,
-     * so that one deflower line's run doesn't delete another's output.
-     */
-    static void prepareOutputDirectory(Path basePath) throws IOException {
-        recreateDirectory(basePath.resolve("out"));
-    }
-
     void storeAt(int startAddress, byte[] bytes) {
         for (int i = 0; i < bytes.length; i++) {
             memory[startAddress+i] = new MemoryLocation(startAddress + i, bytes[i] & 0xff);
         }
-    }
-
-    private static void recreateDirectory(Path directory) throws IOException {
-        if (Files.exists(directory)) {
-            walkFileTree(directory, new SimpleFileVisitor<>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    delete(file);
-                    return CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                    delete(dir);
-                    return CONTINUE;
-                }
-            });
-        }
-        createDirectories(directory);
     }
 
     Area peek(int address) {

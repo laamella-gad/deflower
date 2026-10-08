@@ -2,6 +2,7 @@ package com.laamella.deflower;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.List;
 
 public class Deflower {
     private final SubjectConfigurer subjectConfigurer = new SubjectConfigurer();
@@ -17,7 +18,12 @@ public class Deflower {
 
     public void deflower(String flowerFile) throws IOException, URISyntaxException {
         try {
-            for (Subject subject : subjectConfigurer.configure(flowerFile)) {
+            List<Subject> subjects = subjectConfigurer.configure(flowerFile);
+            if (subjects.isEmpty()) {
+                return;
+            }
+            resultWriter.prepareOutputDirectory(subjects.get(0).basePath);
+            for (Subject subject : subjects) {
                 flowAnalyser.analyseCodeFlows(subject);
                 resultWriter.write(subject);
             }

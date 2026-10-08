@@ -3,8 +3,15 @@ package com.laamella.deflower;
 import com.laamella.mpu6502.specification.Instruction;
 
 import java.io.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Objects;
+
+import static java.nio.file.FileVisitResult.CONTINUE;
+import static java.nio.file.Files.*;
 
 import static com.laamella.Printing.*;
 import static com.laamella.mpu6502.ByteManipulation.toSignedByte;
@@ -128,6 +135,34 @@ class AssemblyFileFormat {
 }
 
 class ResultWriter {
+
+    /**
+     * Clears and recreates the shared output directory. Called once per
+     * .flo file, before any of its (possibly several) Subjects are written,
+     * so that one deflower line's run doesn't delete another's output.
+     */
+    void prepareOutputDirectory(Path basePath) throws IOException {
+        recreateDirectory(basePath.resolve("out"));
+    }
+
+    private void recreateDirectory(Path directory) throws IOException {
+        if (Files.exists(directory)) {
+            walkFileTree(directory, new SimpleFileVisitor<>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    delete(file);
+                    return CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    delete(dir);
+                    return CONTINUE;
+                }
+            });
+        }
+        createDirectories(directory);
+    }
 
     void write(Subject subject) throws IOException {
         Path asmFile = subject.outputPath.resolve(subject.outputFileName);
