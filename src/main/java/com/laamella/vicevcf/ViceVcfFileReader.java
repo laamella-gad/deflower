@@ -49,14 +49,19 @@ public class ViceVcfFileReader {
         String machineName = paddedString(machineNameBytes, 0);
         System.out.printf("Vice dump found, format %s %s.%n", machineName, version);
 
+        // VICE snapshot format 2.0+ has a "VICE Version" block here. Older
+        // snapshots (format 1.x, as produced by e.g. VICE 1.x) go straight
+        // into the first module, so what we just read is that module's
+        // header and has to be put back.
         byte[] expectedViceVersionHeader = "VICE Version\032".getBytes(US_ASCII);
         byte[] viceVersionHeader = getByteArray(vcfFileContents, expectedViceVersionHeader.length);
-        if (!Arrays.equals(expectedViceVersionHeader, viceVersionHeader)) {
-            throw new IOException("Old VICE snapshot file");
+        if (Arrays.equals(expectedViceVersionHeader, viceVersionHeader)) {
+            int viceVersion = readDword(vcfFileContents);
+            int viceSubversionRevisionNumber = readDword(vcfFileContents);
+            System.out.printf("Vice version %s, SVN revision %s.%n", viceVersion, viceSubversionRevisionNumber);
+        } else {
+            vcfFileContents.position(vcfFileContents.position() - expectedViceVersionHeader.length);
         }
-        int viceVersion = readDword(vcfFileContents);
-        int viceSubversionRevisionNumber = readDword(vcfFileContents);
-        System.out.printf("Vice version %s, SVN revision %s.%n", viceVersion, viceSubversionRevisionNumber);
 
         return new Header(machineName, version);
     }
