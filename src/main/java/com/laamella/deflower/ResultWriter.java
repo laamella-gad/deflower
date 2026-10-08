@@ -27,11 +27,26 @@ class AssemblyFileFormat {
         this.w = w;
     }
 
-    void printLabel(String label, int address) throws IOException {
+    /**
+     * Prints a comment (one output line per source line, each prefixed
+     * "; "), a label (as "label:"), both, or neither, for the given
+     * address. Comment and label share one blank-line separator above
+     * them, so a commented label doesn't get a blank line wedged between
+     * the comment and the label it belongs to.
+     */
+    void printAnnotation(int address, String comment, String label) throws IOException {
         considerReOrg(address);
         newLine();
         newLine();
-        print(label + ":");
+        if (comment != null) {
+            for (String line : comment.split("\n", -1)) {
+                print("; " + line);
+                newLine();
+            }
+        }
+        if (label != null) {
+            print(label + ":");
+        }
     }
 
     void print(String s) throws IOException {
@@ -202,10 +217,11 @@ class ResultWriter {
 
                 Area currentArea = subject.peek(address);
 
-                // Is there a label here? Print it.
+                // Is there a comment or a label here? Print them.
+                String comment = subject.memory[address].comment;
                 String label = subject.memory[address].label;
-                if (label != null) {
-                    assemblyFile.printLabel(label, address);
+                if (comment != null || label != null) {
+                    assemblyFile.printAnnotation(address, comment, label);
                 }
                 if (currentArea != null) {
                     if (currentArea instanceof DataArea) {

@@ -10,6 +10,7 @@ class MemoryLocation {
     final int data;
     Area area = null;
     String label = null;
+    String comment = null;
 
     MemoryLocation(int address, int data) {
         this.address = address;

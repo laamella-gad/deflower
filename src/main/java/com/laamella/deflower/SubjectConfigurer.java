@@ -56,6 +56,7 @@ class SubjectConfigurer {
             boolean isSystem = false;
             int amount = 1;
             String name = null;
+            final List<String> pendingComments = new ArrayList<>();
 
             void startNewLine() {
                 address = null;
@@ -73,6 +74,7 @@ class SubjectConfigurer {
                 System.out.println("Reading " + filename);
                 subject = new Subject(basePath);
                 subject.outputFileName = outputFileNameFor(targetName);
+                pendingComments.clear();
                 subjects.add(subject);
                 String filenameString = filename.toString();
                 if (filenameString.endsWith("vsf")) {
@@ -89,6 +91,11 @@ class SubjectConfigurer {
             @Override
             public void enterLine(FloParser.LineContext ctx) {
                 startNewLine();
+            }
+
+            @Override
+            public void enterComment(FloParser.CommentContext ctx) {
+                pendingComments.add(commentText(ctx.getText()));
             }
 
             @Override
@@ -133,6 +140,10 @@ class SubjectConfigurer {
                 assertState(address != null, "Require an address: %s", ctx);
                 if (name != null) {
                     subject.memory[address].label = name;
+                }
+                if (!pendingComments.isEmpty()) {
+                    subject.memory[address].comment = String.join("\n", pendingComments);
+                    pendingComments.clear();
                 }
                 switch (type) {
                     case CODE_ENTRY -> {
@@ -184,6 +195,15 @@ class SubjectConfigurer {
         parser.removeErrorListeners();
         parser.addErrorListener(errorCollector);
         return parser;
+    }
+
+    /**
+     * Strips the leading ';' or '#' marker (and one following space, if
+     * any) off a COMMENT token's raw text.
+     */
+    private String commentText(String raw) {
+        String body = raw.substring(1);
+        return body.startsWith(" ") ? body.substring(1) : body;
     }
 
     private Optional<Integer> parseNumber(String part) {

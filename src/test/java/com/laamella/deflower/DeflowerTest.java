@@ -115,6 +115,17 @@ class DeflowerTest {
         assertThat(capturedErr.toString()).doesNotContain("Area conflict");
     }
 
+    /**
+     * A standalone ';'/'#' comment line attaches to the address of the
+     * annotation line that follows it (issue 0003): it's printed as a
+     * "; ..." line right above the label/data it documents. Consecutive
+     * comment lines attach as one multi-line comment.
+     */
+    @Test
+    void carriesCommentsToOutput() throws IOException, URISyntaxException {
+        assertDeflowered("comments");
+    }
+
     @Test
     void rejectsUnrecognizedTokens() throws IOException, URISyntaxException {
         assertFailsToParse("invalid/garbage-tokens.flo");

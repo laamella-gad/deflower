@@ -1,6 +1,7 @@
 
 *=$0057
 
+; 3b20 screen 0400 charset 2800
 player_direction:
 		.BYTE	$EF
 
@@ -28,6 +29,7 @@ screen_ram:		.BYTE	$A0
 _0423_DATA:
 *=$0424
 
+; ???
 var_init_b1:		.BYTE	$B3
 *=$0755
 
@@ -95,6 +97,7 @@ high_score_table_4:		.BYTE	$14, $0B, $34, $20, $30, $30, $30, $30, $30, $30, $20
 
 high_score_table_5:		.BYTE	$14, $0B, $35, $20
 
+; ???
 hiscore:		.BYTE	$30, $30, $30, $30, $30, $30, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.BYTE	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.BYTE	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
@@ -623,22 +626,30 @@ data:
 		.BYTE	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.BYTE	$00, $00, $4B, $00, $70, $00
 
+; ???
 word_1_048e:		.BYTE	$8E
 
 _2649_DATA:		.BYTE	$04
 
+; ???
 word_2_048e:		.BYTE	$8E, $04
 
+; ???
 word_3_048e:		.BYTE	$8E, $04
 
+; ???
 word_4_048e:		.BYTE	$8E, $04
 
+; ???
 word_5_048e:		.BYTE	$8E, $04
 
+; ???
 word_6_048e:		.BYTE	$8E, $04
 
+; ???
 word_7_048e:		.BYTE	$8E, $04
 
+; ???
 word_8_048e:		.BYTE	$8E
 
 _2657_DATA:		.BYTE	$04
@@ -1057,6 +1068,7 @@ _30BA_CODE:
 		BNE _30BA_CODE
 		RTS 
 
+; ???
 update_hi:
 		LDX #$00
 
@@ -1961,6 +1973,7 @@ no_bonus:
 		STA bonus_points_char
 		RTS 
 
+; ???
 bonus_10_points:
 		CMP #$02
 		BNE bonus_100_points
@@ -2057,6 +2070,7 @@ bonus_round_loop:
 		LDY #$00
 		LDA (new_loc_lo), Y
 
+; ???
 bonus_walk_on_44:
 		CMP #$44
 		BNE bonus_walk_on_43
@@ -2066,6 +2080,7 @@ bonus_walk_on_44:
 		JSR inc_score_digit_x
 		JMP _382D_CODE
 
+; ???
 bonus_walk_on_43:
 		CMP #$43
 		BNE bonus_walk_on_46
@@ -2770,6 +2785,7 @@ countdown_irq:
 _3D48_CODE:
 		JMP _EA31_CODE
 
+; ???
 _3D4B_CODE:
 		LDA #$81
 		STA jiffy_timer

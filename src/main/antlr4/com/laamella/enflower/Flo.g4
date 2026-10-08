@@ -1,7 +1,6 @@
 grammar Flo;
 prog:	(statement NEWLINE)*;
 
-// TODO add comments to disassembly
 statement: COMMENT # comment
     | 'deflower' ID         # setFileName
     | expr+ '{'?                # line
