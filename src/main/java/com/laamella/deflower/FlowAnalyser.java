@@ -29,7 +29,6 @@ class FlowAnalyser {
         }
         Instruction instruction = Instruction.INSTRUCTION_BY_NR[memoryLocation.data];
         int address = memoryLocation.address;
-//        System.out.format("%04X %s\n", address, instruction);
         if (instruction == null) {
             System.out.println("Jumped into a JAM");
             return;

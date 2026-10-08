@@ -24,9 +24,6 @@ public class Deflower {
             return;
         }
         flowAnalyser.analyseCodeFlows(subject);
-//        do {
-            resultWriter.write(subject);
-//            System.out.println(System.currentTimeMillis());
-//        } while (true);
+        resultWriter.write(subject);
     }
 }
