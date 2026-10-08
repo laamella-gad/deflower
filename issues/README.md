@@ -26,7 +26,7 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0003](0003-flo-comments-dropped.md) | open | `.flo` comments are parsed but not carried to the output |
 | [0004](0004-tests-have-no-assertions.md) | done | Tests only smoke-run the pipeline |
 | [0005](0005-debug-output-everywhere.md) | done | Excessive `System.out` tracing |
-| [0006](0006-dead-parseline.md) | open | Unused legacy `parseLine` in `SubjectConfigurer` |
+| [0006](0006-dead-parseline.md) | done | Unused legacy `parseLine` in `SubjectConfigurer` |
 | [0007](0007-range-end-off-by-one.md) | invalid | Address range end is off by one |
 | [0008](0008-mul-ignores-datatype.md) | done | `n*m` size ignores the datatype |
 | [0009](0009-annotation-before-deflower-npe.md) | done | Annotations before the deflower line throw NullPointerException |
