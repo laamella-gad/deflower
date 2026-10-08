@@ -2,6 +2,8 @@
 
 Never commit automatically.
 
+Always use snipsert to check generated output.
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Purpose
