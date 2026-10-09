@@ -328,6 +328,27 @@ class DeflowerTest {
     }
 
     /**
+     * Issue 0017: the whole .flo file is parsed before any memory image is
+     * loaded or annotated, so an annotation line before the first
+     * 'deflower' line is reported up front (no NullPointerException, as in
+     * issue 0009) and nothing is written.
+     */
+    @Test
+    void rejectsAnnotationBeforeDeflowerLine() throws IOException, URISyntaxException {
+        String flowerFile = "invalid/annotation-before-deflower.flo";
+        ByteArrayOutputStream capturedErr = new ByteArrayOutputStream();
+        PrintStream originalErr = System.err;
+        System.setErr(new PrintStream(capturedErr));
+        try {
+            new Deflower().deflower(flowerFile);
+        } finally {
+            System.setErr(originalErr);
+        }
+        assertThat(capturedErr.toString()).contains("Start the file with a 'deflower <file>' line.");
+        assertThat(isEmpty(outDir(flowerFile))).as("output directory for an annotation before 'deflower'").isTrue();
+    }
+
+    /**
      * deflower() catches a parse failure, logs it to stderr, and returns
      * without writing any output (issue 0021) rather than throwing, so a
      * malformed .flo file is checked by its effects: an error logged to
