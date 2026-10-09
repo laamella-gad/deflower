@@ -23,7 +23,7 @@ class FlowAnalyser {
 
     private void analyseCodeFlow(int startAddress, Subject subject) {
         MemoryLocation memoryLocation = subject.memory[startAddress];
-        if (memoryLocation.area != null) {
+        if (memoryLocation.area != null && !memoryLocation.area.isPlaceholder()) {
             if (memoryLocation.area instanceof DataArea) {
                 System.out.println("Jumping into non-code area " + memoryLocation.area.toString());
             }
@@ -89,7 +89,7 @@ class FlowAnalyser {
     private boolean runsIntoExistingArea(int address, Instruction instruction, Subject subject) {
         for (int offset = 1; offset < instruction.addressingMode.totalBytes; offset++) {
             Area existing = subject.memory[address + offset].area;
-            if (existing != null) {
+            if (existing != null && !existing.isPlaceholder()) {
                 System.out.println("Instruction at " + asHexWord(address) + " would run into " + existing + ", not disassembling");
                 return true;
             }

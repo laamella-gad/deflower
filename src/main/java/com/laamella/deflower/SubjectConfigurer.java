@@ -33,7 +33,14 @@ import static java.nio.file.Files.readAllBytes;
 
 class SubjectConfigurer {
     enum LineType {
-        CHAR_BLOCK(CHAR), BYTE_BLOCK(BYTE), CODE_ENTRY(null), WORD_BLOCK(WORD), DWORD_BLOCK(DWORD);
+        CHAR_BLOCK(CHAR), BYTE_BLOCK(BYTE), CODE_ENTRY(null), WORD_BLOCK(WORD), DWORD_BLOCK(DWORD),
+        /**
+         * The default when a line has no explicit type keyword (issue
+         * 0031) - a placeholder for memory that isn't understood yet,
+         * printed as plain bytes but freely narrowable by any later,
+         * more specific annotation.
+         */
+        UNKNOWN_BLOCK(UNKNOWN);
         final DataType dataType;
 
         LineType(DataType dataType) {
@@ -52,7 +59,7 @@ class SubjectConfigurer {
             Subject subject = null;
             Integer address = null;
             Integer addressEnd = null;
-            LineType type = BYTE_BLOCK;
+            LineType type = UNKNOWN_BLOCK;
             boolean isSystem = false;
             int amount = 1;
             String name = null;
@@ -61,7 +68,7 @@ class SubjectConfigurer {
             void startNewLine() {
                 address = null;
                 addressEnd = null;
-                type = BYTE_BLOCK;
+                type = UNKNOWN_BLOCK;
                 isSystem = false;
                 amount = 1;
                 name = null;
@@ -150,7 +157,7 @@ class SubjectConfigurer {
                         subject.potentialCodeLocations.add(address);
                         System.out.format("Will disassemble from %X\n", address);
                     }
-                    case CHAR_BLOCK, BYTE_BLOCK, WORD_BLOCK, DWORD_BLOCK -> {
+                    case CHAR_BLOCK, BYTE_BLOCK, WORD_BLOCK, DWORD_BLOCK, UNKNOWN_BLOCK -> {
                         if (addressEnd != null) {
                             amount = (addressEnd - address) / type.dataType.sizeInBytes;
                         }

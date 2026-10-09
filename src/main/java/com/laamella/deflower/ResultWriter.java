@@ -22,6 +22,11 @@ class AssemblyFileFormat {
     private final Writer w;
     private Area lastArea = null;
     boolean needsToReOrg = true;
+    // True right after a newLine() - i.e. nothing has been written on the
+    // current line yet - false once any text is printed. Distinct from
+    // `column`, which only tracks position within a tabular .BYTE/.WORD
+    // dump: this tracks whether the line as a whole still needs closing.
+    private boolean atLineStart = true;
 
     AssemblyFileFormat(PrintWriter w) {
         this.w = w;
@@ -63,7 +68,17 @@ class AssemblyFileFormat {
                 newLine();
             }
         } else {
-            newLine();
+            // One newLine() closes whatever line is still dangling (if
+            // any - atLineStart tracks that precisely, since column only
+            // tracks tabular .BYTE/.WORD position, not label/comment
+            // text); the other adds the actual blank-line separator. When
+            // the previous line was already cleanly closed (e.g. by the
+            // forced newline below, for a label with nothing of its own
+            // to print), skip the first one instead of emitting a second,
+            // needless blank line.
+            if (!atLineStart) {
+                newLine();
+            }
             newLine();
         }
         if (comment != null) {
@@ -74,13 +89,28 @@ class AssemblyFileFormat {
         }
         if (label != null) {
             print(label + ":");
-            // Issue 0029: among same-kind labels, glue a single value onto
-            // the label's line; several values get their own line so the
-            // tabular dump underneath stays readable. A label that starts
-            // a genuinely new kind of area always gets its own line -
-            // print(DataArea, ...)'s own kind-change check already does
-            // that, so doing it again here would double the newline.
-            if (sameKindAsPrevious && !isSingleValueRun(address, (DataArea) currentArea, subject)) {
+            // A label can land on an address that's covered by an area but
+            // isn't where that area actually prints anything - the second
+            // byte of a WORD/DWORD, an instruction's operand byte - because
+            // print(DataArea, ...) and printInstruction() only emit output
+            // at an area's own start address. There, nothing follows this
+            // label from the area it names, so it must get its own line
+            // unconditionally: gluing it to whatever unrelated address's
+            // label/comment happens to print right after it is a bug, not
+            // a glue. An address with no area at all is unaffected - the
+            // next thing printed always starts with its own considerReOrg
+            // or print call, which supplies the missing newline itself.
+            boolean labelInsideAreaButNotAtItsStart = currentArea != null && currentArea.address != address;
+            if (labelInsideAreaButNotAtItsStart) {
+                newLine();
+            } else if (sameKindAsPrevious && !isSingleValueRun(address, (DataArea) currentArea, subject)) {
+                // Issue 0029: among same-kind labels, glue a single value
+                // onto the label's line; several values get their own line
+                // so the tabular dump underneath stays readable. A label
+                // that starts a genuinely new kind of area always gets its
+                // own line - print(DataArea, ...)'s own kind-change check
+                // already does that, so doing it again here would double
+                // the newline.
                 newLine();
             }
         }
@@ -111,11 +141,13 @@ class AssemblyFileFormat {
 
     void print(String s) throws IOException {
         w.write(s);
+        atLineStart = false;
     }
 
     private void newLine() throws IOException {
         w.write("\n");
         column = 0;
+        atLineStart = true;
     }
 
     private void indent() throws IOException {
@@ -138,7 +170,7 @@ class AssemblyFileFormat {
             newLine();
         }
         switch (block.type) {
-            case BYTE:
+            case BYTE, UNKNOWN:
                 tabularPrint(".BYTE", asHexByte(subject.byteAt(address)));
                 break;
             case CHAR:

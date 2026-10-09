@@ -51,5 +51,6 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0028](0028-mid-block-labels-as-address-defines.md) | open | Emit a label inside a larger area as an address define, not inline |
 | [0029](0029-first-label-in-run-still-glued.md) | done | First label of a run still glues onto its .BYTE line, inconsistent with the rest of the run |
 | [0030](0030-ai-friendliness-of-flo-grammar.md) | open | Investigate whether the .flo format/grammar is easy to use, including for an AI writing it |
-| [0031](0031-carving-specific-types-out-of-unknown-data-is-a-conflict.md) | open | Carving a specific type out of a placeholder data block is reported as a conflict, blocking output |
+| [0031](0031-carving-specific-types-out-of-unknown-data-is-a-conflict.md) | done | Carving a specific type out of a placeholder data block is reported as a conflict, blocking output |
 | [0032](0032-modernize-squirm-flo.md) | open | squirm.flo was written for an older version of deflower and needs modernizing |
+| [0033](0033-array-elements-carry-own-label-reference.md) | open | Follow-up to 0026 - give each array element its own label reference instead of scanning for one |

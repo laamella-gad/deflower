@@ -1588,7 +1588,8 @@ table_with_timers:
 		.BYTE	$2A, $12, $32, $20, $0E, $2E, $2A, $2A
 *=$9D88
 
-joystick_state:		.BYTE	$7E
+joystick_state:
+		.BYTE	$7E
 sprite_coll_state:		.BYTE	$00
 *=$9D8C
 

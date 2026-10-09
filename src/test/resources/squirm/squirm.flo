@@ -61,21 +61,21 @@ $24df code draw_screen_colors
 $2508 code animate_player_chars
 $2542 code color_lines
 # ???
-$2648 data word_1_048e
+$2648 word word_1_048e
 # ???
-$264a data word_2_048e
+$264a word word_2_048e
 # ???
-$264c data word_3_048e
+$264c word word_3_048e
 # ???
-$264e data word_4_048e
+$264e word word_4_048e
 # ???
-$2650 data word_5_048e
+$2650 word word_5_048e
 # ???
-$2652 data word_6_048e
+$2652 word word_6_048e
 # ???
-$2654 data word_7_048e
+$2654 word word_7_048e
 # ???
-$2656 data word_8_048e
+$2656 word word_8_048e
 $2658 data snk_head_loc_lo
 $2659 data snk_head_loc_hi
 $265a data snake_pos_tbl_lo

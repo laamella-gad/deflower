@@ -61,7 +61,7 @@ class Subject {
         for (int a = 0; a < area.size; a++) {
             int address = a + area.address;
             Area existing = memory[address].area;
-            if (existing != null && !existing.equals(area)) {
+            if (existing != null && !existing.equals(area) && !existing.isPlaceholder()) {
                 errors.add(String.format("Area conflict at %s: %s overwrites %s", asHexWord(address), area, existing));
             }
             memory[address].area = area;

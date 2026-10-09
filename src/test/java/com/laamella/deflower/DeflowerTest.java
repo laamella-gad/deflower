@@ -163,6 +163,27 @@ class DeflowerTest {
         assertDeflowered("midblocklabel");
     }
 
+    /**
+     * A line with no explicit type keyword is a placeholder (issue 0031):
+     * narrowing it later with a more specific annotation - a word, or a
+     * code entry point - must not be reported as an area conflict, and
+     * must not stop the subject's output from being written. The carved
+     * word and the carved code entry (one RTS) both take over cleanly in
+     * the middle of what's otherwise still a plain placeholder dump.
+     */
+    @Test
+    void carvingASpecificTypeOutOfAPlaceholderDoesNotConflict() throws IOException, URISyntaxException {
+        ByteArrayOutputStream capturedErr = new ByteArrayOutputStream();
+        PrintStream originalErr = System.err;
+        System.setErr(new PrintStream(capturedErr));
+        try {
+            assertDeflowered("narrowplaceholder");
+        } finally {
+            System.setErr(originalErr);
+        }
+        assertThat(capturedErr.toString()).doesNotContain("Area conflict");
+    }
+
     @Test
     void rejectsUnrecognizedTokens() throws IOException, URISyntaxException {
         assertFailsToParse("invalid/garbage-tokens.flo");

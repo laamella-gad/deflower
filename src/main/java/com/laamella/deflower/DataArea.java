@@ -29,6 +29,11 @@ class DataArea extends Area {
         return Objects.hash(super.hashCode(), type, isSystem);
     }
 
+    @Override
+    public boolean isPlaceholder() {
+        return type == DataType.UNKNOWN;
+    }
+
     /**
      * An array annotation (issue 0024) registers one single-element
      * DataArea per index, so a mid-block address's own area never carries

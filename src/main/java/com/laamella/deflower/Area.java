@@ -39,5 +39,17 @@ abstract class Area {
         return Objects.hash(getClass(), address, size);
     }
 
+    /**
+     * True for an area that only marks memory as "not yet understood" -
+     * i.e. a {@code .flo} line with no explicit type keyword (issue 0031).
+     * A placeholder may be silently narrowed by any later, more specific
+     * annotation ({@link Subject#registerBlock}), and {@link FlowAnalyser}
+     * may decode straight through one instead of refusing as it would for
+     * a deliberate area.
+     */
+    public boolean isPlaceholder() {
+        return false;
+    }
+
     public abstract String labelFor(int address, Subject subject);
 }
