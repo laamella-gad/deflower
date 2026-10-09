@@ -25,7 +25,6 @@ screen_ram:		.byte	$A0
 _0423_DATA:
 *=$0424
 
-; ???
 var_init_b1:		.byte	$B3
 *=$0755
 
@@ -91,7 +90,6 @@ high_score_table_4:
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $35, $20
 high_score_table_5:
 		.byte	$14, $0B, $35, $20
-; ???
 hiscore:
 		.byte	$30, $30, $30, $30, $30, $30, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
@@ -115,6 +113,7 @@ hiscore:
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20
+; title screen is 40*21 bytes; rest_of_title is its last 75
 title:
 		.byte	$A0, $A0, $A0, $A0, $A0, $A0, $A0, $A0, $A0, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $A0
@@ -331,7 +330,9 @@ level_3:
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $1B
 		.byte	$21, $1D, $1D, $1D, $1D, $1D, $1D, $1D, $1D, $1D, $1D, $1D, $1D, $1D, $1D, $1D
 		.byte	$1D, $1D, $1D, $1D, $1D, $1D, $1D, $1D, $1D, $1D, $1D, $1D, $1D, $1D, $1D, $1D
-		.byte	$1D, $1D, $1D, $1D, $1D, $1D, $1D, $1F, $04
+		.byte	$1D, $1D, $1D, $1D, $1D, $1D, $1D, $1F
+		.byte	$04
+
 title_screen_colors:
 		.byte	$F2, $F2, $C2, $F2, $92, $F2, $F2, $C2, $F2, $62, $12, $F2, $F2, $F2, $12, $F2
 		.byte	$F2, $A2, $62, $F2, $F2, $F2, $92, $12, $F2, $F2, $12, $F2, $F2, $F2, $12, $02
@@ -387,8 +388,7 @@ title_screen_colors:
 		.byte	$12, $D2, $F2, $F2, $F2, $F2, $F2, $F2, $F2, $32, $F2, $F2, $92, $F2, $02, $82
 		.byte	$F2, $F2, $E2, $F2, $F2, $B2, $B2, $62
 *=$23F9
-
-data:		.byte	$31
+		.byte	$31
 
 set_top_bottom_text:
 		LDX #$00
@@ -418,21 +418,19 @@ _241C_CODE:
 		LDX #$00
 
 _241E_CODE:
-		LDA data + $A2, X
+		LDA high_score_screen + $1, X
 		STA $0450, X
-		LDA data + $1A1, X
+		LDA high_score_table_2 + $1, X
 		STA $054F, X
-		LDA data + $2A0, X
+		LDA hiscore + $C, X
 		STA $064E, X
 		INX 
 		CPX #$FF
 		BNE _241E_CODE
 		LDX #$00
-		LDA data + $39F, X
+		LDA hiscore + $10B, X
 		STA $074D, X
 		INX 
-
-data:
 		.byte	$E0
 *=$2441
 
@@ -443,9 +441,9 @@ draw_title_screen:
 _2445_CODE:
 		LDA title, X
 		STA $0450, X
-		LDA data + $4E9, X
+		LDA title + $FF, X
 		STA $054F, X
-		LDA data + $5E8, X
+		LDA title + $1FE, X
 		STA $064E, X
 		INX 
 		CPX #$FF
@@ -466,9 +464,9 @@ draw_level_1:
 _246C_CODE:
 		LDA level_1, X
 		STA $0450, X
-		LDA data + $831, X
+		LDA level_1 + $FF, X
 		STA $054F, X
-		LDA data + $930, X
+		LDA level_1 + $1FE, X
 		STA $064E, X
 		INX 
 		CPX #$FF
@@ -476,7 +474,7 @@ _246C_CODE:
 		LDX #$00
 
 _2485_CODE:
-		LDA data + $A2F, X
+		LDA level_1 + $2FD, X
 		STA $074D, X
 		INX 
 		CPX #$4B
@@ -489,9 +487,9 @@ draw_level_2:
 _2493_CODE:
 		LDA level_2, X
 		STA $0450, X
-		LDA data + $B79, X
+		LDA level_2 + $FF, X
 		STA $054F, X
-		LDA data + $C78, X
+		LDA level_2 + $1FE, X
 		STA $064E, X
 		INX 
 		CPX #$FF
@@ -499,7 +497,7 @@ _2493_CODE:
 		LDX #$00
 
 _24AC_CODE:
-		LDA data + $D77, X
+		LDA level_2 + $2FD, X
 		STA $074D, X
 		INX 
 		CPX #$4B
@@ -512,9 +510,9 @@ draw_level_3:
 _24BA_CODE:
 		LDA level_3, X
 		STA $0450, X
-		LDA data + $EC1, X
+		LDA level_3 + $FF, X
 		STA $054F, X
-		LDA data + $FC0, X
+		LDA level_3 + $1FE, X
 		STA $064E, X
 		INX 
 		CPX #$FF
@@ -522,7 +520,7 @@ _24BA_CODE:
 		LDX #$00
 
 _24D3_CODE:
-		LDA data + $10BF, X
+		LDA level_3 + $2FD, X
 		STA $074D, X
 		INX 
 		CPX #$4B
@@ -535,9 +533,9 @@ draw_screen_colors:
 _24E1_CODE:
 		LDA title_screen_colors, X
 		STA $D850, X
-		LDA data + $120A, X
+		LDA title_screen_colors + $FF, X
 		STA $D94F, X
-		LDA data + $1309, X
+		LDA title_screen_colors + $1FE, X
 		STA $DA4E, X
 		INX 
 		CPX #$FF
@@ -545,7 +543,7 @@ _24E1_CODE:
 		LDX #$00
 
 _24FA_CODE:
-		LDA data + $1408, X
+		LDA title_screen_colors + $2FD, X
 		STA $DB4D, X
 		INX 
 		CPX #$4B
@@ -604,8 +602,6 @@ _2544_CODE:
 		CPX #$28
 		BNE _2544_CODE
 		RTS 
-
-data:
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $46, $00, $70, $00
 		.byte	$01, $00, $15, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
@@ -621,24 +617,16 @@ data:
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $4B, $00, $70, $00
 
-; ???
 word_1_048e:
 		.word	$048E
 
 _2649_DATA:
-; ???
 word_2_048e:		.word	$048E
-; ???
 word_3_048e:		.word	$048E
-; ???
 word_4_048e:		.word	$048E
-; ???
 word_5_048e:		.word	$048E
-; ???
 word_6_048e:		.word	$048E
-; ???
 word_7_048e:		.word	$048E
-; ???
 word_8_048e:		.word	$048E
 
 _2657_DATA:
@@ -647,16 +635,23 @@ snk_head_loc_lo:
 		.byte	$E0
 snk_head_loc_hi:		.byte	$05
 snake_pos_tbl_lo:		.byte	$E1
-snake_pos_tbl_hi:
-		.byte	$05, $09, $06, $31, $06
+snake_pos_tbl_hi:		.byte	$05
+		.byte	$09, $06, $31, $06
 _2660_DATA:		.byte	$59
 _2661_DATA:		.byte	$06
-snake_pos_tbl:		.byte	$41
+
+snake_pos_tbl:
+		.byte	$41
+
 _2663_DATA:
 		.byte	$05, $19, $05, $F1, $04, $F2, $04
-clear_snake_lo:		.byte	$F3
+
+clear_snake_lo:
+		.byte	$F3
 clear_snake_hi:		.byte	$04
-_266C_DATA:		.byte	$D3
+
+_266C_DATA:
+		.byte	$D3
 _266D_DATA:
 		.byte	$05, $D2, $05, $D1, $05, $D0, $05
 _2674_DATA:		.byte	$CF
@@ -670,46 +665,50 @@ _267F_DATA:		.byte	$06
 _2680_DATA:
 *=$2681
 
-var7_init_0:		.byte	$02
+var7_init_0:
+		.byte	$02
 level_nr:		.byte	$03
 irq_delay_counter:		.byte	$06
 bonus_guy_char:		.byte	$02
 lives:		.byte	$00
-_2686_DATA:		.byte	$68
+
+_2686_DATA:
+		.byte	$68
 _2687_DATA:		.byte	$07
-var2_init_with_1:		.byte	$03
+
+var2_init_with_1:
+		.byte	$03
 some_bonus_timer:		.byte	$FA
 bon_gy_loc_lo:		.byte	$68
-bon_gy_loc_hi:
-		.byte	$07, $00
-var5_init_with_0:		.byte	$00
-bonus_guy_char:		.byte	$49
-_268F_DATA:		.byte	$0A
-dots_eaten:		.byte	$00
+bon_gy_loc_hi:		.byte	$07
+		.byte	$00
+
+var5_init_with_0:
+		.byte	$00
+bonus_guy_char_2:		.byte	$49
+
+_268F_DATA:
+		.byte	$0A
+
+dots_eaten:
+		.byte	$00
 bonus_points_char:		.byte	$4D
-note_idx:
-		.byte	$97, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+note_idx:		.byte	$97
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00
+
 press_fire_to_start_:
 		.byte	$10, $12, $05, $13, $13, $20, $06, $09, $12, $05, $20, $14, $0F, $20, $13, $14
 		.byte	$01, $12, $14
 *=$26C0
 
-get_ready_text:		.byte	$87
-*=$26C2
-
-data:
-		.byte	$94, $A0, $92, $85, $81, $84
-*=$26CA
-
-bonus_run_text:		.byte	$8C
-data:
-		.byte	$85, $96, $85, $8C, $A0, $A0, $A0, $A0, $20
+get_ready_text:
+		.byte	$87, $85, $94, $A0, $92, $85, $81, $84, $99, $20
+bonus_run_text:
+		.byte	$8C, $85, $96, $85, $8C, $A0, $A0, $A0, $A0, $20
 bonus_text:
 		.byte	$02, $0F, $0E, $15, $13, $20, $12, $15
 *=$26DF
-
-data:
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
@@ -729,6 +728,7 @@ data:
 		.byte	$00, $00, $00, $00, $00, $00, $00, $4D, $00, $3E, $00, $01, $00, $0B, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00
+
 charset:
 		.byte	$FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $3E, $7D, $63, $77, $6F, $43, $23, $63
 		.byte	$7E, $7D, $63, $76, $6E, $43, $3F, $7E, $3E, $7D, $63, $60, $60, $43, $3F, $3E
@@ -767,8 +767,10 @@ arrow_char_1:
 arrow_char_2:
 		.byte	$00, $C4, $C6, $FF, $FF, $C6, $C4, $00
 arrow_char_3:
-		.byte	$00, $0C, $06, $FF, $FF, $06, $0C, $00, $C3, $3C, $5A, $99, $BD, $FF, $66, $3C
-		.byte	$00, $1C, $32, $7D, $7F, $7F, $3E, $1C, $00, $1C, $32, $7D, $7F, $7F, $3E, $1C
+		.byte	$00, $0C, $06, $FF, $FF, $06, $0C, $00
+		.byte	$C3, $3C, $5A, $99, $BD, $FF, $66, $3C, $00, $1C, $32, $7D, $7F, $7F, $3E, $1C
+		.byte	$00, $1C, $32, $7D, $7F, $7F, $3E, $1C
+
 dot_char:
 		.byte	$00, $00, $18, $00, $0C, $00, $00, $00
 bonus_gy_1_char_1:
@@ -778,8 +780,10 @@ bonus_gy_1_char_2:
 bonus_gy_2_char_1:
 		.byte	$00, $18, $18, $3C, $6E, $66, $3C, $00
 bonus_gy_2_char_2:
-		.byte	$00, $FF, $18, $3C, $66, $76, $3C, $00, $00, $B6, $C9, $C9, $C9, $B6, $00, $FF
-		.byte	$00, $4E, $59, $55, $53, $4E, $00, $FF, $00, $00, $4A, $52, $62, $3C, $00, $FF
+		.byte	$00, $FF, $18, $3C, $66, $76, $3C, $00
+		.byte	$00, $B6, $C9, $C9, $C9, $B6, $00, $FF, $00, $4E, $59, $55, $53, $4E, $00, $FF
+		.byte	$00, $00, $4A, $52, $62, $3C, $00, $FF
+
 player_char_1:
 		.byte	$66, $99, $3C, $5A, $FF, $18, $18, $00
 player_char_2:
@@ -795,92 +799,92 @@ player_char_6:
 player_char_7:
 		.byte	$66, $99, $3C, $5A, $FF, $18, $18, $00
 player_char_8:
-		.byte	$66, $99, $3C, $5A, $FF, $18, $00, $00, $87, $0F, $27, $73, $67, $77, $3E, $1C
-		.byte	$00, $0C, $06, $32, $26, $16, $0C, $00, $81, $00, $00, $00, $00, $00, $00, $81
-		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $FF, $06, $D5, $D3, $D5, $D6, $D6, $FF
-		.byte	$FF, $81, $81, $81, $81, $81, $81, $FF, $3C, $5A, $99, $7E, $3E, $7C, $3E, $7C
-		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $28, $00, $41, $4E, $44, $49, $CD, $29
-		.byte	$01, $52, $4F, $4C, $C1, $2A, $00, $42, $49, $D4, $2C, $02, $41, $4E, $C4, $2D
-		.byte	$02, $52, $4F, $CC, $2E, $02, $42, $4D, $C9, $30, $01, $41, $4E, $44, $49, $D9
-		.byte	$31, $01, $41, $4E, $44, $5A, $D8, $35, $01, $52, $4F, $4C, $5A, $D8, $36, $01
-		.byte	$53, $45, $C3, $38, $00, $41, $4E, $44, $D9, $39, $02, $41, $4E, $44, $D8, $3D
-		.byte	$02, $52, $4F, $4C, $D8, $3E, $02, $52, $54, $C9, $40, $00, $45, $4F, $52, $49
-		.byte	$D8, $41, $01, $45, $4F, $52, $DA, $45, $01, $4C, $53, $52, $DA, $46, $01, $50
-		.byte	$48, $C1, $48, $00, $45, $4F, $52, $49, $CD, $49, $01, $4C, $53, $52, $C1, $4A
-		.byte	$00, $4A, $4D, $D0, $4C, $02, $45, $4F, $D2, $4D, $02, $4C, $53, $D2, $4E, $02
-		.byte	$42, $56, $C3, $50, $01, $45, $4F, $52, $49, $D9, $51, $01, $45, $4F, $52, $5A
-		.byte	$D8, $55, $01, $4C, $53, $52, $5A, $D8, $56, $01, $43, $4C, $C9, $58, $00, $45
-		.byte	$4F, $52, $D9, $59, $02, $45, $4F, $52, $D8, $5D, $02, $4C, $53, $52, $D8, $5E
-		.byte	$02, $52, $54, $D3, $60, $00, $41, $44, $43, $49, $D8, $61, $01, $41, $44, $43
-		.byte	$DA, $65, $01, $52, $4F, $52, $DA, $66, $01, $50, $4C, $C1, $68, $00, $41, $44
-		.byte	$43, $49, $CD, $69, $01, $52, $4F, $52, $C1, $6A, $00, $4A, $4D, $50, $49, $C1
-		.byte	$6C, $02, $41, $44, $C3, $6D, $02, $52, $4F, $D2, $6E, $02, $42, $56, $D3, $70
-		.byte	$01, $41, $44, $43, $49, $D9, $71, $01, $41, $44, $43, $5A, $D8, $75, $01, $52
-		.byte	$4F, $52, $5A, $D8, $76, $01, $53, $45, $C9, $78, $00, $41, $44, $43, $00, $00
-		.byte	$FF, $C3, $BD, $BD, $81, $BD, $BD, $FF, $FF, $83, $BD, $BD, $83, $BD, $83, $FF
-		.byte	$FF, $C3, $BD, $BF, $BF, $BD, $C3, $FF, $FF, $83, $BD, $BD, $BD, $BD, $83, $FF
-		.byte	$FF, $81, $BF, $BF, $87, $BF, $81, $FF, $FF, $81, $BF, $BF, $87, $BF, $BF, $FF
-		.byte	$FF, $C3, $BD, $B7, $B1, $BD, $C3, $FF, $FF, $BD, $BD, $81, $BD, $BD, $BD, $FF
-		.byte	$FF, $C1, $F7, $F7, $F7, $F7, $C1, $FF, $FF, $C1, $F7, $F7, $F7, $F7, $C7, $FF
-		.byte	$FF, $B9, $B7, $AF, $8F, $B7, $B9, $FF, $FF, $BF, $BF, $BF, $BF, $BF, $81, $FF
-		.byte	$FF, $BD, $99, $A5, $BD, $BD, $BD, $FF, $FF, $BD, $9D, $AD, $B5, $B9, $BD, $FF
-		.byte	$FF, $C3, $BD, $BD, $BD, $BD, $C3, $FF, $FF, $83, $BD, $BD, $83, $BF, $BF, $FF
-		.byte	$FF, $C7, $BB, $BB, $BB, $B3, $C1, $FF, $FF, $83, $BD, $BD, $83, $B7, $BB, $FF
-		.byte	$FF, $C3, $BD, $BF, $C3, $FD, $83, $FF, $FF, $81, $E7, $E7, $E7, $E7, $E7, $FF
-		.byte	$FF, $BD, $BD, $BD, $BD, $BD, $C3, $FF, $FF, $BD, $BD, $BD, $BD, $DB, $E7, $FF
-		.byte	$FF, $BD, $BD, $BD, $A5, $99, $BD, $FF, $FF, $BD, $DB, $E7, $E7, $DB, $BD, $FF
-		.byte	$FF, $BD, $BD, $DB, $E7, $E7, $E7, $FF, $FF, $81, $FB, $F7, $EF, $DF, $81, $FF
-		.byte	$4C, $44, $41, $5A, $D8, $B5, $01, $4C, $44, $58, $5A, $D9, $B6, $01, $43, $4C
-		.byte	$D6, $B8, $00, $4C, $44, $41, $D9, $B9, $02, $54, $53, $D8, $BA, $00, $4C, $44
-		.byte	$59, $D8, $BC, $02, $4C, $44, $41, $D8, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-		.byte	$43, $50, $59, $49, $CD, $C0, $01, $43, $4D, $50, $49, $D8, $C1, $01, $43, $50
-		.byte	$59, $DA, $C4, $01, $43, $4D, $50, $DA, $C5, $01, $44, $45, $43, $DA, $C6, $01
-		.byte	$49, $4E, $D9, $C8, $00, $43, $4D, $50, $49, $CD, $C9, $01, $44, $45, $D8, $CA
-		.byte	$00, $43, $50, $D9, $CC, $02, $43, $4D, $D0, $CD, $02, $44, $45, $C3, $CE, $02
-		.byte	$42, $4E, $C5, $D0, $01, $43, $4D, $50, $49, $D9, $D1, $01, $43, $4D, $50, $5A
-		.byte	$D8, $D5, $01, $44, $45, $43, $5A, $D8, $D6, $01, $43, $4C, $C4, $D8, $00, $43
-		.byte	$4D, $50, $D9, $D9, $02, $43, $4D, $50, $D8, $DD, $02, $44, $45, $43, $D8, $DE
-		.byte	$02, $43, $50, $58, $49, $CD, $E0, $01, $FF, $C3, $9D, $AD, $B5, $B9, $C3, $FF
-		.byte	$FF, $F7, $E7, $F7, $F7, $F7, $C1, $FF, $FF, $C3, $BD, $FD, $C3, $BF, $81, $FF
-		.byte	$FF, $C3, $BD, $FD, $F3, $BD, $C3, $FF, $FF, $FB, $F3, $EB, $DB, $81, $FB, $FF
-		.byte	$FF, $81, $BF, $83, $FD, $BD, $C3, $FF, $FF, $C3, $BD, $BF, $83, $BD, $C3, $FF
-		.byte	$FF, $81, $FB, $F7, $EF, $DF, $BF, $FF, $FF, $C3, $BD, $BD, $C3, $BD, $C3, $FF
-		.byte	$FF, $C1, $BD, $BD, $C1, $FD, $FD, $FF, $D8, $F6, $FF, $FF, $00, $87, $04, $87
-		.byte	$CD, $FF, $03, $9C, $07, $FD, $07, $FD, $87, $FF, $87, $C5, $DF, $87, $07, $FF
-		.byte	$00, $FF, $C3, $FF, $07, $E7, $07, $87, $07, $FF, $03, $00, $00, $07, $44, $10
-		.byte	$00, $FE, $87, $84, $07, $07, $07, $06, $07, $F5, $F5, $0F, $07, $07, $07, $F7
-		.byte	$87, $BF, $F5, $27, $27, $07, $07, $67, $03, $87, $87, $0F, $F4, $EF, $07, $07
-		.byte	$03, $FF, $00, $6F, $00, $EF, $41, $07, $07, $07, $F7, $EF, $00, $FF, $87, $FF
-		.byte	$00, $FF, $F5, $07, $85, $FF, $07, $0F, $00, $FF, $07, $FF, $03, $FF, $00, $93
-		.byte	$00, $FF, $87, $F7, $0C, $F7, $97, $10, $F5, $F7, $F5, $FF, $F7, $F5, $87, $93
-		.byte	$87, $FF, $87, $07, $07, $07, $07, $F7, $01, $FF, $07, $F7, $00, $EF, $00, $EF
-		.byte	$F5, $FF, $02, $FF, $04, $07, $07, $07, $84, $FF, $00, $FF, $87, $FF, $87, $87
-		.byte	$F7, $FF, $87, $87, $87, $FF, $A7, $AE, $07, $FF, $87, $DF, $00, $FF, $00, $12
-		.byte	$00, $FF, $02, $FF, $03, $F7, $87, $87, $00, $F7, $20, $87, $07, $07, $07, $07
-		.byte	$02, $07, $03, $77, $07, $EF, $87, $07, $85, $FF, $00, $FF, $27, $05, $87, $00
-		.byte	$03, $F6, $03, $4F, $07, $FF, $07, $87, $F5, $07, $07, $07, $07, $8F, $07, $FF
-		.byte	$27, $97, $03, $FF, $07, $FF, $07, $7F, $00, $9F, $00, $FF, $00, $FF, $03, $FF
-		.byte	$03, $FF, $03, $07, $07, $07, $87, $FF, $A4, $FF, $00, $10, $F5, $F7, $85, $67
-		.byte	$87, $FF, $00, $07, $E7, $F7, $87, $97, $01, $FF, $F7, $FF, $00, $87, $04, $87
-		.byte	$57, $FF, $03, $9C, $07, $FF, $07, $F7, $87, $FF, $87, $C5, $F7, $87, $07, $FF
-		.byte	$02, $FF, $83, $FF, $07, $E7, $07, $87, $07, $FF, $03, $00, $00, $07, $05, $10
-		.byte	$00, $FE, $87, $84, $07, $07, $07, $07, $07, $B4, $B4, $0D, $07, $07, $07, $F7
-		.byte	$07, $BF, $B4, $27, $A7, $07, $27, $26, $03, $07, $07, $1F, $B4, $EF, $07, $07
-		.byte	$03, $FF, $00, $6F, $00, $EF, $41, $07, $07, $07, $B6, $EF, $00, $FF, $07, $FF
-		.byte	$00, $FF, $B4, $07, $85, $FF, $27, $07, $00, $FF, $05, $FF, $03, $FF, $00, $BB
-		.byte	$00, $FF, $07, $F7, $0C, $F7, $97, $00, $B5, $B6, $B4, $FF, $B6, $B5, $07, $93
-		.byte	$07, $FF, $87, $07, $07, $07, $06, $F7, $00, $FF, $07, $F7, $00, $EF, $00, $EF
-		.byte	$B4, $FF, $02, $FF, $04, $07, $07, $07, $04, $FF, $00, $FF, $07, $FF, $07, $07
-		.byte	$B7, $FF, $07, $C7, $07, $FF, $27, $AE, $07, $FF, $07, $FF, $00, $FF, $00, $12
-		.byte	$00, $FF, $02, $FF, $02, $F7, $07, $07, $00, $B7, $20, $07, $07, $07, $07, $07
-		.byte	$02, $05, $03, $37, $07, $EF, $07, $07, $05, $FF, $00, $FF, $24, $05, $07, $20
-		.byte	$03, $B6, $03, $4F, $07, $FF, $07, $07, $B5, $07, $07, $07, $07, $0F, $07, $FF
-		.byte	$27, $97, $03, $FF, $07, $FF, $07, $FF, $00, $DF, $00, $FF, $00, $FF, $03, $FF
-		.byte	$03, $FF, $03, $07, $07, $0F, $07, $FF, $24, $FF, $00, $12, $B4, $B7, $05, $A7
-		.byte	$07, $FF, $00, $07, $A7, $F7, $07, $97, $00, $FF, $B7, $FF, $00, $07, $04, $07
-		.byte	$05, $FF, $03, $BC, $07, $FF, $07, $F7, $07, $FF, $07, $84, $B7, $07, $07, $FF
-		.byte	$02, $FF, $83, $FF, $07, $E7, $07, $07, $07, $FF, $03, $00, $00, $07, $04, $10
-		.byte	$00
+		.byte	$66, $99, $3C, $5A, $FF, $18, $00, $00
+		.byte	$87, $0F, $27, $73, $67, $77, $3E, $1C, $00, $0C, $06, $32, $26, $16, $0C, $00
+		.byte	$81, $00, $00, $00, $00, $00, $00, $81, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$FF, $06, $D5, $D3, $D5, $D6, $D6, $FF, $FF, $81, $81, $81, $81, $81, $81, $FF
+		.byte	$3C, $5A, $99, $7E, $3E, $7C, $3E, $7C, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$28, $00, $41, $4E, $44, $49, $CD, $29, $01, $52, $4F, $4C, $C1, $2A, $00, $42
+		.byte	$49, $D4, $2C, $02, $41, $4E, $C4, $2D, $02, $52, $4F, $CC, $2E, $02, $42, $4D
+		.byte	$C9, $30, $01, $41, $4E, $44, $49, $D9, $31, $01, $41, $4E, $44, $5A, $D8, $35
+		.byte	$01, $52, $4F, $4C, $5A, $D8, $36, $01, $53, $45, $C3, $38, $00, $41, $4E, $44
+		.byte	$D9, $39, $02, $41, $4E, $44, $D8, $3D, $02, $52, $4F, $4C, $D8, $3E, $02, $52
+		.byte	$54, $C9, $40, $00, $45, $4F, $52, $49, $D8, $41, $01, $45, $4F, $52, $DA, $45
+		.byte	$01, $4C, $53, $52, $DA, $46, $01, $50, $48, $C1, $48, $00, $45, $4F, $52, $49
+		.byte	$CD, $49, $01, $4C, $53, $52, $C1, $4A, $00, $4A, $4D, $D0, $4C, $02, $45, $4F
+		.byte	$D2, $4D, $02, $4C, $53, $D2, $4E, $02, $42, $56, $C3, $50, $01, $45, $4F, $52
+		.byte	$49, $D9, $51, $01, $45, $4F, $52, $5A, $D8, $55, $01, $4C, $53, $52, $5A, $D8
+		.byte	$56, $01, $43, $4C, $C9, $58, $00, $45, $4F, $52, $D9, $59, $02, $45, $4F, $52
+		.byte	$D8, $5D, $02, $4C, $53, $52, $D8, $5E, $02, $52, $54, $D3, $60, $00, $41, $44
+		.byte	$43, $49, $D8, $61, $01, $41, $44, $43, $DA, $65, $01, $52, $4F, $52, $DA, $66
+		.byte	$01, $50, $4C, $C1, $68, $00, $41, $44, $43, $49, $CD, $69, $01, $52, $4F, $52
+		.byte	$C1, $6A, $00, $4A, $4D, $50, $49, $C1, $6C, $02, $41, $44, $C3, $6D, $02, $52
+		.byte	$4F, $D2, $6E, $02, $42, $56, $D3, $70, $01, $41, $44, $43, $49, $D9, $71, $01
+		.byte	$41, $44, $43, $5A, $D8, $75, $01, $52, $4F, $52, $5A, $D8, $76, $01, $53, $45
+		.byte	$C9, $78, $00, $41, $44, $43, $00, $00, $FF, $C3, $BD, $BD, $81, $BD, $BD, $FF
+		.byte	$FF, $83, $BD, $BD, $83, $BD, $83, $FF, $FF, $C3, $BD, $BF, $BF, $BD, $C3, $FF
+		.byte	$FF, $83, $BD, $BD, $BD, $BD, $83, $FF, $FF, $81, $BF, $BF, $87, $BF, $81, $FF
+		.byte	$FF, $81, $BF, $BF, $87, $BF, $BF, $FF, $FF, $C3, $BD, $B7, $B1, $BD, $C3, $FF
+		.byte	$FF, $BD, $BD, $81, $BD, $BD, $BD, $FF, $FF, $C1, $F7, $F7, $F7, $F7, $C1, $FF
+		.byte	$FF, $C1, $F7, $F7, $F7, $F7, $C7, $FF, $FF, $B9, $B7, $AF, $8F, $B7, $B9, $FF
+		.byte	$FF, $BF, $BF, $BF, $BF, $BF, $81, $FF, $FF, $BD, $99, $A5, $BD, $BD, $BD, $FF
+		.byte	$FF, $BD, $9D, $AD, $B5, $B9, $BD, $FF, $FF, $C3, $BD, $BD, $BD, $BD, $C3, $FF
+		.byte	$FF, $83, $BD, $BD, $83, $BF, $BF, $FF, $FF, $C7, $BB, $BB, $BB, $B3, $C1, $FF
+		.byte	$FF, $83, $BD, $BD, $83, $B7, $BB, $FF, $FF, $C3, $BD, $BF, $C3, $FD, $83, $FF
+		.byte	$FF, $81, $E7, $E7, $E7, $E7, $E7, $FF, $FF, $BD, $BD, $BD, $BD, $BD, $C3, $FF
+		.byte	$FF, $BD, $BD, $BD, $BD, $DB, $E7, $FF, $FF, $BD, $BD, $BD, $A5, $99, $BD, $FF
+		.byte	$FF, $BD, $DB, $E7, $E7, $DB, $BD, $FF, $FF, $BD, $BD, $DB, $E7, $E7, $E7, $FF
+		.byte	$FF, $81, $FB, $F7, $EF, $DF, $81, $FF, $4C, $44, $41, $5A, $D8, $B5, $01, $4C
+		.byte	$44, $58, $5A, $D9, $B6, $01, $43, $4C, $D6, $B8, $00, $4C, $44, $41, $D9, $B9
+		.byte	$02, $54, $53, $D8, $BA, $00, $4C, $44, $59, $D8, $BC, $02, $4C, $44, $41, $D8
+		.byte	$FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $43, $50, $59, $49, $CD, $C0, $01, $43
+		.byte	$4D, $50, $49, $D8, $C1, $01, $43, $50, $59, $DA, $C4, $01, $43, $4D, $50, $DA
+		.byte	$C5, $01, $44, $45, $43, $DA, $C6, $01, $49, $4E, $D9, $C8, $00, $43, $4D, $50
+		.byte	$49, $CD, $C9, $01, $44, $45, $D8, $CA, $00, $43, $50, $D9, $CC, $02, $43, $4D
+		.byte	$D0, $CD, $02, $44, $45, $C3, $CE, $02, $42, $4E, $C5, $D0, $01, $43, $4D, $50
+		.byte	$49, $D9, $D1, $01, $43, $4D, $50, $5A, $D8, $D5, $01, $44, $45, $43, $5A, $D8
+		.byte	$D6, $01, $43, $4C, $C4, $D8, $00, $43, $4D, $50, $D9, $D9, $02, $43, $4D, $50
+		.byte	$D8, $DD, $02, $44, $45, $43, $D8, $DE, $02, $43, $50, $58, $49, $CD, $E0, $01
+		.byte	$FF, $C3, $9D, $AD, $B5, $B9, $C3, $FF, $FF, $F7, $E7, $F7, $F7, $F7, $C1, $FF
+		.byte	$FF, $C3, $BD, $FD, $C3, $BF, $81, $FF, $FF, $C3, $BD, $FD, $F3, $BD, $C3, $FF
+		.byte	$FF, $FB, $F3, $EB, $DB, $81, $FB, $FF, $FF, $81, $BF, $83, $FD, $BD, $C3, $FF
+		.byte	$FF, $C3, $BD, $BF, $83, $BD, $C3, $FF, $FF, $81, $FB, $F7, $EF, $DF, $BF, $FF
+		.byte	$FF, $C3, $BD, $BD, $C3, $BD, $C3, $FF, $FF, $C1, $BD, $BD, $C1, $FD, $FD, $FF
+		.byte	$D8, $F6, $FF, $FF, $00, $87, $04, $87, $CD, $FF, $03, $9C, $07, $FD, $07, $FD
+		.byte	$87, $FF, $87, $C5, $DF, $87, $07, $FF, $00, $FF, $C3, $FF, $07, $E7, $07, $87
+		.byte	$07, $FF, $03, $00, $00, $07, $44, $10, $00, $FE, $87, $84, $07, $07, $07, $06
+		.byte	$07, $F5, $F5, $0F, $07, $07, $07, $F7, $87, $BF, $F5, $27, $27, $07, $07, $67
+		.byte	$03, $87, $87, $0F, $F4, $EF, $07, $07, $03, $FF, $00, $6F, $00, $EF, $41, $07
+		.byte	$07, $07, $F7, $EF, $00, $FF, $87, $FF, $00, $FF, $F5, $07, $85, $FF, $07, $0F
+		.byte	$00, $FF, $07, $FF, $03, $FF, $00, $93, $00, $FF, $87, $F7, $0C, $F7, $97, $10
+		.byte	$F5, $F7, $F5, $FF, $F7, $F5, $87, $93, $87, $FF, $87, $07, $07, $07, $07, $F7
+		.byte	$01, $FF, $07, $F7, $00, $EF, $00, $EF, $F5, $FF, $02, $FF, $04, $07, $07, $07
+		.byte	$84, $FF, $00, $FF, $87, $FF, $87, $87, $F7, $FF, $87, $87, $87, $FF, $A7, $AE
+		.byte	$07, $FF, $87, $DF, $00, $FF, $00, $12, $00, $FF, $02, $FF, $03, $F7, $87, $87
+		.byte	$00, $F7, $20, $87, $07, $07, $07, $07, $02, $07, $03, $77, $07, $EF, $87, $07
+		.byte	$85, $FF, $00, $FF, $27, $05, $87, $00, $03, $F6, $03, $4F, $07, $FF, $07, $87
+		.byte	$F5, $07, $07, $07, $07, $8F, $07, $FF, $27, $97, $03, $FF, $07, $FF, $07, $7F
+		.byte	$00, $9F, $00, $FF, $00, $FF, $03, $FF, $03, $FF, $03, $07, $07, $07, $87, $FF
+		.byte	$A4, $FF, $00, $10, $F5, $F7, $85, $67, $87, $FF, $00, $07, $E7, $F7, $87, $97
+		.byte	$01, $FF, $F7, $FF, $00, $87, $04, $87, $57, $FF, $03, $9C, $07, $FF, $07, $F7
+		.byte	$87, $FF, $87, $C5, $F7, $87, $07, $FF, $02, $FF, $83, $FF, $07, $E7, $07, $87
+		.byte	$07, $FF, $03, $00, $00, $07, $05, $10, $00, $FE, $87, $84, $07, $07, $07, $07
+		.byte	$07, $B4, $B4, $0D, $07, $07, $07, $F7, $07, $BF, $B4, $27, $A7, $07, $27, $26
+		.byte	$03, $07, $07, $1F, $B4, $EF, $07, $07, $03, $FF, $00, $6F, $00, $EF, $41, $07
+		.byte	$07, $07, $B6, $EF, $00, $FF, $07, $FF, $00, $FF, $B4, $07, $85, $FF, $27, $07
+		.byte	$00, $FF, $05, $FF, $03, $FF, $00, $BB, $00, $FF, $07, $F7, $0C, $F7, $97, $00
+		.byte	$B5, $B6, $B4, $FF, $B6, $B5, $07, $93, $07, $FF, $87, $07, $07, $07, $06, $F7
+		.byte	$00, $FF, $07, $F7, $00, $EF, $00, $EF, $B4, $FF, $02, $FF, $04, $07, $07, $07
+		.byte	$04, $FF, $00, $FF, $07, $FF, $07, $07, $B7, $FF, $07, $C7, $07, $FF, $27, $AE
+		.byte	$07, $FF, $07, $FF, $00, $FF, $00, $12, $00, $FF, $02, $FF, $02, $F7, $07, $07
+		.byte	$00, $B7, $20, $07, $07, $07, $07, $07, $02, $05, $03, $37, $07, $EF, $07, $07
+		.byte	$05, $FF, $00, $FF, $24, $05, $07, $20, $03, $B6, $03, $4F, $07, $FF, $07, $07
+		.byte	$B5, $07, $07, $07, $07, $0F, $07, $FF, $27, $97, $03, $FF, $07, $FF, $07, $FF
+		.byte	$00, $DF, $00, $FF, $00, $FF, $03, $FF, $03, $FF, $03, $07, $07, $0F, $07, $FF
+		.byte	$24, $FF, $00, $12, $B4, $B7, $05, $A7, $07, $FF, $00, $07, $A7, $F7, $07, $97
+		.byte	$00, $FF, $B7, $FF, $00, $07, $04, $07, $05, $FF, $03, $BC, $07, $FF, $07, $F7
+		.byte	$07, $FF, $07, $84, $B7, $07, $07, $FF, $02, $FF, $83, $FF, $07, $E7, $07, $07
+		.byte	$07, $FF, $03, $00, $00, $07, $04, $10, $00
 
 check_move_possible:
 		CLC 
@@ -1033,7 +1037,6 @@ _30BA_CODE:
 		BNE _30BA_CODE
 		RTS 
 
-; ???
 update_hi:
 		LDX #$00
 
@@ -1550,7 +1553,7 @@ _3457_CODE:
 
 rotate_snake_pos:
 		LDA snake_pos_tbl, X
-		STA data + $F2, X
+		STA $2664, X
 		DEX 
 		CPX #$FF
 		BNE rotate_snake_pos
@@ -1588,9 +1591,9 @@ _34B8_CODE:
 		LDX #$00
 
 _34BA_CODE:
-		LDA data + $F2, X
+		LDA $2664, X
 		STA tmp_loc_lo
-		LDA data + $F3, X
+		LDA $2665, X
 		STA tmp_loc_hi
 		LDA #$44
 		STA (tmp_loc_lo), Y
@@ -1617,7 +1620,7 @@ _34BA_CODE:
 
 _34F3_CODE:
 		LDA _266C_DATA, X
-		STA data + $FC, X
+		STA $266E, X
 		DEX 
 		CPX #$FF
 		BNE _34F3_CODE
@@ -1655,9 +1658,9 @@ _353D_CODE:
 		LDX #$00
 
 _353F_CODE:
-		LDA data + $FC, X
+		LDA $266E, X
 		STA tmp_loc_lo
-		LDA data + $FD, X
+		LDA $266F, X
 		STA tmp_loc_hi
 		LDA #$44
 		STA (tmp_loc_lo), Y
@@ -1684,7 +1687,7 @@ _353F_CODE:
 
 _3578_CODE:
 		LDA _2676_DATA, X
-		STA data + $106, X
+		STA $2678, X
 		DEX 
 		CPX #$FF
 		BNE _3578_CODE
@@ -1722,9 +1725,9 @@ _35C2_CODE:
 		LDX #$00
 
 _35C4_CODE:
-		LDA data + $106, X
+		LDA $2678, X
 		STA tmp_loc_lo
-		LDA data + $107, X
+		LDA $2679, X
 		STA tmp_loc_hi
 		LDA #$44
 		STA (tmp_loc_lo), Y
@@ -1739,8 +1742,6 @@ _35C4_CODE:
 		LDA #$43
 		STA (tmp_loc_lo), Y
 		RTS 
-
-data:
 		.byte	$41
 
 colorize_maze:
@@ -1860,51 +1861,51 @@ initialize_pointers:
 		STA word_7_048e + $1
 		STA _2657_DATA
 		STA _2663_DATA
-		STA data + $F3
-		STA data + $F5
-		STA data + $F7
+		STA $2665
+		STA $2667
+		STA $2669
 		STA clear_snake_hi
 		LDA #$55
 		STA snk_head_loc_lo
 		STA snake_pos_tbl_lo
-		STA data + $EA
-		STA data + $EC
+		STA $265C
+		STA $265E
 		STA _2660_DATA
 		LDA #$07
 		STA snk_head_loc_hi
 		STA snake_pos_tbl_hi
-		STA data + $EB
-		STA data + $ED
+		STA $265D
+		STA $265F
 		STA _2661_DATA
 		LDA #$CB
-		STA data + $F2
+		STA $2664
 		STA snake_pos_tbl
-		STA data + $F4
-		STA data + $F6
+		STA $2666
+		STA $2668
 		STA clear_snake_lo
 		LDA #$75
 		STA _266C_DATA
-		STA data + $FC
-		STA data + $FE
-		STA data + $100
+		STA $266E
+		STA $2670
+		STA $2672
 		STA _2674_DATA
 		LDA #$05
 		STA _266D_DATA
-		STA data + $FD
-		STA data + $FF
-		STA data + $101
+		STA $266F
+		STA $2671
+		STA $2673
 		STA _2675_DATA
 		LDA #$FB
-		STA data + $106
+		STA $2678
 		STA _2676_DATA
-		STA data + $108
-		STA data + $10A
+		STA $267A
+		STA $267C
 		STA _267E_DATA
 		LDA #$06
-		STA data + $107
+		STA $2679
 		STA _2677_DATA
-		STA data + $109
-		STA data + $10B
+		STA $267B
+		STA $267D
 		STA _267F_DATA
 		RTS 
 
@@ -1938,7 +1939,6 @@ no_bonus:
 		STA bonus_points_char
 		RTS 
 
-; ???
 bonus_10_points:
 		CMP #$02
 		BNE bonus_100_points
@@ -2035,7 +2035,6 @@ bonus_round_loop:
 		LDY #$00
 		LDA (new_loc_lo), Y
 
-; ???
 bonus_walk_on_44:
 		CMP #$44
 		BNE bonus_walk_on_43
@@ -2045,7 +2044,6 @@ bonus_walk_on_44:
 		JSR inc_score_digit_x
 		JMP _382D_CODE
 
-; ???
 bonus_walk_on_43:
 		CMP #$43
 		BNE bonus_walk_on_46
@@ -2278,7 +2276,7 @@ _39B5_CODE:
 		STA tmp_loc_lo
 		LDA bon_gy_loc_hi
 		STA tmp_loc_hi
-		LDA bonus_guy_char
+		LDA bonus_guy_char_2
 		LDY #$00
 		STA (tmp_loc_lo), Y
 		INC _268F_DATA
@@ -2337,13 +2335,13 @@ _3A15_CODE:
 		STA bon_gy_loc_lo
 		LDA #$07
 		STA bon_gy_loc_hi
-		INC bonus_guy_char
-		INC bonus_guy_char
-		LDA bonus_guy_char
+		INC bonus_guy_char_2
+		INC bonus_guy_char_2
+		LDA bonus_guy_char_2
 		CMP #$4B
 		BNE _3A45_CODE
 		LDA #$47
-		STA bonus_guy_char
+		STA bonus_guy_char_2
 
 _3A45_CODE:
 		RTS 
@@ -2526,7 +2524,7 @@ reset_everything:
 		STA dots_eaten
 		STA var5_init_with_0
 		LDA #$47
-		STA bonus_guy_char
+		STA bonus_guy_char_2
 		LDA #$FA
 		STA some_bonus_timer
 		LDX #$00
@@ -2584,7 +2582,7 @@ check_hit_dot:
 		JMP nothing_hit
 
 check_hit_bonus_guy:
-		CMP bonus_guy_char
+		CMP bonus_guy_char_2
 		BNE check_hit_snake
 		LDA #$14
 		STA $D401
@@ -2750,7 +2748,6 @@ countdown_irq:
 _3D48_CODE:
 		JMP _EA31_CODE
 
-; ???
 _3D4B_CODE:
 		LDA #$81
 		STA jiffy_timer
@@ -2760,7 +2757,7 @@ _3D4F_CODE:
 		BMI _3D4F_CODE
 		LDA #$00
 		STA note_idx
-		STA data + $11
+		STA $2693
 		RTS 
 
 play_next_note:
@@ -2791,31 +2788,31 @@ _3D82_CODE:
 *=$3DB8
 
 bonus_notes:
-		.byte	$0A, $14, $1E, $28, $32, $3C, $46, $50, $5A, $64, $C8, $14, $1E, $28, $32, $3C
-		.byte	$46, $50, $5A, $14, $1E, $28, $32, $3C, $46, $50, $5A, $1E, $28, $32, $3C, $46
-		.byte	$50, $1E, $28, $32, $3C, $46, $50, $28, $32, $3C, $46, $28, $32, $3C, $46, $32
-		.byte	$3C, $32, $3C, $32, $3C, $32, $28, $1E, $28, $1E, $14, $1E, $0A, $14, $0A, $1E
-		.byte	$0A, $1E, $0A, $1E, $0A, $1E, $0A, $1E, $0A, $1E, $0A, $1E, $0A, $1E, $0A, $1E
-		.byte	$0A, $1E, $0A, $1E, $0A, $1E, $0A, $1E, $0A, $1E, $0A, $1E, $0A, $1E, $0A, $1E
-		.byte	$0A, $1E, $0A, $14, $0A, $0B, $0C, $0D, $0E, $0F, $10, $11, $12, $13, $14, $15
-		.byte	$16, $17, $18, $19, $1A, $19, $17, $15, $13, $11, $0F, $0D, $0B, $0A, $09, $08
-		.byte	$09, $08, $07, $08, $07, $08, $06, $07, $06, $07, $05, $06, $05, $06, $04, $05
-		.byte	$02, $01, $0A, $0A, $0A, $0A, $0A, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$0A
+		.byte	$14, $1E, $28, $32, $3C, $46, $50, $5A, $64, $C8, $14, $1E, $28, $32, $3C, $46
+		.byte	$50, $5A, $14, $1E, $28, $32, $3C, $46, $50, $5A, $1E, $28, $32, $3C, $46, $50
+		.byte	$1E, $28, $32, $3C, $46, $50, $28, $32, $3C, $46, $28, $32, $3C, $46, $32, $3C
+		.byte	$32, $3C, $32, $3C, $32, $28, $1E, $28, $1E, $14, $1E, $0A, $14, $0A, $1E, $0A
+		.byte	$1E, $0A, $1E, $0A, $1E, $0A, $1E, $0A, $1E, $0A, $1E, $0A, $1E, $0A, $1E, $0A
+		.byte	$1E, $0A, $1E, $0A, $1E, $0A, $1E, $0A, $1E, $0A, $1E, $0A, $1E, $0A, $1E, $0A
+		.byte	$1E, $0A, $14, $0A, $0B, $0C, $0D, $0E, $0F, $10, $11, $12, $13, $14, $15, $16
+		.byte	$17, $18, $19, $1A, $19, $17, $15, $13, $11, $0F, $0D, $0B, $0A, $09, $08, $09
+		.byte	$08, $07, $08, $07, $08, $06, $07, $06, $07, $05, $06, $05, $06, $04, $05, $02
+		.byte	$01, $0A, $0A, $0A, $0A, $0A, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-		.byte	$00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00
 *=$3E80
 
-voice_1_notes:		.byte	$00
-data:
+voice_1_notes:
+		.byte	$00
 		.byte	$14, $1E, $28, $32, $3C, $46, $50, $5A, $64, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $0A, $14, $1E, $28, $32, $3C, $46, $50, $5A, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $0A, $14, $1E, $28, $32, $3C, $46, $50, $5A
 		.byte	$00, $00, $00, $00, $00, $00, $00, $5A, $50, $46, $3C, $32, $28, $1E, $14, $0A
 		.byte	$00, $00, $00, $00, $00, $00, $5A, $50, $46, $3C, $32, $28, $1E, $14, $0A, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $32, $28, $1E, $14, $0A, $32, $3C, $46
-		.byte	$50, $5A
-data:		.byte	$64
+		.byte	$50, $5A, $64
 
 voice_2_notes:
 		.byte	$0A
@@ -2831,7 +2828,8 @@ voice_2_notes:
 _D023_DATA:
 *=$D800
 
-color_ram:		.byte	$00
+color_ram:
+		.byte	$00
 *=$DC01
 
 _DC01_DATA:

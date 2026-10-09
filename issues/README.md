@@ -52,7 +52,7 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0029](0029-first-label-in-run-still-glued.md) | done | First label of a run still glues onto its .BYTE line, inconsistent with the rest of the run |
 | [0030](0030-ai-friendliness-of-flo-grammar.md) | open | Investigate whether the .flo format/grammar is easy to use, including for an AI writing it |
 | [0031](0031-carving-specific-types-out-of-unknown-data-is-a-conflict.md) | done | Carving a specific type out of a placeholder data block is reported as a conflict, blocking output |
-| [0032](0032-modernize-squirm-flo.md) | open | squirm.flo was written for an older version of deflower and needs modernizing |
+| [0032](0032-modernize-squirm-flo.md) | done | squirm.flo was written for an older version of deflower and needs modernizing |
 | [0033](0033-array-elements-carry-own-label-reference.md) | done | Follow-up to 0026 - give each array element its own label reference instead of scanning for one |
 | [0034](0034-support-hi-lo-byte-extraction-operators.md) | open | Support tass64's `<`/`>` hi/lo byte extraction operators in output |
 | [0035](0035-implement-offset-block-syntax.md) | open | Implement the `{ }` block syntax as address-offset scoping |
@@ -63,3 +63,4 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0040](0040-text-encoding-screen-code-vs-ascii.md) | open | Support 64tass text encodings (`.enc`/screen code) for CHAR output |
 | [0041](0041-user-declarable-address-pointer-type.md) | open | Allow annotating a `.flo` line with type `address`/`pointer` |
 | [0042](0042-lowercase-generated-assembly.md) | open | Generate lowercase assembly output (except user labels/comments) |
+| [0043](0043-error-on-duplicate-label-definition.md) | open | Report an error when the same label is defined at two addresses |

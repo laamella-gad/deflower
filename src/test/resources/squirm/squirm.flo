@@ -1,54 +1,50 @@
 deflower squirm.vsf
-$2800-$2ff9  data
-$0fa0-$23f3  data
-$23f9-$23fa  data
-$243e-$243f  data
-$2572-$2680  data
-$3e81-$3ee3  data
-$3ee3-$3f46  data
-$3db8-$3e7f  data
-$35e7-$35e8  data
-$2682-$26ac data
-$26df-$2800 data
-$26ac-$26bf       data
-$26c2-$26c8       data
-$26cb-$26dc       data
+$2800-$2ff9
+$0fa0-$23f3
+$23f9-$23fa
+$243e-$243f
+$2572-$2680
+$3e81-$3ee3
+$3ee3-$3f46
+$3db8-$3e7f
+$35e7-$35e8
+$2682-$26ac
+$26df-$2800
 
 ; 3b20 screen 0400 charset 2800
 
-$0057 data player_direction
-$0058 data joy_dir_for_move
-$00a2 data jiffy_timer
-$00c5 data last_key_pressed
-$00fb data new_loc_lo
-$00fc data new_loc_hi
-$00fd data tmp_loc_lo
-$00fe data tmp_loc_hi
-$0400 data screen_ram
-# ???
-$0424 data var_init_b1
-$0755 data bonus_guy_2_start
-$07de data bonus_timer_digit_1
-$07df data bonus_timer_digit_2
-$07e0 data bonus_timer_digit_3
-$0fa0 data top_line
-$0fa4 data hi_text
-$0ff1 data empty_line
-$1019 data bottom_line
-$1041 data high_score_screen
-$10f0 data high_score_table_1
-$1140 data high_score_table_2
-$1190 data high_score_table_3
-$11e0 data high_score_table_4
-$1230 data high_score_table_5
-# ???
-$1234 data hiscore
-$138a 40x25 bytes title
-$1687 data rest_of_title
-$16d2 data level_1
-$1a1a data level_2
-$1d62 data level_3
-$20ab data title_screen_colors
+$0057 byte player_direction
+$0058 byte joy_dir_for_move
+$00a2 byte jiffy_timer
+$00c5 byte last_key_pressed
+$00fb byte new_loc_lo
+$00fc byte new_loc_hi
+$00fd byte tmp_loc_lo
+$00fe byte tmp_loc_hi
+$0400 byte screen_ram
+$0424 byte var_init_b1
+$0755 byte bonus_guy_2_start
+$07de byte bonus_timer_digit_1
+$07df byte bonus_timer_digit_2
+$07e0 byte bonus_timer_digit_3
+$0fa0 byte[4] top_line
+$0fa4 byte[77] hi_text
+$0ff1 byte[40] empty_line
+$1019 byte[40] bottom_line
+$1041 byte[175] high_score_screen
+$10f0 byte[80] high_score_table_1
+$1140 byte[80] high_score_table_2
+$1190 byte[80] high_score_table_3
+$11e0 byte[80] high_score_table_4
+$1230 byte[4] high_score_table_5
+$1234 byte[342] hiscore
+; title screen is 40*21 bytes; rest_of_title is its last 75
+$138a byte[765] title
+$1687 byte[75] rest_of_title
+$16d2 40*21 byte level_1
+$1a1a 40*21 byte level_2
+$1d62 40*21 byte level_3
+$20ab 40*21 byte title_screen_colors
 $23fa code set_top_bottom_text
 $23fc code more_chars
 $240e code set_top_bottom_red
@@ -60,64 +56,56 @@ $24b8 code draw_level_3
 $24df code draw_screen_colors
 $2508 code animate_player_chars
 $2542 code color_lines
-# ???
 $2648 word word_1_048e
-# ???
 $264a word word_2_048e
-# ???
 $264c word word_3_048e
-# ???
 $264e word word_4_048e
-# ???
 $2650 word word_5_048e
-# ???
 $2652 word word_6_048e
-# ???
 $2654 word word_7_048e
-# ???
 $2656 word word_8_048e
-$2658 data snk_head_loc_lo
-$2659 data snk_head_loc_hi
-$265a data snake_pos_tbl_lo
-$265b data snake_pos_tbl_hi
-$2662 data snake_pos_tbl
-$266a data clear_snake_lo
-$266b data clear_snake_hi
-$2681 data var7_init_0
-$2682 data level_nr
-$2683 data irq_delay_counter
-$2684 data bonus_guy_char
-$2685 data lives
-$2688 data var2_init_with_1
-$2689 data some_bonus_timer
-$268a data bon_gy_loc_lo
-$268b data bon_gy_loc_hi
-$268d data var5_init_with_0
-$268e data bonus_guy_char
-$2690 data dots_eaten
-$2691 data bonus_points_char
-$2692 data note_idx
-$26ac data press_fire_to_start_
-$26c0 data get_ready_text
-$26ca data bonus_run_text
-$26d4 data bonus_text
-$2800 data charset
-$2a00 data arrow_char_1
-$2a08 data arrow_char_2
-$2a10 data arrow_char_3
-$2a30 data dot_char
-$2a38 data bonus_gy_1_char_1
-$2a40 data bonus_gy_1_char_2
-$2a48 data bonus_gy_2_char_1
-$2a50 data bonus_gy_2_char_2
-$2a70 data player_char_1
-$2a78 data player_char_2
-$2a80 data player_char_3
-$2a88 data player_char_4
-$2a90 data player_char_5
-$2a98 data player_char_6
-$2aa0 data player_char_7
-$2aa8 data player_char_8
+$2658 byte snk_head_loc_lo
+$2659 byte snk_head_loc_hi
+$265a byte snake_pos_tbl_lo
+$265b byte snake_pos_tbl_hi
+$2662 byte snake_pos_tbl
+$266a byte clear_snake_lo
+$266b byte clear_snake_hi
+$2681 byte var7_init_0
+$2682 byte level_nr
+$2683 byte irq_delay_counter
+$2684 byte bonus_guy_char
+$2685 byte lives
+$2688 byte var2_init_with_1
+$2689 byte some_bonus_timer
+$268a byte bon_gy_loc_lo
+$268b byte bon_gy_loc_hi
+$268d byte var5_init_with_0
+$268e byte bonus_guy_char_2
+$2690 byte dots_eaten
+$2691 byte bonus_points_char
+$2692 byte note_idx
+$26ac byte[19] press_fire_to_start_
+$26c0 byte[10] get_ready_text
+$26ca byte[10] bonus_run_text
+$26d4 byte[8] bonus_text
+$2800 8*64 byte charset
+$2a00 byte[8] arrow_char_1
+$2a08 byte[8] arrow_char_2
+$2a10 byte[8] arrow_char_3
+$2a30 byte[8] dot_char
+$2a38 byte[8] bonus_gy_1_char_1
+$2a40 byte[8] bonus_gy_1_char_2
+$2a48 byte[8] bonus_gy_2_char_1
+$2a50 byte[8] bonus_gy_2_char_2
+$2a70 byte[8] player_char_1
+$2a78 byte[8] player_char_2
+$2a80 byte[8] player_char_3
+$2a88 byte[8] player_char_4
+$2a90 byte[8] player_char_5
+$2a98 byte[8] player_char_6
+$2aa0 byte[8] player_char_7
+$2aa8 byte[8] player_char_8
 $2ff9 code check_move_possible
 $3011 code move_is_possible
 $3014 code check_move_up
@@ -128,7 +116,6 @@ $3060 code check_fire
 $306e code try_move
 $30a2 code sfx_hi_char_entry
 $30b8 code move_hi_from_scr_to_
-# ???
 $30de code update_hi
 $3429 code draw_snakes
 $3433 code draw_snake_tail
@@ -142,16 +129,13 @@ $3669 code initialize_pointers
 $3724 code inc_score_digit_x
 $373b code bonus_guy_hit_handle
 $3742 code no_bonus
-# ???
 $3752 code bonus_10_points
 $376b code bonus_100_points
 $3780 code bonus_round
 $378f code burp_bonus_text
 $37c7 code start_next_level
 $37f1 code bonus_round_loop
-# ???
 $37f8 code bonus_walk_on_44
-# ???
 $3809 code bonus_walk_on_43
 $381f code bonus_walk_on_46
 $3862 code end_bonus_round
@@ -178,11 +162,10 @@ $3cc4 code animate_charset
 $3d08 code skip_irq
 $3d0b code setup_irq
 $3d27 code countdown_irq
-# ???
 $3d4b code
 $3d5c code play_next_note
 $3d76 code quiet
-$3db8 data bonus_notes
-$3e80 data voice_1_notes
+$3db8 byte bonus_notes
+$3e80 byte voice_1_notes
 $3ee4 byte voice_2_notes
-$d800 system bytes color_ram
+$d800 system byte color_ram
