@@ -3,7 +3,7 @@
 
 ; a lone comment
 val:
-		.BYTE	$42
+		.byte	$42
 
 ; entry point
 ; second line of same comment

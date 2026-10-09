@@ -1,6 +1,6 @@
 ---
 title: Use 64tass's `.addr` directive instead of `.WORD` for pointer values
-status: open
+status: done
 labels: enhancement
 ---
 
@@ -11,3 +11,7 @@ This is the narrow, mechanical slice of a larger look at 64tass's numeric-storag
 Scope: same value formatting (`nameForAddress`, label-or-hex), just the directive name in the `POINTER` case of `print(DataArea, ...)`'s switch.
 
 Done when: `POINTER` areas print as `.addr` instead of `.WORD`, with the `datatypes` fixture (the existing one already covering `.WORD`/`.DWORD`/`.CHAR`, per issue 0002) updated to show it.
+
+## Closing note
+
+Done. One-line change in `print(DataArea, ...)`'s `POINTER` case: `.WORD` → `.addr`. `.flo` has no `pointer` keyword (only `FlowAnalyser` creates `DataType.POINTER` areas internally, for an indirect `JMP`'s target pointer), so the `datatypes` fixture doesn't cover it - `indirectjmp` does (its `_C010_POINTER` is exactly this case) and was used instead; its `expected.asm` regenerated and reviewed (only change: `.WORD` → `.addr` on that one line). 26/26 tests green.

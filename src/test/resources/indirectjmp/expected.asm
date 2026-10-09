@@ -6,7 +6,7 @@ entry:
 *=$C010
 
 _C010_POINTER:
-		.WORD	_C020_CODE
+		.addr	_C020_CODE
 *=$C020
 
 _C020_CODE:

@@ -12,7 +12,7 @@ entry_b:
 		STA $FE
 
 marker_b:
-		.BYTE	$85, $FF, $AE, $3F
+		.byte	$85, $FF, $AE, $3F
 *=$C40E
 
 _C40E_CODE:

@@ -5,4 +5,4 @@ entry:
 *=$C002
 
 guard:
-		.BYTE	$42
+		.byte	$42

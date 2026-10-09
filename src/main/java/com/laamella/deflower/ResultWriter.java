@@ -171,19 +171,22 @@ class AssemblyFileFormat {
         }
         switch (block.type) {
             case BYTE, UNKNOWN:
-                tabularPrint(".BYTE", asHexByte(subject.byteAt(address)));
+                tabularPrint(".byte", asHexByte(subject.byteAt(address)));
                 break;
             case CHAR:
-                tabularPrint(".BYTE", asChar(subject.byteAt(address)));
+                tabularPrint(".byte", asChar(subject.byteAt(address)));
                 break;
             case WORD:
-                tabularPrint(".WORD", asHexWord(subject.wordAt(address)));
+                tabularPrint(".word", asHexWord(subject.wordAt(address)));
                 break;
             case DWORD:
-                tabularPrint(".DWORD", asHexDword(subject.dwordAt(address)));
+                tabularPrint(".dword", asHexDword(subject.dwordAt(address)));
                 break;
             case POINTER:
-                tabularPrint(".WORD", nameForAddress(subject.wordAt(address), "$%04X", subject));
+                // 64tass's .addr is specifically "a 16-bit address constant"
+                // (issue 0036) - more precise than .WORD for a value that's
+                // always an address, not an arbitrary 16-bit number.
+                tabularPrint(".addr", nameForAddress(subject.wordAt(address), "$%04X", subject));
                 break;
         }
         lastArea = block;

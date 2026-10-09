@@ -61,3 +61,4 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0038](0038-rta-return-address-table-detection.md) | open | Detect and support 64tass's `.rta` return-address-table idiom |
 | [0039](0039-text-string-directive-detection.md) | open | Detect runs of printable characters and emit 64tass's `.text`/`.null`/`.ptext` |
 | [0040](0040-text-encoding-screen-code-vs-ascii.md) | open | Support 64tass text encodings (`.enc`/screen code) for CHAR output |
+| [0041](0041-user-declarable-address-pointer-type.md) | open | Allow annotating a `.flo` line with type `address`/`pointer` |
