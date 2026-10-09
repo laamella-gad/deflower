@@ -7,7 +7,7 @@ entry_b:
 		LDA #$04
 		STA $FD
 		LDA #$00
-		JSR _C40E_CODE
+		JSR lC40E
 		NOP 
 		STA $FE
 
@@ -15,7 +15,7 @@ marker_b:
 		.byte	$85, $FF, $AE, $3F
 *=$C40E
 
-_C40E_CODE:
+lC40E:
 		LDA #$29
 		STA $FC
 		LDA #$00

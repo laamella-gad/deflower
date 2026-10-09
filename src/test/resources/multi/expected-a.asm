@@ -7,14 +7,14 @@ entry_a:
 		LDA #$04
 		STA $FD
 		LDA #$00
-		JSR _C40E_CODE
+		JSR lC40E
 		NOP 
 		STA $FE
 		STA $FF
 		LDX $033F
 
-_C015_CODE:
-		BEQ _C028_CODE
+lC015:
+		BEQ lC028
 		LDA $FA
 		CLC 
 		ADC #$59
@@ -23,12 +23,12 @@ _C015_CODE:
 		ADC #$01
 		STA $FB
 		DEX 
-		JMP _C015_CODE
+		JMP lC015
 
-_C028_CODE:
+lC028:
 		LDX #$00
 
-_C02A_CODE:
+lC02A:
 		LDY #$00
 		LDA ($FA), Y
 		LSR 
@@ -53,30 +53,30 @@ _C02A_CODE:
 		CLC 
 		ADC #$01
 		STA $FA
-		BCC _C058_CODE
+		BCC lC058
 		INC $FB
 
-_C058_CODE:
+lC058:
 		CPX #$0E
-		BCC _C02A_CODE
+		BCC lC02A
 		INC $FF
 		LDA $FC
 		CLC 
 		ADC #$28
 		STA $FC
-		BCC _C069_CODE
+		BCC lC069
 		INC $FD
 
-_C069_CODE:
+lC069:
 		LDX #$00
 		STX $FE
 		LDX $FF
 		CPX #$18
-		BCC _C028_CODE
+		BCC lC028
 		RTS 
 *=$C40E
 
-_C40E_CODE:
+lC40E:
 		LDA #$29
 		STA $FC
 		LDA #$00

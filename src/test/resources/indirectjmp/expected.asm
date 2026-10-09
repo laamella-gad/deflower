@@ -2,13 +2,13 @@
 *=$C000
 
 entry:
-		JMP (_C010_POINTER)
+		JMP (pC010)
 *=$C010
 
-_C010_POINTER:
-		.addr	_C020_CODE
+pC010:
+		.addr	lC020
 *=$C020
 
-_C020_CODE:
+lC020:
 		LDA #$42
 		RTS 

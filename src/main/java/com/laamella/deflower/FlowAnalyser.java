@@ -51,7 +51,7 @@ class FlowAnalyser {
                     // The operand is a pointer, not the destination: label the
                     // pointer cell as data and follow the address stored there.
                     int pointerAddress = getAbsoluteAddressOperand(address, subject);
-                    subject.ensureLabelled(pointerAddress, "POINTER", address);
+                    subject.ensureLabelled(pointerAddress, "p", address);
                     subject.registerBlock(new DataArea(pointerAddress, DataType.POINTER, false, null, 0));
                     subject.addPotentialCodeLocation(subject.wordAt(pointerAddress), true, address);
                 } else {
@@ -72,7 +72,7 @@ class FlowAnalyser {
             case LDA:
                 switch (instruction.addressingMode) {
                     case ABSOLUTE ->
-                            subject.ensureLabelled(getAbsoluteAddressOperand(address, subject), "DATA", address);
+                            subject.ensureLabelled(getAbsoluteAddressOperand(address, subject), "d", address);
                 }
             default:
                 subject.addPotentialCodeLocation(address + instruction.addressingMode.totalBytes, false, address);

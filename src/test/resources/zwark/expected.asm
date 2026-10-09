@@ -11,7 +11,7 @@ sprite_pointers:
 
 *=$0805
 
-_0805_DATA:
+d0805:
 *=$9000
 
 start_game:
@@ -19,38 +19,38 @@ start_game:
 *=$9009
 
 actual_start_game:
-		JSR _9CD5_CODE
+		JSR l9CD5
 		LDA #$FE
-		BNE _901A_CODE
+		BNE l901A
 
 main_loop:
-		JSR _FFE1_CODE
-		BNE _901D_CODE
+		JSR lFFE1
+		BNE l901D
 		BEQ actual_start_game
-		JSR _9541_CODE
+		JSR l9541
 
-_901A_CODE:
-		JSR _999A_CODE
+l901A:
+		JSR l999A
 
-_901D_CODE:
+l901D:
 		LDA vic_joystick1
 		STA joystick_state
 		LDA vic_sprite_coll
 		STA sprite_coll_state
-		JSR _9773_CODE
-		JSR _91C4_CODE
-		STA _9049_DATA
-		JSR _9226_CODE
-		JSR _9570_CODE
+		JSR l9773
+		JSR l91C4
+		STA d9049
+		JSR l9226
+		JSR l9570
 		JSR update_vic_sprite_positions
-		JSR _978B_CODE
-		JSR _9563_CODE
-		LDA _9049_DATA
-		BNE _901A_CODE
+		JSR l978B
+		JSR l9563
+		LDA d9049
+		BNE l901A
 		CLC 
 		BCC main_loop
 
-_9049_DATA:
+d9049:
 		BRK 
 
 player_sprite:
@@ -84,18 +84,18 @@ explosion_sprite_3:
 		.byte	$43, $8B, $02, $0A, $00, $44, $08, $20, $0C, $00, $08, $00, $44, $01, $12, $00
 		.byte	$10, $41, $09, $00, $22, $20, $10, $10, $02, $04, $41, $00, $00, $04, $00
 
-_91C4_CODE:
+l91C4:
 		LDA #$01
-		JSR _94FD_CODE
+		JSR l94FD
 		LDA $9D98
-		JSR _93D8_CODE
+		JSR l93D8
 		BNE check_joystick
 		LDA $9D98
-		JSR _92FA_CODE
-		BNE _9223_CODE
+		JSR l92FA
+		BNE l9223
 		LDX $9D8C
 		DEC $9D8A, X
-		BMI _91FD_CODE
+		BMI l91FD
 		LDX #$00
 		LDA init_sprite_coords, X
 		STA sprite_ptrs, X
@@ -107,11 +107,11 @@ _91C4_CODE:
 		STA sprite_x_high_bits
 		LDA #$01
 		CLC 
-		BCC _9225_CODE
+		BCC l9225
 
-_91FD_CODE:
+l91FD:
 		LDA #$FF
-		BNE _9225_CODE
+		BNE l9225
 
 check_joystick:
 		LDX #$01
@@ -122,57 +122,57 @@ check_right:
 		BIT joystick_state
 		BNE check_left
 		LDA $9D98
-		JSR _93F9_CODE
+		JSR l93F9
 		LDX #$01
 		LDY #$00
 
 check_left:
 		LDA #$04
 		BIT joystick_state
-		BNE _9223_CODE
+		BNE l9223
 		LDA $9D98
-		JSR _944D_CODE
+		JSR l944D
 
-_9223_CODE:
+l9223:
 		LDA #$00
 
-_9225_CODE:
+l9225:
 		RTS 
 
-_9226_CODE:
+l9226:
 		LDA #$02
-		JSR _94FD_CODE
+		JSR l94FD
 		LDA $9D98
-		JSR _93D8_CODE
-		BNE _9240_CODE
+		JSR l93D8
+		BNE l9240
 		LDA #$01
 		EOR #$FF
 		AND $9D87
 		STA $9D87
 		CLC 
-		BCC _92B6_CODE
+		BCC l92B6
 
-_9240_CODE:
+l9240:
 		LDA #$01
 		BIT $9D87
-		BNE _9286_CODE
+		BNE l9286
 		LDA #$10
 		BIT joystick_state
-		BNE _92AE_CODE
+		BNE l92AE
 
 fire_pressed:
 		LDA #$02
 		BIT $9D87
-		BEQ _92B6_CODE
+		BEQ l92B6
 		LDA #$01
-		JSR _94FD_CODE
+		JSR l94FD
 		LDA #$01
-		JSR _93D8_CODE
+		JSR l93D8
 		STA $92F9
 		LDA #$02
-		JSR _94FD_CODE
+		JSR l94FD
 		LDA $92F9
-		BEQ _92B6_CODE
+		BEQ l92B6
 		ORA $9D87
 		LDA #$01
 		ORA $9D87
@@ -182,33 +182,33 @@ fire_pressed:
 		AND $9D87
 		STA $9D87
 		LDA #$01
-		JSR _989C_CODE
+		JSR l989C
 
-_9286_CODE:
+l9286:
 		LDA #$02
 		ORA $9D5B
 		STA $9D5B
 		LDA $9D98
 		LDX #$FF
 		LDY #$02
-		JSR _9486_CODE
+		JSR l9486
 		LDA #$02
-		JSR _989C_CODE
+		JSR l989C
 		CPY #$0A
-		BCS _92F8_CODE
+		BCS l92F8
 		LDA #$01
 		EOR #$FF
 		AND $9D87
 		STA $9D87
 		CLC 
-		BCC _92F8_CODE
+		BCC l92F8
 
-_92AE_CODE:
+l92AE:
 		LDA #$02
 		ORA $9D87
 		STA $9D87
 
-_92B6_CODE:
+l92B6:
 		LDA #$FD
 		AND $9D5B
 		STA $9D5B
@@ -226,36 +226,36 @@ _92B6_CODE:
 		LDX #$03
 		STA sprite_ptrs, X
 		LDA #$FF
-		JSR _989C_CODE
+		JSR l989C
 		LDA #$01
 		BIT sprite_x_high_bits
-		BNE _92EA_CODE
+		BNE l92EA
 		LDA #$FD
 		AND sprite_x_high_bits
 		CLC 
-		BCC _92EF_CODE
+		BCC l92EF
 
-_92EA_CODE:
+l92EA:
 		LDA #$02
 		ORA sprite_x_high_bits
 
-_92EF_CODE:
+l92EF:
 		STA sprite_x_high_bits
 		CLC 
-		BCC _92F8_CODE
+		BCC l92F8
 		INC $9D9D
 
-_92F8_CODE:
+l92F8:
 		RTS 
 
-_92F9_DATA:
+d92F9:
 *=$92FA
 
-_92FA_CODE:
+l92FA:
 		LDX $9D99
 		LDA $9D98
 		BIT $9D86
-		BNE _9345_CODE
+		BNE l9345
 		ORA $9D86
 		STA $9D86
 		LDA #$00
@@ -265,65 +265,65 @@ _92FA_CODE:
 		LDX #$01
 		LDA #$01
 		BIT $9D98
-		BNE _9345_CODE
+		BNE l9345
 
-_931E_CODE:
+l931E:
 		LDY $9D8C
 		LDA $9D8D, Y
 		CLC 
 		SED 
 		ADC #$01
 		STA $9D8D, Y
-		BCC _9338_CODE
+		BCC l9338
 		LDA $9D8F, Y
 		CLC 
 		ADC #$01
 		STA $9D8F, Y
-		BCC _9338_CODE
+		BCC l9338
 
-_9338_CODE:
+l9338:
 		CLD 
 		CPX #$01
-		BNE _9345_CODE
+		BNE l9345
 		INX 
 		LDA #$F8
 		BIT $9D86
-		BNE _931E_CODE
+		BNE l931E
 
-_9345_CODE:
+l9345:
 		LDA #$05
-		JSR _989C_CODE
+		JSR l989C
 		DEC init_sprite_ptrs + $8, X
-		BEQ _9352_CODE
-		JMP _93D5_CODE
+		BEQ l9352
+		JMP l93D5
 
-_9352_CODE:
+l9352:
 		INC $9D7E, X
 		LDA $9D7E, X
 		CMP #$01
-		BNE _9365_CODE
+		BNE l9365
 		LDA sprite_pointers, X
 		LDX #$07
 		LDY #$91
-		BNE _93CA_CODE
+		BNE l93CA
 
-_9365_CODE:
+l9365:
 		CMP #$02
-		BNE _9372_CODE
+		BNE l9372
 		LDA sprite_pointers, X
 		LDX #$46
 		LDY #$91
-		BNE _93CA_CODE
+		BNE l93CA
 
-_9372_CODE:
+l9372:
 		CMP #$03
-		BNE _937F_CODE
+		BNE l937F
 		LDA sprite_pointers, X
 		LDX #$85
 		LDY #$91
-		BNE _93CA_CODE
+		BNE l93CA
 
-_937F_CODE:
+l937F:
 		LDA $9D98
 		EOR $9D86
 		STA $9D86
@@ -333,16 +333,16 @@ _937F_CODE:
 		LDY $9D32, X
 		LDA sprite_pointers, X
 		LDX $9D97
-		JSR _94DE_CODE
+		JSR l94DE
 		LDA #$FE
-		JSR _989C_CODE
+		JSR l989C
 		LDA #$03
 		AND $9D98
-		BNE _93C0_CODE
+		BNE l93C0
 		LDY $9D8C
 		LDA #$0F
 		AND $9D8D, Y
-		BNE _93C0_CODE
+		BNE l93C0
 		LDX $9D99
 
 flash_sprite:
@@ -351,157 +351,157 @@ flash_sprite:
 		AND #$0F
 		BEQ flash_sprite
 
-_93C0_CODE:
+l93C0:
 		LDA vic_sprite_coll
 		LDA #$00
 		STA vic_sprite_coll
-		BEQ _93D7_CODE
+		BEQ l93D7
 
-_93CA_CODE:
-		JSR _94DE_CODE
+l93CA:
+		JSR l94DE
 		LDX $9D99
 		LDA #$1E
 		STA init_sprite_ptrs + $8, X
 
-_93D5_CODE:
+l93D5:
 		LDA #$01
 
-_93D7_CODE:
+l93D7:
 		RTS 
 
-_93D8_CODE:
+l93D8:
 		BIT $9D86
-		BNE _93F6_CODE
+		BNE l93F6
 		BIT sprite_coll_state
-		BEQ _93F2_CODE
+		BEQ l93F2
 		LDA #$FC
 		BIT sprite_coll_state
-		BEQ _93F2_CODE
+		BEQ l93F2
 		LDA #$03
 		BIT sprite_coll_state
-		BNE _93F6_CODE
-		BEQ _93F2_CODE
+		BNE l93F6
+		BEQ l93F2
 
-_93F2_CODE:
+l93F2:
 		LDA #$FF
-		BNE _93F8_CODE
+		BNE l93F8
 
-_93F6_CODE:
+l93F6:
 		LDA #$00
 
-_93F8_CODE:
+l93F8:
 		RTS 
 
-_93F9_CODE:
+l93F9:
 		CPX #$00
-		BEQ _942F_CODE
+		BEQ l942F
 		DEX 
 		STX $9D9C
 		LDX $9D9A
 		LDA sprite_ptrs, X
 		CPY #$FF
-		BEQ _9417_CODE
+		BEQ l9417
 		CMP #$3C
-		BCC _9417_CODE
+		BCC l9417
 		LDA $9D98
 		BIT sprite_x_high_bits
-		BNE _942B_CODE
+		BNE l942B
 
-_9417_CODE:
+l9417:
 		INC sprite_ptrs, X
-		BNE _9425_CODE
+		BNE l9425
 		LDA $9D98
 		ORA sprite_x_high_bits
 		STA sprite_x_high_bits
 
-_9425_CODE:
+l9425:
 		LDX $9D9C
 		CLC 
-		BCC _93F9_CODE
+		BCC l93F9
 
-_942B_CODE:
+l942B:
 		LDA #$01
-		BNE _9431_CODE
+		BNE l9431
 
-_942F_CODE:
+l942F:
 		LDA #$00
 
-_9431_CODE:
+l9431:
 		STA $9D9B
 		LDA $9D98
 		BIT sprite_x_high_bits
-		BEQ _9440_CODE
+		BEQ l9440
 		LDY #$01
-		BNE _9442_CODE
+		BNE l9442
 
-_9440_CODE:
+l9440:
 		LDY #$00
 
-_9442_CODE:
+l9442:
 		LDX $9D9A
 		LDA sprite_ptrs, X
 		TAX 
 		LDA $9D9B
 		RTS 
 
-_944D_CODE:
+l944D:
 		CPX #$00
-		BEQ _942F_CODE
+		BEQ l942F
 		DEX 
 		STX $9D9C
 		LDX $9D9A
 		LDA sprite_ptrs, X
 		CPY #$FF
-		BEQ _946B_CODE
+		BEQ l946B
 		CMP #$17
-		BCS _946B_CODE
+		BCS l946B
 		LDA $9D98
 		BIT sprite_x_high_bits
-		BEQ _942B_CODE
+		BEQ l942B
 
-_946B_CODE:
+l946B:
 		DEC sprite_ptrs, X
 		LDA #$FF
 		CMP sprite_ptrs, X
-		BNE _9480_CODE
+		BNE l9480
 		LDA $9D98
 		EOR #$FF
 		AND sprite_x_high_bits
 		STA sprite_x_high_bits
 
-_9480_CODE:
+l9480:
 		LDX $9D9C
 		CLC 
-		BCC _944D_CODE
+		BCC l944D
 
-_9486_CODE:
+l9486:
 		CPY #$00
-		BEQ _94AB_CODE
+		BEQ l94AB
 		DEY 
 		STX $9D9C
 		TXA 
 		LDX $9D9A
 		INX 
 		CMP #$FF
-		BEQ _949E_CODE
+		BEQ l949E
 		LDA sprite_ptrs, X
 		CMP #$32
-		BCC _94A7_CODE
+		BCC l94A7
 
-_949E_CODE:
+l949E:
 		DEC sprite_ptrs, X
 		LDX $9D9C
 		CLC 
-		BCC _9486_CODE
+		BCC l9486
 
-_94A7_CODE:
+l94A7:
 		LDA #$01
-		BNE _94AD_CODE
+		BNE l94AD
 
-_94AB_CODE:
+l94AB:
 		LDA #$00
 
-_94AD_CODE:
+l94AD:
 		STA $9D9B
 		LDX $9D9A
 		INX 
@@ -510,27 +510,27 @@ _94AD_CODE:
 		LDA $9D9B
 		RTS 
 
-_94BD_CODE:
+l94BD:
 		CPY #$00
-		BEQ _94AB_CODE
+		BEQ l94AB
 		DEY 
 		STX $9D9C
 		TXA 
 		LDX $9D9A
 		INX 
 		CMP #$FF
-		BEQ _94D5_CODE
+		BEQ l94D5
 		LDA sprite_ptrs, X
 		CMP #$FA
-		BCS _94A7_CODE
+		BCS l94A7
 
-_94D5_CODE:
+l94D5:
 		INC sprite_ptrs, X
 		LDX $9D9C
 		CLC 
-		BCC _94BD_CODE
+		BCC l94BD
 
-_94DE_CODE:
+l94DE:
 		STX $57
 		STY $58
 		STA $59
@@ -538,57 +538,57 @@ _94DE_CODE:
 		STA $5A
 		LDX #$06
 
-_94EA_CODE:
+l94EA:
 		ASL $59
 		ROL $5A
 		DEX 
-		BNE _94EA_CODE
+		BNE l94EA
 		LDY #$00
 
-_94F3_CODE:
+l94F3:
 		LDA ($57), Y
 		STA ($59), Y
 		INY 
 		CPY #$40
-		BCC _94F3_CODE
+		BCC l94F3
 		RTS 
 
-_94FD_CODE:
+l94FD:
 		CMP #$00
-		BEQ _951B_CODE
+		BEQ l951B
 		STA $9D98
 		LDX #$00
 
-_9506_CODE:
+l9506:
 		LSR 
-		BCS _9510_CODE
+		BCS l9510
 		INX 
 		CPX #$08
-		BCC _9506_CODE
-		BCS _951B_CODE
+		BCC l9506
+		BCS l951B
 
-_9510_CODE:
+l9510:
 		STX $9D99
 		TXA 
 		ASL 
 		STA $9D9A
 		CLC 
-		BCC _9526_CODE
+		BCC l9526
 
-_951B_CODE:
+l951B:
 		LDA #$00
 		STA $9D99
 		STA $9D9A
 		STA $9D98
 
-_9526_CODE:
+l9526:
 		LDA $9D98
 		LDX $9D99
 		LDY $9D9A
 		RTS 
 *=$9541
 
-_9541_CODE:
+l9541:
 		PHA 
 		LDA #$00
 		STA sid_vol_filter
@@ -600,43 +600,43 @@ update_vic_sprite_positions:
 		STA vic_sprite_x_high_bits
 		LDX #$00
 
-_9551_CODE:
+l9551:
 		LDA sprite_ptrs, X
 		STA vic_sprite_coords, X
 		INX 
 		CPX #$10
-		BCC _9551_CODE
+		BCC l9551
 		LDA $9D5B
 		STA vic_sprite_enable
 		RTS 
 
-_9563_CODE:
+l9563:
 		LDY $9D94
 
-_9566_CODE:
+l9566:
 		LDX $9D95
 
-_9569_CODE:
+l9569:
 		DEX 
-		BNE _9569_CODE
+		BNE l9569
 		DEY 
-		BNE _9566_CODE
+		BNE l9566
 		RTS 
 
-_9570_CODE:
+l9570:
 		LDA #$04
 
-_9572_CODE:
-		JSR _94FD_CODE
+l9572:
+		JSR l94FD
 		LDA $9D98
-		JSR _93D8_CODE
-		BNE _95B8_CODE
+		JSR l93D8
+		BNE l95B8
 		LDA $9D98
-		JSR _92FA_CODE
-		BEQ _9588_CODE
-		JMP _960F_CODE
+		JSR l92FA
+		BEQ l9588
+		JMP l960F
 
-_9588_CODE:
+l9588:
 		LDX $9D9A
 		INX 
 		LDA #$28
@@ -646,160 +646,160 @@ _9588_CODE:
 		LDX $9D9A
 		STA sprite_ptrs, X
 		CMP #$17
-		BCC _95AF_CODE
+		BCC l95AF
 		LDA $9D98
 		EOR #$FF
 		AND sprite_x_high_bits
 		STA sprite_x_high_bits
-		JMP _95B8_CODE
+		JMP l95B8
 
-_95AF_CODE:
+l95AF:
 		LDA $9D98
 		ORA sprite_x_high_bits
 		STA sprite_x_high_bits
 
-_95B8_CODE:
+l95B8:
 		LDX $9D99
 		CPX #$02
-		BNE _95D9_CODE
+		BNE l95D9
 		LDA #$80
 		AND table_with_timed_stuff, X
-		BEQ _95D1_CODE
+		BEQ l95D1
 		LDA #$7F
 		AND table_with_timed_stuff, X
 		STA table_with_timed_stuff, X
 		CLC 
-		BCC _960F_CODE
+		BCC l960F
 
-_95D1_CODE:
+l95D1:
 		LDA #$80
 		ORA table_with_timed_stuff, X
 		STA table_with_timed_stuff, X
 
-_95D9_CODE:
+l95D9:
 		LDA #$02
 		AND table_with_timed_stuff, X
-		BEQ _95EA_CODE
+		BEQ l95EA
 		LDA $9D98
 		LDY #$01
 		LDX #$FF
-		JSR _94BD_CODE
+		JSR l94BD
 
-_95EA_CODE:
+l95EA:
 		LDA #$08
 		AND table_with_timed_stuff, X
-		BEQ _95FB_CODE
+		BEQ l95FB
 		LDA $9D98
 		LDX #$01
 		LDY #$00
-		JSR _93F9_CODE
+		JSR l93F9
 
-_95FB_CODE:
+l95FB:
 		LDX $9D99
 		LDA #$04
 		AND table_with_timed_stuff, X
-		BEQ _960F_CODE
+		BEQ l960F
 		LDA $9D98
 		LDX #$01
 		LDY #$00
-		JSR _944D_CODE
+		JSR l944D
 
-_960F_CODE:
+l960F:
 		LDA #$04
 		CMP $9D98
-		BCC _963A_CODE
+		BCC l963A
 		ASL 
 		BIT $9D5B
-		BNE _9635_CODE
+		BNE l9635
 		LDY $9D8C
 		LDA $9D8F, Y
 		CMP #$01
-		BCS _962D_CODE
+		BCS l962D
 		LDA $9D8D, Y
 		CMP #$15
-		BCC _963A_CODE
+		BCC l963A
 
-_962D_CODE:
+l962D:
 		LDA #$08
 		ORA $9D5B
 		STA $9D5B
 
-_9635_CODE:
+l9635:
 		LDA #$08
-		JMP _9572_CODE
+		JMP l9572
 
-_963A_CODE:
+l963A:
 		LDA #$08
 		CMP $9D98
-		BCC _9665_CODE
+		BCC l9665
 		ASL 
 		BIT $9D5B
-		BNE _9660_CODE
+		BNE l9660
 		LDY $9D8C
 		LDA $9D8F, Y
 		CMP #$01
-		BCS _9658_CODE
+		BCS l9658
 		LDA $9D8D, Y
 		CMP #$40
-		BCC _96B4_CODE
+		BCC l96B4
 
-_9658_CODE:
+l9658:
 		LDA #$10
 		ORA $9D5B
 		STA $9D5B
 
-_9660_CODE:
+l9660:
 		LDA #$10
-		JMP _9572_CODE
+		JMP l9572
 
-_9665_CODE:
+l9665:
 		LDA #$10
 		CMP $9D98
-		BCC _9690_CODE
+		BCC l9690
 		ASL 
 		BIT $9D5B
-		BNE _968B_CODE
+		BNE l968B
 		LDY $9D8C
 		LDA $9D8F, Y
 		CMP #$01
-		BCS _9683_CODE
+		BCS l9683
 		LDA $9D8D, Y
 		CMP #$80
-		BCC _96B4_CODE
+		BCC l96B4
 
-_9683_CODE:
+l9683:
 		LDA #$20
 		ORA $9D5B
 		STA $9D5B
 
-_968B_CODE:
+l968B:
 		LDA #$20
-		JMP _9572_CODE
+		JMP l9572
 
-_9690_CODE:
+l9690:
 		LDA #$20
 		CMP $9D98
-		BCC _96B4_CODE
+		BCC l96B4
 		ASL 
 		BIT $9D5B
-		BNE _96AF_CODE
+		BNE l96AF
 		LDY $9D8C
 		LDA $9D8F, Y
 		CMP #$01
-		BCC _96B4_CODE
+		BCC l96B4
 		LDA #$40
 		ORA $9D5B
 		STA $9D5B
 
-_96AF_CODE:
+l96AF:
 		LDA #$40
-		JMP _9572_CODE
+		JMP l9572
 
-_96B4_CODE:
+l96B4:
 		RTS 
 
-_96B5_CODE:
-		JSR _E544_CODE
+l96B5:
+		JSR lE544
 		LDA #$4C
 		STA $73
 		LDA #$09
@@ -808,39 +808,39 @@ _96B5_CODE:
 		STA $75
 		LDX #$00
 
-_96C6_CODE:
+l96C6:
 		LDA init_sprite_ptrs, X
 		STA sprite_pointers, X
 		INX 
 		CPX #$08
-		BCC _96C6_CODE
+		BCC l96C6
 		LDX #$00
 
-_96D3_CODE:
+l96D3:
 		LDA $9D2A, X
 		STA $9D96
 		LDY $9D32, X
 		LDA init_sprite_ptrs, X
 		STX $9D97
 		LDX $9D96
-		JSR _94DE_CODE
+		JSR l94DE
 		LDX $9D97
 		INX 
 		CPX #$07
-		BCC _96D3_CODE
+		BCC l96D3
 		LDX #$00
 
-_96F2_CODE:
+l96F2:
 		LDA init_sprite_coords, X
 		STA vic_sprite_coords, X
 		CPX #$10
-		BCS _96FF_CODE
+		BCS l96FF
 		STA sprite_ptrs, X
 
-_96FF_CODE:
+l96FF:
 		INX 
 		CPX #$2F
-		BCC _96F2_CODE
+		BCC l96F2
 		LDA #$32
 		STA $9D94
 		LDA #$0A
@@ -848,11 +848,11 @@ _96FF_CODE:
 		LDA #$00
 		LDX #$00
 
-_9712_CODE:
+l9712:
 		STA init_sprite_ptrs + $8, X
 		INX 
 		CPX #$08
-		BCC _9712_CODE
+		BCC l9712
 		STA $9D8D
 		STA $9D8E
 		STA $9D8F
@@ -865,7 +865,7 @@ _9712_CODE:
 		STA $9D8A
 		STA $9D8B
 		JSR draw_turns
-		JSR _978B_CODE
+		JSR l978B
 		LDA $9DB9
 		STA $9D5B
 		LDX #$00
@@ -884,7 +884,7 @@ sid_clear_loop:
 		LDX #$00
 		LDY #$00
 
-_9762_CODE:
+l9762:
 		LDA $9DCB, X
 		STA $9D5C, Y
 		INY 
@@ -892,58 +892,58 @@ _9762_CODE:
 		INY 
 		INX 
 		CPX #$08
-		BCC _9762_CODE
+		BCC l9762
 		RTS 
 
-_9773_CODE:
+l9773:
 		LDX #$00
 
-_9775_CODE:
+l9775:
 		DEC table_with_timers, X
-		BNE _9785_CODE
+		BNE l9785
 		LDA vic_timer_a
 		STA table_with_timed_stuff, X
 		LDA #$32
 		STA table_with_timers, X
 
-_9785_CODE:
+l9785:
 		INX 
 		CPX #$08
-		BCC _9775_CODE
+		BCC l9775
 		RTS 
 
-_978B_CODE:
+l978B:
 		LDA #$00
 		STA $9D9F
 		LDA #$02
 		STA $9DA0
 
-_9795_CODE:
+l9795:
 		LDY $9D9F
 		LDA $9D8F, Y
-		JSR _9D0D_CODE
+		JSR l9D0D
 		TXA 
 		CMP #$30
-		BNE _97A5_CODE
+		BNE l97A5
 		LDA #$20
 
-_97A5_CODE:
+l97A5:
 		LDY $9DA0
 		STA vic_screen + $28, Y
 		LDY $9D9F
 		LDA $9D8D, Y
-		JSR _9D0D_CODE
+		JSR l9D0D
 		STX $9D9E
 		TYA 
 		CMP #$30
-		BNE _97C8_CODE
+		BNE l97C8
 		LDX $9D9F
 		LDY $9D8F, X
 		CPY #$00
-		BNE _97C8_CODE
+		BNE l97C8
 		LDA #$20
 
-_97C8_CODE:
+l97C8:
 		LDY $9DA0
 		INY 
 		STA vic_screen + $28, Y
@@ -962,21 +962,21 @@ _97C8_CODE:
 		LDX #$06
 		STA vic_screen + $96, X
 		LDA $9D9F
-		BNE _97FF_CODE
+		BNE l97FF
 		LDA #$01
 		STA $9D9F
 		LDA #$20
 		STA $9DA0
-		BNE _9795_CODE
+		BNE l9795
 
-_97FF_CODE:
-		JSR _993C_CODE
+l97FF:
+		JSR l993C
 		RTS 
 
 draw_turns:
 		LDX #$00
 
-_9805_CODE:
+l9805:
 		LDA turns_text, X
 		AND #$BF
 		STA vic_screen + $96, X
@@ -984,7 +984,7 @@ _9805_CODE:
 		STA vic_color_ram + $96, X
 		INX 
 		CPX #$07
-		BCC _9805_CODE
+		BCC l9805
 		LDX #$00
 
 show_top_score_line:
@@ -1027,11 +1027,11 @@ top_score_line:
 turns_text:
 		.text	"TURNS=  "
 
-_989C_CODE:
+l989C:
 		CMP #$FF
-		BEQ _98F6_CODE
+		BEQ l98F6
 		CMP #$01
-		BNE _98DA_CODE
+		BNE l98DA
 		LDA $9DD5
 		STA $9DD7
 		STA $D401
@@ -1050,11 +1050,11 @@ _989C_CODE:
 		STA $D404
 		LDA #$11
 		STA $D40B
-		BNE _993B_CODE
+		BNE l993B
 
-_98DA_CODE:
+l98DA:
 		CMP #$02
-		BNE _98FE_CODE
+		BNE l98FE
 		DEC $9DD7
 		LDA $9DD7
 		STA $D401
@@ -1063,16 +1063,16 @@ _98DA_CODE:
 		STA sid_base
 		STA $D407
 		CLC 
-		BCC _993B_CODE
+		BCC l993B
 
-_98F6_CODE:
+l98F6:
 		LDA #$00
 		STA $D40B
 		STA $D404
 
-_98FE_CODE:
+l98FE:
 		CMP #$05
-		BNE _9932_CODE
+		BNE l9932
 		LDA vic_timer_a
 		LSR 
 		STA $D410
@@ -1091,47 +1091,47 @@ _98FE_CODE:
 		LDA #$81
 		STA $D404
 		CLC 
-		BCC _993B_CODE
+		BCC l993B
 
-_9932_CODE:
+l9932:
 		CMP #$FE
-		BNE _993B_CODE
+		BNE l993B
 		LDA #$00
 		STA $D412
 
-_993B_CODE:
+l993B:
 		RTS 
 
-_993C_CODE:
+l993C:
 		LDX $9D8C
 		LDA $9D8F, X
 		CMP $9D92
-		BCC _995F_CODE
-		BNE _9953_CODE
+		BCC l995F
+		BNE l9953
 		LDA $9D8D, X
 		CMP $9D91
-		BCC _995F_CODE
-		BEQ _995F_CODE
+		BCC l995F
+		BEQ l995F
 
-_9953_CODE:
+l9953:
 		LDA $9D8D, X
 		STA $9D91
 		LDA $9D8F, X
 		STA $9D92
 
-_995F_CODE:
+l995F:
 		LDA $9D92
-		JSR _9D0D_CODE
+		JSR l9D0D
 		TXA 
 		CMP #$30
-		BNE _996C_CODE
+		BNE l996C
 		LDA #$20
 
-_996C_CODE:
+l996C:
 		LDY #$11
 		STA vic_screen + $28, Y
 		LDA $9D91
-		JSR _9D0D_CODE
+		JSR l9D0D
 		TYA 
 		CMP #$30
 		BNE hi_score_draw
@@ -1153,69 +1153,69 @@ hi_score_draw:
 		STA vic_screen + $28, Y
 		RTS 
 
-_999A_CODE:
+l999A:
 		LDX #$00
 		STX sid_vol_filter
 		CMP #$FE
-		BCC _99F7_CODE
-		BNE _99AB_CODE
-		JSR _96B5_CODE
-		JMP _99BA_CODE
+		BCC l99F7
+		BNE l99AB
+		JSR l96B5
+		JMP l99BA
 
-_99AB_CODE:
-		JSR _9ADF_CODE
+l99AB:
+		JSR l9ADF
 		LDA $9D93
-		BEQ _99BA_CODE
+		BEQ l99BA
 		LDA $9D8C
 		CMP #$00
-		BEQ _99EB_CODE
+		BEQ l99EB
 
-_99BA_CODE:
+l99BA:
 		JSR draw_logo
 
-_99BD_CODE:
+l99BD:
 		LDX #$00
 		STX $9DA2
 		LDX #$0A
 		STX $9DA3
-		BNE _99CC_CODE
+		BNE l99CC
 
-_99C9_CODE:
-		JSR _FFE4_CODE
+l99C9:
+		JSR lFFE4
 
-_99CC_CODE:
+l99CC:
 		CMP #$0D
-		BEQ _9A47_CODE
+		BEQ l9A47
 		CMP #$85
-		BEQ _9A3B_CODE
+		BEQ l9A3B
 		CMP #$86
-		BEQ _9A42_CODE
-		JSR _9563_CODE
+		BEQ l9A42
+		JSR l9563
 		DEC $9DA2
-		BNE _99C9_CODE
+		BNE l99C9
 		DEC $9DA3
-		BNE _99C9_CODE
-		JSR _9A4B_CODE
-		JMP _99BD_CODE
+		BNE l99C9
+		JSR l9A4B
+		JMP l99BD
 
-_99EB_CODE:
+l99EB:
 		LDX #$00
 		LDA #$20
 
-_99EF_CODE:
+l99EF:
 		STA vic_screen + $1E0, X
 		INX 
 		CPX #$28
-		BCC _99EF_CODE
+		BCC l99EF
 
-_99F7_CODE:
-		JSR _9B4D_CODE
-		JSR _978B_CODE
-		JSR _9AF7_CODE
+l99F7:
+		JSR l9B4D
+		JSR l978B
+		JSR l9AF7
 		LDA #$F0
 		STA $9D94
 		STA $9D95
-		JSR _9563_CODE
+		JSR l9563
 		LDA #$32
 		STA $9D94
 		LDA #$0A
@@ -1223,12 +1223,12 @@ _99F7_CODE:
 		LDA #$20
 		LDX #$00
 
-_9A19_CODE:
+l9A19:
 		STA vic_screen + $1E0, X
 		STA vic_screen + $230, X
 		INX 
 		CPX #$28
-		BCC _9A19_CODE
+		BCC l9A19
 		LDX #$0F
 		STX sid_vol_filter
 		LDA vic_sprite_coll
@@ -1239,21 +1239,21 @@ _9A19_CODE:
 		STA $D412
 		RTS 
 
-_9A3B_CODE:
+l9A3B:
 		LDA #$00
 		STA $9D93
-		BEQ _9A47_CODE
+		BEQ l9A47
 
-_9A42_CODE:
+l9A42:
 		LDA #$01
 		STA $9D93
 
-_9A47_CODE:
-		JSR _96B5_CODE
+l9A47:
+		JSR l96B5
 		RTS 
 
-_9A4B_CODE:
-		JSR _96B5_CODE
+l9A4B:
+		JSR l96B5
 		JSR draw_logo
 		LDA #$1D
 		STA $9D5B
@@ -1264,34 +1264,34 @@ _9A4B_CODE:
 		LDA #$0E
 		STA $9D95
 
-_9A65_CODE:
-		JSR _FFE1_CODE
-		BEQ _9AA4_CODE
-		JSR _FFE4_CODE
+l9A65:
+		JSR lFFE1
+		BEQ l9AA4
+		JSR lFFE4
 		CMP #$0D
-		BEQ _9AA4_CODE
+		BEQ l9AA4
 		CMP #$85
-		BEQ _9AA4_CODE
+		BEQ l9AA4
 		CMP #$86
-		BEQ _9AA4_CODE
+		BEQ l9AA4
 		LDA table_with_timed_stuff
 		EOR #$08
 		STA joystick_state
 		LDA vic_sprite_coll
 		STA sprite_coll_state
-		JSR _9773_CODE
-		JSR _91C4_CODE
-		STA _9049_DATA
-		JSR _9226_CODE
-		JSR _9570_CODE
+		JSR l9773
+		JSR l91C4
+		STA d9049
+		JSR l9226
+		JSR l9570
 		JSR update_vic_sprite_positions
-		JSR _9563_CODE
-		LDA _9049_DATA
-		BNE _9AA4_CODE
+		JSR l9563
+		LDA d9049
+		BNE l9AA4
 		CLC 
-		BCC _9A65_CODE
+		BCC l9A65
 
-_9AA4_CODE:
+l9AA4:
 		LDX #$00
 		STX sid_vol_filter
 		LDX #$1D
@@ -1307,11 +1307,11 @@ f1_1_player_text:
 f3_2_player_text:
 		.text	"F3 - TWO PLAYER GAME"
 
-_9ADF_CODE:
+l9ADF:
 		LDX #$00
 		LDY #$0F
 
-_9AE3_CODE:
+l9AE3:
 		LDA game_over_text, X
 		LDA game_over_text, X
 		STA vic_screen + $1E0, Y
@@ -1320,9 +1320,9 @@ _9AE3_CODE:
 		INX 
 		INY 
 		CPX #$09
-		BCC _9AE3_CODE
+		BCC l9AE3
 
-_9AF7_CODE:
+l9AF7:
 		LDX #$00
 		LDY #$0F
 		LDA $9D8C
@@ -1343,46 +1343,46 @@ show_top_score_row_14:
 		STA $9B41
 		STA $9D94
 
-_9B1D_CODE:
-		JSR _9563_CODE
-		JSR _FFE1_CODE
-		BEQ _9B40_CODE
-		JSR _FFE4_CODE
+l9B1D:
+		JSR l9563
+		JSR lFFE1
+		BEQ l9B40
+		JSR lFFE4
 		CMP #$0D
-		BEQ _9B40_CODE
+		BEQ l9B40
 		CMP #$85
-		BEQ _9B40_CODE
+		BEQ l9B40
 		CMP #$86
-		BEQ _9B40_CODE
+		BEQ l9B40
 		DEC $9B41
-		BNE _9B1D_CODE
+		BNE l9B1D
 		LDA #$32
 		STA $9D94
 		LDA #$01
 
-_9B40_CODE:
+l9B40:
 		RTS 
 *=$9B42
 
 game_over_text:
 		.text	"GAME OVER  "
 
-_9B4D_CODE:
+l9B4D:
 		LDA $9D93
-		BEQ _9B89_CODE
+		BEQ l9B89
 		LDX $9D8C
 		LDA $9D5B
 		STA $9D6C, X
 		LDY #$00
 
-_9B5D_CODE:
+l9B5D:
 		LDA vic_sprite_colors, Y
 		STA $9D5C, X
 		INX 
 		INX 
 		INY 
 		CPY #$08
-		BCC _9B5D_CODE
+		BCC l9B5D
 		LDA #$01
 		SEC 
 		SBC $9D8C
@@ -1392,42 +1392,42 @@ _9B5D_CODE:
 		STA $9D5B
 		LDY #$00
 
-_9B7C_CODE:
+l9B7C:
 		LDA $9D5C, X
 		STA vic_sprite_colors, Y
 		INX 
 		INX 
 		INY 
 		CPY #$08
-		BCC _9B7C_CODE
+		BCC l9B7C
 
-_9B89_CODE:
+l9B89:
 		LDX #$00
 
-_9B8B_CODE:
+l9B8B:
 		LDA init_sprite_coords, X
 		STA sprite_ptrs, X
 		INX 
 		CPX #$10
-		BCC _9B8B_CODE
+		BCC l9B8B
 		LDA #$00
 		STA sprite_x_high_bits
 		STA $9D86
 		STA $9D87
 		LDX #$00
 
-_9BA3_CODE:
+l9BA3:
 		LDA $9D2A, X
 		STA $9D96
 		LDY $9D32, X
 		LDA init_sprite_ptrs, X
 		STX $9D97
 		LDX $9D96
-		JSR _94DE_CODE
+		JSR l94DE
 		LDX $9D97
 		INX 
 		CPX #$07
-		BCC _9BA3_CODE
+		BCC l9BA3
 		LDA $9D5B
 		AND #$FD
 		STA $9D5B
@@ -1453,24 +1453,24 @@ logo3:		.byte	$20
 logo4:		.byte	$E9
 *=$9CD5
 
-_9CD5_CODE:
+l9CD5:
 		LDA $0805
 		CMP #$9E
 		BEQ nothing_just_rts
 		LDA $73
 		CMP #$4C
-		BNE _9CF4_CODE
+		BNE l9CF4
 		LDA $74
 		CMP #$09
-		BNE _9CF4_CODE
+		BNE l9CF4
 		LDA $2D
 		CMP #$44
-		BNE _9CF4_CODE
+		BNE l9CF4
 		LDA $2E
 		CMP #$08
 		BEQ nothing_just_rts
 
-_9CF4_CODE:
+l9CF4:
 		LDA #$00
 		STA $50
 		LDA #$08
@@ -1478,25 +1478,25 @@ _9CF4_CODE:
 		LDA #$00
 		LDY #$00
 
-_9D00_CODE:
+l9D00:
 		STA ($50), Y
 		INC $50
-		BNE _9D00_CODE
+		BNE l9D00
 		INC $51
-		BNE _9D00_CODE
+		BNE l9D00
 		BEQ nothing_just_rts
 
 nothing_just_rts:
 		RTS 
 
-_9D0D_CODE:
+l9D0D:
 		TAY 
 		AND #$0F
 		CMP #$0A
-		BCC _9D16_CODE
+		BCC l9D16
 		ADC #$06
 
-_9D16_CODE:
+l9D16:
 		ADC #$30
 		TAX 
 		TYA 
@@ -1505,10 +1505,10 @@ _9D16_CODE:
 		LSR 
 		LSR 
 		CMP #$0A
-		BCC _9D24_CODE
+		BCC l9D24
 		ADC #$06
 
-_9D24_CODE:
+l9D24:
 		ADC #$30
 		TAY 
 		LDA #$00
@@ -1521,7 +1521,7 @@ sprite_ptrs:
 		.byte	$16, $D8, $16, $D4, $16, $8B, $52, $4E, $EC, $A6, $70, $10, $F0, $10, $80, $10
 sprite_x_high_bits:		.byte	$00
 
-_9D5B_DATA:
+d9D5B:
 *=$9D6E
 
 table_with_timed_stuff:
@@ -1535,82 +1535,82 @@ joystick_state:
 sprite_coll_state:		.byte	$00
 *=$9D8C
 
-_9D8C_DATA:
+d9D8C:
 *=$9D91
 
-_9D91_DATA:
+d9D91:
 *=$9D92
 
-_9D92_DATA:
+d9D92:
 *=$9D93
 
-_9D93_DATA:
+d9D93:
 *=$9D98
 
-_9D98_DATA:
+d9D98:
 *=$9D9B
 
-_9D9B_DATA:
+d9D9B:
 *=$9D9E
 
-_9D9E_DATA:
+d9D9E:
 *=$9D9F
 
-_9D9F_DATA:
+d9D9F:
 *=$9DA4
 
 init_sprite_coords:		.byte	$A0
 *=$9DB9
 
-_9DB9_DATA:
+d9DB9:
 *=$9DD3
 
-_9DD3_DATA:
+d9DD3:
 *=$9DD4
 
-_9DD4_DATA:
+d9DD4:
 *=$9DD5
 
-_9DD5_DATA:
+d9DD5:
 *=$9DD6
 
-_9DD6_DATA:
+d9DD6:
 *=$9DD7
 
-_9DD7_DATA:
+d9DD7:
 *=$9DD8
 
-_9DD8_DATA:
+d9DD8:
 *=$9DD9
 
-_9DD9_DATA:
+d9DD9:
 *=$9DDA
 
-_9DDA_DATA:
+d9DDA:
 *=$9E00
 
 start:
 		LDA #$00
 		STA $D020
 		STA $D021
-		JSR _E544_CODE
+		JSR lE544
 		LDX #$68
 
-_9E0D_CODE:
+l9E0D:
 		LDA crack_trainer_msg, X
 		STA vic_screen, X
 		LDA #$0F
 		STA vic_color_ram, X
 		DEX 
-		BPL _9E0D_CODE
+		BPL l9E0D
 		CLI 
 
-_9E1C_CODE:
-		JSR _FFE4_CODE
+l9E1C:
+		JSR lFFE4
 		CMP #$4E
 		BEQ no_trainer
 		CMP #$59
-		BNE _9E1C_CODE
+		BNE l9E1C
 		LDA #$2C
 		STA $91DC
 
@@ -1673,12 +1673,12 @@ vic_timer_a:		.byte	?
 
 *=$E544
 
-_E544_CODE:
+lE544:
 		BRK 
 *=$FFE1
 
-_FFE1_CODE:
+lFFE1:
 		ISC $0000, X
 
-_FFE4_CODE:
+lFFE4:
 		BRK 

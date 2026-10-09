@@ -72,3 +72,5 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0049](0049-refactor-subjectconfigurer.md) | done | Refactor SubjectConfigurer - it is doing too much |
 | [0050](0050-fixed-flo-line-shape.md) | done | Give .flo annotation lines a fixed shape in the grammar |
 | [0051](0051-document-flo-format.md) | done | Document the .flo line shape and keywords authoritatively |
+| [0052](0052-auto-labels-are-64tass-local-labels.md) | done | Auto-generated labels start with `_`, which makes them 64tass local labels |
+| [0053](0053-force-absolute-operand-on-zero-page-label.md) | open | Absolute operand on a zero-page label reassembles as zero page |

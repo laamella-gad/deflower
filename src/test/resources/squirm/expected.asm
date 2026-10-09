@@ -23,7 +23,7 @@ tmp_loc_hi:		.byte	?
 .virtual $0400
 screen_ram:
 		.fill	35
-_0423_DATA:		.byte	?
+d0423:		.byte	?
 var_init_b1:
 		.fill	817
 bonus_guy_2_start:
@@ -414,10 +414,10 @@ more_colors:
 		BNE more_colors
 		RTS 
 
-_241C_CODE:
+l241C:
 		LDX #$00
 
-_241E_CODE:
+l241E:
 		LDA high_score_screen + $1, X
 		STA screen_ram + $50, X
 		LDA high_score_table_2 + $1, X
@@ -426,7 +426,7 @@ _241E_CODE:
 		STA screen_ram + $24E, X
 		INX 
 		CPX #$FF
-		BNE _241E_CODE
+		BNE l241E
 		LDX #$00
 		LDA hiscore + $10B, X
 		STA screen_ram + $34D, X
@@ -438,7 +438,7 @@ draw_title_screen:
 		SBC $60, X
 		LDX #$00
 
-_2445_CODE:
+l2445:
 		LDA title, X
 		STA screen_ram + $50, X
 		LDA title + $FF, X
@@ -447,21 +447,21 @@ _2445_CODE:
 		STA screen_ram + $24E, X
 		INX 
 		CPX #$FF
-		BNE _2445_CODE
+		BNE l2445
 		LDX #$00
 
-_245E_CODE:
+l245E:
 		LDA rest_of_title, X
 		STA screen_ram + $34D, X
 		INX 
 		CPX #$4B
-		BNE _245E_CODE
+		BNE l245E
 		RTS 
 
 draw_level_1:
 		LDX #$00
 
-_246C_CODE:
+l246C:
 		LDA level_1, X
 		STA screen_ram + $50, X
 		LDA level_1 + $FF, X
@@ -470,21 +470,21 @@ _246C_CODE:
 		STA screen_ram + $24E, X
 		INX 
 		CPX #$FF
-		BNE _246C_CODE
+		BNE l246C
 		LDX #$00
 
-_2485_CODE:
+l2485:
 		LDA level_1 + $2FD, X
 		STA screen_ram + $34D, X
 		INX 
 		CPX #$4B
-		BNE _2485_CODE
+		BNE l2485
 		RTS 
 
 draw_level_2:
 		LDX #$00
 
-_2493_CODE:
+l2493:
 		LDA level_2, X
 		STA screen_ram + $50, X
 		LDA level_2 + $FF, X
@@ -493,21 +493,21 @@ _2493_CODE:
 		STA screen_ram + $24E, X
 		INX 
 		CPX #$FF
-		BNE _2493_CODE
+		BNE l2493
 		LDX #$00
 
-_24AC_CODE:
+l24AC:
 		LDA level_2 + $2FD, X
 		STA screen_ram + $34D, X
 		INX 
 		CPX #$4B
-		BNE _24AC_CODE
+		BNE l24AC
 		RTS 
 
 draw_level_3:
 		LDX #$00
 
-_24BA_CODE:
+l24BA:
 		LDA level_3, X
 		STA screen_ram + $50, X
 		LDA level_3 + $FF, X
@@ -516,21 +516,21 @@ _24BA_CODE:
 		STA screen_ram + $24E, X
 		INX 
 		CPX #$FF
-		BNE _24BA_CODE
+		BNE l24BA
 		LDX #$00
 
-_24D3_CODE:
+l24D3:
 		LDA level_3 + $2FD, X
 		STA screen_ram + $34D, X
 		INX 
 		CPX #$4B
-		BNE _24D3_CODE
+		BNE l24D3
 		RTS 
 
 draw_screen_colors:
 		LDX #$00
 
-_24E1_CODE:
+l24E1:
 		LDA title_screen_colors, X
 		STA color_ram + $50, X
 		LDA title_screen_colors + $FF, X
@@ -539,22 +539,22 @@ _24E1_CODE:
 		STA color_ram + $24E, X
 		INX 
 		CPX #$FF
-		BNE _24E1_CODE
+		BNE l24E1
 		LDX #$00
 
-_24FA_CODE:
+l24FA:
 		LDA title_screen_colors + $2FD, X
 		STA color_ram + $34D, X
 		INX 
 		CPX #$4B
-		BNE _24FA_CODE
+		BNE l24FA
 		RTS 
 *=$2508
 
 animate_player_chars:
 		LDX #$00
 
-_250A_CODE:
+l250A:
 		LDA player_char_1, X
 		PHA 
 		LDA player_char_2, X
@@ -575,13 +575,13 @@ _250A_CODE:
 		STA player_char_8, X
 		INX 
 		CPX #$08
-		BNE _250A_CODE
+		BNE l250A
 		RTS 
 
 color_lines:
 		LDX #$00
 
-_2544_CODE:
+l2544:
 		LDA #$04
 		STA color_ram + $78, X
 		LDA #$05
@@ -600,7 +600,7 @@ _2544_CODE:
 		STA color_ram + $2D0, X
 		INX 
 		CPX #$28
-		BNE _2544_CODE
+		BNE l2544
 		RTS 
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $46, $00, $70, $00
@@ -620,7 +620,7 @@ _2544_CODE:
 word_1_048e:
 		.word	$048E
 
-_2649_DATA:
+d2649:
 word_2_048e:		.word	$048E
 word_3_048e:		.word	$048E
 word_4_048e:		.word	$048E
@@ -629,7 +629,7 @@ word_6_048e:		.word	$048E
 word_7_048e:		.word	$048E
 word_8_048e:		.word	$048E
 
-_2657_DATA:
+d2657:
 
 snk_head_loc_lo:
 		.byte	$E0
@@ -637,32 +637,32 @@ snk_head_loc_hi:		.byte	$05
 snake_pos_tbl_lo:		.byte	$E1
 snake_pos_tbl_hi:		.byte	$05
 		.byte	$09, $06, $31, $06
-_2660_DATA:		.byte	$59
-_2661_DATA:		.byte	$06
+d2660:		.byte	$59
+d2661:		.byte	$06
 
 snake_pos_tbl:
 		.byte	$41
 
-_2663_DATA:
+d2663:
 		.byte	$05, $19, $05, $F1, $04, $F2, $04
 
 clear_snake_lo:
 		.byte	$F3
 clear_snake_hi:		.byte	$04
 
-_266C_DATA:
+d266C:
 		.byte	$D3
-_266D_DATA:
+d266D:
 		.byte	$05, $D2, $05, $D1, $05, $D0, $05
-_2674_DATA:		.byte	$CF
-_2675_DATA:		.byte	$05
-_2676_DATA:		.byte	$5B
-_2677_DATA:
+d2674:		.byte	$CF
+d2675:		.byte	$05
+d2676:		.byte	$5B
+d2677:
 		.byte	$06, $83, $06, $AB, $06, $D3, $06
-_267E_DATA:		.byte	$FB
-_267F_DATA:		.byte	$06
+d267E:		.byte	$FB
+d267F:		.byte	$06
 
-_2680_DATA:
+d2680:
 *=$2681
 
 var7_init_0:
@@ -672,9 +672,9 @@ irq_delay_counter:		.byte	$06
 bonus_guy_char:		.byte	$02
 lives:		.byte	$00
 
-_2686_DATA:
+d2686:
 		.byte	$68
-_2687_DATA:		.byte	$07
+d2687:		.byte	$07
 
 var2_init_with_1:
 		.byte	$03
@@ -687,7 +687,7 @@ var5_init_with_0:
 		.byte	$00
 bonus_guy_char_2:		.byte	$49
 
-_268F_DATA:
+d268F:
 		.byte	$0A
 
 dots_eaten:
@@ -913,10 +913,10 @@ check_move_up:
 		LDA new_loc_lo
 		SBC #$28
 		STA new_loc_lo
-		BCS _3025_CODE
+		BCS l3025
 		DEC new_loc_hi
 
-_3025_CODE:
+l3025:
 		JMP check_move_possible
 
 check_move_down:
@@ -938,10 +938,10 @@ check_move_right:
 		INC new_loc_lo
 		LDA new_loc_lo
 		CMP #$00
-		BNE _304B_CODE
+		BNE l304B
 		INC new_loc_hi
 
-_304B_CODE:
+l304B:
 		JMP check_move_possible
 
 check_move_left:
@@ -951,21 +951,21 @@ check_move_left:
 		DEC new_loc_lo
 		LDA new_loc_lo
 		CMP #$FF
-		BNE _305D_CODE
+		BNE l305D
 		DEC new_loc_hi
 
-_305D_CODE:
+l305D:
 		JMP check_move_possible
 
 check_fire:
 		CMP #$EF
-		BNE _306B_CODE
+		BNE l306B
 		LDA #$EF
 		STA player_direction
 		LDA #$00
 		RTS 
 
-_306B_CODE:
+l306B:
 		LDA #$01
 		RTS 
 
@@ -976,26 +976,26 @@ try_move:
 		STA tmp_loc_hi
 		LDA $DC01
 		CMP player_direction
-		BEQ _308B_CODE
+		BEQ l308B
 		STA joy_dir_for_move
 		JSR check_move_up
 		CMP #$01
-		BEQ _308B_CODE
+		BEQ l308B
 		LDA joy_dir_for_move
 		STA player_direction
 		RTS 
 
-_308B_CODE:
+l308B:
 		LDA player_direction
 		STA joy_dir_for_move
 		JSR check_move_up
 		CMP #$01
-		BEQ _309B_CODE
+		BEQ l309B
 		LDA joy_dir_for_move
 		STA player_direction
 		RTS 
 
-_309B_CODE:
+l309B:
 		LDA #$EF
 		STA player_direction
 		RTS 
@@ -1004,24 +1004,24 @@ _309B_CODE:
 sfx_hi_char_entry:
 		LDX #$0F
 
-_30A4_CODE:
+l30A4:
 		STX $D418
 		STX $D403
 		LDA #$FA
 		STA jiffy_timer
 
-_30AE_CODE:
+l30AE:
 		LDA jiffy_timer
-		BMI _30AE_CODE
+		BMI l30AE
 		DEX 
 		CPX #$FF
-		BNE _30A4_CODE
+		BNE l30A4
 		RTS 
 
 move_hi_from_scr_to_:
 		LDX #$00
 
-_30BA_CODE:
+l30BA:
 		LDA screen_ram + $FE, X
 		STA high_score_table_1, X
 		LDA screen_ram + $14E, X
@@ -1034,39 +1034,39 @@ _30BA_CODE:
 		STA high_score_table_5, X
 		INX 
 		CPX #$0A
-		BNE _30BA_CODE
+		BNE l30BA
 		RTS 
 
 update_hi:
 		LDX #$00
 
-_30E0_CODE:
+l30E0:
 		LDA screen_ram + $14, X
 		AND #$7F
 		CLC 
 		CMP hiscore, X
-		BEQ _30EF_CODE
-		BCS _30F5_CODE
-		BCC _30F4_CODE
+		BEQ l30EF
+		BCS l30F5
+		BCC l30F4
 
-_30EF_CODE:
+l30EF:
 		INX 
 		CPX #$05
-		BNE _30E0_CODE
+		BNE l30E0
 
-_30F4_CODE:
+l30F4:
 		RTS 
 
-_30F5_CODE:
+l30F5:
 		LDX #$00
 
-_30F7_CODE:
+l30F7:
 		LDA screen_ram + $14, X
 		AND #$7F
 		STA screen_ram + $242, X
 		INX 
 		CPX #$05
-		BNE _30F7_CODE
+		BNE l30F7
 		LDA #$20
 		STA screen_ram + $23E
 		STA screen_ram + $23F
@@ -1074,7 +1074,7 @@ _30F7_CODE:
 		LDY #$00
 		LDX #$00
 
-_3113_CODE:
+l3113:
 		LDA screen_ram + $2D5, X
 		CLC 
 		ADC #$80
@@ -1082,39 +1082,39 @@ _3113_CODE:
 		LDA #$F6
 		STA jiffy_timer
 
-_3120_CODE:
+l3120:
 		LDA jiffy_timer
-		BMI _3120_CODE
+		BMI l3120
 		LDA $DC01
 		CMP #$F7
-		BEQ _3136_CODE
+		BEQ l3136
 		CMP #$FB
-		BEQ _3148_CODE
+		BEQ l3148
 		CMP #$EF
-		BEQ _315A_CODE
-		JMP _3113_CODE
+		BEQ l315A
+		JMP l3113
 
-_3136_CODE:
+l3136:
 		LDA screen_ram + $2D5, X
 		AND #$7F
 		STA screen_ram + $2D5, X
 		INX 
 		CPX #$1B
-		BNE _3113_CODE
+		BNE l3113
 		LDX #$00
-		JMP _3113_CODE
+		JMP l3113
 
-_3148_CODE:
+l3148:
 		LDA screen_ram + $2D5, X
 		AND #$7F
 		STA screen_ram + $2D5, X
 		DEX 
 		CPX #$FF
-		BNE _3113_CODE
+		BNE l3113
 		LDX #$1A
-		JMP _3113_CODE
+		JMP l3113
 
-_315A_CODE:
+l315A:
 		LDA screen_ram + $2D5, X
 		ORA #$80
 		STA screen_ram + $290, Y
@@ -1126,35 +1126,35 @@ _315A_CODE:
 		JSR sfx_hi_char_entry
 		LDX tmp_loc_hi
 		CPY #$03
-		BEQ _3179_CODE
-		JMP _3113_CODE
+		BEQ l3179
+		JMP l3113
 
-_3179_CODE:
+l3179:
 		LDA #$0A
 		STA $D401
 		JSR sfx_hi_char_entry
 		LDX #$00
 
-_3183_CODE:
+l3183:
 		CLC 
 		LDA screen_ram + $242, X
 		CMP screen_ram + $1F2, X
-		BEQ _3190_CODE
-		BCS _3198_CODE
-		BCC _3195_CODE
+		BEQ l3190
+		BCS l3198
+		BCC l3195
 
-_3190_CODE:
+l3190:
 		INX 
 		CPX #$05
-		BNE _3183_CODE
+		BNE l3183
 
-_3195_CODE:
+l3195:
 		JMP move_hi_from_scr_to_
 
-_3198_CODE:
+l3198:
 		LDX #$00
 
-_319A_CODE:
+l319A:
 		LDA screen_ram + $1EE, X
 		PHA 
 		LDA screen_ram + $23E, X
@@ -1163,32 +1163,32 @@ _319A_CODE:
 		STA screen_ram + $23E, X
 		INX 
 		CPX #$0A
-		BNE _319A_CODE
+		BNE l319A
 		LDA #$14
 		STA $D401
 		JSR sfx_hi_char_entry
 		LDX #$00
 
-_31B7_CODE:
+l31B7:
 		CLC 
 		LDA screen_ram + $1F2, X
 		CMP screen_ram + $1A2, X
-		BEQ _31C4_CODE
-		BCS _31CC_CODE
-		BCC _31C9_CODE
+		BEQ l31C4
+		BCS l31CC
+		BCC l31C9
 
-_31C4_CODE:
+l31C4:
 		INX 
 		CPX #$05
-		BNE _31B7_CODE
+		BNE l31B7
 
-_31C9_CODE:
+l31C9:
 		JMP move_hi_from_scr_to_
 
-_31CC_CODE:
+l31CC:
 		LDX #$00
 
-_31CE_CODE:
+l31CE:
 		LDA screen_ram + $19E, X
 		PHA 
 		LDA screen_ram + $1EE, X
@@ -1197,32 +1197,32 @@ _31CE_CODE:
 		STA screen_ram + $1EE, X
 		INX 
 		CPX #$0A
-		BNE _31CE_CODE
+		BNE l31CE
 		LDA #$1E
 		STA $D401
 		JSR sfx_hi_char_entry
 		LDX #$00
 
-_31EB_CODE:
+l31EB:
 		CLC 
 		LDA screen_ram + $1A2, X
 		CMP screen_ram + $152, X
-		BEQ _31F8_CODE
-		BCS _3200_CODE
-		BCC _31FD_CODE
+		BEQ l31F8
+		BCS l3200
+		BCC l31FD
 
-_31F8_CODE:
+l31F8:
 		INX 
 		CPX #$05
-		BNE _31EB_CODE
+		BNE l31EB
 
-_31FD_CODE:
+l31FD:
 		JMP move_hi_from_scr_to_
 
-_3200_CODE:
+l3200:
 		LDX #$00
 
-_3202_CODE:
+l3202:
 		LDA screen_ram + $14E, X
 		PHA 
 		LDA screen_ram + $19E, X
@@ -1231,32 +1231,32 @@ _3202_CODE:
 		STA screen_ram + $19E, X
 		INX 
 		CPX #$0A
-		BNE _3202_CODE
+		BNE l3202
 		LDA #$28
 		STA $D401
 		JSR sfx_hi_char_entry
 		LDX #$00
 
-_321F_CODE:
+l321F:
 		CLC 
 		LDA screen_ram + $152, X
 		CMP screen_ram + $102, X
-		BEQ _322C_CODE
-		BCS _3234_CODE
-		BCC _3231_CODE
+		BEQ l322C
+		BCS l3234
+		BCC l3231
 
-_322C_CODE:
+l322C:
 		INX 
 		CPX #$05
-		BNE _321F_CODE
+		BNE l321F
 
-_3231_CODE:
+l3231:
 		JMP move_hi_from_scr_to_
 
-_3234_CODE:
+l3234:
 		LDX #$00
 
-_3236_CODE:
+l3236:
 		LDA screen_ram + $FE, X
 		PHA 
 		LDA screen_ram + $14E, X
@@ -1265,23 +1265,23 @@ _3236_CODE:
 		STA screen_ram + $14E, X
 		INX 
 		CPX #$0A
-		BNE _3236_CODE
+		BNE l3236
 		LDX #$00
 
-_324B_CODE:
+l324B:
 		LDA screen_ram + $102, X
 		ORA #$80
 		STA hi_text, X
 		INX 
 		CPX #$05
-		BNE _324B_CODE
+		BNE l324B
 		JSR set_top_bottom_text
 		LDA #$50
 		STA $D401
 		JSR sfx_hi_char_entry
 		JMP move_hi_from_scr_to_
 
-_3266_CODE:
+l3266:
 		LDA #$06
 		JSR set_top_bottom_red
 		STA $D020
@@ -1290,7 +1290,7 @@ _3266_CODE:
 		LDA #$0A
 		STA $D403
 		STA $D402
-		JSR _241C_CODE
+		JSR l241C
 		JSR color_lines
 		LDA #$41
 		STA $D404
@@ -1303,156 +1303,156 @@ _3266_CODE:
 		LDA #$F6
 		STA jiffy_timer
 
-_329A_CODE:
+l329A:
 		LDA jiffy_timer
-		BMI _329A_CODE
+		BMI l329A
 		LDX #$00
 
-_32A0_CODE:
+l32A0:
 		LDA press_fire_to_start_, X
 		STA screen_ram + $289, X
 		INX 
 		CPX #$13
-		BNE _32A0_CODE
+		BNE l32A0
 		LDA #$1E
 		STA $D401
 		LDA #$F0
 		STA jiffy_timer
 
-_32B4_CODE:
+l32B4:
 		LDA jiffy_timer
-		BMI _32B4_CODE
+		BMI l32B4
 		LDA #$00
 		STA $D401
 		LDA #$02
 		JSR set_top_bottom_red
 		STA $D020
 
-_32C5_CODE:
+l32C5:
 		LDA $DC01
 		CMP #$EF
-		BEQ _32CF_CODE
-		JMP _32C5_CODE
+		BEQ l32CF
+		JMP l32C5
 
-_32CF_CODE:
+l32CF:
 		RTS 
 *=$32D2
 
-_32D2_CODE:
-		JMP _3C93_CODE
+l32D2:
+		JMP l3C93
 *=$32EF
 
-_32EF_CODE:
+l32EF:
 		CMP #$01
-		BNE _3303_CODE
-		INC _2686_DATA
-		LDA _2686_DATA
+		BNE l3303
+		INC d2686
+		LDA d2686
 		CMP #$00
-		BNE _3300_CODE
-		INC _2687_DATA
+		BNE l3300
+		INC d2687
 
-_3300_CODE:
-		JMP _32D2_CODE
+l3300:
+		JMP l32D2
 
-_3303_CODE:
+l3303:
 		CMP #$02
-		BNE _3317_CODE
-		DEC _2686_DATA
-		LDA _2686_DATA
+		BNE l3317
+		DEC d2686
+		LDA d2686
 		CMP #$FF
-		BNE _3314_CODE
-		DEC _2687_DATA
+		BNE l3314
+		DEC d2687
 
-_3314_CODE:
-		JMP _32D2_CODE
+l3314:
+		JMP l32D2
 
-_3317_CODE:
+l3317:
 		CMP #$03
-		BNE _332C_CODE
+		BNE l332C
 		SEC 
-		LDA _2686_DATA
+		LDA d2686
 		SBC #$28
-		STA _2686_DATA
-		BCS _3329_CODE
-		DEC _2687_DATA
+		STA d2686
+		BCS l3329
+		DEC d2687
 
-_3329_CODE:
-		JMP _32D2_CODE
+l3329:
+		JMP l32D2
 
-_332C_CODE:
+l332C:
 		CLC 
-		LDA _2686_DATA
+		LDA d2686
 		ADC #$28
-		STA _2686_DATA
-		BCC _333A_CODE
-		INC _2687_DATA
+		STA d2686
+		BCC l333A
+		INC d2687
 
-_333A_CODE:
-		JMP _32D2_CODE
+l333A:
+		JMP l32D2
 
-_333D_CODE:
+l333D:
 		INC $2680
 		LDA $2680
 		CMP #$05
-		BNE _334C_CODE
+		BNE l334C
 		LDA #$01
 		STA $2680
 
-_334C_CODE:
+l334C:
 		RTS 
 
-_334D_CODE:
+l334D:
 		LDA #$00
 		STA var7_init_0
 		LDA word_8_048e
 		STA tmp_loc_lo
-		LDA _2657_DATA
+		LDA d2657
 		STA tmp_loc_hi
 		LDA #$46
 		LDY #$00
 		STA (tmp_loc_lo), Y
 		LDX #$0D
 
-_3364_CODE:
+l3364:
 		LDA word_1_048e, X
 		STA word_2_048e, X
 		DEX 
 		CPX #$FF
-		BNE _3364_CODE
+		BNE l3364
 
-_336F_CODE:
+l336F:
 		INC var7_init_0
 		LDA var7_init_0
 		CMP #$05
-		BEQ _33A4_CODE
+		BEQ l33A4
 		LDA word_1_048e
-		STA _2686_DATA
-		LDA _2649_DATA
-		STA _2687_DATA
-		JSR _333D_CODE
+		STA d2686
+		LDA d2649
+		STA d2687
+		JSR l333D
 		LDA $2680
-		JSR _32EF_CODE
+		JSR l32EF
 		CMP #$01
-		BNE _3395_CODE
-		JMP _336F_CODE
+		BNE l3395
+		JMP l336F
 
-_3395_CODE:
-		LDA _2686_DATA
+l3395:
+		LDA d2686
 		STA word_1_048e
-		LDA _2687_DATA
-		STA _2649_DATA
-		JMP _33AE_CODE
+		LDA d2687
+		STA d2649
+		JMP l33AE
 
-_33A4_CODE:
+l33A4:
 		LDA #$8E
 		STA word_1_048e
 		LDA #$04
-		STA _2649_DATA
+		STA d2649
 
-_33AE_CODE:
+l33AE:
 		LDX #$00
 
-_33B0_CODE:
+l33B0:
 		LDA word_2_048e, X
 		STA tmp_loc_lo
 		LDA word_2_048e + $1, X
@@ -1462,53 +1462,53 @@ _33B0_CODE:
 		INX 
 		INX 
 		CPX #$0E
-		BNE _33B0_CODE
+		BNE l33B0
 		LDA word_1_048e
 		STA tmp_loc_lo
-		LDA _2649_DATA
+		LDA d2649
 		STA tmp_loc_hi
 		LDA #$43
 		STA (tmp_loc_lo), Y
 
-_33D2_CODE:
+l33D2:
 		LDA #$00
 		STA var7_init_0
-		LDA _2660_DATA
+		LDA d2660
 		STA tmp_loc_lo
-		LDA _2661_DATA
+		LDA d2661
 		STA tmp_loc_hi
 		LDA #$20
 		LDY #$00
 		STA (tmp_loc_lo), Y
 		LDX #$07
 
-_33E9_CODE:
+l33E9:
 		LDA snk_head_loc_lo, X
 		STA snake_pos_tbl_lo, X
 		DEX 
 		CPX #$FF
-		BNE _33E9_CODE
+		BNE l33E9
 
-_33F4_CODE:
+l33F4:
 		INC var7_init_0
 		LDA var7_init_0
 		CMP #$05
 		BEQ draw_snakes
 		LDA snk_head_loc_lo
-		STA _2686_DATA
+		STA d2686
 		LDA snk_head_loc_hi
-		STA _2687_DATA
-		JSR _333D_CODE
+		STA d2687
+		JSR l333D
 		LDA $2680
-		JSR _32EF_CODE
+		JSR l32EF
 		CMP #$01
-		BNE _341A_CODE
-		JMP _33F4_CODE
+		BNE l341A
+		JMP l33F4
 
-_341A_CODE:
-		LDA _2686_DATA
+l341A:
+		LDA d2686
 		STA snk_head_loc_lo
-		LDA _2687_DATA
+		LDA d2687
 		STA snk_head_loc_hi
 		JMP draw_snake_tail
 
@@ -1539,7 +1539,7 @@ draw_snake_ball:
 		LDA #$43
 		STA (tmp_loc_lo), Y
 
-_3457_CODE:
+l3457:
 		LDA #$00
 		STA var7_init_0
 		LDA clear_snake_lo
@@ -1558,39 +1558,39 @@ rotate_snake_pos:
 		CPX #$FF
 		BNE rotate_snake_pos
 
-_3479_CODE:
+l3479:
 		INC var7_init_0
 		LDA var7_init_0
 		CMP #$05
-		BEQ _34AE_CODE
+		BEQ l34AE
 		LDA snake_pos_tbl
-		STA _2686_DATA
-		LDA _2663_DATA
-		STA _2687_DATA
-		JSR _333D_CODE
+		STA d2686
+		LDA d2663
+		STA d2687
+		JSR l333D
 		LDA $2680
-		JSR _32EF_CODE
+		JSR l32EF
 		CMP #$01
-		BNE _349F_CODE
-		JMP _3479_CODE
+		BNE l349F
+		JMP l3479
 
-_349F_CODE:
-		LDA _2686_DATA
+l349F:
+		LDA d2686
 		STA snake_pos_tbl
-		LDA _2687_DATA
-		STA _2663_DATA
-		JMP _34B8_CODE
+		LDA d2687
+		STA d2663
+		JMP l34B8
 
-_34AE_CODE:
+l34AE:
 		LDA #$CB
 		STA snake_pos_tbl
 		LDA #$04
-		STA _2663_DATA
+		STA d2663
 
-_34B8_CODE:
+l34B8:
 		LDX #$00
 
-_34BA_CODE:
+l34BA:
 		LDA $2664, X
 		STA tmp_loc_lo
 		LDA $2665, X
@@ -1600,64 +1600,64 @@ _34BA_CODE:
 		INX 
 		INX 
 		CPX #$08
-		BNE _34BA_CODE
+		BNE l34BA
 		LDA snake_pos_tbl
 		STA tmp_loc_lo
-		LDA _2663_DATA
+		LDA d2663
 		STA tmp_loc_hi
 		LDA #$43
 		STA (tmp_loc_lo), Y
 		LDA #$00
 		STA var7_init_0
-		LDA _2674_DATA
+		LDA d2674
 		STA tmp_loc_lo
-		LDA _2675_DATA
+		LDA d2675
 		STA tmp_loc_hi
 		LDA #$20
 		LDY #$00
 		STA (tmp_loc_lo), Y
 		LDX #$07
 
-_34F3_CODE:
-		LDA _266C_DATA, X
+l34F3:
+		LDA d266C, X
 		STA $266E, X
 		DEX 
 		CPX #$FF
-		BNE _34F3_CODE
+		BNE l34F3
 
-_34FE_CODE:
+l34FE:
 		INC var7_init_0
 		LDA var7_init_0
 		CMP #$05
-		BEQ _3533_CODE
-		LDA _266C_DATA
-		STA _2686_DATA
-		LDA _266D_DATA
-		STA _2687_DATA
-		JSR _333D_CODE
+		BEQ l3533
+		LDA d266C
+		STA d2686
+		LDA d266D
+		STA d2687
+		JSR l333D
 		LDA $2680
-		JSR _32EF_CODE
+		JSR l32EF
 		CMP #$01
-		BNE _3524_CODE
-		JMP _34FE_CODE
+		BNE l3524
+		JMP l34FE
 
-_3524_CODE:
-		LDA _2686_DATA
-		STA _266C_DATA
-		LDA _2687_DATA
-		STA _266D_DATA
-		JMP _353D_CODE
+l3524:
+		LDA d2686
+		STA d266C
+		LDA d2687
+		STA d266D
+		JMP l353D
 
-_3533_CODE:
+l3533:
 		LDA #$75
-		STA _266C_DATA
+		STA d266C
 		LDA #$05
-		STA _266D_DATA
+		STA d266D
 
-_353D_CODE:
+l353D:
 		LDX #$00
 
-_353F_CODE:
+l353F:
 		LDA $266E, X
 		STA tmp_loc_lo
 		LDA $266F, X
@@ -1667,64 +1667,64 @@ _353F_CODE:
 		INX 
 		INX 
 		CPX #$08
-		BNE _353F_CODE
-		LDA _266C_DATA
+		BNE l353F
+		LDA d266C
 		STA tmp_loc_lo
-		LDA _266D_DATA
+		LDA d266D
 		STA tmp_loc_hi
 		LDA #$43
 		STA (tmp_loc_lo), Y
 		LDA #$00
 		STA var7_init_0
-		LDA _267E_DATA
+		LDA d267E
 		STA tmp_loc_lo
-		LDA _267F_DATA
+		LDA d267F
 		STA tmp_loc_hi
 		LDA #$46
 		LDY #$00
 		STA (tmp_loc_lo), Y
 		LDX #$07
 
-_3578_CODE:
-		LDA _2676_DATA, X
+l3578:
+		LDA d2676, X
 		STA $2678, X
 		DEX 
 		CPX #$FF
-		BNE _3578_CODE
+		BNE l3578
 
-_3583_CODE:
+l3583:
 		INC var7_init_0
 		LDA var7_init_0
 		CMP #$05
-		BEQ _35B8_CODE
-		LDA _2676_DATA
-		STA _2686_DATA
-		LDA _2677_DATA
-		STA _2687_DATA
-		JSR _333D_CODE
+		BEQ l35B8
+		LDA d2676
+		STA d2686
+		LDA d2677
+		STA d2687
+		JSR l333D
 		LDA $2680
-		JSR _32EF_CODE
+		JSR l32EF
 		CMP #$01
-		BNE _35A9_CODE
-		JMP _3583_CODE
+		BNE l35A9
+		JMP l3583
 
-_35A9_CODE:
-		LDA _2686_DATA
-		STA _2676_DATA
-		LDA _2687_DATA
-		STA _2677_DATA
-		JMP _35C2_CODE
+l35A9:
+		LDA d2686
+		STA d2676
+		LDA d2687
+		STA d2677
+		JMP l35C2
 
-_35B8_CODE:
+l35B8:
 		LDA #$FB
-		STA _2676_DATA
+		STA d2676
 		LDA #$06
-		STA _2677_DATA
+		STA d2677
 
-_35C2_CODE:
+l35C2:
 		LDX #$00
 
-_35C4_CODE:
+l35C4:
 		LDA $2678, X
 		STA tmp_loc_lo
 		LDA $2679, X
@@ -1734,10 +1734,10 @@ _35C4_CODE:
 		INX 
 		INX 
 		CPX #$08
-		BNE _35C4_CODE
-		LDA _2676_DATA
+		BNE l35C4
+		LDA d2676
 		STA tmp_loc_lo
-		LDA _2677_DATA
+		LDA d2677
 		STA tmp_loc_hi
 		LDA #$43
 		STA (tmp_loc_lo), Y
@@ -1748,48 +1748,48 @@ colorize_maze:
 		LDY #$01
 		LDX #$00
 
-_35EC_CODE:
+l35EC:
 		LDA screen_ram + $50, X
 		CMP #$20
-		BEQ _35FB_CODE
+		BEQ l35FB
 		LDA #$09
 		STA color_ram + $50, X
-		JMP _35FF_CODE
+		JMP l35FF
 
-_35FB_CODE:
+l35FB:
 		TYA 
 		STA color_ram + $50, X
 
-_35FF_CODE:
+l35FF:
 		INY 
 		CPY #$08
-		BNE _3606_CODE
+		BNE l3606
 		LDY #$01
 
-_3606_CODE:
+l3606:
 		INX 
 		CPX #$FF
-		BNE _35EC_CODE
+		BNE l35EC
 
 colorize_maze_2:
 		LDA screen_ram + $14F, X
 		CMP #$20
-		BEQ _361A_CODE
+		BEQ l361A
 		LDA #$09
 		STA color_ram + $14F, X
-		JMP _361E_CODE
+		JMP l361E
 
-_361A_CODE:
+l361A:
 		TYA 
 		STA color_ram + $14F, X
 
-_361E_CODE:
+l361E:
 		INY 
 		CPY #$08
-		BNE _3625_CODE
+		BNE l3625
 		LDY #$01
 
-_3625_CODE:
+l3625:
 		INX 
 		CPX #$FF
 		BNE colorize_maze_2
@@ -1797,22 +1797,22 @@ _3625_CODE:
 colorize_maze_3:
 		LDA screen_ram + $24E, X
 		CMP #$20
-		BEQ _3639_CODE
+		BEQ l3639
 		LDA #$09
 		STA color_ram + $24E, X
-		JMP _363D_CODE
+		JMP l363D
 
-_3639_CODE:
+l3639:
 		TYA 
 		STA color_ram + $24E, X
 
-_363D_CODE:
+l363D:
 		INY 
 		CPY #$08
-		BNE _3644_CODE
+		BNE l3644
 		LDY #$01
 
-_3644_CODE:
+l3644:
 		INX 
 		CPX #$FF
 		BNE colorize_maze_3
@@ -1820,22 +1820,22 @@ _3644_CODE:
 colorize_maze_4:
 		LDA screen_ram + $34D, X
 		CMP #$20
-		BEQ _3658_CODE
+		BEQ l3658
 		LDA #$09
 		STA color_ram + $34D, X
-		JMP _365C_CODE
+		JMP l365C
 
-_3658_CODE:
+l3658:
 		TYA 
 		STA color_ram + $34D, X
 
-_365C_CODE:
+l365C:
 		INY 
 		CPY #$08
-		BNE _3663_CODE
+		BNE l3663
 		LDY #$01
 
-_3663_CODE:
+l3663:
 		INX 
 		CPX #$4B
 		BNE colorize_maze_4
@@ -1852,15 +1852,15 @@ initialize_pointers:
 		STA word_7_048e
 		STA word_8_048e
 		LDA #$04
-		STA _2649_DATA
+		STA d2649
 		STA word_2_048e + $1
 		STA word_3_048e + $1
 		STA word_4_048e + $1
 		STA word_5_048e + $1
 		STA word_6_048e + $1
 		STA word_7_048e + $1
-		STA _2657_DATA
-		STA _2663_DATA
+		STA d2657
+		STA d2663
 		STA $2665
 		STA $2667
 		STA $2669
@@ -1870,13 +1870,13 @@ initialize_pointers:
 		STA snake_pos_tbl_lo
 		STA $265C
 		STA $265E
-		STA _2660_DATA
+		STA d2660
 		LDA #$07
 		STA snk_head_loc_hi
 		STA snake_pos_tbl_hi
 		STA $265D
 		STA $265F
-		STA _2661_DATA
+		STA d2661
 		LDA #$CB
 		STA $2664
 		STA snake_pos_tbl
@@ -1884,29 +1884,29 @@ initialize_pointers:
 		STA $2668
 		STA clear_snake_lo
 		LDA #$75
-		STA _266C_DATA
+		STA d266C
 		STA $266E
 		STA $2670
 		STA $2672
-		STA _2674_DATA
+		STA d2674
 		LDA #$05
-		STA _266D_DATA
+		STA d266D
 		STA $266F
 		STA $2671
 		STA $2673
-		STA _2675_DATA
+		STA d2675
 		LDA #$FB
 		STA $2678
-		STA _2676_DATA
+		STA d2676
 		STA $267A
 		STA $267C
-		STA _267E_DATA
+		STA d267E
 		LDA #$06
 		STA $2679
-		STA _2677_DATA
+		STA d2677
 		STA $267B
 		STA $267D
-		STA _267F_DATA
+		STA d267F
 		RTS 
 
 inc_score_digit_x:
@@ -1914,13 +1914,13 @@ inc_score_digit_x:
 		TAY 
 		INY 
 		CPY #$BA
-		BNE _3736_CODE
+		BNE l3736
 		LDA #$B0
 		STA screen_ram + $14, X
 		DEX 
 		JMP inc_score_digit_x
 
-_3736_CODE:
+l3736:
 		TYA 
 		STA screen_ram + $14, X
 		RTS 
@@ -1981,17 +1981,17 @@ burp_bonus_text:
 		LDA #$FF
 		STA jiffy_timer
 
-_37A2_CODE:
+l37A2:
 		LDA jiffy_timer
-		BMI _37A2_CODE
+		BMI l37A2
 		LDA #$14
 		STA $D401
 		LDA #$FF
 		STA jiffy_timer
 
-_37AF_CODE:
+l37AF:
 		LDA jiffy_timer
-		BMI _37AF_CODE
+		BMI l37AF
 		INX 
 		CPX #$09
 		BNE burp_bonus_text
@@ -1999,7 +1999,7 @@ _37AF_CODE:
 		STA jiffy_timer
 		LDA #$00
 		STA $D401
-		JSR _3D4B_CODE
+		JSR l3D4B
 		NOP 
 		LDX #$00
 
@@ -2012,17 +2012,17 @@ start_next_level:
 		LDA #$C8
 		STA jiffy_timer
 
-_37D6_CODE:
+l37D6:
 		LDA jiffy_timer
-		BMI _37D6_CODE
+		BMI l37D6
 		LDX #$08
 
-_37DC_CODE:
+l37DC:
 		PLA 
 		STA screen_ram + $1C5, X
 		DEX 
 		CPX #$FF
-		BNE _37DC_CODE
+		BNE l37DC
 		SEI 
 		LDA #$27
 		STA $0314
@@ -2042,7 +2042,7 @@ bonus_walk_on_44:
 		STA $D401
 		LDX #$03
 		JSR inc_score_digit_x
-		JMP _382D_CODE
+		JMP l382D
 
 bonus_walk_on_43:
 		CMP #$43
@@ -2053,17 +2053,17 @@ bonus_walk_on_43:
 		JSR inc_score_digit_x
 		LDX #$03
 		JSR inc_score_digit_x
-		JMP _382D_CODE
+		JMP l382D
 
 bonus_walk_on_46:
 		CMP #$46
-		BNE _382D_CODE
+		BNE l382D
 		LDA #$05
 		STA $D401
 		LDX #$04
 		JSR inc_score_digit_x
 
-_382D_CODE:
+l382D:
 		JSR play_next_note
 		NOP 
 		NOP 
@@ -2074,25 +2074,25 @@ _382D_CODE:
 		STA jiffy_timer
 		LDA player_direction
 		CMP #$EF
-		BEQ _3846_CODE
+		BEQ l3846
 		LDY #$00
 		LDA #$00
 		STA (tmp_loc_lo), Y
 
-_3846_CODE:
+l3846:
 		LDY #$00
 		LDA #$51
 		STA (new_loc_lo), Y
 
-_384C_CODE:
+l384C:
 		LDA bonus_timer_digit_1
 		CMP #$AF
-		BNE _3856_CODE
+		BNE l3856
 		JMP end_bonus_round
 
-_3856_CODE:
+l3856:
 		LDA jiffy_timer
-		BMI _384C_CODE
+		BMI l384C
 		LDA #$00
 		STA $D401
 		JMP bonus_round_loop
@@ -2117,27 +2117,27 @@ end_level:
 		INC var_init_b1
 		LDA var_init_b1
 		CMP #$BA
-		BNE _389B_CODE
+		BNE l389B
 		LDA #$B1
-		STA _0423_DATA
+		STA d0423
 		LDA #$B0
 		STA var_init_b1
 
-_389B_CODE:
+l389B:
 		LDA #$00
 		STA dots_eaten
 		JSR initialize_pointers
 		LDX #$00
 
-_38A5_CODE:
+l38A5:
 		LDA get_ready_text, X
 		STA screen_ram + $1C5, X
 		INX 
 		CPX #$09
-		BNE _38A5_CODE
+		BNE l38A5
 		LDX #$00
 
-_38B2_CODE:
+l38B2:
 		LDA voice_1_notes, X
 		STA $D401
 		LDA voice_2_notes, X
@@ -2145,16 +2145,16 @@ _38B2_CODE:
 		LDA #$F6
 		STA jiffy_timer
 
-_38C2_CODE:
+l38C2:
 		LDA jiffy_timer
-		BMI _38C2_CODE
+		BMI l38C2
 		INX 
 		CPX #$1E
-		BNE _38B2_CODE
+		BNE l38B2
 		LDX #$00
 		STA $D408
 
-_38D0_CODE:
+l38D0:
 		LDA bonus_run_text, X
 		STA screen_ram + $1C5, X
 		LDA #$0A
@@ -2164,21 +2164,21 @@ _38D0_CODE:
 		LDA #$FF
 		STA jiffy_timer
 
-_38E4_CODE:
+l38E4:
 		LDA jiffy_timer
-		BMI _38E4_CODE
+		BMI l38E4
 		LDA #$14
 		STA $D401
 		LDA #$FF
 		STA jiffy_timer
 
-_38F1_CODE:
+l38F1:
 		LDA jiffy_timer
-		BMI _38F1_CODE
+		BMI l38F1
 		INX 
 		CPX #$09
-		BNE _38D0_CODE
-		LDA _0423_DATA
+		BNE l38D0
+		LDA d0423
 		STA screen_ram + $1CC
 		LDA var_init_b1
 		STA screen_ram + $1CD
@@ -2191,33 +2191,33 @@ _38F1_CODE:
 		INC level_nr
 		LDA level_nr
 		CMP #$04
-		BNE _391D_CODE
+		BNE l391D
 		LDA #$01
 		STA level_nr
 
-_391D_CODE:
+l391D:
 		CMP #$01
-		BNE _3927_CODE
+		BNE l3927
 		JSR draw_level_1
-		JMP _3934_CODE
+		JMP l3934
 
-_3927_CODE:
+l3927:
 		CMP #$02
-		BNE _3931_CODE
+		BNE l3931
 		JSR draw_level_2
-		JMP _3934_CODE
+		JMP l3934
 
-_3931_CODE:
+l3931:
 		JSR draw_level_3
 
-_3934_CODE:
+l3934:
 		JSR colorize_maze
 		LDA #$02
 		STA $D020
 		JSR set_top_bottom_red
 		LDA #$00
 		STA $D401
-		STA _268F_DATA
+		STA d268F
 		STA var5_init_with_0
 		LDA #$FE
 		STA player_direction
@@ -2231,7 +2231,7 @@ _3934_CODE:
 		STA bon_gy_loc_hi
 		RTS 
 
-_3961_CODE:
+l3961:
 		LDA #$00
 		STA var7_init_0
 		LDA bon_gy_loc_lo
@@ -2242,36 +2242,36 @@ _3961_CODE:
 		LDY #$00
 		STA (tmp_loc_lo), Y
 
-_3976_CODE:
+l3976:
 		INC var7_init_0
 		LDA var7_init_0
 		CMP #$05
-		BEQ _39AB_CODE
+		BEQ l39AB
 		LDA bon_gy_loc_lo
-		STA _2686_DATA
+		STA d2686
 		LDA bon_gy_loc_hi
-		STA _2687_DATA
-		JSR _333D_CODE
+		STA d2687
+		JSR l333D
 		LDA $2680
-		JSR _32EF_CODE
+		JSR l32EF
 		CMP #$01
-		BNE _399C_CODE
-		JMP _3976_CODE
+		BNE l399C
+		JMP l3976
 
-_399C_CODE:
-		LDA _2686_DATA
+l399C:
+		LDA d2686
 		STA bon_gy_loc_lo
-		LDA _2687_DATA
+		LDA d2687
 		STA bon_gy_loc_hi
-		JMP _39B5_CODE
+		JMP l39B5
 
-_39AB_CODE:
+l39AB:
 		LDA #$55
 		STA bon_gy_loc_lo
 		LDA #$07
 		STA bon_gy_loc_hi
 
-_39B5_CODE:
+l39B5:
 		LDA bon_gy_loc_lo
 		STA tmp_loc_lo
 		LDA bon_gy_loc_hi
@@ -2279,39 +2279,39 @@ _39B5_CODE:
 		LDA bonus_guy_char_2
 		LDY #$00
 		STA (tmp_loc_lo), Y
-		INC _268F_DATA
-		LDA _268F_DATA
+		INC d268F
+		LDA d268F
 		CMP #$1E
-		BNE _39D5_CODE
+		BNE l39D5
 		LDA #$01
-		STA _268F_DATA
+		STA d268F
 
-_39D5_CODE:
-		LDX _268F_DATA
+l39D5:
+		LDX d268F
 		LDA voice_1_notes, X
 		STA $D408
 		RTS 
 
-_39DF_CODE:
+l39DF:
 		INC bonus_guy_char
 		LDA bonus_guy_char
 		CMP #$04
-		BNE _39EE_CODE
+		BNE l39EE
 		LDA #$01
 		STA bonus_guy_char
 
-_39EE_CODE:
+l39EE:
 		LDA var5_init_with_0
 		CMP #$00
-		BNE _39F8_CODE
-		JMP _3961_CODE
+		BNE l39F8
+		JMP l3961
 
-_39F8_CODE:
+l39F8:
 		DEC var5_init_with_0
 		LDA var5_init_with_0
 		CLC 
 		CMP #$B4
-		BCC _3A15_CODE
+		BCC l3A15
 		LDY #$00
 		LDA bon_gy_loc_lo
 		STA tmp_loc_lo
@@ -2321,9 +2321,9 @@ _39F8_CODE:
 		STA (tmp_loc_lo), Y
 		RTS 
 
-_3A15_CODE:
+l3A15:
 		CMP #$AA
-		BNE _3A45_CODE
+		BNE l3A45
 		LDA bon_gy_loc_lo
 		STA tmp_loc_lo
 		LDA bon_gy_loc_hi
@@ -2339,42 +2339,42 @@ _3A15_CODE:
 		INC bonus_guy_char_2
 		LDA bonus_guy_char_2
 		CMP #$4B
-		BNE _3A45_CODE
+		BNE l3A45
 		LDA #$47
 		STA bonus_guy_char_2
 
-_3A45_CODE:
+l3A45:
 		RTS 
 
 var_2_stuff:
 		LDA var2_init_with_1
 		CMP #$01
-		BNE _3A51_CODE
-		JSR _3457_CODE
+		BNE l3A51
+		JSR l3457
 		RTS 
 
-_3A51_CODE:
+l3A51:
 		CMP #$02
-		BNE _3A5C_CODE
-		JSR _3457_CODE
-		JSR _39DF_CODE
+		BNE l3A5C
+		JSR l3457
+		JSR l39DF
 		RTS 
 
-_3A5C_CODE:
+l3A5C:
 		CMP #$03
-		BNE _3A67_CODE
-		JSR _33D2_CODE
-		JSR _39DF_CODE
+		BNE l3A67
+		JSR l33D2
+		JSR l39DF
 		RTS 
 
-_3A67_CODE:
+l3A67:
 		CMP #$04
-		BNE _3A72_CODE
-		JSR _334D_CODE
-		JSR _39DF_CODE
+		BNE l3A72
+		JSR l334D
+		JSR l39DF
 		RTS 
 
-_3A72_CODE:
+l3A72:
 		INC some_bonus_timer
 		LDA #$01
 		STA var2_init_with_1
@@ -2390,7 +2390,7 @@ life_lost_handler:
 		STA (new_loc_lo), Y
 		STA (tmp_loc_lo), Y
 
-_3A8F_CODE:
+l3A8F:
 		DEC $D401
 		LDA (new_loc_lo), Y
 		STA tmp_loc_lo
@@ -2399,22 +2399,22 @@ _3A8F_CODE:
 		LDA #$FD
 		STA jiffy_timer
 
-_3A9E_CODE:
+l3A9E:
 		LDA jiffy_timer
-		BMI _3A9E_CODE
+		BMI l3A9E
 		LDA tmp_loc_lo
 		STA (new_loc_lo), Y
 		CLC 
 		LDA new_loc_lo
 		ADC #$28
 		STA new_loc_lo
-		BCC _3AB1_CODE
+		BCC l3AB1
 		INC new_loc_hi
 
-_3AB1_CODE:
+l3AB1:
 		LDA (new_loc_lo), Y
 		CMP #$A0
-		BNE _3A8F_CODE
+		BNE l3A8F
 		LDA #$41
 		STA $D404
 		LDA #$00
@@ -2430,18 +2430,18 @@ _3AB1_CODE:
 		STA $D022
 		STA $D023
 
-_3AD8_CODE:
+l3AD8:
 		INC $D022
 		INC $D023
 		LDA #$FF
 		STA jiffy_timer
 
-_3AE2_CODE:
+l3AE2:
 		LDA jiffy_timer
-		BMI _3AE2_CODE
-		JSR _3C8D_CODE
+		BMI l3AE2
+		JSR l3C8D
 		CMP #$0F
-		BNE _3AD8_CODE
+		BNE l3AD8
 		LDA #$06
 		STA $D022
 		STA $D023
@@ -2452,9 +2452,9 @@ _3AE2_CODE:
 		LDA #$81
 		STA jiffy_timer
 
-_3B03_CODE:
+l3B03:
 		LDA jiffy_timer
-		BMI _3B03_CODE
+		BMI l3B03
 		LDA #$EF
 		STA player_direction
 		RTS 
@@ -2464,7 +2464,7 @@ restart_to_title:
 		LDA #$00
 		STA $D401
 		STA $D408
-		JSR _3266_CODE
+		JSR l3266
 		JMP reset_everything
 
 entry:
@@ -2620,18 +2620,18 @@ player_not_moving:
 		LDA some_bonus_timer
 		STA jiffy_timer
 
-_3C5B_CODE:
+l3C5B:
 		LDA jiffy_timer
-		BMI _3C5B_CODE
+		BMI l3C5B
 		LDA #$00
 		STA $D408
 		STA $D401
 		LDA last_key_pressed
 		CMP #$04
-		BNE _3C70_CODE
+		BNE l3C70
 		JSR pause
 
-_3C70_CODE:
+l3C70:
 		JMP game_loop
 
 pause:
@@ -2640,40 +2640,40 @@ pause:
 		LDA #$81
 		STA jiffy_timer
 
-_3C7C_CODE:
+l3C7C:
 		LDA jiffy_timer
-		BMI _3C7C_CODE
+		BMI l3C7C
 
-_3C80_CODE:
+l3C80:
 		LDA $DC01
 		CMP #$EF
-		BNE _3C80_CODE
+		BNE l3C80
 		LDA #$0F
 		STA $D418
 		RTS 
 
-_3C8D_CODE:
+l3C8D:
 		LDA $D023
 		AND #$0F
 		RTS 
 
-_3C93_CODE:
-		LDA _2686_DATA
+l3C93:
+		LDA d2686
 		STA tmp_loc_lo
-		LDA _2687_DATA
+		LDA d2687
 		STA tmp_loc_hi
 		LDY #$00
 		LDA (tmp_loc_lo), Y
 		CMP #$20
-		BEQ _3CB0_CODE
+		BEQ l3CB0
 		CMP #$51
-		BEQ _3CB0_CODE
+		BEQ l3CB0
 		CMP #$46
-		BEQ _3CB0_CODE
+		BEQ l3CB0
 		LDA #$01
 		RTS 
 
-_3CB0_CODE:
+l3CB0:
 		LDA #$00
 		RTS 
 
@@ -2718,7 +2718,7 @@ animate_charset:
 		JSR animate_player_chars
 
 skip_irq:
-		JMP _EA31_CODE
+		JMP lEA31
 
 setup_irq:
 		SEI 
@@ -2734,27 +2734,27 @@ countdown_irq:
 		DEC bonus_timer_digit_3
 		LDA bonus_timer_digit_3
 		CMP #$AF
-		BNE _3D48_CODE
+		BNE l3D48
 		LDA #$B9
 		STA bonus_timer_digit_3
 		DEC bonus_timer_digit_2
 		LDA bonus_timer_digit_2
 		CMP #$AF
-		BNE _3D48_CODE
+		BNE l3D48
 		LDA #$B9
 		STA bonus_timer_digit_2
 		DEC bonus_timer_digit_1
 
-_3D48_CODE:
-		JMP _EA31_CODE
+l3D48:
+		JMP lEA31
 
-_3D4B_CODE:
+l3D4B:
 		LDA #$81
 		STA jiffy_timer
 
-_3D4F_CODE:
+l3D4F:
 		LDA jiffy_timer
-		BMI _3D4F_CODE
+		BMI l3D4F
 		LDA #$00
 		STA note_idx
 		STA $2693
@@ -2766,10 +2766,10 @@ play_next_note:
 		STA $D408
 		INX 
 		CPX #$FF
-		BNE _3D6C_CODE
+		BNE l3D6C
 		LDX #$00
 
-_3D6C_CODE:
+l3D6C:
 		STX note_idx
 		RTS 
 *=$3D76
@@ -2781,9 +2781,9 @@ quiet:
 		LDA #$81
 		STA jiffy_timer
 
-_3D82_CODE:
+l3D82:
 		LDA jiffy_timer
-		BMI _3D82_CODE
+		BMI l3D82
 		RTS 
 *=$3DB8
 
@@ -2825,7 +2825,7 @@ voice_2_notes:
 		.byte	$3C
 *=$D023
 
-_D023_DATA:
+dD023:
 
 .virtual $D800
 color_ram:
@@ -2834,8 +2834,8 @@ color_ram:
 
 *=$DC01
 
-_DC01_DATA:
+dDC01:
 *=$EA31
 
-_EA31_CODE:
+lEA31:
 		BRK 

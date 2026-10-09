@@ -221,7 +221,7 @@ class Subject {
     public void addPotentialCodeLocation(int address, boolean labelIt, int referencingAddress) {
         MemoryLocation location = memory[address];
         if (labelIt) {
-            ensureLabelled(address, "CODE", referencingAddress);
+            ensureLabelled(address, "l", referencingAddress);
         }
         if (location.area == null) {
             potentialCodeLocations.add(address);
@@ -231,7 +231,7 @@ class Subject {
     public void ensureLabelled(int address, String contentHint, int referencedFromAddress) {
         MemoryLocation location = memory[address];
         if (location.label == null) {
-            location.label = String.format("_%04X_%s", address, contentHint);
+            location.label = String.format("%s%04X", contentHint, address);
             System.out.println("Unnamed target: " + location.label + " from address " + asHexWord(referencedFromAddress));
         }
     }

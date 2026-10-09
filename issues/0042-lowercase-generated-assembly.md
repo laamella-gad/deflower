@@ -11,7 +11,7 @@ Directives are already lowercase (`.byte`/`.word`/`.dword`/`.addr`, issue 0036/c
 - **Hex digits in `$`-prefixed literals** - `Printing.asHexByte`/`asHexWord`/`asHexDword`/`asAddress` all use `%02X`/`%04X`/`%08X` (uppercase hex digits), used throughout for immediate values, absolute addresses, and raw `.byte` dumps.
 
 Not in scope - must stay exactly as-is, since they're either user-supplied or raw data, not generated syntax:
-- Labels (`.flo`-given names, and auto-generated `_XXXX_DATA`/`_XXXX_CODE`/`_XXXX_POINTER` - the latter's own casing is a separate, deliberate convention, not assembler syntax).
+- Labels (`.flo`-given names, and auto-generated `dXXXX`/`lXXXX`/`pXXXX` - the latter's own casing is a separate, deliberate convention, not assembler syntax).
 - Comments (carried verbatim from `.flo` comment lines).
 - Character literals (`asChar`'s `'A'`-style quoting) - that's the actual byte value being rendered, not generated syntax around it.
 

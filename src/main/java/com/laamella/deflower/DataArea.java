@@ -79,7 +79,7 @@ class DataArea extends Area {
      * <p>
      * A label set directly on this exact address - via the .flo line's
      * own name, or an auto-label like {@code ensureLabelled} assigns
-     * (`_XXXX_POINTER`, `_XXXX_DATA`) - always wins outright: those don't
+     * (`pXXXX`, `dXXXX`) - always wins outright: those don't
      * go through the array mechanism at all (`FlowAnalyser`'s POINTER
      * areas, for instance, have no arrayLabel). Only once that's absent
      * do we fall back to the baked-in array reference.
