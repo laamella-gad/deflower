@@ -64,3 +64,4 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0041](0041-user-declarable-address-pointer-type.md) | open | Allow annotating a `.flo` line with type `address`/`pointer` |
 | [0042](0042-lowercase-generated-assembly.md) | open | Generate lowercase assembly output (except user labels/comments) |
 | [0043](0043-error-on-duplicate-label-definition.md) | open | Report an error when the same label is defined at two addresses |
+| [0044](0044-array-size-arithmetic-and-hex.md) | open | Allow hex values and `*`/`+` arithmetic inside `[n]` array sizes |
