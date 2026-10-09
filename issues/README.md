@@ -50,7 +50,7 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0027](0027-label-mid-block-fragments-byte-output.md) | done | A label in the middle of a data block breaks up its .BYTE output |
 | [0028](0028-mid-block-labels-as-address-defines.md) | open | Emit a label inside a larger area as an address define, not inline |
 | [0029](0029-first-label-in-run-still-glued.md) | done | First label of a run still glues onto its .BYTE line, inconsistent with the rest of the run |
-| [0030](0030-ai-friendliness-of-flo-grammar.md) | open | Investigate whether the .flo format/grammar is easy to use, including for an AI writing it |
+| [0030](0030-ai-friendliness-of-flo-grammar.md) | done | Investigate whether the .flo format/grammar is easy to use, including for an AI writing it |
 | [0031](0031-carving-specific-types-out-of-unknown-data-is-a-conflict.md) | done | Carving a specific type out of a placeholder data block is reported as a conflict, blocking output |
 | [0032](0032-modernize-squirm-flo.md) | done | squirm.flo was written for an older version of deflower and needs modernizing |
 | [0033](0033-array-elements-carry-own-label-reference.md) | done | Follow-up to 0026 - give each array element its own label reference instead of scanning for one |
@@ -70,3 +70,5 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0047](0047-null-and-ptext-string-directives.md) | open | Emit `.null`/`.ptext` for null-terminated and length-prefixed strings |
 | [0048](0048-refactor-resultwriter.md) | done | Refactor ResultWriter - it is doing too much |
 | [0049](0049-refactor-subjectconfigurer.md) | done | Refactor SubjectConfigurer - it is doing too much |
+| [0050](0050-fixed-flo-line-shape.md) | open | Give .flo annotation lines a fixed shape in the grammar |
+| [0051](0051-document-flo-format.md) | open | Document the .flo line shape and keywords authoritatively |

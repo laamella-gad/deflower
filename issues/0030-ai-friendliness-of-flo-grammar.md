@@ -1,6 +1,6 @@
 ---
 title: Investigate whether the .flo format/grammar is easy to use, including for an AI writing it
-status: open
+status: done
 labels: enhancement
 ---
 
@@ -26,3 +26,23 @@ Findings from reading the grammar and real fixtures (`squirm.flo`, `zwark.flo`):
 None of this is necessarily wrong for a human who already knows the convention by heart (as the project's `.flo` files show, it's workable), but it's the kind of looseness that specifically hurts an AI trying to generate or edit `.flo` lines from the `.asm` output without already having memorized the unwritten convention: no parse errors to react to, silent overwrites instead of conflicts, and decorative words that look meaningful but aren't.
 
 Done when: a decision is made on whether to (a) tighten the grammar to give structural errors for the cases above (duplicate datatype/label on one line, unrecognized bare word where a keyword might be expected), (b) document the actual line shape and reserved words explicitly (e.g. in CLAUDE.md or a grammar comment) so an AI has something authoritative to generate against instead of inferring convention from examples, or (c) both - and, if any, follow-up issues are filed for the concrete changes.
+
+## Closing note
+
+Re-checked against the current grammar (after 0044, 0046 and 0049):
+- Findings 1 and 2 still hold: lines are free-form `expr+`, and a repeated part silently overwrites the earlier one.
+- Finding 3 still holds in the grammar, though the fixtures' throwaway words are gone: `system` became `virtual`, and the `data`/`bytes` lines were cleaned up.
+- Finding 4: `{ }` and `export` are still unused and ignored.
+- Finding 5 is harmless. A keyword always beats a label, so a label named `byte` is a parse error.
+
+Every real fixture line already fits `address-or-range [virtual] [type[size]] [label]`.
+
+The user decided:
+- **both** tighten and document (option c);
+- tighten to a **fixed order**;
+- **keep** `export ID` and `{`/`}`;
+- file follow-ups instead of implementing here.
+
+Follow-ups:
+- [0050](0050-fixed-flo-line-shape.md): a fixed line shape in the grammar, with parse errors for duplicates, wrong order, stray words and a missing address.
+- [0051](0051-document-flo-format.md): document the line shape and reserved words in `Flo.g4` and `CLAUDE.md`.
