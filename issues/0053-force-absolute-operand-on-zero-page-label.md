@@ -11,3 +11,5 @@ Found while doing issue 0015, which labels absolute data references, including o
 Fix: in `AssemblyFileFormat.printInstruction`, write such an operand with 64tass's `@w` prefix (`ISC @w d00FF, X`), which forces the 16-bit form.
 
 Done when: an absolute operand below `$100` that prints as a label carries `@w`, and a fixture shows it reassembles to the original bytes.
+
+Not only labels: 64tass shortens a plain numeric absolute operand below `$100` too. zwark's `ISC $0000, X` at `$FFE1` already assembled as 2 bytes before 0015, which put the next label, `lFFE4`, at `$FFE3`. So the fix should cover every absolute-mode operand below `$100`, numeric or label.

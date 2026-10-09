@@ -35,7 +35,7 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0012](0012-printing-bounds-off-by-one.md) | done | Printing bounds checks admit out-of-range values |
 | [0013](0013-asHexDword-always-throws.md) | done | `asHexDword` always throws |
 | [0014](0014-storeAt-no-bounds-check.md) | open | `storeAt` does not check bounds |
-| [0015](0015-lda-labelling-only-absolute.md) | open | LDA labels data only for absolute addressing |
+| [0015](0015-lda-labelling-only-absolute.md) | done | LDA labels data only for absolute addressing |
 | [0016](0016-duplicate-path-resolution.md) | done | Snapshot path is resolved twice |
 | [0017](0017-annotations-applied-as-side-effects-during-parse.md) | done | Annotations are applied as side effects during the parse walk |
 | [0018](0018-area-conflicts-silently-overwritten.md) | done | Area conflicts are silently overwritten |

@@ -1,4 +1,7 @@
 
+*=$033F
+
+d033F:
 *=$C000
 
 entry_a:
@@ -11,7 +14,7 @@ entry_a:
 		NOP 
 		STA $FE
 		STA $FF
-		LDX $033F
+		LDX d033F
 
 lC015:
 		BEQ lC028
@@ -36,14 +39,14 @@ lC02A:
 		LSR 
 		LSR 
 		TAY 
-		LDA $C076, Y
+		LDA dC076, Y
 		LDY $FE
 		STA ($FC), Y
 		LDY #$00
 		LDA ($FA), Y
 		AND #$0F
 		TAY 
-		LDA $C080, Y
+		LDA dC080, Y
 		INC $FE
 		LDY $FE
 		STA ($FC), Y
@@ -74,6 +77,12 @@ lC069:
 		CPX #$18
 		BCC lC028
 		RTS 
+*=$C076
+
+dC076:
+*=$C080
+
+dC080:
 *=$C40E
 
 lC40E:

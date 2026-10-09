@@ -20,10 +20,16 @@ tmp_loc_lo:		.byte	?
 tmp_loc_hi:		.byte	?
 .endv
 
+*=$0314
+
+d0314:
+*=$0315
+
+d0315:
+
 .virtual $0400
 screen_ram:
-		.fill	35
-d0423:		.byte	?
+		.fill	36
 var_init_b1:
 		.fill	817
 bonus_guy_2_start:
@@ -619,8 +625,6 @@ l2544:
 
 word_1_048e:
 		.word	$048E
-
-d2649:
 word_2_048e:		.word	$048E
 word_3_048e:		.word	$048E
 word_4_048e:		.word	$048E
@@ -629,14 +633,17 @@ word_6_048e:		.word	$048E
 word_7_048e:		.word	$048E
 word_8_048e:		.word	$048E
 
-d2657:
-
 snk_head_loc_lo:
 		.byte	$E0
 snk_head_loc_hi:		.byte	$05
 snake_pos_tbl_lo:		.byte	$E1
 snake_pos_tbl_hi:		.byte	$05
-		.byte	$09, $06, $31, $06
+
+d265C:
+		.byte	$09
+d265D:		.byte	$06
+d265E:		.byte	$31
+d265F:		.byte	$06
 d2660:		.byte	$59
 d2661:		.byte	$06
 
@@ -644,7 +651,13 @@ snake_pos_tbl:
 		.byte	$41
 
 d2663:
-		.byte	$05, $19, $05, $F1, $04, $F2, $04
+		.byte	$05
+d2664:		.byte	$19
+d2665:		.byte	$05
+d2666:		.byte	$F1
+d2667:		.byte	$04
+d2668:		.byte	$F2
+d2669:		.byte	$04
 
 clear_snake_lo:
 		.byte	$F3
@@ -652,13 +665,23 @@ clear_snake_hi:		.byte	$04
 
 d266C:
 		.byte	$D3
-d266D:
-		.byte	$05, $D2, $05, $D1, $05, $D0, $05
+d266D:		.byte	$05
+d266E:		.byte	$D2
+d266F:		.byte	$05
+d2670:		.byte	$D1
+d2671:		.byte	$05
+d2672:		.byte	$D0
+d2673:		.byte	$05
 d2674:		.byte	$CF
 d2675:		.byte	$05
 d2676:		.byte	$5B
-d2677:
-		.byte	$06, $83, $06, $AB, $06, $D3, $06
+d2677:		.byte	$06
+d2678:		.byte	$83
+d2679:		.byte	$06
+d267A:		.byte	$AB
+d267B:		.byte	$06
+d267C:		.byte	$D3
+d267D:		.byte	$06
 d267E:		.byte	$FB
 d267F:		.byte	$06
 
@@ -694,6 +717,8 @@ dots_eaten:
 		.byte	$00
 bonus_points_char:		.byte	$4D
 note_idx:		.byte	$97
+
+d2693:
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00
 
@@ -974,7 +999,7 @@ try_move:
 		STA tmp_loc_lo
 		LDA new_loc_hi
 		STA tmp_loc_hi
-		LDA $DC01
+		LDA dDC01
 		CMP player_direction
 		BEQ l308B
 		STA joy_dir_for_move
@@ -1005,8 +1030,8 @@ sfx_hi_char_entry:
 		LDX #$0F
 
 l30A4:
-		STX $D418
-		STX $D403
+		STX dD418
+		STX dD403
 		LDA #$FA
 		STA jiffy_timer
 
@@ -1085,7 +1110,7 @@ l3113:
 l3120:
 		LDA jiffy_timer
 		BMI l3120
-		LDA $DC01
+		LDA dDC01
 		CMP #$F7
 		BEQ l3136
 		CMP #$FB
@@ -1122,7 +1147,7 @@ l315A:
 		STA screen_ram + $23E, Y
 		INY 
 		STX tmp_loc_hi
-		STA $D401
+		STA dD401
 		JSR sfx_hi_char_entry
 		LDX tmp_loc_hi
 		CPY #$03
@@ -1131,7 +1156,7 @@ l315A:
 
 l3179:
 		LDA #$0A
-		STA $D401
+		STA dD401
 		JSR sfx_hi_char_entry
 		LDX #$00
 
@@ -1165,7 +1190,7 @@ l319A:
 		CPX #$0A
 		BNE l319A
 		LDA #$14
-		STA $D401
+		STA dD401
 		JSR sfx_hi_char_entry
 		LDX #$00
 
@@ -1199,7 +1224,7 @@ l31CE:
 		CPX #$0A
 		BNE l31CE
 		LDA #$1E
-		STA $D401
+		STA dD401
 		JSR sfx_hi_char_entry
 		LDX #$00
 
@@ -1233,7 +1258,7 @@ l3202:
 		CPX #$0A
 		BNE l3202
 		LDA #$28
-		STA $D401
+		STA dD401
 		JSR sfx_hi_char_entry
 		LDX #$00
 
@@ -1277,29 +1302,29 @@ l324B:
 		BNE l324B
 		JSR set_top_bottom_text
 		LDA #$50
-		STA $D401
+		STA dD401
 		JSR sfx_hi_char_entry
 		JMP move_hi_from_scr_to_
 
 l3266:
 		LDA #$06
 		JSR set_top_bottom_red
-		STA $D020
+		STA dD020
 		LDA #$C8
-		STA $D016
+		STA dD016
 		LDA #$0A
-		STA $D403
-		STA $D402
+		STA dD403
+		STA dD402
 		JSR l241C
 		JSR color_lines
 		LDA #$41
-		STA $D404
+		STA dD404
 		JSR update_hi
 		LDA #$0A
-		STA $D401
-		STA $D403
+		STA dD401
+		STA dD403
 		LDA #$0F
-		STA $D418
+		STA dD418
 		LDA #$F6
 		STA jiffy_timer
 
@@ -1315,7 +1340,7 @@ l32A0:
 		CPX #$13
 		BNE l32A0
 		LDA #$1E
-		STA $D401
+		STA dD401
 		LDA #$F0
 		STA jiffy_timer
 
@@ -1323,13 +1348,13 @@ l32B4:
 		LDA jiffy_timer
 		BMI l32B4
 		LDA #$00
-		STA $D401
+		STA dD401
 		LDA #$02
 		JSR set_top_bottom_red
-		STA $D020
+		STA dD020
 
 l32C5:
-		LDA $DC01
+		LDA dDC01
 		CMP #$EF
 		BEQ l32CF
 		JMP l32C5
@@ -1391,12 +1416,12 @@ l333A:
 		JMP l32D2
 
 l333D:
-		INC $2680
-		LDA $2680
+		INC d2680
+		LDA d2680
 		CMP #$05
 		BNE l334C
 		LDA #$01
-		STA $2680
+		STA d2680
 
 l334C:
 		RTS 
@@ -1406,7 +1431,7 @@ l334D:
 		STA var7_init_0
 		LDA word_8_048e
 		STA tmp_loc_lo
-		LDA d2657
+		LDA word_8_048e + $1
 		STA tmp_loc_hi
 		LDA #$46
 		LDY #$00
@@ -1427,10 +1452,10 @@ l336F:
 		BEQ l33A4
 		LDA word_1_048e
 		STA d2686
-		LDA d2649
+		LDA word_1_048e + $1
 		STA d2687
 		JSR l333D
-		LDA $2680
+		LDA d2680
 		JSR l32EF
 		CMP #$01
 		BNE l3395
@@ -1440,14 +1465,14 @@ l3395:
 		LDA d2686
 		STA word_1_048e
 		LDA d2687
-		STA d2649
+		STA word_1_048e + $1
 		JMP l33AE
 
 l33A4:
 		LDA #$8E
 		STA word_1_048e
 		LDA #$04
-		STA d2649
+		STA word_1_048e + $1
 
 l33AE:
 		LDX #$00
@@ -1465,7 +1490,7 @@ l33B0:
 		BNE l33B0
 		LDA word_1_048e
 		STA tmp_loc_lo
-		LDA d2649
+		LDA word_1_048e + $1
 		STA tmp_loc_hi
 		LDA #$43
 		STA (tmp_loc_lo), Y
@@ -1499,7 +1524,7 @@ l33F4:
 		LDA snk_head_loc_hi
 		STA d2687
 		JSR l333D
-		LDA $2680
+		LDA d2680
 		JSR l32EF
 		CMP #$01
 		BNE l341A
@@ -1553,7 +1578,7 @@ l3457:
 
 rotate_snake_pos:
 		LDA snake_pos_tbl, X
-		STA $2664, X
+		STA d2664, X
 		DEX 
 		CPX #$FF
 		BNE rotate_snake_pos
@@ -1568,7 +1593,7 @@ l3479:
 		LDA d2663
 		STA d2687
 		JSR l333D
-		LDA $2680
+		LDA d2680
 		JSR l32EF
 		CMP #$01
 		BNE l349F
@@ -1591,9 +1616,9 @@ l34B8:
 		LDX #$00
 
 l34BA:
-		LDA $2664, X
+		LDA d2664, X
 		STA tmp_loc_lo
-		LDA $2665, X
+		LDA d2665, X
 		STA tmp_loc_hi
 		LDA #$44
 		STA (tmp_loc_lo), Y
@@ -1620,7 +1645,7 @@ l34BA:
 
 l34F3:
 		LDA d266C, X
-		STA $266E, X
+		STA d266E, X
 		DEX 
 		CPX #$FF
 		BNE l34F3
@@ -1635,7 +1660,7 @@ l34FE:
 		LDA d266D
 		STA d2687
 		JSR l333D
-		LDA $2680
+		LDA d2680
 		JSR l32EF
 		CMP #$01
 		BNE l3524
@@ -1658,9 +1683,9 @@ l353D:
 		LDX #$00
 
 l353F:
-		LDA $266E, X
+		LDA d266E, X
 		STA tmp_loc_lo
-		LDA $266F, X
+		LDA d266F, X
 		STA tmp_loc_hi
 		LDA #$44
 		STA (tmp_loc_lo), Y
@@ -1687,7 +1712,7 @@ l353F:
 
 l3578:
 		LDA d2676, X
-		STA $2678, X
+		STA d2678, X
 		DEX 
 		CPX #$FF
 		BNE l3578
@@ -1702,7 +1727,7 @@ l3583:
 		LDA d2677
 		STA d2687
 		JSR l333D
-		LDA $2680
+		LDA d2680
 		JSR l32EF
 		CMP #$01
 		BNE l35A9
@@ -1725,9 +1750,9 @@ l35C2:
 		LDX #$00
 
 l35C4:
-		LDA $2678, X
+		LDA d2678, X
 		STA tmp_loc_lo
-		LDA $2679, X
+		LDA d2679, X
 		STA tmp_loc_hi
 		LDA #$44
 		STA (tmp_loc_lo), Y
@@ -1852,60 +1877,60 @@ initialize_pointers:
 		STA word_7_048e
 		STA word_8_048e
 		LDA #$04
-		STA d2649
+		STA word_1_048e + $1
 		STA word_2_048e + $1
 		STA word_3_048e + $1
 		STA word_4_048e + $1
 		STA word_5_048e + $1
 		STA word_6_048e + $1
 		STA word_7_048e + $1
-		STA d2657
+		STA word_8_048e + $1
 		STA d2663
-		STA $2665
-		STA $2667
-		STA $2669
+		STA d2665
+		STA d2667
+		STA d2669
 		STA clear_snake_hi
 		LDA #$55
 		STA snk_head_loc_lo
 		STA snake_pos_tbl_lo
-		STA $265C
-		STA $265E
+		STA d265C
+		STA d265E
 		STA d2660
 		LDA #$07
 		STA snk_head_loc_hi
 		STA snake_pos_tbl_hi
-		STA $265D
-		STA $265F
+		STA d265D
+		STA d265F
 		STA d2661
 		LDA #$CB
-		STA $2664
+		STA d2664
 		STA snake_pos_tbl
-		STA $2666
-		STA $2668
+		STA d2666
+		STA d2668
 		STA clear_snake_lo
 		LDA #$75
 		STA d266C
-		STA $266E
-		STA $2670
-		STA $2672
+		STA d266E
+		STA d2670
+		STA d2672
 		STA d2674
 		LDA #$05
 		STA d266D
-		STA $266F
-		STA $2671
-		STA $2673
+		STA d266F
+		STA d2671
+		STA d2673
 		STA d2675
 		LDA #$FB
-		STA $2678
+		STA d2678
 		STA d2676
-		STA $267A
-		STA $267C
+		STA d267A
+		STA d267C
 		STA d267E
 		LDA #$06
-		STA $2679
+		STA d2679
 		STA d2677
-		STA $267B
-		STA $267D
+		STA d267B
+		STA d267D
 		STA d267F
 		RTS 
 
@@ -1932,7 +1957,7 @@ bonus_guy_hit_handle:
 
 no_bonus:
 		LDA #$0A
-		STA $D401
+		STA dD401
 		LDA #$C8
 		STA var5_init_with_0
 		LDA #$4D
@@ -1945,7 +1970,7 @@ bonus_10_points:
 		LDX #$04
 		JSR inc_score_digit_x
 		LDA #$14
-		STA $D401
+		STA dD401
 		LDA #$4C
 		STA bonus_points_char
 		LDA #$C8
@@ -1956,7 +1981,7 @@ bonus_100_points:
 		LDX #$03
 		JSR inc_score_digit_x
 		LDA #$5A
-		STA $D401
+		STA dD401
 		LDA #$4B
 		STA bonus_points_char
 		LDA #$C8
@@ -1965,7 +1990,7 @@ bonus_100_points:
 
 bonus_round:
 		LDA #$07
-		STA $D020
+		STA dD020
 		JSR set_top_bottom_red
 		LDA #$B9
 		STA bonus_timer_digit_1
@@ -1977,7 +2002,7 @@ burp_bonus_text:
 		LDA bonus_text, X
 		STA screen_ram + $1C5, X
 		LDA #$0A
-		STA $D401
+		STA dD401
 		LDA #$FF
 		STA jiffy_timer
 
@@ -1985,7 +2010,7 @@ l37A2:
 		LDA jiffy_timer
 		BMI l37A2
 		LDA #$14
-		STA $D401
+		STA dD401
 		LDA #$FF
 		STA jiffy_timer
 
@@ -1998,7 +2023,7 @@ l37AF:
 		LDA #$81
 		STA jiffy_timer
 		LDA #$00
-		STA $D401
+		STA dD401
 		JSR l3D4B
 		NOP 
 		LDX #$00
@@ -2025,9 +2050,9 @@ l37DC:
 		BNE l37DC
 		SEI 
 		LDA #$27
-		STA $0314
+		STA d0314
 		LDA #$3D
-		STA $0315
+		STA d0315
 		CLI 
 
 bonus_round_loop:
@@ -2039,7 +2064,7 @@ bonus_walk_on_44:
 		CMP #$44
 		BNE bonus_walk_on_43
 		LDA #$32
-		STA $D401
+		STA dD401
 		LDX #$03
 		JSR inc_score_digit_x
 		JMP l382D
@@ -2048,7 +2073,7 @@ bonus_walk_on_43:
 		CMP #$43
 		BNE bonus_walk_on_46
 		LDA #$46
-		STA $D401
+		STA dD401
 		LDX #$03
 		JSR inc_score_digit_x
 		LDX #$03
@@ -2059,7 +2084,7 @@ bonus_walk_on_46:
 		CMP #$46
 		BNE l382D
 		LDA #$05
-		STA $D401
+		STA dD401
 		LDX #$04
 		JSR inc_score_digit_x
 
@@ -2094,14 +2119,14 @@ l3856:
 		LDA jiffy_timer
 		BMI l384C
 		LDA #$00
-		STA $D401
+		STA dD401
 		JMP bonus_round_loop
 
 end_bonus_round:
 		JSR setup_irq
 		LDA #$00
-		STA $D401
-		STA $D408
+		STA dD401
+		STA dD408
 		LDA #$B0
 		STA bonus_timer_digit_1
 		STA bonus_timer_digit_2
@@ -2110,8 +2135,8 @@ end_bonus_round:
 
 end_level:
 		LDA #$00
-		STA $D401
-		STA $D408
+		STA dD401
+		STA dD408
 		JSR bonus_round
 		INC var2_init_with_1
 		INC var_init_b1
@@ -2119,7 +2144,7 @@ end_level:
 		CMP #$BA
 		BNE l389B
 		LDA #$B1
-		STA d0423
+		STA screen_ram + $23
 		LDA #$B0
 		STA var_init_b1
 
@@ -2139,9 +2164,9 @@ l38A5:
 
 l38B2:
 		LDA voice_1_notes, X
-		STA $D401
+		STA dD401
 		LDA voice_2_notes, X
-		STA $D408
+		STA dD408
 		LDA #$F6
 		STA jiffy_timer
 
@@ -2152,13 +2177,13 @@ l38C2:
 		CPX #$1E
 		BNE l38B2
 		LDX #$00
-		STA $D408
+		STA dD408
 
 l38D0:
 		LDA bonus_run_text, X
 		STA screen_ram + $1C5, X
 		LDA #$0A
-		STA $D401
+		STA dD401
 		LDA #$01
 		STA color_ram + $1C5, X
 		LDA #$FF
@@ -2168,7 +2193,7 @@ l38E4:
 		LDA jiffy_timer
 		BMI l38E4
 		LDA #$14
-		STA $D401
+		STA dD401
 		LDA #$FF
 		STA jiffy_timer
 
@@ -2178,7 +2203,7 @@ l38F1:
 		INX 
 		CPX #$09
 		BNE l38D0
-		LDA d0423
+		LDA screen_ram + $23
 		STA screen_ram + $1CC
 		LDA var_init_b1
 		STA screen_ram + $1CD
@@ -2213,10 +2238,10 @@ l3931:
 l3934:
 		JSR colorize_maze
 		LDA #$02
-		STA $D020
+		STA dD020
 		JSR set_top_bottom_red
 		LDA #$00
-		STA $D401
+		STA dD401
 		STA d268F
 		STA var5_init_with_0
 		LDA #$FE
@@ -2252,7 +2277,7 @@ l3976:
 		LDA bon_gy_loc_hi
 		STA d2687
 		JSR l333D
-		LDA $2680
+		LDA d2680
 		JSR l32EF
 		CMP #$01
 		BNE l399C
@@ -2289,7 +2314,7 @@ l39B5:
 l39D5:
 		LDX d268F
 		LDA voice_1_notes, X
-		STA $D408
+		STA dD408
 		RTS 
 
 l39DF:
@@ -2382,16 +2407,16 @@ l3A72:
 
 life_lost_handler:
 		LDA #$81
-		STA $D404
+		STA dD404
 		LDA #$14
-		STA $D401
+		STA dD401
 		LDA #$20
 		LDY #$00
 		STA (new_loc_lo), Y
 		STA (tmp_loc_lo), Y
 
 l3A8F:
-		DEC $D401
+		DEC dD401
 		LDA (new_loc_lo), Y
 		STA tmp_loc_lo
 		LDA #$51
@@ -2416,10 +2441,10 @@ l3AB1:
 		CMP #$A0
 		BNE l3A8F
 		LDA #$41
-		STA $D404
+		STA dD404
 		LDA #$00
-		STA $D408
-		STA $D401
+		STA dD408
+		STA dD401
 		LDA #$E0
 		STA new_loc_lo
 		STA tmp_loc_lo
@@ -2427,12 +2452,12 @@ l3AB1:
 		STA new_loc_hi
 		STA tmp_loc_hi
 		LDA #$00
-		STA $D022
-		STA $D023
+		STA dD022
+		STA dD023
 
 l3AD8:
-		INC $D022
-		INC $D023
+		INC dD022
+		INC dD023
 		LDA #$FF
 		STA jiffy_timer
 
@@ -2443,8 +2468,8 @@ l3AE2:
 		CMP #$0F
 		BNE l3AD8
 		LDA #$06
-		STA $D022
-		STA $D023
+		STA dD022
+		STA dD023
 		LDA #$81
 		LDX lives
 		LDA #$A0
@@ -2462,46 +2487,46 @@ l3B03:
 restart_to_title:
 		JSR life_lost_handler
 		LDA #$00
-		STA $D401
-		STA $D408
+		STA dD401
+		STA dD408
 		JSR l3266
 		JMP reset_everything
 
 entry:
 		JSR setup_irq
 		LDA #$1A
-		STA $D018
+		STA dD018
 
 reset_everything:
 		LDA #$00
-		STA $D021
-		STA $D401
-		STA $D408
-		STA $D412
+		STA dD021
+		STA dD401
+		STA dD408
+		STA dD412
 		LDA #$88
-		STA $D405
-		STA $D406
-		STA $D40C
-		STA $D40D
+		STA dD405
+		STA dD406
+		STA dD40C
+		STA dD40D
 		LDA #$41
-		STA $D404
-		STA $D40B
+		STA dD404
+		STA dD40B
 		LDA #$0A
-		STA $D403
-		STA $D402
-		STA $D409
-		STA $D40A
+		STA dD403
+		STA dD402
+		STA dD409
+		STA dD40A
 		LDA #$0F
-		STA $D418
+		STA dD418
 		LDA #$06
-		STA $D022
-		STA $D023
+		STA dD022
+		STA dD023
 		LDA #$02
-		STA $D020
+		STA dD020
 		JSR set_top_bottom_red
 		JSR set_top_bottom_text
 		LDA #$C8
-		STA $D016
+		STA dD016
 		JSR draw_title_screen
 		JSR draw_screen_colors
 		JSR initialize_pointers
@@ -2531,9 +2556,9 @@ reset_everything:
 
 play_music_loop:
 		LDA voice_1_notes, X
-		STA $D401
+		STA dD401
 		LDA voice_2_notes, X
-		STA $D408
+		STA dD408
 		LDA #$F6
 		STA jiffy_timer
 
@@ -2546,14 +2571,14 @@ play_music_wait_loop:
 		LDX #$00
 
 check_space:
-		LDA $DC01
+		LDA dDC01
 		CMP #$EF
 		BNE play_music_loop
 		LDA #$00
-		STA $D401
-		STA $D408
+		STA dD401
+		STA dD408
 		LDA #$D8
-		STA $D016
+		STA dD016
 		JSR draw_level_1
 		LDA #$01
 		STA level_nr
@@ -2575,7 +2600,7 @@ check_hit_dot:
 		JSR inc_score_digit_x
 		INC dots_eaten
 		LDA dots_eaten
-		STA $D401
+		STA dD401
 		CMP #$FF
 		BNE nothing_hit
 		JSR end_level
@@ -2585,7 +2610,7 @@ check_hit_bonus_guy:
 		CMP bonus_guy_char_2
 		BNE check_hit_snake
 		LDA #$14
-		STA $D401
+		STA dD401
 		JSR bonus_guy_hit_handle
 		JMP nothing_hit
 
@@ -2624,8 +2649,8 @@ l3C5B:
 		LDA jiffy_timer
 		BMI l3C5B
 		LDA #$00
-		STA $D408
-		STA $D401
+		STA dD408
+		STA dD401
 		LDA last_key_pressed
 		CMP #$04
 		BNE l3C70
@@ -2636,7 +2661,7 @@ l3C70:
 
 pause:
 		LDA #$00
-		STA $D418
+		STA dD418
 		LDA #$81
 		STA jiffy_timer
 
@@ -2645,15 +2670,15 @@ l3C7C:
 		BMI l3C7C
 
 l3C80:
-		LDA $DC01
+		LDA dDC01
 		CMP #$EF
 		BNE l3C80
 		LDA #$0F
-		STA $D418
+		STA dD418
 		RTS 
 
 l3C8D:
-		LDA $D023
+		LDA dD023
 		AND #$0F
 		RTS 
 
@@ -2723,9 +2748,9 @@ skip_irq:
 setup_irq:
 		SEI 
 		LDA #$B3
-		STA $0314
+		STA d0314
 		LDA #$3C
-		STA $0315
+		STA d0315
 		CLI 
 		RTS 
 *=$3D27
@@ -2757,13 +2782,13 @@ l3D4F:
 		BMI l3D4F
 		LDA #$00
 		STA note_idx
-		STA $2693
+		STA d2693
 		RTS 
 
 play_next_note:
 		LDX note_idx
 		LDA bonus_notes, X
-		STA $D408
+		STA dD408
 		INX 
 		CPX #$FF
 		BNE l3D6C
@@ -2776,8 +2801,8 @@ l3D6C:
 
 quiet:
 		LDA #$00
-		STA $D408
-		STA $D401
+		STA dD408
+		STA dD401
 		LDA #$81
 		STA jiffy_timer
 
@@ -2823,9 +2848,66 @@ voice_2_notes:
 		.byte	$32, $28, $32, $28, $32, $28, $32, $28, $32, $28, $32, $28, $32, $28, $32, $28
 		.byte	$32, $28, $3C, $32, $3C, $32, $3C, $32, $3C, $32, $3C, $32, $3C, $32, $3C, $32
 		.byte	$3C
+*=$D016
+
+dD016:
+*=$D018
+
+dD018:
+*=$D020
+
+dD020:
+*=$D021
+
+dD021:
+*=$D022
+
+dD022:
 *=$D023
 
 dD023:
+*=$D401
+
+dD401:
+*=$D402
+
+dD402:
+*=$D403
+
+dD403:
+*=$D404
+
+dD404:
+*=$D405
+
+dD405:
+*=$D406
+
+dD406:
+*=$D408
+
+dD408:
+*=$D409
+
+dD409:
+*=$D40A
+
+dD40A:
+*=$D40B
+
+dD40B:
+*=$D40C
+
+dD40C:
+*=$D40D
+
+dD40D:
+*=$D412
+
+dD412:
+*=$D418
+
+dD418:
 
 .virtual $D800
 color_ram:

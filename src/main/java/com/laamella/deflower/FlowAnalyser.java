@@ -69,14 +69,28 @@ class FlowAnalyser {
                 subject.addPotentialCodeLocation(getRelativeAddressOperand(address, subject), true, address);
                 subject.addPotentialCodeLocation(address + instruction.addressingMode.totalBytes, false, address);
                 break;
-            case LDA:
-                switch (instruction.addressingMode) {
-                    case ABSOLUTE ->
-                            subject.ensureLabelled(getAbsoluteAddressOperand(address, subject), "d", address);
-                }
             default:
+                // Every control-flow instruction has its own case above, so
+                // an absolute operand here is a data reference.
+                switch (instruction.addressingMode) {
+                    case ABSOLUTE, ABSOLUTE_X, ABSOLUTE_Y ->
+                            labelDataReference(getAbsoluteAddressOperand(address, subject), address, subject);
+                }
                 subject.addPotentialCodeLocation(address + instruction.addressingMode.totalBytes, false, address);
         }
+    }
+
+    /**
+     * Labels the data `target` refers to, unless it can already be named:
+     * an address inside a labelled array or instruction resolves as
+     * "label + offset", and a label of its own would replace that.
+     */
+    private void labelDataReference(int target, int referencingAddress, Subject subject) {
+        Area area = subject.peek(target);
+        if (area != null && area.labelFor(target, subject) != null) {
+            return;
+        }
+        subject.ensureLabelled(target, "d", referencingAddress);
     }
 
     /**
