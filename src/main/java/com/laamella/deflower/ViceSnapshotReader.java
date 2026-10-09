@@ -39,7 +39,7 @@ class ViceSnapshotReader {
                     .map(C64MemModule.class::cast)
                     .map(module -> module.ram)
                     .findAny()
-                    .orElseThrow(() -> new IllegalArgumentException("No C64MEM found.")));
+                    .orElseThrow(() -> new IllegalArgumentException("No C64MEM found.")), c64File);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -3,6 +3,7 @@ package com.laamella.deflower;
 import java.nio.file.Path;
 import java.util.*;
 
+import static com.laamella.Assert.assertState;
 import static com.laamella.Printing.asHexWord;
 
 class MemoryLocation {
@@ -35,7 +36,13 @@ class Subject {
         }
     }
 
-    void storeAt(int startAddress, byte[] bytes) {
+    /**
+     * Copies `bytes`, read from `source`, into memory from `startAddress`
+     * on. Rejects an image that runs past $FFFF (issue 0014).
+     */
+    void storeAt(int startAddress, byte[] bytes, Path source) {
+        assertState(startAddress + bytes.length <= memory.length,
+                "%s: %d bytes loaded at %s run past $FFFF", source, bytes.length, asHexWord(startAddress));
         for (int i = 0; i < bytes.length; i++) {
             memory[startAddress+i] = new MemoryLocation(startAddress + i, bytes[i] & 0xff);
         }

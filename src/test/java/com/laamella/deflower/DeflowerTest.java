@@ -120,6 +120,27 @@ class DeflowerTest {
     }
 
     /**
+     * Issue 0014: a .prg whose load address plus length runs past $FFFF is
+     * rejected with a message naming the file and load address, instead of
+     * an ArrayIndexOutOfBoundsException.
+     */
+    @Test
+    void rejectsPrgRunningPastEndOfMemory() throws IOException, URISyntaxException {
+        String flowerFile = "toolong/toolong.flo";
+        ByteArrayOutputStream capturedErr = new ByteArrayOutputStream();
+        PrintStream originalErr = System.err;
+        System.setErr(new PrintStream(capturedErr));
+        try {
+            new Deflower().deflower(flowerFile);
+        } finally {
+            System.setErr(originalErr);
+        }
+        assertThat(capturedErr.toString())
+                .contains("toolong.prg: 32 bytes loaded at $FFF0 run past $FFFF");
+        assertThat(isEmpty(outDir(flowerFile))).as("output directory for an oversized prg").isTrue();
+    }
+
+    /**
      * Areas that describe themselves identically (same address, size and
      * kind) are a redundant re-annotation, not a disagreement, so they must
      * not be reported as a conflict.

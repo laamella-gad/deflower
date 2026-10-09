@@ -23,7 +23,7 @@ class PrgReader {
             System.out.println("load address " + loadAddress);
             byte[] b = new byte[c64Dump.remaining()];
             c64Dump.get(b);
-            subject.storeAt(loadAddress, b);
+            subject.storeAt(loadAddress, b, c64File);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
