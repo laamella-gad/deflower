@@ -200,6 +200,16 @@ class DeflowerTest {
         assertDeflowered("partialarraycarve");
     }
 
+    /**
+     * Issue 0045: a `system` area's contents are not dumped; its label (and
+     * comment) become an address definition, and code referencing it -
+     * including an element inside a system array - still resolves by name.
+     */
+    @Test
+    void systemAreaBecomesAddressDefinitionInsteadOfData() throws IOException, URISyntaxException {
+        assertDeflowered("systemarea");
+    }
+
     @Test
     void rejectsUnrecognizedTokens() throws IOException, URISyntaxException {
         assertFailsToParse("invalid/garbage-tokens.flo");

@@ -1,3 +1,11 @@
+screen_ram = $0400
+_0423_DATA = $0423
+var_init_b1 = $0424
+bonus_guy_2_start = $0755
+bonus_timer_digit_1 = $07DE
+bonus_timer_digit_2 = $07DF
+bonus_timer_digit_3 = $07E0
+color_ram = $D800
 
 *=$0057
 
@@ -17,23 +25,6 @@ new_loc_lo:		.byte	$E0
 new_loc_hi:		.byte	$05
 tmp_loc_lo:		.byte	$E0
 tmp_loc_hi:		.byte	$05
-*=$0400
-
-screen_ram:		.byte	$A0
-*=$0423
-
-_0423_DATA:
-*=$0424
-
-var_init_b1:		.byte	$B3
-*=$0755
-
-bonus_guy_2_start:		.byte	$20
-*=$07DE
-
-bonus_timer_digit_1:		.byte	$B0
-bonus_timer_digit_2:		.byte	$B0
-bonus_timer_digit_3:		.byte	$B0
 *=$0FA0
 
 top_line:
@@ -397,7 +388,7 @@ more_chars:
 		LDA top_line, X
 		STA screen_ram, X
 		LDA empty_line, X
-		STA $0798, X
+		STA screen_ram + $398, X
 		INX 
 		CPX #$50
 		BNE more_chars
@@ -408,7 +399,7 @@ set_top_bottom_red:
 
 more_colors:
 		STA color_ram, X
-		STA $DB98, X
+		STA color_ram + $398, X
 		INX 
 		CPX #$50
 		BNE more_colors
@@ -419,17 +410,17 @@ _241C_CODE:
 
 _241E_CODE:
 		LDA high_score_screen + $1, X
-		STA $0450, X
+		STA screen_ram + $50, X
 		LDA high_score_table_2 + $1, X
-		STA $054F, X
+		STA screen_ram + $14F, X
 		LDA hiscore + $C, X
-		STA $064E, X
+		STA screen_ram + $24E, X
 		INX 
 		CPX #$FF
 		BNE _241E_CODE
 		LDX #$00
 		LDA hiscore + $10B, X
-		STA $074D, X
+		STA screen_ram + $34D, X
 		INX 
 		.byte	$E0
 *=$2441
@@ -440,11 +431,11 @@ draw_title_screen:
 
 _2445_CODE:
 		LDA title, X
-		STA $0450, X
+		STA screen_ram + $50, X
 		LDA title + $FF, X
-		STA $054F, X
+		STA screen_ram + $14F, X
 		LDA title + $1FE, X
-		STA $064E, X
+		STA screen_ram + $24E, X
 		INX 
 		CPX #$FF
 		BNE _2445_CODE
@@ -452,7 +443,7 @@ _2445_CODE:
 
 _245E_CODE:
 		LDA rest_of_title, X
-		STA $074D, X
+		STA screen_ram + $34D, X
 		INX 
 		CPX #$4B
 		BNE _245E_CODE
@@ -463,11 +454,11 @@ draw_level_1:
 
 _246C_CODE:
 		LDA level_1, X
-		STA $0450, X
+		STA screen_ram + $50, X
 		LDA level_1 + $FF, X
-		STA $054F, X
+		STA screen_ram + $14F, X
 		LDA level_1 + $1FE, X
-		STA $064E, X
+		STA screen_ram + $24E, X
 		INX 
 		CPX #$FF
 		BNE _246C_CODE
@@ -475,7 +466,7 @@ _246C_CODE:
 
 _2485_CODE:
 		LDA level_1 + $2FD, X
-		STA $074D, X
+		STA screen_ram + $34D, X
 		INX 
 		CPX #$4B
 		BNE _2485_CODE
@@ -486,11 +477,11 @@ draw_level_2:
 
 _2493_CODE:
 		LDA level_2, X
-		STA $0450, X
+		STA screen_ram + $50, X
 		LDA level_2 + $FF, X
-		STA $054F, X
+		STA screen_ram + $14F, X
 		LDA level_2 + $1FE, X
-		STA $064E, X
+		STA screen_ram + $24E, X
 		INX 
 		CPX #$FF
 		BNE _2493_CODE
@@ -498,7 +489,7 @@ _2493_CODE:
 
 _24AC_CODE:
 		LDA level_2 + $2FD, X
-		STA $074D, X
+		STA screen_ram + $34D, X
 		INX 
 		CPX #$4B
 		BNE _24AC_CODE
@@ -509,11 +500,11 @@ draw_level_3:
 
 _24BA_CODE:
 		LDA level_3, X
-		STA $0450, X
+		STA screen_ram + $50, X
 		LDA level_3 + $FF, X
-		STA $054F, X
+		STA screen_ram + $14F, X
 		LDA level_3 + $1FE, X
-		STA $064E, X
+		STA screen_ram + $24E, X
 		INX 
 		CPX #$FF
 		BNE _24BA_CODE
@@ -521,7 +512,7 @@ _24BA_CODE:
 
 _24D3_CODE:
 		LDA level_3 + $2FD, X
-		STA $074D, X
+		STA screen_ram + $34D, X
 		INX 
 		CPX #$4B
 		BNE _24D3_CODE
@@ -532,11 +523,11 @@ draw_screen_colors:
 
 _24E1_CODE:
 		LDA title_screen_colors, X
-		STA $D850, X
+		STA color_ram + $50, X
 		LDA title_screen_colors + $FF, X
-		STA $D94F, X
+		STA color_ram + $14F, X
 		LDA title_screen_colors + $1FE, X
-		STA $DA4E, X
+		STA color_ram + $24E, X
 		INX 
 		CPX #$FF
 		BNE _24E1_CODE
@@ -544,7 +535,7 @@ _24E1_CODE:
 
 _24FA_CODE:
 		LDA title_screen_colors + $2FD, X
-		STA $DB4D, X
+		STA color_ram + $34D, X
 		INX 
 		CPX #$4B
 		BNE _24FA_CODE
@@ -583,21 +574,21 @@ color_lines:
 
 _2544_CODE:
 		LDA #$04
-		STA $D878, X
+		STA color_ram + $78, X
 		LDA #$05
-		STA $D8F2, X
+		STA color_ram + $F2, X
 		LDA #$07
-		STA $D940, X
+		STA color_ram + $140, X
 		LDA #$06
-		STA $D990, X
+		STA color_ram + $190, X
 		LDA #$02
-		STA $D9E0, X
+		STA color_ram + $1E0, X
 		LDA #$01
-		STA $DA30, X
+		STA color_ram + $230, X
 		LDA #$03
-		STA $DA80, X
+		STA color_ram + $280, X
 		LDA #$04
-		STA $DAD0, X
+		STA color_ram + $2D0, X
 		INX 
 		CPX #$28
 		BNE _2544_CODE
@@ -1022,15 +1013,15 @@ move_hi_from_scr_to_:
 		LDX #$00
 
 _30BA_CODE:
-		LDA $04FE, X
+		LDA screen_ram + $FE, X
 		STA high_score_table_1, X
-		LDA $054E, X
+		LDA screen_ram + $14E, X
 		STA high_score_table_2, X
-		LDA $059E, X
+		LDA screen_ram + $19E, X
 		STA high_score_table_3, X
-		LDA $05EE, X
+		LDA screen_ram + $1EE, X
 		STA high_score_table_4, X
-		LDA $063E, X
+		LDA screen_ram + $23E, X
 		STA high_score_table_5, X
 		INX 
 		CPX #$0A
@@ -1041,7 +1032,7 @@ update_hi:
 		LDX #$00
 
 _30E0_CODE:
-		LDA $0414, X
+		LDA screen_ram + $14, X
 		AND #$7F
 		CLC 
 		CMP hiscore, X
@@ -1061,24 +1052,24 @@ _30F5_CODE:
 		LDX #$00
 
 _30F7_CODE:
-		LDA $0414, X
+		LDA screen_ram + $14, X
 		AND #$7F
-		STA $0642, X
+		STA screen_ram + $242, X
 		INX 
 		CPX #$05
 		BNE _30F7_CODE
 		LDA #$20
-		STA $063E
-		STA $063F
-		STA $0640
+		STA screen_ram + $23E
+		STA screen_ram + $23F
+		STA screen_ram + $240
 		LDY #$00
 		LDX #$00
 
 _3113_CODE:
-		LDA $06D5, X
+		LDA screen_ram + $2D5, X
 		CLC 
 		ADC #$80
-		STA $06D5, X
+		STA screen_ram + $2D5, X
 		LDA #$F6
 		STA jiffy_timer
 
@@ -1095,9 +1086,9 @@ _3120_CODE:
 		JMP _3113_CODE
 
 _3136_CODE:
-		LDA $06D5, X
+		LDA screen_ram + $2D5, X
 		AND #$7F
-		STA $06D5, X
+		STA screen_ram + $2D5, X
 		INX 
 		CPX #$1B
 		BNE _3113_CODE
@@ -1105,9 +1096,9 @@ _3136_CODE:
 		JMP _3113_CODE
 
 _3148_CODE:
-		LDA $06D5, X
+		LDA screen_ram + $2D5, X
 		AND #$7F
-		STA $06D5, X
+		STA screen_ram + $2D5, X
 		DEX 
 		CPX #$FF
 		BNE _3113_CODE
@@ -1115,11 +1106,11 @@ _3148_CODE:
 		JMP _3113_CODE
 
 _315A_CODE:
-		LDA $06D5, X
+		LDA screen_ram + $2D5, X
 		ORA #$80
-		STA $0690, Y
+		STA screen_ram + $290, Y
 		AND #$7F
-		STA $063E, Y
+		STA screen_ram + $23E, Y
 		INY 
 		STX tmp_loc_hi
 		STA $D401
@@ -1137,8 +1128,8 @@ _3179_CODE:
 
 _3183_CODE:
 		CLC 
-		LDA $0642, X
-		CMP $05F2, X
+		LDA screen_ram + $242, X
+		CMP screen_ram + $1F2, X
 		BEQ _3190_CODE
 		BCS _3198_CODE
 		BCC _3195_CODE
@@ -1155,12 +1146,12 @@ _3198_CODE:
 		LDX #$00
 
 _319A_CODE:
-		LDA $05EE, X
+		LDA screen_ram + $1EE, X
 		PHA 
-		LDA $063E, X
-		STA $05EE, X
+		LDA screen_ram + $23E, X
+		STA screen_ram + $1EE, X
 		PLA 
-		STA $063E, X
+		STA screen_ram + $23E, X
 		INX 
 		CPX #$0A
 		BNE _319A_CODE
@@ -1171,8 +1162,8 @@ _319A_CODE:
 
 _31B7_CODE:
 		CLC 
-		LDA $05F2, X
-		CMP $05A2, X
+		LDA screen_ram + $1F2, X
+		CMP screen_ram + $1A2, X
 		BEQ _31C4_CODE
 		BCS _31CC_CODE
 		BCC _31C9_CODE
@@ -1189,12 +1180,12 @@ _31CC_CODE:
 		LDX #$00
 
 _31CE_CODE:
-		LDA $059E, X
+		LDA screen_ram + $19E, X
 		PHA 
-		LDA $05EE, X
-		STA $059E, X
+		LDA screen_ram + $1EE, X
+		STA screen_ram + $19E, X
 		PLA 
-		STA $05EE, X
+		STA screen_ram + $1EE, X
 		INX 
 		CPX #$0A
 		BNE _31CE_CODE
@@ -1205,8 +1196,8 @@ _31CE_CODE:
 
 _31EB_CODE:
 		CLC 
-		LDA $05A2, X
-		CMP $0552, X
+		LDA screen_ram + $1A2, X
+		CMP screen_ram + $152, X
 		BEQ _31F8_CODE
 		BCS _3200_CODE
 		BCC _31FD_CODE
@@ -1223,12 +1214,12 @@ _3200_CODE:
 		LDX #$00
 
 _3202_CODE:
-		LDA $054E, X
+		LDA screen_ram + $14E, X
 		PHA 
-		LDA $059E, X
-		STA $054E, X
+		LDA screen_ram + $19E, X
+		STA screen_ram + $14E, X
 		PLA 
-		STA $059E, X
+		STA screen_ram + $19E, X
 		INX 
 		CPX #$0A
 		BNE _3202_CODE
@@ -1239,8 +1230,8 @@ _3202_CODE:
 
 _321F_CODE:
 		CLC 
-		LDA $0552, X
-		CMP $0502, X
+		LDA screen_ram + $152, X
+		CMP screen_ram + $102, X
 		BEQ _322C_CODE
 		BCS _3234_CODE
 		BCC _3231_CODE
@@ -1257,19 +1248,19 @@ _3234_CODE:
 		LDX #$00
 
 _3236_CODE:
-		LDA $04FE, X
+		LDA screen_ram + $FE, X
 		PHA 
-		LDA $054E, X
-		STA $04FE, X
+		LDA screen_ram + $14E, X
+		STA screen_ram + $FE, X
 		PLA 
-		STA $054E, X
+		STA screen_ram + $14E, X
 		INX 
 		CPX #$0A
 		BNE _3236_CODE
 		LDX #$00
 
 _324B_CODE:
-		LDA $0502, X
+		LDA screen_ram + $102, X
 		ORA #$80
 		STA hi_text, X
 		INX 
@@ -1310,7 +1301,7 @@ _329A_CODE:
 
 _32A0_CODE:
 		LDA press_fire_to_start_, X
-		STA $0689, X
+		STA screen_ram + $289, X
 		INX 
 		CPX #$13
 		BNE _32A0_CODE
@@ -1749,16 +1740,16 @@ colorize_maze:
 		LDX #$00
 
 _35EC_CODE:
-		LDA $0450, X
+		LDA screen_ram + $50, X
 		CMP #$20
 		BEQ _35FB_CODE
 		LDA #$09
-		STA $D850, X
+		STA color_ram + $50, X
 		JMP _35FF_CODE
 
 _35FB_CODE:
 		TYA 
-		STA $D850, X
+		STA color_ram + $50, X
 
 _35FF_CODE:
 		INY 
@@ -1772,16 +1763,16 @@ _3606_CODE:
 		BNE _35EC_CODE
 
 colorize_maze_2:
-		LDA $054F, X
+		LDA screen_ram + $14F, X
 		CMP #$20
 		BEQ _361A_CODE
 		LDA #$09
-		STA $D94F, X
+		STA color_ram + $14F, X
 		JMP _361E_CODE
 
 _361A_CODE:
 		TYA 
-		STA $D94F, X
+		STA color_ram + $14F, X
 
 _361E_CODE:
 		INY 
@@ -1795,16 +1786,16 @@ _3625_CODE:
 		BNE colorize_maze_2
 
 colorize_maze_3:
-		LDA $064E, X
+		LDA screen_ram + $24E, X
 		CMP #$20
 		BEQ _3639_CODE
 		LDA #$09
-		STA $DA4E, X
+		STA color_ram + $24E, X
 		JMP _363D_CODE
 
 _3639_CODE:
 		TYA 
-		STA $DA4E, X
+		STA color_ram + $24E, X
 
 _363D_CODE:
 		INY 
@@ -1818,16 +1809,16 @@ _3644_CODE:
 		BNE colorize_maze_3
 
 colorize_maze_4:
-		LDA $074D, X
+		LDA screen_ram + $34D, X
 		CMP #$20
 		BEQ _3658_CODE
 		LDA #$09
-		STA $DB4D, X
+		STA color_ram + $34D, X
 		JMP _365C_CODE
 
 _3658_CODE:
 		TYA 
-		STA $DB4D, X
+		STA color_ram + $34D, X
 
 _365C_CODE:
 		INY 
@@ -1910,19 +1901,19 @@ initialize_pointers:
 		RTS 
 
 inc_score_digit_x:
-		LDA $0414, X
+		LDA screen_ram + $14, X
 		TAY 
 		INY 
 		CPY #$BA
 		BNE _3736_CODE
 		LDA #$B0
-		STA $0414, X
+		STA screen_ram + $14, X
 		DEX 
 		JMP inc_score_digit_x
 
 _3736_CODE:
 		TYA 
-		STA $0414, X
+		STA screen_ram + $14, X
 		RTS 
 
 bonus_guy_hit_handle:
@@ -1972,10 +1963,10 @@ bonus_round:
 		LDX #$00
 
 burp_bonus_text:
-		LDA $05C5, X
+		LDA screen_ram + $1C5, X
 		PHA 
 		LDA bonus_text, X
-		STA $05C5, X
+		STA screen_ram + $1C5, X
 		LDA #$0A
 		STA $D401
 		LDA #$FF
@@ -2005,7 +1996,7 @@ _37AF_CODE:
 
 start_next_level:
 		LDA get_ready_text, X
-		STA $05C5, X
+		STA screen_ram + $1C5, X
 		INX 
 		CPX #$09
 		BNE start_next_level
@@ -2019,7 +2010,7 @@ _37D6_CODE:
 
 _37DC_CODE:
 		PLA 
-		STA $05C5, X
+		STA screen_ram + $1C5, X
 		DEX 
 		CPX #$FF
 		BNE _37DC_CODE
@@ -2119,7 +2110,7 @@ end_level:
 		CMP #$BA
 		BNE _389B_CODE
 		LDA #$B1
-		STA $0423
+		STA _0423_DATA
 		LDA #$B0
 		STA var_init_b1
 
@@ -2131,7 +2122,7 @@ _389B_CODE:
 
 _38A5_CODE:
 		LDA get_ready_text, X
-		STA $05C5, X
+		STA screen_ram + $1C5, X
 		INX 
 		CPX #$09
 		BNE _38A5_CODE
@@ -2156,11 +2147,11 @@ _38C2_CODE:
 
 _38D0_CODE:
 		LDA bonus_run_text, X
-		STA $05C5, X
+		STA screen_ram + $1C5, X
 		LDA #$0A
 		STA $D401
 		LDA #$01
-		STA $D9C5, X
+		STA color_ram + $1C5, X
 		LDA #$FF
 		STA jiffy_timer
 
@@ -2178,10 +2169,10 @@ _38F1_CODE:
 		INX 
 		CPX #$09
 		BNE _38D0_CODE
-		LDA $0423
-		STA $05CC
+		LDA _0423_DATA
+		STA screen_ram + $1CC
 		LDA var_init_b1
-		STA $05CD
+		STA screen_ram + $1CD
 		JSR quiet
 		NOP 
 		NOP 
@@ -2448,7 +2439,7 @@ _3AE2_CODE:
 		LDA #$81
 		LDX lives
 		LDA #$A0
-		STA $07C8, X
+		STA screen_ram + $3C8, X
 		LDA #$81
 		STA jiffy_timer
 
@@ -2826,10 +2817,6 @@ voice_2_notes:
 *=$D023
 
 _D023_DATA:
-*=$D800
-
-color_ram:
-		.byte	$00
 *=$DC01
 
 _DC01_DATA:

@@ -59,7 +59,6 @@ class AssemblyFileFormat {
         // this method is the one responsible for any line break between
         // the label and its data.
         boolean sameKindAsPrevious = currentArea instanceof DataArea
-                && !((DataArea) currentArea).isSystem
                 && lastArea instanceof DataArea
                 && ((DataArea) lastArea).type == ((DataArea) currentArea).type;
         boolean continuesRun = sameKindAsPrevious && lastArea.lastOccupiedAddress == address - 1;
@@ -136,7 +135,7 @@ class AssemblyFileFormat {
             return true;
         }
         DataArea nextBlock = (DataArea) nextArea;
-        return nextBlock.type != block.type || nextBlock.isSystem;
+        return nextBlock.type != block.type || nextBlock.isSystem();
     }
 
     void print(String s) throws IOException {
@@ -156,13 +155,30 @@ class AssemblyFileFormat {
 
     private int column = 0;
 
+    /**
+     * A system area (`system` in the .flo file: I/O registers, colour RAM,
+     * ...) isn't part of the program, so its contents are never dumped.
+     * Its label still has to exist for the code that references it, so it
+     * becomes an address definition (`color_ram = $D800`) instead of a
+     * `label:` under an origin pointing into I/O space (issue 0045).
+     */
+    void printSystemDefine(int address, String comment, String label) throws IOException {
+        if (comment != null) {
+            for (String line : comment.split("\n", -1)) {
+                print("; " + line);
+                newLine();
+            }
+        }
+        if (label != null) {
+            print(label + " = " + asHexWord(address));
+            newLine();
+        }
+    }
+
     public void print(DataArea block, int address, Subject subject) throws IOException {
         // A multi-byte area (WORD, DWORD, POINTER) owns several consecutive
         // addresses but is one value: print it once, at its first address.
         if (address != block.address) {
-            return;
-        }
-        if (block.isSystem) {
             return;
         }
         considerReOrg(address);
@@ -309,8 +325,24 @@ class ResultWriter {
         try (Writer w = new FileWriter(asmFile.toFile()); BufferedWriter bw = new BufferedWriter(w); PrintWriter pw = new PrintWriter(bw)) {
             AssemblyFileFormat assemblyFile = new AssemblyFileFormat(pw);
             for (int address = 0; address < 0x10000; address++) {
+                Area area = subject.peek(address);
+                if (area != null && area.isSystem()) {
+                    String comment = subject.memory[address].comment;
+                    String label = subject.memory[address].label;
+                    if (comment != null || label != null) {
+                        assemblyFile.printSystemDefine(address, comment, label);
+                    }
+                }
+            }
+            for (int address = 0; address < 0x10000; address++) {
 
                 Area currentArea = subject.peek(address);
+                if (currentArea != null && currentArea.isSystem()) {
+                    // Already written as an address definition above;
+                    // nothing of it belongs in the program body.
+                    assemblyFile.needsToReOrg = true;
+                    continue;
+                }
 
                 // Is there a comment or a label here? Print them.
                 String comment = subject.memory[address].comment;

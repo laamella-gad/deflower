@@ -171,6 +171,11 @@ class SubjectConfigurer {
             }
 
             @Override
+            public void enterSetSystem(FloParser.SetSystemContext ctx) {
+                isSystem = true;
+            }
+
+            @Override
             public void enterSetLabel(FloParser.SetLabelContext ctx) {
                 name = ctx.ID().getText();
             }

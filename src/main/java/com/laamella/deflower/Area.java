@@ -51,5 +51,14 @@ abstract class Area {
         return false;
     }
 
+    /**
+     * True for an area declared {@code system} in the {@code .flo} file
+     * (I/O registers, colour RAM, ...): not part of the program, so its
+     * contents are never dumped, only its label defined (issue 0045).
+     */
+    public boolean isSystem() {
+        return false;
+    }
+
     public abstract String labelFor(int address, Subject subject);
 }

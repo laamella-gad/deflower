@@ -1,4 +1,8 @@
 deflower squirm.vsf
+
+$d800 system byte[1000] color_ram
+$0400 system byte[1000] screen_ram
+
 $2800-$2ff9
 $0fa0-$23f3
 $23f9-$23fa
@@ -21,12 +25,11 @@ $00fb byte new_loc_lo
 $00fc byte new_loc_hi
 $00fd byte tmp_loc_lo
 $00fe byte tmp_loc_hi
-$0400 byte screen_ram
-$0424 byte var_init_b1
-$0755 byte bonus_guy_2_start
-$07de byte bonus_timer_digit_1
-$07df byte bonus_timer_digit_2
-$07e0 byte bonus_timer_digit_3
+$0424 system byte var_init_b1
+$0755 system byte bonus_guy_2_start
+$07de system byte bonus_timer_digit_1
+$07df system byte bonus_timer_digit_2
+$07e0 system byte bonus_timer_digit_3
 $0fa0 byte[4] top_line
 $0fa4 byte[77] hi_text
 $0ff1 byte[40] empty_line
@@ -168,4 +171,3 @@ $3d76 code quiet
 $3db8 byte bonus_notes
 $3e80 byte voice_1_notes
 $3ee4 byte voice_2_notes
-$d800 system byte color_ram

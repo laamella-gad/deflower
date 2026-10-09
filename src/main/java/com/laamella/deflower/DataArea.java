@@ -4,7 +4,7 @@ import java.util.Objects;
 
 class DataArea extends Area {
     final DataType type;
-    boolean isSystem;
+    final boolean system;
     // The label of the array this element belongs to (null if the .flo
     // line that declared it had no name), and this element's index within
     // that array. Baked in at creation time (issue 0033) so labelFor can
@@ -18,26 +18,31 @@ class DataArea extends Area {
     DataArea(int address, DataType type, boolean isSystem, String arrayLabel, int indexInArray) {
         super(address, type.sizeInBytes);
         this.type = type;
-        this.isSystem = isSystem;
+        this.system = isSystem;
         this.arrayLabel = arrayLabel;
         this.indexInArray = indexInArray;
     }
 
     @Override
     public String toString() {
-        return super.toString() + " " + type.name().toLowerCase() + (isSystem ? " system" : "");
+        return super.toString() + " " + type.name().toLowerCase() + (system ? " system" : "");
     }
 
     @Override
     public boolean equals(Object o) {
         if (!super.equals(o)) return false;
         DataArea other = (DataArea) o;
-        return type == other.type && isSystem == other.isSystem;
+        return type == other.type && system == other.system;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), type, isSystem);
+        return Objects.hash(super.hashCode(), type, system);
+    }
+
+    @Override
+    public boolean isSystem() {
+        return system;
     }
 
     @Override
