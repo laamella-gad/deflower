@@ -98,6 +98,28 @@ class DeflowerTest {
     }
 
     /**
+     * Issue 0043: one label defined at two addresses would make the
+     * assembler reject the output, or resolve references to the wrong
+     * address, so it is reported and no output is written.
+     */
+    @Test
+    void reportsDuplicateLabelAndSkipsOutput() throws IOException, URISyntaxException {
+        String flowerFile = "duplicatelabel/duplicatelabel.flo";
+        ByteArrayOutputStream capturedErr = new ByteArrayOutputStream();
+        PrintStream originalErr = System.err;
+        System.setErr(new PrintStream(capturedErr));
+        try {
+            new Deflower().deflower(flowerFile);
+        } finally {
+            System.setErr(originalErr);
+        }
+        assertThat(capturedErr.toString())
+                .contains("Duplicate label twin at $C001, already defined at $C000")
+                .contains("Errors detected");
+        assertThat(isEmpty(outDir(flowerFile))).as("output directory for a subject with a duplicate label").isTrue();
+    }
+
+    /**
      * Areas that describe themselves identically (same address, size and
      * kind) are a redundant re-annotation, not a disagreement, so they must
      * not be reported as a conflict.

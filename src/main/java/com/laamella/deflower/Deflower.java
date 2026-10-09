@@ -38,6 +38,7 @@ public class Deflower {
             prepareOutputDirectory(subjects.get(0).basePath);
             for (Subject subject : subjects) {
                 flowAnalyser.analyseCodeFlows(subject);
+                subject.reportDuplicateLabels();
                 if (!subject.errors.isEmpty()) {
                     subject.errors.forEach(System.err::println);
                     System.err.println("Errors detected for " + subject.outputFileName + ", not writing output.");

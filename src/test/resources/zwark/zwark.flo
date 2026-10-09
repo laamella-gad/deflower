@@ -34,7 +34,7 @@ $9985 code hi_score_draw
 $9ab7 char[20] f1_1_player_text
 $9acb char[20] f3_2_player_text
 
-$9b02 code show_top_score_line
+$9b02 code show_top_score_row_14
 
 $9b42 char[11] game_over_text
 $9bcc draw_logo

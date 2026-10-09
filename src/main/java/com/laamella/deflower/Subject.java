@@ -188,6 +188,25 @@ class Subject {
         return screen > none ? "screen" : none > screen ? "none" : onTie;
     }
 
+    /**
+     * Reports every label that is defined at more than one address (issue
+     * 0043): the assembler would reject it, or code references would
+     * resolve to the wrong one. Run after the flow analysis, so the
+     * auto-generated labels are checked too.
+     */
+    void reportDuplicateLabels() {
+        Map<String, Integer> firstAddressByLabel = new HashMap<>();
+        for (MemoryLocation location : memory) {
+            if (location.label == null) {
+                continue;
+            }
+            Integer first = firstAddressByLabel.putIfAbsent(location.label, location.address);
+            if (first != null) {
+                errors.add(String.format("Duplicate label %s at %s, already defined at %s", location.label, asHexWord(location.address), asHexWord(first)));
+            }
+        }
+    }
+
     void registerBlock(Area area) {
         for (int a = 0; a < area.size; a++) {
             int address = a + area.address;

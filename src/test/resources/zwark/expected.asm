@@ -1326,10 +1326,10 @@ _9AF7_CODE:
 		LDX #$00
 		LDY #$0F
 		LDA $9D8C
-		BEQ show_top_score_line
+		BEQ show_top_score_row_14
 		LDX #$1E
 
-show_top_score_line:
+show_top_score_row_14:
 		LDA top_score_line, X
 		AND #$BF
 		STA vic_screen + $230, Y
@@ -1338,7 +1338,7 @@ show_top_score_line:
 		INY 
 		INX 
 		CPY #$19
-		BCC show_top_score_line
+		BCC show_top_score_row_14
 		LDA #$FF
 		STA $9B41
 		STA $9D94
