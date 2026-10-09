@@ -69,3 +69,4 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0046](0046-rename-system-to-virtual.md) | done | Rename `system` to `virtual` and emit 64tass `.virtual` blocks instead of address defines |
 | [0047](0047-null-and-ptext-string-directives.md) | open | Emit `.null`/`.ptext` for null-terminated and length-prefixed strings |
 | [0048](0048-refactor-resultwriter.md) | done | Refactor ResultWriter - it is doing too much |
+| [0049](0049-refactor-subjectconfigurer.md) | done | Refactor SubjectConfigurer - it is doing too much |

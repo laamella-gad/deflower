@@ -57,6 +57,38 @@ class Subject {
         return wordAt(address) + 256 * 256 * wordAt(address + 2);
     }
 
+    /**
+     * Applies one {@code .flo} annotation line: its label and comment go
+     * onto its address, a code entry becomes a place to start the flow
+     * analysis from, and a data line registers one DataArea per element.
+     */
+    void annotate(Annotation annotation) {
+        int address = annotation.address;
+        if (annotation.name != null) {
+            memory[address].label = annotation.name;
+        }
+        if (annotation.comment != null) {
+            memory[address].comment = annotation.comment;
+        }
+        LineType type = annotation.type;
+        switch (type) {
+            case CODE_ENTRY -> {
+                potentialCodeLocations.add(address);
+                System.out.format("Will disassemble from %X\n", address);
+            }
+            case CHAR_BLOCK, BYTE_BLOCK, WORD_BLOCK, DWORD_BLOCK, UNKNOWN_BLOCK -> {
+                int amount = annotation.addressEnd != null
+                        ? (annotation.addressEnd - address) / type.dataType.sizeInBytes
+                        : annotation.amount;
+                System.out.format("Marking block of %d %s at %X \"%s\"\n", amount, type.dataType.name().toLowerCase(), address, annotation.name);
+                for (int i = 0; i < amount; i++) {
+                    registerBlock(new DataArea(address + i * type.dataType.sizeInBytes, type.dataType, annotation.virtual, annotation.name, i));
+                }
+            }
+            default -> throw new RuntimeException("No data type");
+        }
+    }
+
     boolean isVirtualAt(int address) {
         Area area = peek(address);
         return area != null && area.isVirtual();
