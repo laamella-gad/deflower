@@ -2,16 +2,9 @@ package com.laamella.deflower;
 
 import com.laamella.mpu6502.specification.Instruction;
 
-import java.io.*;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Objects;
-
-import static java.nio.file.FileVisitResult.CONTINUE;
-import static java.nio.file.Files.*;
 
 import static com.laamella.Printing.*;
 import static com.laamella.mpu6502.ByteManipulation.toSignedByte;
@@ -19,17 +12,12 @@ import static com.laamella.mpu6502.ByteManipulation.word;
 import static java.lang.String.format;
 
 class AssemblyFileFormat {
-    private final Writer w;
+    private final LineEmitter out;
     private Area lastArea = null;
     boolean needsToReOrg = true;
-    // True right after a newLine() - i.e. nothing has been written on the
-    // current line yet - false once any text is printed. Distinct from
-    // `column`, which only tracks position within a tabular .BYTE/.WORD
-    // dump: this tracks whether the line as a whole still needs closing.
-    private boolean atLineStart = true;
 
-    AssemblyFileFormat(PrintWriter w) {
-        this.w = w;
+    AssemblyFileFormat(Writer w) {
+        this.out = new LineEmitter(w);
     }
 
     /**
@@ -63,31 +51,22 @@ class AssemblyFileFormat {
                 && ((DataArea) lastArea).type == ((DataArea) currentArea).type;
         boolean continuesRun = sameKindAsPrevious && lastArea.lastOccupiedAddress == address - 1;
         if (continuesRun) {
-            if (column != 0) {
-                newLine();
+            if (out.column() != 0) {
+                out.newLine();
             }
         } else {
-            // One newLine() closes whatever line is still dangling (if
-            // any - atLineStart tracks that precisely, since column only
-            // tracks tabular .BYTE/.WORD position, not label/comment
-            // text); the other adds the actual blank-line separator. When
+            // finishLine() closes whatever line is still dangling (if
+            // any); newLine() adds the actual blank-line separator. When
             // the previous line was already cleanly closed (e.g. by the
             // forced newline below, for a label with nothing of its own
-            // to print), skip the first one instead of emitting a second,
-            // needless blank line.
-            if (!atLineStart) {
-                newLine();
-            }
-            newLine();
+            // to print), finishLine() skips emitting a second, needless
+            // blank line.
+            out.finishLine();
+            out.newLine();
         }
-        if (comment != null) {
-            for (String line : comment.split("\n", -1)) {
-                print("; " + line);
-                newLine();
-            }
-        }
+        printCommentLines(comment);
         if (label != null) {
-            print(label + ":");
+            out.print(label + ":");
             // A label can land on an address that's covered by an area but
             // isn't where that area actually prints anything - the second
             // byte of a WORD/DWORD, an instruction's operand byte - because
@@ -101,7 +80,7 @@ class AssemblyFileFormat {
             // or print call, which supplies the missing newline itself.
             boolean labelInsideAreaButNotAtItsStart = currentArea != null && currentArea.address != address;
             if (labelInsideAreaButNotAtItsStart) {
-                newLine();
+                out.newLine();
             } else if (sameKindAsPrevious && !isSingleValueRun(address, (DataArea) currentArea, subject)) {
                 // Issue 0029: among same-kind labels, glue a single value
                 // onto the label's line; several values get their own line
@@ -110,7 +89,7 @@ class AssemblyFileFormat {
                 // own line - print(DataArea, ...)'s own kind-change check
                 // already does that, so doing it again here would double
                 // the newline.
-                newLine();
+                out.newLine();
             }
         }
     }
@@ -123,38 +102,8 @@ class AssemblyFileFormat {
      * better than putting the label on its own line.
      */
     private boolean isSingleValueRun(int address, DataArea block, Subject subject) {
-        int next = address + block.size;
-        if (next >= subject.memory.length) {
-            return true;
-        }
-        if (subject.memory[next].label != null || subject.memory[next].comment != null) {
-            return true;
-        }
-        Area nextArea = subject.peek(next);
-        if (!(nextArea instanceof DataArea) || nextArea.address != next) {
-            return true;
-        }
-        DataArea nextBlock = (DataArea) nextArea;
-        return nextBlock.type != block.type || nextBlock.isVirtual();
+        return !subject.continuesRun(block, address + block.size);
     }
-
-    void print(String s) throws IOException {
-        w.write(s);
-        atLineStart = false;
-    }
-
-    private void newLine() throws IOException {
-        closeQuotes();
-        w.write("\n");
-        column = 0;
-        atLineStart = true;
-    }
-
-    private void indent() throws IOException {
-        print("\t\t");
-    }
-
-    private int column = 0;
 
     /**
      * Prints a stretch of consecutive virtual areas (issue 0046) as one
@@ -167,14 +116,12 @@ class AssemblyFileFormat {
      * @return the first address after the stretch
      */
     int printVirtualStretch(int start, Subject subject) throws IOException {
-        if (!atLineStart) {
-            newLine();
-        }
-        newLine();
-        print(".virtual " + asHexWord(start));
-        newLine();
+        out.finishLine();
+        out.newLine();
+        out.print(".virtual " + asHexWord(start));
+        out.newLine();
         int address = start;
-        while (address < subject.memory.length && isVirtualAt(address, subject)) {
+        while (address < subject.memory.length && subject.isVirtualAt(address)) {
             DataArea block = (DataArea) subject.peek(address);
             String comment = subject.memory[address].comment;
             String label = subject.memory[address].label;
@@ -183,77 +130,35 @@ class AssemblyFileFormat {
                 // A label landing inside a multi-byte element (the second
                 // byte of a word): no reservation of its own to hang it on.
                 if (label != null) {
-                    print(label + " = " + asHexWord(address));
-                    newLine();
+                    out.print(label + " = " + asHexWord(address));
+                    out.newLine();
                 }
                 address++;
                 continue;
             }
-            int end = endOfVirtualRun(block, subject);
+            int end = subject.endOfRun(block);
             int count = (end - address) / block.size;
             if (label != null) {
-                print(label + ":");
+                out.print(label + ":");
             }
             if (count == 1) {
-                indent();
-                print(reservationDirective(block.type) + "\t?");
+                out.indent();
+                out.print(reservationDirective(block.type) + "\t?");
             } else {
                 if (label != null) {
-                    newLine();
+                    out.newLine();
                 }
-                indent();
-                print(".fill\t" + (end - address));
+                out.indent();
+                out.print(".fill\t" + (end - address));
             }
-            newLine();
-            address = firstAnnotatedAddressInside(address, end, subject);
+            out.newLine();
+            address = subject.firstAnnotatedAddressInside(address, end);
         }
-        print(".endv");
-        newLine();
+        out.print(".endv");
+        out.newLine();
         needsToReOrg = true;
         lastArea = null;
         return address;
-    }
-
-    private static boolean isVirtualAt(int address, Subject subject) {
-        Area area = subject.peek(address);
-        return area != null && area.isVirtual();
-    }
-
-    /**
-     * The (exclusive) end of the run of same-type virtual elements starting
-     * at `first`: it stops before an element that differs or carries its own
-     * label/comment, and after an element with a label/comment somewhere
-     * inside it, so that annotation can still be printed.
-     */
-    private static int endOfVirtualRun(DataArea first, Subject subject) {
-        int end = first.address + first.size;
-        while (!annotatedInside(end - first.size, end, subject) && end < subject.memory.length) {
-            Area next = subject.peek(end);
-            if (!(next instanceof DataArea) || !next.isVirtual() || next.address != end
-                    || ((DataArea) next).type != first.type
-                    || subject.memory[end].label != null || subject.memory[end].comment != null) {
-                break;
-            }
-            end += first.size;
-        }
-        return end;
-    }
-
-    private static boolean annotatedInside(int elementStart, int elementEnd, Subject subject) {
-        return firstAnnotatedAddressInside(elementStart, elementEnd, subject) != elementEnd;
-    }
-
-    /**
-     * The first address after `start` and before `end` with a label or
-     * comment, or `end` when there is none.
-     */
-    private static int firstAnnotatedAddressInside(int start, int end, Subject subject) {
-        for (int address = start + 1; address < end; address++) {
-            if (subject.memory[address].label != null || subject.memory[address].comment != null) {
-                return address;
-            }
-        }
-        return end;
     }
 
     private static String reservationDirective(DataType type) {
@@ -268,8 +173,8 @@ class AssemblyFileFormat {
     private void printCommentLines(String comment) throws IOException {
         if (comment != null) {
             for (String line : comment.split("\n", -1)) {
-                print("; " + line);
-                newLine();
+                out.print("; " + line);
+                out.newLine();
             }
         }
     }
@@ -282,7 +187,7 @@ class AssemblyFileFormat {
         }
         considerReOrg(address);
         if ((!(lastArea instanceof DataArea)) || block.type != ((DataArea) lastArea).type) {
-            newLine();
+            out.newLine();
         }
         switch (block.type) {
             case BYTE, UNKNOWN:
@@ -309,10 +214,6 @@ class AssemblyFileFormat {
 
     private static final int TEXT_BYTES_PER_LINE = 32;
 
-    // True while a double-quoted literal is open on the current .text
-    // line; newLine() closes it.
-    private boolean inQuotes = false;
-
     // The 64tass text encoding in effect at this point of the output;
     // "none" is 64tass's own default.
     private String encoding = "none";
@@ -338,80 +239,40 @@ class AssemblyFileFormat {
      */
     private void textPrint(DataArea block, int value, Subject subject) throws IOException {
         String valueEncoding = encodingFor(block, subject);
-        if (column == TEXT_BYTES_PER_LINE || (column != 0 && !valueEncoding.equals(encoding))) {
-            newLine();
+        if (out.column() == TEXT_BYTES_PER_LINE || (out.column() != 0 && !valueEncoding.equals(encoding))) {
+            out.newLine();
         }
-        if (column == 0) {
+        if (out.column() == 0) {
             if (!valueEncoding.equals(encoding)) {
-                indent();
-                print(".enc\t\"" + valueEncoding + "\"");
-                newLine();
+                out.indent();
+                out.print(".enc\t\"" + valueEncoding + "\"");
+                out.newLine();
                 encoding = valueEncoding;
             }
-            indent();
-            print(".text\t");
+            out.indent();
+            out.print(".text\t");
         }
         int character = characterFor(valueEncoding, value);
         if (character != -1) {
-            if (!inQuotes) {
-                if (column != 0) {
-                    print(", ");
-                }
-                print("\"");
-                inQuotes = true;
-            }
-            print(String.valueOf((char) character));
+            out.quotedCharacter((char) character);
         } else {
-            closeQuotes();
-            if (column != 0) {
-                print(", ");
-            }
-            print(asHexByte(value));
+            out.item(asHexByte(value));
         }
-        column++;
     }
 
     /**
-     * The encoding to read the char array `block` belongs to in: the
-     * elements one {@code .flo} line declared (same array label,
-     * consecutive indexes). Counts the bytes that are uppercase letters
-     * in each: $41-$5A under "none", $01-$1A under "screen". More wins; a
-     * tie (e.g. digits, reverse video) keeps the encoding already in
-     * effect, so it doesn't cause a needless {@code .enc} switch. Only uppercase counts, because ASCII uppercase is
-     * also screen-code lowercase, and a stray $00 terminator or length
-     * byte would otherwise tip plain ASCII text over to "screen".
+     * The encoding to read the char array `block` belongs to in (the
+     * elements one {@code .flo} line declared), chosen once per array by
+     * {@link Subject#likelyTextEncoding}. A tie keeps the encoding already
+     * in effect, so it doesn't cause a needless {@code .enc} switch.
      */
     private String encodingFor(DataArea block, Subject subject) {
-        if (block.address >= encodingArrayStart && block.address < encodingArrayEnd) {
-            return arrayEncoding;
+        if (block.address < encodingArrayStart || block.address >= encodingArrayEnd) {
+            encodingArrayStart = block.arrayStart();
+            encodingArrayEnd = subject.endOfArray(block);
+            arrayEncoding = subject.likelyTextEncoding(encodingArrayStart, encodingArrayEnd, encoding);
         }
-        int start = block.address - block.indexInArray;
-        int end = start;
-        while (end < subject.memory.length && isElementOf(subject.peek(end), block, end - start)) {
-            end++;
-        }
-        int none = 0;
-        int screen = 0;
-        for (int address = start; address < end; address++) {
-            int value = subject.byteAt(address);
-            if (value >= 0x41 && value <= 0x5A) {
-                none++;
-            }
-            if (value >= 0x01 && value <= 0x1A) {
-                screen++;
-            }
-        }
-        encodingArrayStart = start;
-        encodingArrayEnd = end;
-        arrayEncoding = screen > none ? "screen" : none > screen ? "none" : encoding;
         return arrayEncoding;
-    }
-
-    private static boolean isElementOf(Area area, DataArea block, int index) {
-        return area instanceof DataArea
-                && ((DataArea) area).type == DataType.CHAR
-                && ((DataArea) area).indexInArray == index
-                && Objects.equals(((DataArea) area).arrayLabel, block.arrayLabel);
     }
 
     /**
@@ -437,43 +298,28 @@ class AssemblyFileFormat {
         return character >= 0x20 && character <= 0x7E && character != '"' ? character : -1;
     }
 
-    private void closeQuotes() throws IOException {
-        if (inQuotes) {
-            print("\"");
-            inQuotes = false;
-        }
-    }
-
-    /**
-     * Finishes the output: closes a string literal still open on the last
-     * line.
-     */
     void close() throws IOException {
-        closeQuotes();
+        out.close();
     }
 
     private void considerReOrg(int address) throws IOException {
         if (needsToReOrg) {
-            newLine();
-            print("*=" + asHexWord(address));
+            out.newLine();
+            out.print("*=" + asHexWord(address));
             needsToReOrg = false;
         }
     }
 
     private void tabularPrint(String command, String data) throws IOException {
-        if (column == 16) {
-            newLine();
+        if (out.column() == 16) {
+            out.newLine();
         }
 
-        if (column == 0) {
-            indent();
-            print(command);
-            print("\t");
-        } else {
-            print(", ");
+        if (out.column() == 0) {
+            out.indent();
+            out.print(command + "\t");
         }
-        print(data);
-        column++;
+        out.item(data);
     }
 
     public void printInstruction(InstructionArea block, Subject subject) throws IOException {
@@ -499,11 +345,11 @@ class AssemblyFileFormat {
             case ZERO_PAGE_Y -> format("%s, Y", nameForAddress(byte1, "$%02X", subject));
             case JAM, ACCUMULATOR, NONE -> "";
         };
-        newLine();
-        indent();
-        print(instruction.opcode.name());
-        print(" ");
-        print(operand);
+        out.newLine();
+        out.indent();
+        out.print(instruction.opcode.name());
+        out.print(" ");
+        out.print(operand);
 
         lastArea = block;
     }
@@ -523,68 +369,36 @@ class AssemblyFileFormat {
 
 class ResultWriter {
 
-    /**
-     * Clears and recreates the shared output directory. Called once per
-     * .flo file, before any of its (possibly several) Subjects are written,
-     * so that one deflower line's run doesn't delete another's output.
-     */
-    void prepareOutputDirectory(Path basePath) throws IOException {
-        recreateDirectory(basePath.resolve("out"));
-    }
+    void write(Subject subject, Writer w) throws IOException {
+        AssemblyFileFormat assemblyFile = new AssemblyFileFormat(w);
+        for (int address = 0; address < 0x10000; address++) {
 
-    private void recreateDirectory(Path directory) throws IOException {
-        if (Files.exists(directory)) {
-            walkFileTree(directory, new SimpleFileVisitor<>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    delete(file);
-                    return CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                    delete(dir);
-                    return CONTINUE;
-                }
-            });
-        }
-        createDirectories(directory);
-    }
-
-    void write(Subject subject) throws IOException {
-        Path asmFile = subject.outputPath.resolve(subject.outputFileName);
-        System.out.println("Writing "+asmFile);
-        try (Writer w = new FileWriter(asmFile.toFile()); BufferedWriter bw = new BufferedWriter(w); PrintWriter pw = new PrintWriter(bw)) {
-            AssemblyFileFormat assemblyFile = new AssemblyFileFormat(pw);
-            for (int address = 0; address < 0x10000; address++) {
-
-                Area currentArea = subject.peek(address);
-                if (currentArea != null && currentArea.isVirtual()) {
-                    // The loop's own address++ then lands on the first
-                    // address after the stretch.
-                    address = assemblyFile.printVirtualStretch(address, subject) - 1;
-                    continue;
-                }
-
-                // Is there a comment or a label here? Print them.
-                String comment = subject.memory[address].comment;
-                String label = subject.memory[address].label;
-                if (comment != null || label != null) {
-                    assemblyFile.printAnnotation(address, comment, label, currentArea, subject);
-                }
-                if (currentArea != null) {
-                    if (currentArea instanceof DataArea) {
-                        assemblyFile.print((DataArea) currentArea, address, subject);
-                    } else if (currentArea instanceof InstructionArea) {
-                        InstructionArea instructionBlock = (InstructionArea) currentArea;
-                        assemblyFile.printInstruction(instructionBlock, subject);
-                    }
-                } else {
-                    assemblyFile.needsToReOrg = true;
-                }
-
+            Area currentArea = subject.peek(address);
+            if (currentArea != null && currentArea.isVirtual()) {
+                // The loop's own address++ then lands on the first
+                // address after the stretch.
+                address = assemblyFile.printVirtualStretch(address, subject) - 1;
+                continue;
             }
-            assemblyFile.close();
+
+            // Is there a comment or a label here? Print them.
+            String comment = subject.memory[address].comment;
+            String label = subject.memory[address].label;
+            if (comment != null || label != null) {
+                assemblyFile.printAnnotation(address, comment, label, currentArea, subject);
+            }
+            if (currentArea != null) {
+                if (currentArea instanceof DataArea) {
+                    assemblyFile.print((DataArea) currentArea, address, subject);
+                } else if (currentArea instanceof InstructionArea) {
+                    InstructionArea instructionBlock = (InstructionArea) currentArea;
+                    assemblyFile.printInstruction(instructionBlock, subject);
+                }
+            } else {
+                assemblyFile.needsToReOrg = true;
+            }
+
         }
+        assemblyFile.close();
     }
 }

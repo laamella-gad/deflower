@@ -51,6 +51,23 @@ class DataArea extends Area {
     }
 
     /**
+     * The address of the first element of the array this element belongs to.
+     */
+    int arrayStart() {
+        return address - indexInArray * size;
+    }
+
+    /**
+     * True when `area` is element `index` of the same array as this one.
+     */
+    boolean isInSameArray(Area area, int index) {
+        return area instanceof DataArea
+                && ((DataArea) area).type == type
+                && ((DataArea) area).indexInArray == index
+                && Objects.equals(((DataArea) area).arrayLabel, arrayLabel);
+    }
+
+    /**
      * An array annotation (issue 0024) registers one single-element
      * DataArea per index (issue 0033), each one already knowing its own
      * array label and index, so "STA $422" into a `byte[1000] screen`

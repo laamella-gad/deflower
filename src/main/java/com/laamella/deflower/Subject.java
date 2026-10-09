@@ -57,6 +57,98 @@ class Subject {
         return wordAt(address) + 256 * 256 * wordAt(address + 2);
     }
 
+    boolean isVirtualAt(int address) {
+        Area area = peek(address);
+        return area != null && area.isVirtual();
+    }
+
+    /**
+     * True when a label or comment is attached to `address`.
+     */
+    boolean isAnnotated(int address) {
+        return memory[address].label != null || memory[address].comment != null;
+    }
+
+    /**
+     * The first address after `start` and before `end` with a label or
+     * comment, or `end` when there is none.
+     */
+    int firstAnnotatedAddressInside(int start, int end) {
+        for (int address = start + 1; address < end; address++) {
+            if (isAnnotated(address)) {
+                return address;
+            }
+        }
+        return end;
+    }
+
+    /**
+     * True when the run of data `block` is part of carries on at `address`:
+     * an element of the same type, virtual or not like `block`, starts
+     * there, and no label or comment interrupts the run.
+     */
+    boolean continuesRun(DataArea block, int address) {
+        if (address >= memory.length || isAnnotated(address)) {
+            return false;
+        }
+        Area area = peek(address);
+        return area instanceof DataArea
+                && area.address == address
+                && ((DataArea) area).type == block.type
+                && area.isVirtual() == block.isVirtual();
+    }
+
+    /**
+     * The (exclusive) end of the run of same-type elements starting at
+     * `first`: it stops before an element that differs or carries its own
+     * label/comment, and after an element with a label/comment somewhere
+     * inside it, so that annotation can still be printed.
+     */
+    int endOfRun(DataArea first) {
+        int end = first.address + first.size;
+        while (firstAnnotatedAddressInside(end - first.size, end) == end && continuesRun(first, end)) {
+            end += first.size;
+        }
+        return end;
+    }
+
+    /**
+     * The (exclusive) end of the array `element` belongs to: the elements
+     * one {@code .flo} line declared.
+     */
+    int endOfArray(DataArea element) {
+        int end = element.arrayStart();
+        for (int index = 0; end < memory.length && element.isInSameArray(peek(end), index); index++) {
+            end += element.size;
+        }
+        return end;
+    }
+
+    /**
+     * The 64tass encoding the text at `start` (inclusive) to `end`
+     * (exclusive) is most likely written in. Counts the bytes that are
+     * uppercase letters in each: $41-$5A under "none" (ASCII), $01-$1A
+     * under "screen" (Commodore screen codes). More wins; a tie (e.g.
+     * digits, reverse video) returns `onTie`. Only uppercase counts,
+     * because ASCII uppercase is also screen-code lowercase, and a stray
+     * $00 terminator or length byte would otherwise tip plain ASCII text
+     * over to "screen".
+     */
+    String likelyTextEncoding(int start, int end, String onTie) {
+        int none = 0;
+        int screen = 0;
+        for (int address = start; address < end; address++) {
+            int value = byteAt(address);
+            if (value >= 0x41 && value <= 0x5A) {
+                none++;
+            }
+            if (value >= 0x01 && value <= 0x1A) {
+                screen++;
+            }
+        }
+        return screen > none ? "screen" : none > screen ? "none" : onTie;
+    }
+
     void registerBlock(Area area) {
         for (int a = 0; a < area.size; a++) {
             int address = a + area.address;

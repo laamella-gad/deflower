@@ -1,6 +1,6 @@
 ---
 title: Refactor ResultWriter - it is doing too much
-status: open
+status: done
 labels: cleanup
 ---
 
@@ -30,3 +30,22 @@ The result is that each new output feature needs to know which other paths touch
 Pure refactor: the generated output must not change. Every `expected.asm` must stay byte-identical (snipsert), and the 64tass reassembly of the small fixtures must still match their `.prg` bytes.
 
 Done when: `AssemblyFileFormat` is split along lines like the above, no class mixes memory analysis with line/column state, and all tests pass with unchanged expectations.
+
+## Closing note
+
+Done at moderate scope, as decided up front: the emitter and the memory analysis came out; `AssemblyFileFormat` keeps layout and per-type printing. Three steps, with the full suite, unchanged expectations and the 64tass reassembly check after each:
+
+1. **File-system work moved to `Deflower`.** `prepareOutputDirectory`/`recreateDirectory` and opening the `.asm` file live there now; `ResultWriter.write(Subject, Writer)` only walks memory.
+2. **Memory analysis moved to `Subject`/`DataArea`.**
+   - `Subject`: `isVirtualAt`, `isAnnotated`, `firstAnnotatedAddressInside`, `continuesRun`, `endOfRun`, `endOfArray` and `likelyTextEncoding` (the uppercase-letter heuristic, with the tie answer passed in).
+   - `DataArea`: `arrayStart` and `isInSameArray`.
+   - The two "does the run continue here?" checks (`isSingleValueRun`, `endOfVirtualRun`) are now one rule, `Subject.continuesRun`: an element of the same type and the same virtual flag starts there, and no label or comment interrupts the run. The behaviour is identical: annotations only see non-virtual blocks, and virtual runs only see virtual ones.
+   - `AssemblyFileFormat` keeps only the per-array cache of the encoding decision, because a tie depends on the encoding in effect in the output.
+3. **New emitter class, `LineEmitter`.** It holds the writer, line start, value column and open quotes, with `print`, `newLine`, `finishLine`, `indent`, `item` (comma separators) and `quotedCharacter`. `AssemblyFileFormat` no longer touches `atLineStart`/`inQuotes`, and it reads `column` only through `column()`. `printAnnotation` reuses `printCommentLines`.
+
+Not done (out of the chosen scope):
+- per-kind printers behind a common shape, which would merge `write`'s loop with `printVirtualStretch`'s;
+- an explicit "previous output kind" in place of `lastArea`;
+- a `TextEncoding` type in place of the `"none"`/`"screen"` strings.
+
+Verification: 30/30 tests green. No `expected.asm` changed. screencodes, strings and datatypes still reassemble with 64tass to their `.prg` bytes.
