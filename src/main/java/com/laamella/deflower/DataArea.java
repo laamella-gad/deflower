@@ -5,11 +5,22 @@ import java.util.Objects;
 class DataArea extends Area {
     final DataType type;
     boolean isSystem;
+    // The label of the array this element belongs to (null if the .flo
+    // line that declared it had no name), and this element's index within
+    // that array. Baked in at creation time (issue 0033) so labelFor can
+    // compute a reference directly instead of scanning neighboring
+    // MemoryLocations for the nearest label - which depended on whichever
+    // Area objects happened to still be sitting next door, and broke down
+    // across a partial overwrite (issue 0031's placeholder-carving).
+    final String arrayLabel;
+    final int indexInArray;
 
-    DataArea(int address, DataType type, boolean isSystem) {
+    DataArea(int address, DataType type, boolean isSystem, String arrayLabel, int indexInArray) {
         super(address, type.sizeInBytes);
         this.type = type;
         this.isSystem = isSystem;
+        this.arrayLabel = arrayLabel;
+        this.indexInArray = indexInArray;
     }
 
     @Override
@@ -36,35 +47,34 @@ class DataArea extends Area {
 
     /**
      * An array annotation (issue 0024) registers one single-element
-     * DataArea per index, so a mid-block address's own area never carries
-     * the block's label - only the first element does. Walk backwards
-     * through same-type, same-system DataAreas until a label turns up (or
-     * the run breaks), so "STA $422" into a `byte[1000] screen` block
-     * starting at $400 resolves to "screen + $22" instead of falling back
-     * to a bare hex address.
+     * DataArea per index (issue 0033), each one already knowing its own
+     * array label and index, so "STA $422" into a `byte[1000] screen`
+     * block starting at $400 resolves to "screen + $22" by direct
+     * computation - no scanning through neighboring MemoryLocations for
+     * the nearest label. `address` may differ from this element's own
+     * address when it lands on a later byte of a multi-byte element
+     * (e.g. the second byte of a WORD).
+     * <p>
+     * A label set directly on this exact address - via the .flo line's
+     * own name, or an auto-label like {@code ensureLabelled} assigns
+     * (`_XXXX_POINTER`, `_XXXX_DATA`) - always wins outright: those don't
+     * go through the array mechanism at all (`FlowAnalyser`'s POINTER
+     * areas, for instance, have no arrayLabel). Only once that's absent
+     * do we fall back to the baked-in array reference.
      */
     @Override
     public String labelFor(int address, Subject subject) {
-        int blockAddress = address;
-        while (subject.memory[blockAddress].label == null && sameKindAt(blockAddress - 1, subject)) {
-            blockAddress--;
+        String directLabel = subject.memory[address].label;
+        if (directLabel != null) {
+            return directLabel;
         }
-        String label = subject.memory[blockAddress].label;
-        if (label == null) {
+        if (arrayLabel == null) {
             return null;
         }
-        int offset = address - blockAddress;
+        int offset = indexInArray * size + (address - this.address);
         if (offset == 0) {
-            return label;
+            return arrayLabel;
         }
-        return String.format("%s + $%X", label, offset);
-    }
-
-    private boolean sameKindAt(int address, Subject subject) {
-        if (address < 0) {
-            return false;
-        }
-        Area other = subject.memory[address].area;
-        return other instanceof DataArea && ((DataArea) other).type == type && ((DataArea) other).isSystem == isSystem;
+        return String.format("%s + $%X", arrayLabel, offset);
     }
 }

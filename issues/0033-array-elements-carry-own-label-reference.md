@@ -1,6 +1,6 @@
 ---
 title: Follow-up to 0026 - give each array element its own label reference instead of scanning for one
-status: open
+status: done
 labels: enhancement
 ---
 
@@ -13,3 +13,13 @@ That second part is the main new motivation: it also fixes a problem the backwar
 Important distinction to carry into the design: this is *not* the same as setting `MemoryLocation.label` on every element. That field is also what `ResultWriter`/`AssemblyFileFormat.printAnnotation` checks to decide whether to print a `label:` line - setting it on every element would print a label line for every single byte of every array, which is not wanted. The back-reference belongs on the `Area`/`DataArea` object itself (consulted only by `labelFor`), not on `MemoryLocation.label` (consulted by the printer).
 
 Done when: `DataArea.labelFor` no longer scans (`DataArea.sameKindAt`/the backward `while` loop in `DataArea.java` can go), array elements resolve their label via their own stored back-reference instead, and the squirm `high_score_screen + 1`-style case (label declared mid-block, code reads one byte past it, never separately declared) still resolves correctly - plus a new fixture covering the partial-overwrite case (carve a sub-range out of the middle of a labeled array; confirm the elements on both sides of the cut still resolve their own name/offset correctly). All existing fixtures (`blockoffset`, `squirm`, `zwark` especially) must still pass unchanged.
+
+## Closing note
+
+Done, with one accepted trade-off flagged to and confirmed by the user.
+
+`DataArea` gained `arrayLabel`/`indexInArray`, baked in at creation (`SubjectConfigurer`'s per-element loop passes `name, i`; `FlowAnalyser`'s internal POINTER creation passes `null, 0`). `labelFor` now: (1) check `subject.memory[address].label` directly first - this is what still makes auto-labels (`ensureLabelled`'s `_XXXX_DATA`/`_XXXX_POINTER`) and any element's own `.flo`-given name win outright, no array machinery involved; (2) otherwise fall back to `arrayLabel`/`offset = indexInArray * size + (address - this.address)` computed directly, no scan. `DataArea.sameKindAt` and the backward `while` loop are gone.
+
+Trade-off found during verification: `squirm.flo` is mostly adjacent single-address lines inside big anonymous placeholder ranges (legacy "data"-labelled leftovers, issue 0032 territory), and its *current* output depended on the old scan crossing those line boundaries to find a nearer, more meaningful label. Without the scan, elements inside such an anonymous range now resolve to that range's own baked name - `data + $A2` instead of the old `high_score_screen + $1` (~45 lines in squirm affected this way; `zwark`/`blockoffset`/`datatypes` unaffected, 0 diff). Flagged to the user as a three-way choice (keep a scan fallback / accept the regression / block on issue 0032 first); user chose to accept it. `squirm/expected.asm` regenerated and reviewed - every changed line confirmed to be exactly this `data + $hex` pattern, nothing else moved.
+
+New fixture `partialarraycarve` (test `arrayElementsOnBothSidesOfACarvedOutMiddleStillResolveToTheArrayLabel`): a 16-element placeholder array (`my_array`, $C000-$C00F) with a `word` (`mid_ptr`) carved out of its middle ($C006-$C007, issue 0031 narrowing); code references one element before the cut, one after, and the cut itself. All three resolve correctly (`my_array + $5`, `my_array + $8`, `mid_ptr`), confirming the cut doesn't orphan either side. 27/27 tests green.

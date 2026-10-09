@@ -184,6 +184,22 @@ class DeflowerTest {
         assertThat(capturedErr.toString()).doesNotContain("Area conflict");
     }
 
+    /**
+     * Issue 0033: each array element now carries its own label/offset
+     * baked in at creation, instead of resolving it by scanning backward
+     * through neighboring MemoryLocations for the nearest label. my_array
+     * spans $C000-$C00F as an unnamed-per-element placeholder; carving a
+     * word (mid_ptr) out of its middle ($C006-$C007, issue 0031's
+     * narrowing) must not orphan the elements on either side of the cut -
+     * $C005 (before) and $C008 (after) must still resolve to "my_array +
+     * $5" / "my_array + $8" respectively, and $C006 itself to "mid_ptr",
+     * regardless of what now sits between them.
+     */
+    @Test
+    void arrayElementsOnBothSidesOfACarvedOutMiddleStillResolveToTheArrayLabel() throws IOException, URISyntaxException {
+        assertDeflowered("partialarraycarve");
+    }
+
     @Test
     void rejectsUnrecognizedTokens() throws IOException, URISyntaxException {
         assertFailsToParse("invalid/garbage-tokens.flo");

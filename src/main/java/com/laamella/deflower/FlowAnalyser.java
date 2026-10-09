@@ -52,7 +52,7 @@ class FlowAnalyser {
                     // pointer cell as data and follow the address stored there.
                     int pointerAddress = getAbsoluteAddressOperand(address, subject);
                     subject.ensureLabelled(pointerAddress, "POINTER", address);
-                    subject.registerBlock(new DataArea(pointerAddress, DataType.POINTER, false));
+                    subject.registerBlock(new DataArea(pointerAddress, DataType.POINTER, false, null, 0));
                     subject.addPotentialCodeLocation(subject.wordAt(pointerAddress), true, address);
                 } else {
                     subject.addPotentialCodeLocation(getAbsoluteAddressOperand(address, subject), true, address);

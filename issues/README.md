@@ -53,7 +53,7 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0030](0030-ai-friendliness-of-flo-grammar.md) | open | Investigate whether the .flo format/grammar is easy to use, including for an AI writing it |
 | [0031](0031-carving-specific-types-out-of-unknown-data-is-a-conflict.md) | done | Carving a specific type out of a placeholder data block is reported as a conflict, blocking output |
 | [0032](0032-modernize-squirm-flo.md) | open | squirm.flo was written for an older version of deflower and needs modernizing |
-| [0033](0033-array-elements-carry-own-label-reference.md) | open | Follow-up to 0026 - give each array element its own label reference instead of scanning for one |
+| [0033](0033-array-elements-carry-own-label-reference.md) | done | Follow-up to 0026 - give each array element its own label reference instead of scanning for one |
 | [0034](0034-support-hi-lo-byte-extraction-operators.md) | open | Support tass64's `<`/`>` hi/lo byte extraction operators in output |
 | [0035](0035-implement-offset-block-syntax.md) | open | Implement the `{ }` block syntax as address-offset scoping |
 | [0036](0036-use-tass64-addr-directive.md) | open | Use 64tass's `.addr` directive instead of `.WORD` for pointer values |

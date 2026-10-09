@@ -163,7 +163,7 @@ class SubjectConfigurer {
                         }
                         System.out.format("Marking block of %d %s at %X \"%s\"\n", amount, type.dataType.name().toLowerCase(), address, name);
                         for (int i = 0; i < amount; i++) {
-                            subject.registerBlock(new DataArea(address + i * type.dataType.sizeInBytes, type.dataType, isSystem));
+                            subject.registerBlock(new DataArea(address + i * type.dataType.sizeInBytes, type.dataType, isSystem, name, i));
                         }
                     }
                     default -> throw new RuntimeException("No data type");
