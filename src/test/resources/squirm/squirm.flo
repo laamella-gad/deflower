@@ -88,10 +88,10 @@ $268e byte bonus_guy_char_2
 $2690 byte dots_eaten
 $2691 byte bonus_points_char
 $2692 byte note_idx
-$26ac byte[19] press_fire_to_start_
-$26c0 byte[10] get_ready_text
-$26ca byte[10] bonus_run_text
-$26d4 byte[8] bonus_text
+$26ac char[19] press_fire_to_start_
+$26c0 char[10] get_ready_text
+$26ca char[10] bonus_run_text
+$26d4 char[9] bonus_text
 $2800 8*64 byte charset
 $2a00 byte[8] arrow_char_1
 $2a08 byte[8] arrow_char_2

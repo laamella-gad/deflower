@@ -8,4 +8,4 @@ dword_val:
 		.dword	$44332211
 
 greeting:
-		.byte	'H', 'i', '!'
+		.text	"Hi!"

@@ -25,17 +25,18 @@ $9803 code draw_turns
 $9819 code show_top_score_line
 $982D code show_copyright
 $9841 code make_scores_red
-$984a bytes robert_copyright
-$986c bytes top_score_line
+$984a char[34] robert_copyright
+$986c char[40] top_score_line
+$9894 char[8] turns_text
 
 $9985 code hi_score_draw
 
-$9ab7 bytes f1_1_player_text
-$9acb bytes f3_2_player_text
+$9ab7 char[20] f1_1_player_text
+$9acb char[20] f3_2_player_text
 
 $9b02 code show_top_score_line
 
-$9b42 bytes game_over_text
+$9b42 char[11] game_over_text
 $9bcc draw_logo
 $9C45 logo0
 $9c61 logo1
@@ -55,7 +56,7 @@ $9D6E byte[8] table_with_timed_stuff
 $9E00 code start
 $9E2C code no_trainer
 $9f1c code install_trainer
-$9E40 bytes crack_trainer_msg
+$9E40 char[105] crack_trainer_msg
 
 $0400 virtual byte[1000] vic_screen
 $07f8 virtual byte[8] sprite_pointers

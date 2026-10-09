@@ -59,7 +59,7 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0036](0036-use-tass64-addr-directive.md) | open | Use 64tass's `.addr` directive instead of `.WORD` for pointer values |
 | [0037](0037-signed-numeric-datatype.md) | open | Add a signed numeric DataType (64tass's `.char`/`.sint`/`.lint`/`.dint`) |
 | [0038](0038-rta-return-address-table-detection.md) | open | Detect and support 64tass's `.rta` return-address-table idiom |
-| [0039](0039-text-string-directive-detection.md) | open | Detect runs of printable characters and emit 64tass's `.text`/`.null`/`.ptext` |
+| [0039](0039-text-string-directive-detection.md) | done | Detect runs of printable characters and emit 64tass's `.text`/`.null`/`.ptext` |
 | [0040](0040-text-encoding-screen-code-vs-ascii.md) | open | Support 64tass text encodings (`.enc`/screen code) for CHAR output |
 | [0041](0041-user-declarable-address-pointer-type.md) | open | Allow annotating a `.flo` line with type `address`/`pointer` |
 | [0042](0042-lowercase-generated-assembly.md) | open | Generate lowercase assembly output (except user labels/comments) |
@@ -67,3 +67,4 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0044](0044-array-size-arithmetic-and-hex.md) | open | Allow hex values and `*`/`+` arithmetic inside `[n]` array sizes |
 | [0045](0045-system-keyword-ignored.md) | done | The `system` keyword is parsed but ignored, so system areas are dumped as data |
 | [0046](0046-rename-system-to-virtual.md) | done | Rename `system` to `virtual` and emit 64tass `.virtual` blocks instead of address defines |
+| [0047](0047-null-and-ptext-string-directives.md) | open | Emit `.null`/`.ptext` for null-terminated and length-prefixed strings |

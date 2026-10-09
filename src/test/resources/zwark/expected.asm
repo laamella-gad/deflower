@@ -977,7 +977,7 @@ draw_turns:
 		LDX #$00
 
 _9805_CODE:
-		LDA $9894, X
+		LDA turns_text, X
 		AND #$BF
 		STA vic_screen + $96, X
 		LDA #$06
@@ -1017,11 +1017,13 @@ make_scores_red:
 		RTS 
 
 robert_copyright:
-		.byte	$1A
-*=$986C
-
-top_score_line:		.byte	$50
-*=$989C
+		.text	$1A, $17, $01, $12, $0B, "  (", $03, ") 1982  ", $12, $0F, $02, $05, $12, $14, " ", $17, $05, $0E, $14, $17, $0F, $12, $14
+		.text	$08, " "
+top_score_line:
+		.text	"PLAYER.ONE.....HIGH.SCORE.....PL"
+		.text	"AYER.TWO"
+turns_text:
+		.text	"TURNS=  "
 
 _989C_CODE:
 		CMP #$FF
@@ -1298,11 +1300,9 @@ _9AA4_CODE:
 		RTS 
 
 f1_1_player_text:
-		.byte	$06
-*=$9ACB
-
-f3_2_player_text:		.byte	$06
-*=$9ADF
+		.text	$06, "1 - ", $13, $09, $0E, $07, $0C, $05, " ", $10, $0C, $01, $19, $05, $12, "  "
+f3_2_player_text:
+		.text	$06, "3 - ", $14, $17, $0F, " ", $10, $0C, $01, $19, $05, $12, " ", $07, $01, $0D, $05
 
 _9ADF_CODE:
 		LDX #$00
@@ -1362,8 +1362,7 @@ _9B40_CODE:
 *=$9B42
 
 game_over_text:
-		.byte	$07
-*=$9B4D
+		.text	$07, $01, $0D, $05, " ", $0F, $16, $05, $12, "  "
 
 _9B4D_CODE:
 		LDA $9D93
@@ -1619,7 +1618,10 @@ no_trainer:
 *=$9E40
 
 crack_trainer_msg:
-		.byte	$03
+		.text	$03, $12, $01, $03, $0B, $05, $04, " ", $02, $19, " ", $0D, $01, $0E, $09, $0B, "                "
+		.text	"        cccccccccccccccc        "
+		.text	"                ", $15, $0E, $0C, $09, $0D, $09, $14, $05, $04, " ", $0C, $09, $16, $05, $13, "."
+		.text	"....", $1B, $19, "/", $0E, $1D
 *=$9F1C
 
 install_trainer:

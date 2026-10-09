@@ -1,0 +1,7 @@
+deflower strings.prg
+$c000 code entry
+$c004 char[5] plain
+$c009 char[4] nulled
+$c00d char[4] counted
+$c011 char[6] mixed
+$c017 char[41] long_nulled

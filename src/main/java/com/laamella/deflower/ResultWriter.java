@@ -144,6 +144,7 @@ class AssemblyFileFormat {
     }
 
     private void newLine() throws IOException {
+        closeQuotes();
         w.write("\n");
         column = 0;
         atLineStart = true;
@@ -288,7 +289,7 @@ class AssemblyFileFormat {
                 tabularPrint(".byte", asHexByte(subject.byteAt(address)));
                 break;
             case CHAR:
-                tabularPrint(".byte", asChar(subject.byteAt(address)));
+                textPrint(subject.byteAt(address));
                 break;
             case WORD:
                 tabularPrint(".word", asHexWord(subject.wordAt(address)));
@@ -306,16 +307,60 @@ class AssemblyFileFormat {
         lastArea = block;
     }
 
+    private static final int TEXT_BYTES_PER_LINE = 32;
+
+    // True while a double-quoted literal is open on the current .text
+    // line; newLine() closes it.
+    private boolean inQuotes = false;
+
     /**
-     * A printable, unambiguous character as an assembler character literal
-     * (e.g. 'A'), or a hex byte for anything that isn't (control codes,
-     * quotes, backslashes).
+     * Prints one CHAR value as an item of a 64tass {@code .text} line
+     * (issue 0039), the string counterpart of tabularPrint: consecutive
+     * printable characters share one double-quoted literal, anything else
+     * (control codes, the double quote itself) becomes a hex item, e.g.
+     * {@code .text "AB", $0D, "C"}. Wraps every TEXT_BYTES_PER_LINE values.
      */
-    private String asChar(int value) {
-        if (value >= 0x20 && value <= 0x7E && value != '\'' && value != '\\') {
-            return "'" + (char) value + "'";
+    private void textPrint(int value) throws IOException {
+        if (column == TEXT_BYTES_PER_LINE) {
+            newLine();
         }
-        return asHexByte(value);
+        if (column == 0) {
+            indent();
+            print(".text\t");
+        }
+        boolean printable = value >= 0x20 && value <= 0x7E && value != '"';
+        if (printable) {
+            if (!inQuotes) {
+                if (column != 0) {
+                    print(", ");
+                }
+                print("\"");
+                inQuotes = true;
+            }
+            print(String.valueOf((char) value));
+        } else {
+            closeQuotes();
+            if (column != 0) {
+                print(", ");
+            }
+            print(asHexByte(value));
+        }
+        column++;
+    }
+
+    private void closeQuotes() throws IOException {
+        if (inQuotes) {
+            print("\"");
+            inQuotes = false;
+        }
+    }
+
+    /**
+     * Finishes the output: closes a string literal still open on the last
+     * line.
+     */
+    void close() throws IOException {
+        closeQuotes();
     }
 
     private void considerReOrg(int address) throws IOException {
@@ -450,6 +495,7 @@ class ResultWriter {
                 }
 
             }
+            assemblyFile.close();
         }
     }
 }

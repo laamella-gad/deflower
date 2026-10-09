@@ -62,8 +62,8 @@ class DeflowerTest {
     /**
      * AssemblyFileFormat.print(DataArea, ...) used to only handle BYTE,
      * silently skipping WORD/DWORD/CHAR areas (issue 0002). Covers all three:
-     * two WORDs, one DWORD, and three CHARs (printable as character
-     * literals).
+     * two WORDs, one DWORD, and three CHARs (printed as one .text
+     * string, issue 0039).
      */
     @Test
     void emitsWordDwordAndCharData() throws IOException, URISyntaxException {
@@ -209,6 +209,17 @@ class DeflowerTest {
     @Test
     void virtualAreaBecomesVirtualBlockInsteadOfData() throws IOException, URISyntaxException {
         assertDeflowered("virtualarea");
+    }
+
+    /**
+     * Issue 0039: consecutive CHAR values print as `.text` lines, printable
+     * characters sharing a double-quoted literal and anything else
+     * (control codes, double quotes, a $00 terminator, a length byte) as
+     * hex items, wrapping every 32 values. `.null`/`.ptext` are issue 0047.
+     */
+    @Test
+    void charRunsBecomeTextStrings() throws IOException, URISyntaxException {
+        assertDeflowered("strings");
     }
 
     @Test
