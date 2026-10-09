@@ -19,7 +19,7 @@ Decided scope: every data instruction, absolute modes only (`abs`, `abs,X`, `abs
 Two refinements came out of reviewing the output:
 
 - **No auto-label where a name already exists** (`labelDataReference`). An address inside a labelled array, word or instruction already resolves as `label + offset`, and its own label would replace that. Squirm's `LDA _2657_DATA` now reads `LDA word_8_048e + $1`. That also fixed a real byte error: the old inline `_2649_DATA:`/`_2657_DATA:` labels inside a word assembled one byte too far, so seven squirm instructions reassembled with the wrong operand (noted on [0028](0028-mid-block-labels-as-address-defines.md)).
-- **Labels on memory no area covers are used.** I/O registers, vectors and unused RAM get a `dXXXX` label too. As decided, `nameForAddress` now prints such a label even where there is no area, so `STA $D400` becomes `STA dD400`. The label definition sits in its own `*=` origin block.
+- **Labels on memory no area covers are used.** I/O registers, vectors and unused RAM get a `dXXXX` label too. As decided, `nameForAddress` now prints such a label even where there is no area, so `STA $D400` becomes `STA dD400`. The label definition sits in its own `*=` origin block. *Reversed by [0054](0054-empty-labels-on-uncovered-memory.md): those origin blocks were noise, so memory no area covers is no longer labelled and its operands stay numeric.*
 
 Found and filed along the way:
 - [0052](0052-auto-labels-are-64tass-local-labels.md) (done first): auto-labels started with `_`, which made them 64tass local labels.

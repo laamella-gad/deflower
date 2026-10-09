@@ -1,11 +1,4 @@
 
-*=$0000
-
-d0000:
-*=$00FF
-
-d00FF:
-
 .virtual $0400
 vic_screen:
 		.fill	1000
@@ -16,9 +9,6 @@ sprite_pointers:
 		.fill	8
 .endv
 
-*=$0805
-
-d0805:
 *=$9000
 
 start_game:
@@ -46,18 +36,16 @@ l901D:
 		STA sprite_coll_state
 		JSR l9773
 		JSR l91C4
-		STA d9049
+		STA $9049
 		JSR l9226
 		JSR l9570
 		JSR update_vic_sprite_positions
 		JSR l978B
 		JSR l9563
-		LDA d9049
+		LDA $9049
 		BNE l901A
 		CLC 
 		BCC main_loop
-
-d9049:
 		BRK 
 
 player_sprite:
@@ -94,16 +82,16 @@ explosion_sprite_3:
 l91C4:
 		LDA #$01
 		JSR l94FD
-		LDA d9D98
+		LDA $9D98
 		JSR l93D8
 		BNE check_joystick
-		LDA d9D98
+		LDA $9D98
 		JSR l92FA
 		BNE l9223
-		LDX d9D8C
+		LDX $9D8C
 
 d91DC:
-		DEC d9D8A, X
+		DEC $9D8A, X
 		BMI l91FD
 		LDX #$00
 		LDA init_sprite_coords, X
@@ -130,7 +118,7 @@ check_right:
 		LDA #$08
 		BIT joystick_state
 		BNE check_left
-		LDA d9D98
+		LDA $9D98
 		JSR l93F9
 		LDX #$01
 		LDY #$00
@@ -139,7 +127,7 @@ check_left:
 		LDA #$04
 		BIT joystick_state
 		BNE l9223
-		LDA d9D98
+		LDA $9D98
 		JSR l944D
 
 l9223:
@@ -151,19 +139,19 @@ l9225:
 l9226:
 		LDA #$02
 		JSR l94FD
-		LDA d9D98
+		LDA $9D98
 		JSR l93D8
 		BNE l9240
 		LDA #$01
 		EOR #$FF
-		AND d9D87
-		STA d9D87
+		AND $9D87
+		STA $9D87
 		CLC 
 		BCC l92B6
 
 l9240:
 		LDA #$01
-		BIT d9D87
+		BIT $9D87
 		BNE l9286
 		LDA #$10
 		BIT joystick_state
@@ -171,33 +159,33 @@ l9240:
 
 fire_pressed:
 		LDA #$02
-		BIT d9D87
+		BIT $9D87
 		BEQ l92B6
 		LDA #$01
 		JSR l94FD
 		LDA #$01
 		JSR l93D8
-		STA d92F9
+		STA $92F9
 		LDA #$02
 		JSR l94FD
-		LDA d92F9
+		LDA $92F9
 		BEQ l92B6
-		ORA d9D87
+		ORA $9D87
 		LDA #$01
-		ORA d9D87
-		STA d9D87
+		ORA $9D87
+		STA $9D87
 		LDA #$02
 		EOR #$FF
-		AND d9D87
-		STA d9D87
+		AND $9D87
+		STA $9D87
 		LDA #$01
 		JSR l989C
 
 l9286:
 		LDA #$02
-		ORA d9D5B
-		STA d9D5B
-		LDA d9D98
+		ORA $9D5B
+		STA $9D5B
+		LDA $9D98
 		LDX #$FF
 		LDY #$02
 		JSR l9486
@@ -207,20 +195,20 @@ l9286:
 		BCS l92F8
 		LDA #$01
 		EOR #$FF
-		AND d9D87
-		STA d9D87
+		AND $9D87
+		STA $9D87
 		CLC 
 		BCC l92F8
 
 l92AE:
 		LDA #$02
-		ORA d9D87
-		STA d9D87
+		ORA $9D87
+		STA $9D87
 
 l92B6:
 		LDA #$FD
-		AND d9D5B
-		STA d9D5B
+		AND $9D5B
+		STA $9D5B
 		LDX #$00
 		LDA sprite_ptrs, X
 		LDX #$02
@@ -252,42 +240,40 @@ l92EF:
 		STA sprite_x_high_bits
 		CLC 
 		BCC l92F8
-		INC d9D9D
+		INC $9D9D
 
 l92F8:
 		RTS 
-
-d92F9:
 *=$92FA
 
 l92FA:
-		LDX d9D99
-		LDA d9D98
-		BIT d9D86
+		LDX $9D99
+		LDA $9D98
+		BIT $9D86
 		BNE l9345
-		ORA d9D86
-		STA d9D86
+		ORA $9D86
+		STA $9D86
 		LDA #$00
-		STA d9D7E, X
+		STA $9D7E, X
 		LDA #$01
 		STA init_sprite_ptrs + $8, X
 		LDX #$01
 		LDA #$01
-		BIT d9D98
+		BIT $9D98
 		BNE l9345
 
 l931E:
-		LDY d9D8C
-		LDA d9D8D, Y
+		LDY $9D8C
+		LDA $9D8D, Y
 		CLC 
 		SED 
 		ADC #$01
-		STA d9D8D, Y
+		STA $9D8D, Y
 		BCC l9338
-		LDA d9D8F, Y
+		LDA $9D8F, Y
 		CLC 
 		ADC #$01
-		STA d9D8F, Y
+		STA $9D8F, Y
 		BCC l9338
 
 l9338:
@@ -296,7 +282,7 @@ l9338:
 		BNE l9345
 		INX 
 		LDA #$F8
-		BIT d9D86
+		BIT $9D86
 		BNE l931E
 
 l9345:
@@ -307,8 +293,8 @@ l9345:
 		JMP l93D5
 
 l9352:
-		INC d9D7E, X
-		LDA d9D7E, X
+		INC $9D7E, X
+		LDA $9D7E, X
 		CMP #$01
 		BNE l9365
 		LDA sprite_pointers, X
@@ -333,26 +319,26 @@ l9372:
 		BNE l93CA
 
 l937F:
-		LDA d9D98
-		EOR d9D86
-		STA d9D86
-		LDX d9D99
-		LDA d9D2A, X
-		STA d9D97
-		LDY d9D32, X
+		LDA $9D98
+		EOR $9D86
+		STA $9D86
+		LDX $9D99
+		LDA $9D2A, X
+		STA $9D97
+		LDY $9D32, X
 		LDA sprite_pointers, X
-		LDX d9D97
+		LDX $9D97
 		JSR l94DE
 		LDA #$FE
 		JSR l989C
 		LDA #$03
-		AND d9D98
+		AND $9D98
 		BNE l93C0
-		LDY d9D8C
+		LDY $9D8C
 		LDA #$0F
-		AND d9D8D, Y
+		AND $9D8D, Y
 		BNE l93C0
-		LDX d9D99
+		LDX $9D99
 
 flash_sprite:
 		INC vic_sprite_colors, X
@@ -368,7 +354,7 @@ l93C0:
 
 l93CA:
 		JSR l94DE
-		LDX d9D99
+		LDX $9D99
 		LDA #$1E
 		STA init_sprite_ptrs + $8, X
 
@@ -379,7 +365,7 @@ l93D7:
 		RTS 
 
 l93D8:
-		BIT d9D86
+		BIT $9D86
 		BNE l93F6
 		BIT sprite_coll_state
 		BEQ l93F2
@@ -405,26 +391,26 @@ l93F9:
 		CPX #$00
 		BEQ l942F
 		DEX 
-		STX d9D9C
-		LDX d9D9A
+		STX $9D9C
+		LDX $9D9A
 		LDA sprite_ptrs, X
 		CPY #$FF
 		BEQ l9417
 		CMP #$3C
 		BCC l9417
-		LDA d9D98
+		LDA $9D98
 		BIT sprite_x_high_bits
 		BNE l942B
 
 l9417:
 		INC sprite_ptrs, X
 		BNE l9425
-		LDA d9D98
+		LDA $9D98
 		ORA sprite_x_high_bits
 		STA sprite_x_high_bits
 
 l9425:
-		LDX d9D9C
+		LDX $9D9C
 		CLC 
 		BCC l93F9
 
@@ -436,8 +422,8 @@ l942F:
 		LDA #$00
 
 l9431:
-		STA d9D9B
-		LDA d9D98
+		STA $9D9B
+		LDA $9D98
 		BIT sprite_x_high_bits
 		BEQ l9440
 		LDY #$01
@@ -447,24 +433,24 @@ l9440:
 		LDY #$00
 
 l9442:
-		LDX d9D9A
+		LDX $9D9A
 		LDA sprite_ptrs, X
 		TAX 
-		LDA d9D9B
+		LDA $9D9B
 		RTS 
 
 l944D:
 		CPX #$00
 		BEQ l942F
 		DEX 
-		STX d9D9C
-		LDX d9D9A
+		STX $9D9C
+		LDX $9D9A
 		LDA sprite_ptrs, X
 		CPY #$FF
 		BEQ l946B
 		CMP #$17
 		BCS l946B
-		LDA d9D98
+		LDA $9D98
 		BIT sprite_x_high_bits
 		BEQ l942B
 
@@ -473,13 +459,13 @@ l946B:
 		LDA #$FF
 		CMP sprite_ptrs, X
 		BNE l9480
-		LDA d9D98
+		LDA $9D98
 		EOR #$FF
 		AND sprite_x_high_bits
 		STA sprite_x_high_bits
 
 l9480:
-		LDX d9D9C
+		LDX $9D9C
 		CLC 
 		BCC l944D
 
@@ -487,9 +473,9 @@ l9486:
 		CPY #$00
 		BEQ l94AB
 		DEY 
-		STX d9D9C
+		STX $9D9C
 		TXA 
-		LDX d9D9A
+		LDX $9D9A
 		INX 
 		CMP #$FF
 		BEQ l949E
@@ -499,7 +485,7 @@ l9486:
 
 l949E:
 		DEC sprite_ptrs, X
-		LDX d9D9C
+		LDX $9D9C
 		CLC 
 		BCC l9486
 
@@ -511,21 +497,21 @@ l94AB:
 		LDA #$00
 
 l94AD:
-		STA d9D9B
-		LDX d9D9A
+		STA $9D9B
+		LDX $9D9A
 		INX 
 		LDY sprite_ptrs, X
 		LDX #$00
-		LDA d9D9B
+		LDA $9D9B
 		RTS 
 
 l94BD:
 		CPY #$00
 		BEQ l94AB
 		DEY 
-		STX d9D9C
+		STX $9D9C
 		TXA 
-		LDX d9D9A
+		LDX $9D9A
 		INX 
 		CMP #$FF
 		BEQ l94D5
@@ -535,7 +521,7 @@ l94BD:
 
 l94D5:
 		INC sprite_ptrs, X
-		LDX d9D9C
+		LDX $9D9C
 		CLC 
 		BCC l94BD
 
@@ -565,7 +551,7 @@ l94F3:
 l94FD:
 		CMP #$00
 		BEQ l951B
-		STA d9D98
+		STA $9D98
 		LDX #$00
 
 l9506:
@@ -577,23 +563,23 @@ l9506:
 		BCS l951B
 
 l9510:
-		STX d9D99
+		STX $9D99
 		TXA 
 		ASL 
-		STA d9D9A
+		STA $9D9A
 		CLC 
 		BCC l9526
 
 l951B:
 		LDA #$00
-		STA d9D99
-		STA d9D9A
-		STA d9D98
+		STA $9D99
+		STA $9D9A
+		STA $9D98
 
 l9526:
-		LDA d9D98
-		LDX d9D99
-		LDY d9D9A
+		LDA $9D98
+		LDX $9D99
+		LDY $9D9A
 		RTS 
 *=$9541
 
@@ -615,15 +601,15 @@ l9551:
 		INX 
 		CPX #$10
 		BCC l9551
-		LDA d9D5B
+		LDA $9D5B
 		STA vic_sprite_enable
 		RTS 
 
 l9563:
-		LDY d9D94
+		LDY $9D94
 
 l9566:
-		LDX d9D95
+		LDX $9D95
 
 l9569:
 		DEX 
@@ -637,38 +623,38 @@ l9570:
 
 l9572:
 		JSR l94FD
-		LDA d9D98
+		LDA $9D98
 		JSR l93D8
 		BNE l95B8
-		LDA d9D98
+		LDA $9D98
 		JSR l92FA
 		BEQ l9588
 		JMP l960F
 
 l9588:
-		LDX d9D9A
+		LDX $9D9A
 		INX 
 		LDA #$28
 		STA sprite_ptrs, X
-		LDX d9D99
+		LDX $9D99
 		LDA table_with_timed_stuff, X
-		LDX d9D9A
+		LDX $9D9A
 		STA sprite_ptrs, X
 		CMP #$17
 		BCC l95AF
-		LDA d9D98
+		LDA $9D98
 		EOR #$FF
 		AND sprite_x_high_bits
 		STA sprite_x_high_bits
 		JMP l95B8
 
 l95AF:
-		LDA d9D98
+		LDA $9D98
 		ORA sprite_x_high_bits
 		STA sprite_x_high_bits
 
 l95B8:
-		LDX d9D99
+		LDX $9D99
 		CPX #$02
 		BNE l95D9
 		LDA #$80
@@ -689,7 +675,7 @@ l95D9:
 		LDA #$02
 		AND table_with_timed_stuff, X
 		BEQ l95EA
-		LDA d9D98
+		LDA $9D98
 		LDY #$01
 		LDX #$FF
 		JSR l94BD
@@ -698,40 +684,40 @@ l95EA:
 		LDA #$08
 		AND table_with_timed_stuff, X
 		BEQ l95FB
-		LDA d9D98
+		LDA $9D98
 		LDX #$01
 		LDY #$00
 		JSR l93F9
 
 l95FB:
-		LDX d9D99
+		LDX $9D99
 		LDA #$04
 		AND table_with_timed_stuff, X
 		BEQ l960F
-		LDA d9D98
+		LDA $9D98
 		LDX #$01
 		LDY #$00
 		JSR l944D
 
 l960F:
 		LDA #$04
-		CMP d9D98
+		CMP $9D98
 		BCC l963A
 		ASL 
-		BIT d9D5B
+		BIT $9D5B
 		BNE l9635
-		LDY d9D8C
-		LDA d9D8F, Y
+		LDY $9D8C
+		LDA $9D8F, Y
 		CMP #$01
 		BCS l962D
-		LDA d9D8D, Y
+		LDA $9D8D, Y
 		CMP #$15
 		BCC l963A
 
 l962D:
 		LDA #$08
-		ORA d9D5B
-		STA d9D5B
+		ORA $9D5B
+		STA $9D5B
 
 l9635:
 		LDA #$08
@@ -739,23 +725,23 @@ l9635:
 
 l963A:
 		LDA #$08
-		CMP d9D98
+		CMP $9D98
 		BCC l9665
 		ASL 
-		BIT d9D5B
+		BIT $9D5B
 		BNE l9660
-		LDY d9D8C
-		LDA d9D8F, Y
+		LDY $9D8C
+		LDA $9D8F, Y
 		CMP #$01
 		BCS l9658
-		LDA d9D8D, Y
+		LDA $9D8D, Y
 		CMP #$40
 		BCC l96B4
 
 l9658:
 		LDA #$10
-		ORA d9D5B
-		STA d9D5B
+		ORA $9D5B
+		STA $9D5B
 
 l9660:
 		LDA #$10
@@ -763,23 +749,23 @@ l9660:
 
 l9665:
 		LDA #$10
-		CMP d9D98
+		CMP $9D98
 		BCC l9690
 		ASL 
-		BIT d9D5B
+		BIT $9D5B
 		BNE l968B
-		LDY d9D8C
-		LDA d9D8F, Y
+		LDY $9D8C
+		LDA $9D8F, Y
 		CMP #$01
 		BCS l9683
-		LDA d9D8D, Y
+		LDA $9D8D, Y
 		CMP #$80
 		BCC l96B4
 
 l9683:
 		LDA #$20
-		ORA d9D5B
-		STA d9D5B
+		ORA $9D5B
+		STA $9D5B
 
 l968B:
 		LDA #$20
@@ -787,18 +773,18 @@ l968B:
 
 l9690:
 		LDA #$20
-		CMP d9D98
+		CMP $9D98
 		BCC l96B4
 		ASL 
-		BIT d9D5B
+		BIT $9D5B
 		BNE l96AF
-		LDY d9D8C
-		LDA d9D8F, Y
+		LDY $9D8C
+		LDA $9D8F, Y
 		CMP #$01
 		BCC l96B4
 		LDA #$40
-		ORA d9D5B
-		STA d9D5B
+		ORA $9D5B
+		STA $9D5B
 
 l96AF:
 		LDA #$40
@@ -826,14 +812,14 @@ l96C6:
 		LDX #$00
 
 l96D3:
-		LDA d9D2A, X
-		STA d9D96
-		LDY d9D32, X
+		LDA $9D2A, X
+		STA $9D96
+		LDY $9D32, X
 		LDA init_sprite_ptrs, X
-		STX d9D97
-		LDX d9D96
+		STX $9D97
+		LDX $9D96
 		JSR l94DE
-		LDX d9D97
+		LDX $9D97
 		INX 
 		CPX #$07
 		BCC l96D3
@@ -851,9 +837,9 @@ l96FF:
 		CPX #$2F
 		BCC l96F2
 		LDA #$32
-		STA d9D94
+		STA $9D94
 		LDA #$0A
-		STA d9D95
+		STA $9D95
 		LDA #$00
 		LDX #$00
 
@@ -862,25 +848,25 @@ l9712:
 		INX 
 		CPX #$08
 		BCC l9712
-		STA d9D8D
-		STA d9D8E
-		STA d9D8F
-		STA d9D90
-		STA d9D8C
-		STA d9D87
-		STA d9D86
+		STA $9D8D
+		STA $9D8E
+		STA $9D8F
+		STA $9D90
+		STA $9D8C
+		STA $9D87
+		STA $9D86
 		STA sprite_x_high_bits
 		LDA #$04
-		STA d9D8A
-		STA d9D8B
+		STA $9D8A
+		STA $9D8B
 		JSR draw_turns
 		JSR l978B
-		LDA d9DB9
-		STA d9D5B
+		LDA $9DB9
+		STA $9D5B
 		LDX #$00
-		STA d9D6C, X
+		STA $9D6C, X
 		INX 
-		STA d9D6C, X
+		STA $9D6C, X
 		LDA #$00
 		LDX #$15
 
@@ -894,10 +880,10 @@ sid_clear_loop:
 		LDY #$00
 
 l9762:
-		LDA d9DCB, X
-		STA d9D5C, Y
+		LDA $9DCB, X
+		STA $9D5C, Y
 		INY 
-		STA d9D5C, Y
+		STA $9D5C, Y
 		INY 
 		INX 
 		CPX #$08
@@ -923,13 +909,13 @@ l9785:
 
 l978B:
 		LDA #$00
-		STA d9D9F
+		STA $9D9F
 		LDA #$02
-		STA d9DA0
+		STA $9DA0
 
 l9795:
-		LDY d9D9F
-		LDA d9D8F, Y
+		LDY $9D9F
+		LDA $9D8F, Y
 		JSR l9D0D
 		TXA 
 		CMP #$30
@@ -937,45 +923,45 @@ l9795:
 		LDA #$20
 
 l97A5:
-		LDY d9DA0
+		LDY $9DA0
 		STA vic_screen + $28, Y
-		LDY d9D9F
-		LDA d9D8D, Y
+		LDY $9D9F
+		LDA $9D8D, Y
 		JSR l9D0D
-		STX d9D9E
+		STX $9D9E
 		TYA 
 		CMP #$30
 		BNE l97C8
-		LDX d9D9F
-		LDY d9D8F, X
+		LDX $9D9F
+		LDY $9D8F, X
 		CPY #$00
 		BNE l97C8
 		LDA #$20
 
 l97C8:
-		LDY d9DA0
+		LDY $9DA0
 		INY 
 		STA vic_screen + $28, Y
 		INY 
-		LDA d9D9E
+		LDA $9D9E
 		STA vic_screen + $28, Y
 		INY 
 		LDA #$30
 		STA vic_screen + $28, Y
 		INY 
 		STA vic_screen + $28, Y
-		LDX d9D8C
-		LDA d9D8A, X
+		LDX $9D8C
+		LDA $9D8A, X
 		CLC 
 		ADC #$30
 		LDX #$06
 		STA vic_screen + $96, X
-		LDA d9D9F
+		LDA $9D9F
 		BNE l97FF
 		LDA #$01
-		STA d9D9F
+		STA $9D9F
 		LDA #$20
-		STA d9DA0
+		STA $9DA0
 		BNE l9795
 
 l97FF:
@@ -1041,64 +1027,64 @@ l989C:
 		BEQ l98F6
 		CMP #$01
 		BNE l98DA
-		LDA d9DD5
-		STA d9DD7
-		STA dD401
-		STA dD408
-		LDA d9DD6
-		STA d9DD8
+		LDA $9DD5
+		STA $9DD7
+		STA $D401
+		STA $D408
+		LDA $9DD6
+		STA $9DD8
 		STA sid_base
-		STA dD407
-		LDA d9DD3
-		STA dD405
-		STA dD40C
-		LDA d9DD4
-		STA dD406
-		STA dD40D
+		STA $D407
+		LDA $9DD3
+		STA $D405
+		STA $D40C
+		LDA $9DD4
+		STA $D406
+		STA $D40D
 		LDA #$81
-		STA dD404
+		STA $D404
 		LDA #$11
-		STA dD40B
+		STA $D40B
 		BNE l993B
 
 l98DA:
 		CMP #$02
 		BNE l98FE
-		DEC d9DD7
-		LDA d9DD7
-		STA dD401
-		STA dD408
-		LDA d9DD8
+		DEC $9DD7
+		LDA $9DD7
+		STA $D401
+		STA $D408
+		LDA $9DD8
 		STA sid_base
-		STA dD407
+		STA $D407
 		CLC 
 		BCC l993B
 
 l98F6:
 		LDA #$00
-		STA dD40B
-		STA dD404
+		STA $D40B
+		STA $D404
 
 l98FE:
 		CMP #$05
 		BNE l9932
 		LDA vic_timer_a
 		LSR 
-		STA dD410
-		STA dD401
+		STA $D410
+		STA $D401
 		LSR 
-		STA dD40F
-		STA dD401
-		LDA d9DD9
-		STA dD413
-		STA dD405
-		LDA d9DDA
-		STA dD414
-		STA dD406
+		STA $D40F
+		STA $D401
+		LDA $9DD9
+		STA $D413
+		STA $D405
+		LDA $9DDA
+		STA $D414
+		STA $D406
 		LDA #$11
-		STA dD412
+		STA $D412
 		LDA #$81
-		STA dD404
+		STA $D404
 		CLC 
 		BCC l993B
 
@@ -1106,30 +1092,30 @@ l9932:
 		CMP #$FE
 		BNE l993B
 		LDA #$00
-		STA dD412
+		STA $D412
 
 l993B:
 		RTS 
 
 l993C:
-		LDX d9D8C
-		LDA d9D8F, X
-		CMP d9D92
+		LDX $9D8C
+		LDA $9D8F, X
+		CMP $9D92
 		BCC l995F
 		BNE l9953
-		LDA d9D8D, X
-		CMP d9D91
+		LDA $9D8D, X
+		CMP $9D91
 		BCC l995F
 		BEQ l995F
 
 l9953:
-		LDA d9D8D, X
-		STA d9D91
-		LDA d9D8F, X
-		STA d9D92
+		LDA $9D8D, X
+		STA $9D91
+		LDA $9D8F, X
+		STA $9D92
 
 l995F:
-		LDA d9D92
+		LDA $9D92
 		JSR l9D0D
 		TXA 
 		CMP #$30
@@ -1139,12 +1125,12 @@ l995F:
 l996C:
 		LDY #$11
 		STA vic_screen + $28, Y
-		LDA d9D91
+		LDA $9D91
 		JSR l9D0D
 		TYA 
 		CMP #$30
 		BNE hi_score_draw
-		LDY d9D92
+		LDY $9D92
 		CPY #$00
 		BNE hi_score_draw
 		LDA #$20
@@ -1173,9 +1159,9 @@ l999A:
 
 l99AB:
 		JSR l9ADF
-		LDA d9D93
+		LDA $9D93
 		BEQ l99BA
-		LDA d9D8C
+		LDA $9D8C
 		CMP #$00
 		BEQ l99EB
 
@@ -1184,9 +1170,9 @@ l99BA:
 
 l99BD:
 		LDX #$00
-		STX d9DA2
+		STX $9DA2
 		LDX #$0A
-		STX d9DA3
+		STX $9DA3
 		BNE l99CC
 
 l99C9:
@@ -1200,9 +1186,9 @@ l99CC:
 		CMP #$86
 		BEQ l9A42
 		JSR l9563
-		DEC d9DA2
+		DEC $9DA2
 		BNE l99C9
-		DEC d9DA3
+		DEC $9DA3
 		BNE l99C9
 		JSR l9A4B
 		JMP l99BD
@@ -1222,13 +1208,13 @@ l99F7:
 		JSR l978B
 		JSR l9AF7
 		LDA #$F0
-		STA d9D94
-		STA d9D95
+		STA $9D94
+		STA $9D95
 		JSR l9563
 		LDA #$32
-		STA d9D94
+		STA $9D94
 		LDA #$0A
-		STA d9D95
+		STA $9D95
 		LDA #$20
 		LDX #$00
 
@@ -1243,19 +1229,19 @@ l9A19:
 		LDA vic_sprite_coll
 		LDA #$00
 		STA sprite_coll_state
-		STA dD404
-		STA dD40B
-		STA dD412
+		STA $D404
+		STA $D40B
+		STA $D412
 		RTS 
 
 l9A3B:
 		LDA #$00
-		STA d9D93
+		STA $9D93
 		BEQ l9A47
 
 l9A42:
 		LDA #$01
-		STA d9D93
+		STA $9D93
 
 l9A47:
 		JSR l96B5
@@ -1265,13 +1251,13 @@ l9A4B:
 		JSR l96B5
 		JSR draw_logo
 		LDA #$1D
-		STA d9D5B
+		STA $9D5B
 		LDA #$06
 		STA vic_sprite_colors + $3
 		LDA #$0C
 		STA vic_sprite_colors + $4
 		LDA #$0E
-		STA d9D95
+		STA $9D95
 
 l9A65:
 		JSR lFFE1
@@ -1290,12 +1276,12 @@ l9A65:
 		STA sprite_coll_state
 		JSR l9773
 		JSR l91C4
-		STA d9049
+		STA $9049
 		JSR l9226
 		JSR l9570
 		JSR update_vic_sprite_positions
 		JSR l9563
-		LDA d9049
+		LDA $9049
 		BNE l9AA4
 		CLC 
 		BCC l9A65
@@ -1305,9 +1291,9 @@ l9AA4:
 		STX sid_vol_filter
 		LDX #$1D
 		STX vic_sprite_enable
-		STX d9D5B
+		STX $9D5B
 		LDX #$0A
-		STX d9D95
+		STX $9D95
 		RTS 
 
 f1_1_player_text:
@@ -1334,7 +1320,7 @@ l9AE3:
 l9AF7:
 		LDX #$00
 		LDY #$0F
-		LDA d9D8C
+		LDA $9D8C
 		BEQ show_top_score_row_14
 		LDX #$1E
 
@@ -1349,8 +1335,8 @@ show_top_score_row_14:
 		CPY #$19
 		BCC show_top_score_row_14
 		LDA #$FF
-		STA d9B41
-		STA d9D94
+		STA $9B41
+		STA $9D94
 
 l9B1D:
 		JSR l9563
@@ -1363,32 +1349,30 @@ l9B1D:
 		BEQ l9B40
 		CMP #$86
 		BEQ l9B40
-		DEC d9B41
+		DEC $9B41
 		BNE l9B1D
 		LDA #$32
-		STA d9D94
+		STA $9D94
 		LDA #$01
 
 l9B40:
 		RTS 
-
-d9B41:
 *=$9B42
 
 game_over_text:
 		.text	"GAME OVER  "
 
 l9B4D:
-		LDA d9D93
+		LDA $9D93
 		BEQ l9B89
-		LDX d9D8C
-		LDA d9D5B
-		STA d9D6C, X
+		LDX $9D8C
+		LDA $9D5B
+		STA $9D6C, X
 		LDY #$00
 
 l9B5D:
 		LDA vic_sprite_colors, Y
-		STA d9D5C, X
+		STA $9D5C, X
 		INX 
 		INX 
 		INY 
@@ -1396,15 +1380,15 @@ l9B5D:
 		BCC l9B5D
 		LDA #$01
 		SEC 
-		SBC d9D8C
-		STA d9D8C
+		SBC $9D8C
+		STA $9D8C
 		TAX 
-		LDA d9D6C, X
-		STA d9D5B
+		LDA $9D6C, X
+		STA $9D5B
 		LDY #$00
 
 l9B7C:
-		LDA d9D5C, X
+		LDA $9D5C, X
 		STA vic_sprite_colors, Y
 		INX 
 		INX 
@@ -1423,25 +1407,25 @@ l9B8B:
 		BCC l9B8B
 		LDA #$00
 		STA sprite_x_high_bits
-		STA d9D86
-		STA d9D87
+		STA $9D86
+		STA $9D87
 		LDX #$00
 
 l9BA3:
-		LDA d9D2A, X
-		STA d9D96
-		LDY d9D32, X
+		LDA $9D2A, X
+		STA $9D96
+		LDY $9D32, X
 		LDA init_sprite_ptrs, X
-		STX d9D97
-		LDX d9D96
+		STX $9D97
+		LDX $9D96
 		JSR l94DE
-		LDX d9D97
+		LDX $9D97
 		INX 
 		CPX #$07
 		BCC l9BA3
-		LDA d9D5B
+		LDA $9D5B
 		AND #$FD
-		STA d9D5B
+		STA $9D5B
 		JSR update_vic_sprite_positions
 		RTS 
 
@@ -1465,7 +1449,7 @@ logo4:		.byte	$E9
 *=$9CD5
 
 l9CD5:
-		LDA d0805
+		LDA $0805
 		CMP #$9E
 		BEQ nothing_just_rts
 		LDA $73
@@ -1524,11 +1508,6 @@ l9D24:
 		TAY 
 		LDA #$00
 		RTS 
-
-d9D2A:
-*=$9D32
-
-d9D32:
 *=$9D3A
 
 init_sprite_ptrs:
@@ -1536,146 +1515,26 @@ init_sprite_ptrs:
 sprite_ptrs:
 		.byte	$16, $D8, $16, $D4, $16, $8B, $52, $4E, $EC, $A6, $70, $10, $F0, $10, $80, $10
 sprite_x_high_bits:		.byte	$00
-
-d9D5B:
-*=$9D5C
-
-d9D5C:
-*=$9D6C
-
-d9D6C:
 *=$9D6E
 
 table_with_timed_stuff:
 		.byte	$76, $FA, $EA, $92, $01, $C8, $C8, $A3
 table_with_timers:
 		.byte	$2A, $12, $32, $20, $0E, $2E, $2A, $2A
-
-d9D7E:
-*=$9D86
-
-d9D86:
-*=$9D87
-
-d9D87:
 *=$9D88
 
 joystick_state:
 		.byte	$7E
 sprite_coll_state:		.byte	$00
-
-d9D8A:
-*=$9D8B
-
-d9D8B:
-*=$9D8C
-
-d9D8C:
-*=$9D8D
-
-d9D8D:
-*=$9D8E
-
-d9D8E:
-*=$9D8F
-
-d9D8F:
-*=$9D90
-
-d9D90:
-*=$9D91
-
-d9D91:
-*=$9D92
-
-d9D92:
-*=$9D93
-
-d9D93:
-*=$9D94
-
-d9D94:
-*=$9D95
-
-d9D95:
-*=$9D96
-
-d9D96:
-*=$9D97
-
-d9D97:
-*=$9D98
-
-d9D98:
-*=$9D99
-
-d9D99:
-*=$9D9A
-
-d9D9A:
-*=$9D9B
-
-d9D9B:
-*=$9D9C
-
-d9D9C:
-*=$9D9D
-
-d9D9D:
-*=$9D9E
-
-d9D9E:
-*=$9D9F
-
-d9D9F:
-*=$9DA0
-
-d9DA0:
-*=$9DA2
-
-d9DA2:
-*=$9DA3
-
-d9DA3:
 *=$9DA4
 
 init_sprite_coords:		.byte	$A0
-*=$9DB9
-
-d9DB9:
-*=$9DCB
-
-d9DCB:
-*=$9DD3
-
-d9DD3:
-*=$9DD4
-
-d9DD4:
-*=$9DD5
-
-d9DD5:
-*=$9DD6
-
-d9DD6:
-*=$9DD7
-
-d9DD7:
-*=$9DD8
-
-d9DD8:
-*=$9DD9
-
-d9DD9:
-*=$9DDA
-
-d9DDA:
 *=$9E00
 
 start:
 		LDA #$00
-		STA dD020
-		STA dD021
+		STA $D020
+		STA $D021
 		JSR lE544
 		LDX #$68
 
@@ -1699,7 +1558,7 @@ l9E1C:
 
 no_trainer:
 		LDA #$9E
-		STA d0805
+		STA $0805
 		JMP start_game
 *=$9E40
 
@@ -1711,7 +1570,7 @@ crack_trainer_msg:
 *=$9F1C
 
 install_trainer:
-		ISC d00FF, X
+		ISC $00FF, X
 		BRK 
 
 .virtual $D000
@@ -1728,13 +1587,6 @@ vic_sprite_enable:		.byte	?
 vic_sprite_coll:		.byte	?
 .endv
 
-*=$D020
-
-dD020:
-*=$D021
-
-dD021:
-
 .virtual $D027
 vic_sprite_colors:
 		.fill	8
@@ -1743,49 +1595,6 @@ vic_sprite_colors:
 .virtual $D400
 sid_base:		.byte	?
 .endv
-
-*=$D401
-
-dD401:
-*=$D404
-
-dD404:
-*=$D405
-
-dD405:
-*=$D406
-
-dD406:
-*=$D407
-
-dD407:
-*=$D408
-
-dD408:
-*=$D40B
-
-dD40B:
-*=$D40C
-
-dD40C:
-*=$D40D
-
-dD40D:
-*=$D40F
-
-dD40F:
-*=$D410
-
-dD410:
-*=$D412
-
-dD412:
-*=$D413
-
-dD413:
-*=$D414
-
-dD414:
 
 .virtual $D418
 sid_vol_filter:		.byte	?
@@ -1811,7 +1620,7 @@ lE544:
 *=$FFE1
 
 lFFE1:
-		ISC d0000, X
+		ISC $0000, X
 
 lFFE4:
 		BRK 

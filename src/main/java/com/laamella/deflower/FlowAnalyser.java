@@ -83,11 +83,13 @@ class FlowAnalyser {
     /**
      * Labels the data `target` refers to, unless it can already be named:
      * an address inside a labelled array or instruction resolves as
-     * "label + offset", and a label of its own would replace that.
+     * "label + offset", and a label of its own would replace that. Memory
+     * no area covers (I/O, vectors, outside the image) stays numeric: a
+     * label there would only print as an empty origin block (issue 0054).
      */
     private void labelDataReference(int target, int referencingAddress, Subject subject) {
         Area area = subject.peek(target);
-        if (area != null && area.labelFor(target, subject) != null) {
+        if (area == null || area.labelFor(target, subject) != null) {
             return;
         }
         subject.ensureLabelled(target, "d", referencingAddress);

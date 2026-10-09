@@ -357,8 +357,8 @@ class AssemblyFileFormat {
     private String nameForAddress(int address, String formatWhenNumeric, Subject subject) {
         Area area = subject.memory[address].area;
         if (area == null) {
-            // Memory no area covers (I/O, vectors) can still carry a label,
-            // e.g. a data reference's auto-label (issue 0015).
+            // Memory no area covers can still carry a label: a user label,
+            // or a jump target whose instruction couldn't be decoded.
             String label = subject.memory[address].label;
             return label != null ? label : String.format(formatWhenNumeric, address);
         }

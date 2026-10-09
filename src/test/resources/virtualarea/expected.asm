@@ -9,7 +9,7 @@ entry:
 		LDA #$00
 		STA border_color
 		STA color_ram + $2
-		STA dD400
+		STA $D400
 		STA ptr
 		RTS 
 
@@ -17,10 +17,6 @@ entry:
 ; VIC-II border colour
 border_color:		.byte	?
 .endv
-
-*=$D400
-
-dD400:
 
 .virtual $D800
 color_ram:		.byte	?
