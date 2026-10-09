@@ -29,15 +29,15 @@ All `DeflowerTest` cases pass.
 
 The pipeline is: **flow file → parse → memory image + annotations → code-flow analysis → assembly output**. Everything lives in `com.laamella.deflower` except the grammar and the VICE snapshot parser.
 
-- **Input.** A `.flo` file (grammar `src/main/antlr4/com/laamella/enflower/Flo.g4`, generated package `com.laamella.enflower`) describes the disassembly.
-  - `deflower <file>` starts a run: it loads a memory image, either a `.vsf` VICE snapshot or a `.prg` (2-byte load address header, then bytes). Paths are resolved relative to the `.flo` file's directory. Each `deflower` line is an independent run with its own memory, analysis, and output file named after the binary (`squirm.vsf` → `out/squirm.asm`).
-  - Annotation lines can have:
-    - an address or range (`$2800-$2ff9`, `$0400`);
-    - a data type (`char`, `byte`, `word`, `dword`, `code`), with an optional `[n]` array size (a number, or `*`/`+` over numbers, e.g. `byte[40*21]`, `byte[$af]`). A size of 0, or a range too short for one element, is a `Subject.errors` entry;
-    - `virtual`: memory the code uses but the program does not contain, emitted as a 64tass `.virtual` reservation instead of data;
-    - a label (`ID`).
-  - A line with no type keyword is an `UNKNOWN` placeholder: it prints like `byte`, but a later, more specific line (or a code entry) may narrow it without an area conflict.
-  - Standalone `;`/`#` comment lines attach to the next annotation line.
+- **Input.** A `.flo` file describes the disassembly. Its full, authoritative description is the comment at the top of the grammar, `src/main/antlr4/com/laamella/enflower/Flo.g4` (generated package `com.laamella.enflower`); read it before writing or editing `.flo` lines. In short:
+  - `deflower <file>` starts a run: it loads a `.vsf` VICE snapshot or a `.prg`, relative to the `.flo` file. Each run is independent and writes `out/<file without extension>.asm`.
+  - An annotation line is `<address or start-end> [virtual] [<type>[<size>]] [<label>] [export <id>] [{]`, with the parts in exactly that order and each at most once. Anything else is a parse error.
+    - The range end is exclusive.
+    - Types are `char`, `byte`, `word`, `dword` and `code` (an entry point). No type means an `UNKNOWN` placeholder, which a later line may narrow without an area conflict.
+    - The size is a number or `*`/`+` over numbers (`byte[40*21]`, `byte[$af]`). A size of 0 is an error.
+    - The reserved words can't be labels.
+    - `export` and `{ }` parse but do nothing yet.
+  - `;`/`#` comments sit on their own line and attach to the next annotation line.
 - **`SubjectConfigurer`** drives the two configuration phases.
   - **Parse:** `FloReader` turns the `.flo` file into one `DeflowerRun` per `deflower` line, each holding its `Annotation`s (one per line, plain values; `LineType` is the line's kind). It reads nothing else and changes no memory. Syntax errors abort with "Failed to parse".
   - **Apply:** for each run, `SubjectConfigurer` creates a `Subject`, loads the image (`ViceSnapshotReader` or `PrgReader`, picked by extension), and calls `Subject.annotate` for each annotation. Data lines register one `DataArea` per element; `code` lines push an entry point onto `potentialCodeLocations`.
