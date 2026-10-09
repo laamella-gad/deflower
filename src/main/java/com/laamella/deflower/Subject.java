@@ -80,6 +80,13 @@ class Subject {
                 int amount = annotation.addressEnd != null
                         ? (annotation.addressEnd - address) / type.dataType.sizeInBytes
                         : annotation.amount;
+                if (amount <= 0) {
+                    // Issue 0044: an empty array, or a range too short to
+                    // hold one element (e.g. $c006-$c007 word: the end is
+                    // exclusive), is a mistake, not a no-op.
+                    errors.add(String.format("Zero-size %s at %s", type.dataType.name().toLowerCase(), asHexWord(address)));
+                    return;
+                }
                 System.out.format("Marking block of %d %s at %X \"%s\"\n", amount, type.dataType.name().toLowerCase(), address, annotation.name);
                 for (int i = 0; i < amount; i++) {
                     registerBlock(new DataArea(address + i * type.dataType.sizeInBytes, type.dataType, annotation.virtual, annotation.name, i));

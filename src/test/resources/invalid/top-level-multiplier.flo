@@ -1,0 +1,2 @@
+deflower x.prg
+$c000 40*21 byte removed_multiplier

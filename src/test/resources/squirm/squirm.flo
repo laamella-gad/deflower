@@ -44,10 +44,10 @@ $1234 byte[342] hiscore
 ; title screen is 40*21 bytes; rest_of_title is its last 75
 $138a byte[765] title
 $1687 byte[75] rest_of_title
-$16d2 40*21 byte level_1
-$1a1a 40*21 byte level_2
-$1d62 40*21 byte level_3
-$20ab 40*21 byte title_screen_colors
+$16d2 byte[40*21] level_1
+$1a1a byte[40*21] level_2
+$1d62 byte[40*21] level_3
+$20ab byte[40*21] title_screen_colors
 $23fa code set_top_bottom_text
 $23fc code more_chars
 $240e code set_top_bottom_red
@@ -92,7 +92,7 @@ $26ac char[19] press_fire_to_start_
 $26c0 char[10] get_ready_text
 $26ca char[10] bonus_run_text
 $26d4 char[9] bonus_text
-$2800 8*64 byte charset
+$2800 byte[8*64] charset
 $2a00 byte[8] arrow_char_1
 $2a08 byte[8] arrow_char_2
 $2a10 byte[8] arrow_char_3

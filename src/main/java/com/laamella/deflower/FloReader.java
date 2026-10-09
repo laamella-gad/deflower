@@ -105,8 +105,8 @@ class FloReader {
             } else if (ctx.CODE() != null) {
                 type = CODE_ENTRY;
             }
-            if (ctx.arraySize != null) {
-                amount = parseNumber(ctx.arraySize.getText()).orElse(amount);
+            if (ctx.arraySize() != null) {
+                amount = evaluate(ctx.arraySize());
             }
         }
 
@@ -119,13 +119,6 @@ class FloReader {
         public void enterMemoryRange(FloParser.MemoryRangeContext ctx) {
             address = parseNumber(ctx.number(0).getText()).orElseThrow();
             addressEnd = parseNumber(ctx.number(1).getText()).orElseThrow();
-        }
-
-        @Override
-        public void enterMul(FloParser.MulContext ctx) {
-            int left = parseNumber(ctx.number(0).getText()).orElseThrow();
-            int right = parseNumber(ctx.number(1).getText()).orElseThrow();
-            amount = left * right;
         }
 
         @Override
@@ -146,6 +139,18 @@ class FloReader {
             pendingComments.clear();
             run.annotations.add(new Annotation(address, addressEnd, type, isVirtual, amount, name, comment));
         }
+    }
+
+    private static int evaluate(FloParser.ArraySizeContext size) {
+        if (size instanceof FloParser.ArraySizeMulContext) {
+            FloParser.ArraySizeMulContext mul = (FloParser.ArraySizeMulContext) size;
+            return evaluate(mul.arraySize(0)) * evaluate(mul.arraySize(1));
+        }
+        if (size instanceof FloParser.ArraySizePlusContext) {
+            FloParser.ArraySizePlusContext plus = (FloParser.ArraySizePlusContext) size;
+            return evaluate(plus.arraySize(0)) + evaluate(plus.arraySize(1));
+        }
+        return parseNumber(((FloParser.ArraySizeNumberContext) size).number().getText()).orElseThrow();
     }
 
     /**

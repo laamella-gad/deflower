@@ -1,6 +1,6 @@
 ---
 title: Allow hex values and `*`/`+` arithmetic inside `[n]` array sizes
-status: open
+status: done
 labels: enhancement
 ---
 
@@ -50,3 +50,20 @@ Done when:
 - a size of 0 (from `[...]` or from a range) is reported as an error;
 - a fixture or test covers each form and the zero-size error;
 - all existing fixtures pass, with `squirm.flo` converted and its `expected.asm` unchanged.
+
+## Closing note
+
+Done. Two more decisions were taken with the user before implementing:
+- A zero size goes to `Subject.errors`, like an area conflict. It's printed to stderr, and that subject's output is skipped while other runs are still written.
+- No parentheses inside `[ ]`.
+
+Changes:
+- **Grammar:** `arraySize` is now its own rule: `arraySize '*' arraySize | arraySize '+' arraySize | number`. The `*` alternative comes first, so it binds tighter, and `number` brings hex. The top-level `mul` and `plus` alternatives are removed from `expr`.
+- **`FloReader`:** `enterMul` is gone. `enterDatatype` evaluates the size tree, reusing `parseNumber` for the leaves.
+- **`Subject.annotate`:** a data line whose amount comes out at 0 or less adds "Zero-size <type> at $XXXX" to `errors` and registers nothing. That covers `[0]`, `[0*n]`, a range shorter than one element, and also a reversed range.
+- **`squirm.flo`:** the five `n*m` lines are now `byte[n*m]`. `expected.asm` is unchanged.
+
+Tests (34, all green):
+- New `arraysize` fixture: `[4]`, `[$4]`, `[2*2]`, `[1+2*2]` (5 elements, checking precedence) and `word[1+1]`. Its output reassembles with 64tass to the `.prg`.
+- New `zerosize` fixture: `byte[0]` and `$c006-$c007 word`, both reported, and no output written.
+- `invalid/top-level-multiplier.flo` and `invalid/top-level-plus.flo` now fail to parse.

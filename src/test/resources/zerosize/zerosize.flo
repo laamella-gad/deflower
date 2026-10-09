@@ -1,0 +1,3 @@
+deflower zerosize.prg
+$c000 byte[0] empty
+$c006-$c007 word too_short

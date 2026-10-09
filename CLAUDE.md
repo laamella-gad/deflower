@@ -33,7 +33,7 @@ The pipeline is: **flow file → parse → memory image + annotations → code-f
   - `deflower <file>` starts a run: it loads a memory image, either a `.vsf` VICE snapshot or a `.prg` (2-byte load address header, then bytes). Paths are resolved relative to the `.flo` file's directory. Each `deflower` line is an independent run with its own memory, analysis, and output file named after the binary (`squirm.vsf` → `out/squirm.asm`).
   - Annotation lines can have:
     - an address or range (`$2800-$2ff9`, `$0400`);
-    - a data type (`char`, `byte`, `word`, `dword`, `code`), with an optional `[n]` array size or an `n*m` multiplier;
+    - a data type (`char`, `byte`, `word`, `dword`, `code`), with an optional `[n]` array size (a number, or `*`/`+` over numbers, e.g. `byte[40*21]`, `byte[$af]`). A size of 0, or a range too short for one element, is a `Subject.errors` entry;
     - `virtual`: memory the code uses but the program does not contain, emitted as a 64tass `.virtual` reservation instead of data;
     - a label (`ID`).
   - A line with no type keyword is an `UNKNOWN` placeholder: it prints like `byte`, but a later, more specific line (or a code entry) may narrow it without an area conflict.

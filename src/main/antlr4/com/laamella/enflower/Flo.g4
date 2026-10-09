@@ -7,9 +7,7 @@ statement: COMMENT # comment
     | '}'                           # endBlock
     ;
 
-expr:	number '*' number     # mul
-    |	number '+' number                   # plus
-    |	number '-' number               # memoryRange
+expr:	number '-' number               # memoryRange
     | expr datatype                 # setSize
     | number                        # address
     | 'virtual'                     # setVirtual
@@ -17,7 +15,13 @@ expr:	number '*' number     # mul
     | ID                                    # setLabel
     ;
 
-datatype: (CHAR|BYTE|WORD|DWORD|CODE) ( '[' arraySize=INT? ']')?;
+datatype: (CHAR|BYTE|WORD|DWORD|CODE) ( '[' arraySize? ']')?;
+// The element count of an array: a number, or * and + over numbers, with
+// * binding tighter.
+arraySize: arraySize '*' arraySize  # arraySizeMul
+    | arraySize '+' arraySize       # arraySizePlus
+    | number                        # arraySizeNumber
+    ;
 number: INT|HEX;
 
 CHAR: 'char';

@@ -234,6 +234,53 @@ class DeflowerTest {
         assertDeflowered("screencodes");
     }
 
+    /**
+     * Issue 0044: an array size can be hex, and can use * and + (with *
+     * binding tighter), matching the plain [n] form. 1+2*2 must be 5
+     * elements, not 6.
+     */
+    @Test
+    void arraySizeAcceptsHexAndArithmetic() throws IOException, URISyntaxException {
+        assertDeflowered("arraysize");
+    }
+
+    /**
+     * Issue 0044: a size of 0, from [...] or from a range too short to hold
+     * one element ($c006-$c007 is one byte: the end is exclusive), is
+     * reported as an error, and no output is written for that subject.
+     */
+    @Test
+    void reportsZeroSizeAndSkipsOutput() throws IOException, URISyntaxException {
+        String flowerFile = "zerosize/zerosize.flo";
+        ByteArrayOutputStream capturedErr = new ByteArrayOutputStream();
+        PrintStream originalErr = System.err;
+        System.setErr(new PrintStream(capturedErr));
+        try {
+            new Deflower().deflower(flowerFile);
+        } finally {
+            System.setErr(originalErr);
+        }
+        assertThat(capturedErr.toString())
+                .contains("Zero-size byte at $C000")
+                .contains("Zero-size word at $C006")
+                .contains("Errors detected");
+        assertThat(isEmpty(outDir(flowerFile))).as("output directory for a subject with a zero size").isTrue();
+    }
+
+    /**
+     * Issue 0044: arithmetic lives only inside [ ]; the top-level n*m and
+     * n+m forms are gone.
+     */
+    @Test
+    void rejectsTopLevelMultiplier() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/top-level-multiplier.flo");
+    }
+
+    @Test
+    void rejectsTopLevelPlus() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/top-level-plus.flo");
+    }
+
     @Test
     void rejectsUnrecognizedTokens() throws IOException, URISyntaxException {
         assertFailsToParse("invalid/garbage-tokens.flo");

@@ -11,8 +11,8 @@ final class Annotation {
     final Integer addressEnd;
     final LineType type;
     final boolean virtual;
-    // The number of elements: an array size like "byte[8]" or a
-    // multiplier like "40*21". Ignored when addressEnd is given.
+    // The number of elements: an array size like "byte[8]" or
+    // "byte[40*21]". Ignored when addressEnd is given.
     final int amount;
     final String name;
     // The standalone comment lines right above this line, joined with
