@@ -289,7 +289,7 @@ class AssemblyFileFormat {
                 tabularPrint(".byte", asHexByte(subject.byteAt(address)));
                 break;
             case CHAR:
-                textPrint(subject.byteAt(address));
+                textPrint(block, subject.byteAt(address), subject);
                 break;
             case WORD:
                 tabularPrint(".word", asHexWord(subject.wordAt(address)));
@@ -313,23 +313,46 @@ class AssemblyFileFormat {
     // line; newLine() closes it.
     private boolean inQuotes = false;
 
+    // The 64tass text encoding in effect at this point of the output;
+    // "none" is 64tass's own default.
+    private String encoding = "none";
+
+    // The declared char array the encoding was last chosen for, as an
+    // address range, so it's chosen once per array, not once per value.
+    private int encodingArrayStart = -1;
+    private int encodingArrayEnd = -1;
+    private String arrayEncoding = "none";
+
     /**
      * Prints one CHAR value as an item of a 64tass {@code .text} line
      * (issue 0039), the string counterpart of tabularPrint: consecutive
      * printable characters share one double-quoted literal, anything else
-     * (control codes, the double quote itself) becomes a hex item, e.g.
-     * {@code .text "AB", $0D, "C"}. Wraps every TEXT_BYTES_PER_LINE values.
+     * becomes a hex item, e.g. {@code .text "AB", $0D, "C"}. Wraps every
+     * TEXT_BYTES_PER_LINE values.
+     * <p>
+     * The value is read as ASCII or as Commodore screen codes, whichever
+     * suits its declared array better (issue 0040, {@link #encodingFor}).
+     * A line opening under a different encoding than the one in effect
+     * first switches it with {@code .enc}, so the output reassembles to the
+     * same bytes; an array changing encoding mid-line starts a new line.
      */
-    private void textPrint(int value) throws IOException {
-        if (column == TEXT_BYTES_PER_LINE) {
+    private void textPrint(DataArea block, int value, Subject subject) throws IOException {
+        String valueEncoding = encodingFor(block, subject);
+        if (column == TEXT_BYTES_PER_LINE || (column != 0 && !valueEncoding.equals(encoding))) {
             newLine();
         }
         if (column == 0) {
+            if (!valueEncoding.equals(encoding)) {
+                indent();
+                print(".enc\t\"" + valueEncoding + "\"");
+                newLine();
+                encoding = valueEncoding;
+            }
             indent();
             print(".text\t");
         }
-        boolean printable = value >= 0x20 && value <= 0x7E && value != '"';
-        if (printable) {
+        int character = characterFor(valueEncoding, value);
+        if (character != -1) {
             if (!inQuotes) {
                 if (column != 0) {
                     print(", ");
@@ -337,7 +360,7 @@ class AssemblyFileFormat {
                 print("\"");
                 inQuotes = true;
             }
-            print(String.valueOf((char) value));
+            print(String.valueOf((char) character));
         } else {
             closeQuotes();
             if (column != 0) {
@@ -346,6 +369,72 @@ class AssemblyFileFormat {
             print(asHexByte(value));
         }
         column++;
+    }
+
+    /**
+     * The encoding to read the char array `block` belongs to in: the
+     * elements one {@code .flo} line declared (same array label,
+     * consecutive indexes). Counts the bytes that are uppercase letters
+     * in each: $41-$5A under "none", $01-$1A under "screen". More wins; a
+     * tie (e.g. digits, reverse video) keeps the encoding already in
+     * effect, so it doesn't cause a needless {@code .enc} switch. Only uppercase counts, because ASCII uppercase is
+     * also screen-code lowercase, and a stray $00 terminator or length
+     * byte would otherwise tip plain ASCII text over to "screen".
+     */
+    private String encodingFor(DataArea block, Subject subject) {
+        if (block.address >= encodingArrayStart && block.address < encodingArrayEnd) {
+            return arrayEncoding;
+        }
+        int start = block.address - block.indexInArray;
+        int end = start;
+        while (end < subject.memory.length && isElementOf(subject.peek(end), block, end - start)) {
+            end++;
+        }
+        int none = 0;
+        int screen = 0;
+        for (int address = start; address < end; address++) {
+            int value = subject.byteAt(address);
+            if (value >= 0x41 && value <= 0x5A) {
+                none++;
+            }
+            if (value >= 0x01 && value <= 0x1A) {
+                screen++;
+            }
+        }
+        encodingArrayStart = start;
+        encodingArrayEnd = end;
+        arrayEncoding = screen > none ? "screen" : none > screen ? "none" : encoding;
+        return arrayEncoding;
+    }
+
+    private static boolean isElementOf(Area area, DataArea block, int index) {
+        return area instanceof DataArea
+                && ((DataArea) area).type == DataType.CHAR
+                && ((DataArea) area).indexInArray == index
+                && Objects.equals(((DataArea) area).arrayLabel, block.arrayLabel);
+    }
+
+    /**
+     * The character `value` is written as in a string under 64tass's
+     * `encoding` in its default raw mode (no {@code --ascii}), or -1 when
+     * there is none and it must be printed as hex. "none" is the identity;
+     * "screen" maps screen codes $00-$1F to "@A-Z[\]^_", $20-$3F to
+     * themselves and $40-$5E to "`a-z{|}~" (checked against 64tass 1.59).
+     * Reverse video ($80-$FF), $5F-$7F and the double quote, which would
+     * end the literal, have none.
+     */
+    private static int characterFor(String encoding, int value) {
+        int character = value;
+        if (encoding.equals("screen")) {
+            if (value <= 0x1F) {
+                character = value + 0x40;
+            } else if (value >= 0x40 && value <= 0x5E) {
+                character = value + 0x20;
+            } else if (value > 0x3F) {
+                return -1;
+            }
+        }
+        return character >= 0x20 && character <= 0x7E && character != '"' ? character : -1;
     }
 
     private void closeQuotes() throws IOException {

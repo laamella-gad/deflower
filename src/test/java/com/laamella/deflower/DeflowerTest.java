@@ -222,6 +222,18 @@ class DeflowerTest {
         assertDeflowered("strings");
     }
 
+    /**
+     * Issue 0040: each declared char array is read as ASCII or as
+     * Commodore screen codes, whichever has more uppercase letters in it
+     * (a tie keeps the encoding in effect), and the output switches 64tass's
+     * `.enc` wherever that changes - including between two adjacent arrays
+     * with no label in between.
+     */
+    @Test
+    void charArraysPickAsciiOrScreenCodeEncoding() throws IOException, URISyntaxException {
+        assertDeflowered("screencodes");
+    }
+
     @Test
     void rejectsUnrecognizedTokens() throws IOException, URISyntaxException {
         assertFailsToParse("invalid/garbage-tokens.flo");

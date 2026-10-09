@@ -60,7 +60,7 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0037](0037-signed-numeric-datatype.md) | open | Add a signed numeric DataType (64tass's `.char`/`.sint`/`.lint`/`.dint`) |
 | [0038](0038-rta-return-address-table-detection.md) | open | Detect and support 64tass's `.rta` return-address-table idiom |
 | [0039](0039-text-string-directive-detection.md) | done | Detect runs of printable characters and emit 64tass's `.text`/`.null`/`.ptext` |
-| [0040](0040-text-encoding-screen-code-vs-ascii.md) | open | Support 64tass text encodings (`.enc`/screen code) for CHAR output |
+| [0040](0040-text-encoding-screen-code-vs-ascii.md) | done | Support 64tass text encodings (`.enc`/screen code) for CHAR output |
 | [0041](0041-user-declarable-address-pointer-type.md) | open | Allow annotating a `.flo` line with type `address`/`pointer` |
 | [0042](0042-lowercase-generated-assembly.md) | open | Generate lowercase assembly output (except user labels/comments) |
 | [0043](0043-error-on-duplicate-label-definition.md) | open | Report an error when the same label is defined at two addresses |

@@ -1,0 +1,12 @@
+deflower screencodes.prg
+$c000 code entry
+$c004 char[13] greeting
+; reverse video "HEI", a double quote, then "@A"
+$c011 char[6] odd_codes
+; lowercase only: no uppercase letters either way, a tie
+$c017 char[3] ascii_text
+$c01a char[2] ok_text
+; digits read the same either way: a tie keeps the encoding in effect
+$c01c char[3] digits
+$c01f char[2]
+$c021 char[3] upper_ascii
