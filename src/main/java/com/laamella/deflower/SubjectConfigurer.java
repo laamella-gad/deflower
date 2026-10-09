@@ -60,7 +60,7 @@ class SubjectConfigurer {
             Integer address = null;
             Integer addressEnd = null;
             LineType type = UNKNOWN_BLOCK;
-            boolean isSystem = false;
+            boolean isVirtual = false;
             int amount = 1;
             String name = null;
             final List<String> pendingComments = new ArrayList<>();
@@ -69,7 +69,7 @@ class SubjectConfigurer {
                 address = null;
                 addressEnd = null;
                 type = UNKNOWN_BLOCK;
-                isSystem = false;
+                isVirtual = false;
                 amount = 1;
                 name = null;
             }
@@ -163,7 +163,7 @@ class SubjectConfigurer {
                         }
                         System.out.format("Marking block of %d %s at %X \"%s\"\n", amount, type.dataType.name().toLowerCase(), address, name);
                         for (int i = 0; i < amount; i++) {
-                            subject.registerBlock(new DataArea(address + i * type.dataType.sizeInBytes, type.dataType, isSystem, name, i));
+                            subject.registerBlock(new DataArea(address + i * type.dataType.sizeInBytes, type.dataType, isVirtual, name, i));
                         }
                     }
                     default -> throw new RuntimeException("No data type");
@@ -171,8 +171,8 @@ class SubjectConfigurer {
             }
 
             @Override
-            public void enterSetSystem(FloParser.SetSystemContext ctx) {
-                isSystem = true;
+            public void enterSetVirtual(FloParser.SetVirtualContext ctx) {
+                isVirtual = true;
             }
 
             @Override

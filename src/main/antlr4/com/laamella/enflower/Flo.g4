@@ -12,7 +12,7 @@ expr:	number '*' number     # mul
     |	number '-' number               # memoryRange
     | expr datatype                 # setSize
     | number                        # address
-    | 'system'                      # setSystem
+    | 'virtual'                     # setVirtual
     | 'export' ID                   # export
     | ID                                    # setLabel
     ;

@@ -1,30 +1,39 @@
-screen_ram = $0400
-_0423_DATA = $0423
-var_init_b1 = $0424
-bonus_guy_2_start = $0755
-bonus_timer_digit_1 = $07DE
-bonus_timer_digit_2 = $07DF
-bonus_timer_digit_3 = $07E0
-color_ram = $D800
 
-*=$0057
-
+.virtual $0057
 ; 3b20 screen 0400 charset 2800
-player_direction:
-		.byte	$EF
-joy_dir_for_move:		.byte	$EF
-*=$00A2
+player_direction:		.byte	?
+joy_dir_for_move:		.byte	?
+.endv
 
-jiffy_timer:		.byte	$FB
-*=$00C5
+.virtual $00A2
+jiffy_timer:		.byte	?
+.endv
 
-last_key_pressed:		.byte	$40
-*=$00FB
+.virtual $00C5
+last_key_pressed:		.byte	?
+.endv
 
-new_loc_lo:		.byte	$E0
-new_loc_hi:		.byte	$05
-tmp_loc_lo:		.byte	$E0
-tmp_loc_hi:		.byte	$05
+.virtual $00FB
+new_loc_lo:		.byte	?
+new_loc_hi:		.byte	?
+tmp_loc_lo:		.byte	?
+tmp_loc_hi:		.byte	?
+.endv
+
+.virtual $0400
+screen_ram:
+		.fill	35
+_0423_DATA:		.byte	?
+var_init_b1:
+		.fill	817
+bonus_guy_2_start:
+		.fill	137
+bonus_timer_digit_1:		.byte	?
+bonus_timer_digit_2:		.byte	?
+bonus_timer_digit_3:
+		.fill	8
+.endv
+
 *=$0FA0
 
 top_line:
@@ -2817,6 +2826,12 @@ voice_2_notes:
 *=$D023
 
 _D023_DATA:
+
+.virtual $D800
+color_ram:
+		.fill	1000
+.endv
+
 *=$DC01
 
 _DC01_DATA:

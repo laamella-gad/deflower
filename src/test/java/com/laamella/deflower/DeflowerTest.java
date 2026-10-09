@@ -201,13 +201,14 @@ class DeflowerTest {
     }
 
     /**
-     * Issue 0045: a `system` area's contents are not dumped; its label (and
-     * comment) become an address definition, and code referencing it -
-     * including an element inside a system array - still resolves by name.
+     * Issues 0045/0046: a `virtual` area's contents are not dumped; it
+     * becomes a .virtual reservation keeping its labels, type and size, and
+     * code referencing it - including an element inside a virtual array -
+     * still resolves by name.
      */
     @Test
-    void systemAreaBecomesAddressDefinitionInsteadOfData() throws IOException, URISyntaxException {
-        assertDeflowered("systemarea");
+    void virtualAreaBecomesVirtualBlockInsteadOfData() throws IOException, URISyntaxException {
+        assertDeflowered("virtualarea");
     }
 
     @Test

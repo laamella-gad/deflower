@@ -52,11 +52,14 @@ abstract class Area {
     }
 
     /**
-     * True for an area declared {@code system} in the {@code .flo} file
-     * (I/O registers, colour RAM, ...): not part of the program, so its
-     * contents are never dumped, only its label defined (issue 0045).
+     * True for an area declared {@code virtual} in the {@code .flo} file:
+     * memory the code uses but whose contents aren't part of the program
+     * (I/O registers, screen/colour RAM, zero-page variables, ...). Its
+     * contents are never dumped; it's emitted as a 64tass {@code .virtual}
+     * reservation instead, keeping its labels, type and size (issues
+     * 0045, 0046).
      */
-    public boolean isSystem() {
+    public boolean isVirtual() {
         return false;
     }
 

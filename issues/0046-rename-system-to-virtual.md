@@ -1,6 +1,6 @@
 ---
 title: Rename `system` to `virtual` and emit 64tass `.virtual` blocks instead of address defines
-status: open
+status: done
 labels: enhancement
 ---
 
@@ -52,3 +52,30 @@ documentation, or the pretty formats in issue 0020), add that as a separate tag 
 Done when: `virtual` lines produce `.virtual` blocks with typed reservations and their labels; code references still
 resolve; squirm's zero-page variables no longer appear as `.byte` data; all affected `expected.asm` files are
 regenerated and reviewed (snipsert), with instructions unchanged apart from operands newly resolving to names.
+
+## Closing note
+
+Done.
+
+Decisions taken:
+- **`system` dropped outright, no alias.** All fixtures were converted, and keeping an alias would only preserve the misleading name.
+- **Blocks are placed inline at their address position,** not collected at the top. Address order is kept, and the block slots into the main loop the same way `*=` runs do.
+- **Runs use `.fill n`.** A run of more than one same-type element becomes `.fill n`, with n in bytes; that is 64tass's uninitialised reservation when the fill value is omitted. A single value becomes `.byte ?` / `.word ?` / `.dword ?` / `.addr ?` (CHAR and UNKNOWN use `.byte`). A run breaks at any label or comment, so every label gets its own reservation line, automatic labels such as `_0423_DATA` included.
+- **A label inside a multi-byte element** (e.g. the second byte of a virtual `word`) has no reservation to attach to. It is printed as `name = $XXXX` inside the block.
+
+Changes:
+- Grammar: `'virtual' # setVirtual` replaces `system`.
+- Listener and classes: `enterSetVirtual` in the listener. In the classes, `DataArea.virtual` and `Area.isVirtual()` replace their `system` counterparts.
+- `ResultWriter`: `printVirtualStretch` replaces `printSystemDefine` and the separate defines pass. After `.endv` a fresh `*=` follows.
+- CLAUDE.md now names the `virtual` keyword.
+
+Fixture `systemarea` became `virtualarea` (test `virtualAreaBecomesVirtualBlockInsteadOfData`). It adds a zero-page `virtual word ptr` and a label at `$d801` inside the `color_ram` array. The output shows `ptr: .word ?`, the run split into `color_ram: .byte ?` / `second_color: .fill 3`, and code resolving `STA ptr`, `STA color_ram + $2`, `STA border_color`.
+
+`squirm.flo`'s zero-page variables (`$0057`-`$00fe`) are now `virtual byte`.
+
+Review with snipsert:
+- squirm and zwark: every instruction line, operands included, is identical (checksum match).
+- The defines at the top became `.virtual` blocks at their addresses, with sizes adding up correctly (e.g. squirm's `screen_ram` block: 35 + 1 + 817 + 137 + 1 + 1 + 8 = 1000).
+- squirm's zero-page `.byte` dumps became `.byte ?` reservations.
+
+28/28 green.

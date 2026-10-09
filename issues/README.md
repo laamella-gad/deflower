@@ -66,4 +66,4 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0043](0043-error-on-duplicate-label-definition.md) | open | Report an error when the same label is defined at two addresses |
 | [0044](0044-array-size-arithmetic-and-hex.md) | open | Allow hex values and `*`/`+` arithmetic inside `[n]` array sizes |
 | [0045](0045-system-keyword-ignored.md) | done | The `system` keyword is parsed but ignored, so system areas are dumped as data |
-| [0046](0046-rename-system-to-virtual.md) | open | Rename `system` to `virtual` and emit 64tass `.virtual` blocks instead of address defines |
+| [0046](0046-rename-system-to-virtual.md) | done | Rename `system` to `virtual` and emit 64tass `.virtual` blocks instead of address defines |

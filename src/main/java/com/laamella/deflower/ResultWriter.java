@@ -135,7 +135,7 @@ class AssemblyFileFormat {
             return true;
         }
         DataArea nextBlock = (DataArea) nextArea;
-        return nextBlock.type != block.type || nextBlock.isSystem();
+        return nextBlock.type != block.type || nextBlock.isVirtual();
     }
 
     void print(String s) throws IOException {
@@ -156,22 +156,120 @@ class AssemblyFileFormat {
     private int column = 0;
 
     /**
-     * A system area (`system` in the .flo file: I/O registers, colour RAM,
-     * ...) isn't part of the program, so its contents are never dumped.
-     * Its label still has to exist for the code that references it, so it
-     * becomes an address definition (`color_ram = $D800`) instead of a
-     * `label:` under an origin pointing into I/O space (issue 0045).
+     * Prints a stretch of consecutive virtual areas (issue 0046) as one
+     * 64tass {@code .virtual} block: memory the code uses but whose
+     * contents aren't part of the program. Nothing is emitted for it, but
+     * its labels, type and size survive as reservations - {@code .byte ?}
+     * for a single value, {@code .fill n} for a run of same-type elements -
+     * so references like {@code screen_ram + $50} still assemble.
+     *
+     * @return the first address after the stretch
      */
-    void printSystemDefine(int address, String comment, String label) throws IOException {
+    int printVirtualStretch(int start, Subject subject) throws IOException {
+        if (!atLineStart) {
+            newLine();
+        }
+        newLine();
+        print(".virtual " + asHexWord(start));
+        newLine();
+        int address = start;
+        while (address < subject.memory.length && isVirtualAt(address, subject)) {
+            DataArea block = (DataArea) subject.peek(address);
+            String comment = subject.memory[address].comment;
+            String label = subject.memory[address].label;
+            printCommentLines(comment);
+            if (address != block.address) {
+                // A label landing inside a multi-byte element (the second
+                // byte of a word): no reservation of its own to hang it on.
+                if (label != null) {
+                    print(label + " = " + asHexWord(address));
+                    newLine();
+                }
+                address++;
+                continue;
+            }
+            int end = endOfVirtualRun(block, subject);
+            int count = (end - address) / block.size;
+            if (label != null) {
+                print(label + ":");
+            }
+            if (count == 1) {
+                indent();
+                print(reservationDirective(block.type) + "\t?");
+            } else {
+                if (label != null) {
+                    newLine();
+                }
+                indent();
+                print(".fill\t" + (end - address));
+            }
+            newLine();
+            address = firstAnnotatedAddressInside(address, end, subject);
+        }
+        print(".endv");
+        newLine();
+        needsToReOrg = true;
+        lastArea = null;
+        return address;
+    }
+
+    private static boolean isVirtualAt(int address, Subject subject) {
+        Area area = subject.peek(address);
+        return area != null && area.isVirtual();
+    }
+
+    /**
+     * The (exclusive) end of the run of same-type virtual elements starting
+     * at `first`: it stops before an element that differs or carries its own
+     * label/comment, and after an element with a label/comment somewhere
+     * inside it, so that annotation can still be printed.
+     */
+    private static int endOfVirtualRun(DataArea first, Subject subject) {
+        int end = first.address + first.size;
+        while (!annotatedInside(end - first.size, end, subject) && end < subject.memory.length) {
+            Area next = subject.peek(end);
+            if (!(next instanceof DataArea) || !next.isVirtual() || next.address != end
+                    || ((DataArea) next).type != first.type
+                    || subject.memory[end].label != null || subject.memory[end].comment != null) {
+                break;
+            }
+            end += first.size;
+        }
+        return end;
+    }
+
+    private static boolean annotatedInside(int elementStart, int elementEnd, Subject subject) {
+        return firstAnnotatedAddressInside(elementStart, elementEnd, subject) != elementEnd;
+    }
+
+    /**
+     * The first address after `start` and before `end` with a label or
+     * comment, or `end` when there is none.
+     */
+    private static int firstAnnotatedAddressInside(int start, int end, Subject subject) {
+        for (int address = start + 1; address < end; address++) {
+            if (subject.memory[address].label != null || subject.memory[address].comment != null) {
+                return address;
+            }
+        }
+        return end;
+    }
+
+    private static String reservationDirective(DataType type) {
+        return switch (type) {
+            case BYTE, UNKNOWN, CHAR -> ".byte";
+            case WORD -> ".word";
+            case DWORD -> ".dword";
+            case POINTER -> ".addr";
+        };
+    }
+
+    private void printCommentLines(String comment) throws IOException {
         if (comment != null) {
             for (String line : comment.split("\n", -1)) {
                 print("; " + line);
                 newLine();
             }
-        }
-        if (label != null) {
-            print(label + " = " + asHexWord(address));
-            newLine();
         }
     }
 
@@ -325,22 +423,12 @@ class ResultWriter {
         try (Writer w = new FileWriter(asmFile.toFile()); BufferedWriter bw = new BufferedWriter(w); PrintWriter pw = new PrintWriter(bw)) {
             AssemblyFileFormat assemblyFile = new AssemblyFileFormat(pw);
             for (int address = 0; address < 0x10000; address++) {
-                Area area = subject.peek(address);
-                if (area != null && area.isSystem()) {
-                    String comment = subject.memory[address].comment;
-                    String label = subject.memory[address].label;
-                    if (comment != null || label != null) {
-                        assemblyFile.printSystemDefine(address, comment, label);
-                    }
-                }
-            }
-            for (int address = 0; address < 0x10000; address++) {
 
                 Area currentArea = subject.peek(address);
-                if (currentArea != null && currentArea.isSystem()) {
-                    // Already written as an address definition above;
-                    // nothing of it belongs in the program body.
-                    assemblyFile.needsToReOrg = true;
+                if (currentArea != null && currentArea.isVirtual()) {
+                    // The loop's own address++ then lands on the first
+                    // address after the stretch.
+                    address = assemblyFile.printVirtualStretch(address, subject) - 1;
                     continue;
                 }
 

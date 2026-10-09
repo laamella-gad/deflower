@@ -1,15 +1,13 @@
-vic_screen = $0400
-sprite_pointers = $07F8
-vic_sprite_coords = $D000
-vic_sprite_x_high_bits = $D010
-vic_sprite_enable = $D015
-vic_sprite_coll = $D01E
-vic_sprite_colors = $D027
-sid_base = $D400
-sid_vol_filter = $D418
-vic_color_ram = $D800
-vic_joystick1 = $DC01
-vic_timer_a = $DC04
+
+.virtual $0400
+vic_screen:
+		.fill	1000
+.endv
+
+.virtual $07F8
+sprite_pointers:
+		.fill	8
+.endv
 
 *=$0805
 
@@ -1627,6 +1625,47 @@ crack_trainer_msg:
 install_trainer:
 		ISC $00FF, X
 		BRK 
+
+.virtual $D000
+vic_sprite_coords:
+		.fill	16
+vic_sprite_x_high_bits:		.byte	?
+.endv
+
+.virtual $D015
+vic_sprite_enable:		.byte	?
+.endv
+
+.virtual $D01E
+vic_sprite_coll:		.byte	?
+.endv
+
+.virtual $D027
+vic_sprite_colors:
+		.fill	8
+.endv
+
+.virtual $D400
+sid_base:		.byte	?
+.endv
+
+.virtual $D418
+sid_vol_filter:		.byte	?
+.endv
+
+.virtual $D800
+vic_color_ram:
+		.fill	1000
+.endv
+
+.virtual $DC01
+vic_joystick1:		.byte	?
+.endv
+
+.virtual $DC04
+vic_timer_a:		.byte	?
+.endv
+
 *=$E544
 
 _E544_CODE:
