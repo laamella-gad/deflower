@@ -134,7 +134,6 @@ class FloReader {
         @Override
         public void exitLine(FloParser.LineContext ctx) {
             assertState(run != null, "Start the file with a 'deflower <file>' line.", ctx.getStart().getLine(), ctx.getText());
-            assertState(address != null, "Require an address: %s", ctx);
             String comment = pendingComments.isEmpty() ? null : String.join("\n", pendingComments);
             pendingComments.clear();
             run.annotations.add(new Annotation(address, addressEnd, type, isVirtual, amount, name, comment));

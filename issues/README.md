@@ -70,5 +70,5 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0047](0047-null-and-ptext-string-directives.md) | open | Emit `.null`/`.ptext` for null-terminated and length-prefixed strings |
 | [0048](0048-refactor-resultwriter.md) | done | Refactor ResultWriter - it is doing too much |
 | [0049](0049-refactor-subjectconfigurer.md) | done | Refactor SubjectConfigurer - it is doing too much |
-| [0050](0050-fixed-flo-line-shape.md) | open | Give .flo annotation lines a fixed shape in the grammar |
+| [0050](0050-fixed-flo-line-shape.md) | done | Give .flo annotation lines a fixed shape in the grammar |
 | [0051](0051-document-flo-format.md) | open | Document the .flo line shape and keywords authoritatively |

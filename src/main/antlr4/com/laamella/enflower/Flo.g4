@@ -1,19 +1,17 @@
 grammar Flo;
-prog:	(statement NEWLINE)*;
+prog:	(statement NEWLINE)* EOF;
 
 statement: COMMENT # comment
     | 'deflower' ID         # setFileName
-    | expr+ '{'?                # line
+    | (address | memoryRange) setVirtual? datatype? setLabel? export? '{'? # line
     | '}'                           # endBlock
     ;
 
-expr:	number '-' number               # memoryRange
-    | expr datatype                 # setSize
-    | number                        # address
-    | 'virtual'                     # setVirtual
-    | 'export' ID                   # export
-    | ID                                    # setLabel
-    ;
+address: number;
+memoryRange: number '-' number;
+setVirtual: 'virtual';
+setLabel: ID;
+export: 'export' ID;
 
 datatype: (CHAR|BYTE|WORD|DWORD|CODE) ( '[' arraySize? ']')?;
 // The element count of an array: a number, or * and + over numbers, with

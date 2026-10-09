@@ -1,6 +1,6 @@
 ---
 title: Give .flo annotation lines a fixed shape in the grammar
-status: open
+status: done
 labels: enhancement
 ---
 
@@ -35,3 +35,19 @@ A wrong order, a duplicate part, a stray word or a missing address then becomes 
   - no address.
 
 Done when the above parse errors are reported, all existing fixtures pass unchanged, and the grammar has no `expr+` line rule any more.
+
+## Closing note
+
+Done as designed. In `Flo.g4`, an annotation line is now `(address | memoryRange) setVirtual? datatype? setLabel? export? '{'?`. `address`, `memoryRange`, `setVirtual`, `setLabel` and `export` became small rules of their own, so `FloReader`'s listener methods kept their names. The `expr` rule and `setSize` are gone, and so is the "Require an address" check in `FloReader`.
+
+Found while testing: `prog` was `(statement NEWLINE)*` with no `EOF`. A line that couldn't start a statement, such as one with no address, ended the parse silently, and everything after it was ignored without an error. `prog` now ends in `EOF`. No existing fixture depended on that.
+
+New `invalid/` fixtures, each failing through "Failed to parse" with a line and column:
+- `two-labels` ("extraneous input 'second'");
+- `two-types` ("mismatched input 'word'");
+- `two-addresses`;
+- `type-after-label`;
+- `stray-word` (`$1234 data16 foo`);
+- `no-address`.
+
+Verification: 40/40 tests green. No `expected.asm` changed. screencodes, strings and datatypes still reassemble with 64tass.

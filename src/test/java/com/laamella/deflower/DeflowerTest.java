@@ -281,6 +281,42 @@ class DeflowerTest {
         assertFailsToParse("invalid/top-level-plus.flo");
     }
 
+    /**
+     * Issue 0050: an annotation line has a fixed shape - address or
+     * range, then optionally virtual, a type and a label, in that order
+     * and each at most once - so anything else is a parse error instead
+     * of silently keeping the last value or swallowing a stray word.
+     */
+    @Test
+    void rejectsTwoLabelsOnOneLine() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/two-labels.flo");
+    }
+
+    @Test
+    void rejectsTwoTypesOnOneLine() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/two-types.flo");
+    }
+
+    @Test
+    void rejectsTwoAddressesOnOneLine() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/two-addresses.flo");
+    }
+
+    @Test
+    void rejectsTypeAfterLabel() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/type-after-label.flo");
+    }
+
+    @Test
+    void rejectsStrayWord() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/stray-word.flo");
+    }
+
+    @Test
+    void rejectsLineWithoutAddress() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/no-address.flo");
+    }
+
     @Test
     void rejectsUnrecognizedTokens() throws IOException, URISyntaxException {
         assertFailsToParse("invalid/garbage-tokens.flo");
