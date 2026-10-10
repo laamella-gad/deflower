@@ -23,6 +23,8 @@ Expected `dec d0833` and `dec d0830`.
 
 The same in `3dgolf_snap`: `bne $314f` while `l314F = $314f` is defined.
 
+And in `squirm`: `reset_everything` does `jsr $2441` while `l2441 = $2441` is defined, inside the `bne` that ends `draw_high_score_screen`.
+
 Cause: `ResultWriter.nameForAddress` asks the area that covers the address for a label, and `InstructionArea.labelFor` only builds one from the label on the instruction's first byte (`label + offset`). Here the instructions starting at `$082e` and `$0831` have no label, so it returns null and the operand prints as a number, even though `$0830` and `$0833` have labels of their own.
 
 Want: a label on the exact address wins; `label + offset` from the instruction's start label is only the fallback. Check whether `DataArea.labelFor` has the same gap for a label on an element inside an array.

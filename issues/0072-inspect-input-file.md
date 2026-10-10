@@ -12,7 +12,7 @@ Want: a command line flag, e.g. `deflower --inspect <file>`, that reads a `.vsf`
 ## What to list
 
 For a snapshot (`.vsf`):
-- **CPU state** from the `MAINCPU` module: PC, A, X, Y, SP, status. The PC is the surest code entry point a snapshot has. In VICE 3.9 snapshots (module version 1.4) the module starts with an 8-byte clock, then `A`, `X`, `Y`, `SP`, a 16-bit `PC` and the status register; `3dgolfpic_snap.vsf` has PC = `$7f84`.
+- **CPU state** from the `MAINCPU` module: PC, A, X, Y, SP, status. The PC is the surest code entry point a snapshot has. In VICE 3.9 snapshots (module version 1.4) the module starts with an 8-byte clock, then `A`, `X`, `Y`, `SP`, a 16-bit `PC` and the status register; `3dgolfpic_snap.vsf` has PC = `$7f84`. Older snapshots differ: `squirm.vsf` has module version 1.1 with a 4-byte clock (PC = `$3122`), so the layout depends on the module version.
 - **Banking**: the processor port (`$00`/`$01` from `C64MEM`), i.e. which of BASIC, KERNAL, I/O and character ROM are visible.
 - **Vectors**: IRQ, BRK and NMI at `$0314`/`$0316`/`$0318`, and the hardware vectors at `$fffa-$ffff` in RAM, each marked as pointing into ROM or RAM. Handlers in RAM are code entry points.
 - **The stack**: SP and the return addresses on it, which are likely code.
