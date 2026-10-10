@@ -1,5 +1,333 @@
 deflower 1nvader_snap.vsf
-; where the CPU was when the snapshot was taken
-$4395 code snapshot_pc
-; the return address on the stack, after the jsr to snapshot_pc's routine
-$4382 code caller
+
+; ---- KERNAL variables ----
+$9d virtual byte kernal_msgflag
+$ba virtual byte kernal_device
+$c1 virtual word kernal_save_start
+$0286 virtual byte kernal_text_color
+; bit 7 set disables switching the character set with shift+commodore
+$0291 virtual byte kernal_case_lock
+$0314 virtual word irq_vector
+$0328 virtual word stop_vector
+
+; ---- built at run time by build_charset and build_sprites ----
+$2000-$2800 virtual byte charset
+$3200 virtual byte[64*4] sprites
+
+; ---- screen ----
+$0400-$07e8 virtual byte screen
+$07f8 virtual byte[8] sprite_pointers
+
+; ---- VIC-II ----
+$d000 virtual {
+    $00 byte sprite0_x
+    $01 byte sprite0_y
+    $02 byte sprite1_x
+    $03 byte sprite1_y
+    $04 byte sprite2_x
+    $05 byte sprite2_y
+    $06 byte sprite3_x
+    $07 byte sprite3_y
+    $08 byte sprite4_x
+    $09 byte sprite4_y
+    $0a byte sprite5_x
+    $0b byte sprite5_y
+    $0c byte sprite6_x
+    $0d byte sprite6_y
+    $0e byte sprite7_x
+    $0f byte sprite7_y
+    $10 byte sprites_x_msb
+    $11 byte vic_control1
+    $12 byte raster
+    $13 byte light_pen_x
+    $14 byte light_pen_y
+    $15 byte sprite_enable
+    $16 byte vic_control2
+    $17 byte sprite_expand_y
+    $18 byte vic_memory
+    $19 byte vic_irq_status
+    $1a byte vic_irq_enable
+    $1b byte sprite_priority
+    $1c byte sprite_multicolor
+    $1d byte sprite_expand_x
+    $1e byte sprite_sprite_collision
+    $1f byte sprite_background_collision
+    $20 byte border_color
+    $21 byte background_color
+    $22 byte background_color1
+    $23 byte background_color2
+    $24 byte background_color3
+    $25 byte sprite_multicolor0
+    $26 byte sprite_multicolor1
+    $27 byte sprite0_color
+    $28 byte sprite1_color
+    $29 byte sprite2_color
+    $2a byte sprite3_color
+    $2b byte sprite4_color
+    $2c byte sprite5_color
+    $2d byte sprite6_color
+    $2e byte sprite7_color
+}
+
+; ---- SID ----
+$d400 virtual {
+    $00 word voice1_frequency
+    $02 word voice1_pulse_width
+    $04 byte voice1_control
+    $05 byte voice1_attack_decay
+    $06 byte voice1_sustain_release
+    $07 word voice2_frequency
+    $09 word voice2_pulse_width
+    $0b byte voice2_control
+    $0c byte voice2_attack_decay
+    $0d byte voice2_sustain_release
+    $0e word voice3_frequency
+    $10 word voice3_pulse_width
+    $12 byte voice3_control
+    $13 byte voice3_attack_decay
+    $14 byte voice3_sustain_release
+    $15 word filter_cutoff
+    $17 byte filter_control
+    $18 byte volume_filter_mode
+}
+
+; ---- color RAM ----
+$d800-$dbe8 virtual byte color_ram
+
+; ---- CIA 1 ----
+$dc00 virtual {
+    $00 byte cia1_port_a
+    $01 byte cia1_port_b
+}
+
+; ---- KERNAL jump table ----
+$ff00 virtual {
+    $81 byte[3] cint
+    $84 byte[3] ioinit
+    $87 byte[3] ramtas
+    $8a byte[3] restor
+    $8d byte[3] vector
+    $90 byte[3] setmsg
+    $93 byte[3] second
+    $96 byte[3] tksa
+    $99 byte[3] memtop
+    $9c byte[3] membot
+    $9f byte[3] scnkey
+    $a2 byte[3] settmo
+    $a5 byte[3] acptr
+    $a8 byte[3] ciout
+    $ab byte[3] untlk
+    $ae byte[3] unlsn
+    $b1 byte[3] listen
+    $b4 byte[3] talk
+    $b7 byte[3] readst
+    $ba byte[3] setlfs
+    $bd byte[3] setnam
+    $c0 byte[3] open
+    $c3 byte[3] close
+    $c6 byte[3] chkin
+    $c9 byte[3] chkout
+    $cc byte[3] clrchn
+    $cf byte[3] chrin
+    $d2 byte[3] chrout
+    $d5 byte[3] load
+    $d8 byte[3] save
+    $db byte[3] settim
+    $de byte[3] rdtim
+    $e1 byte[3] stop
+    $e4 byte[3] getin
+    $e7 byte[3] clall
+    $ea byte[3] udtim
+    $ed byte[3] screen_size
+    $f0 byte[3] plot
+    $f3 byte[3] iobase
+}
+
+; ---- game: code ----
+; the game's start, where the decruncher jumps to
+$4000 code start
+; shows the title screen; also where the game returns to after game over
+$404b code title_screen
+$40a8 code title_loop
+$4102 code start_game
+$4111 code draw_title
+$411f code clear_title
+; unreferenced: fills the title's colour RAM with title_color
+$412c code fill_title_color
+$413a code draw_ground
+$4187 code stripe_title_colors
+$41ca code cycle_title_colors
+$41d5 code reset_game
+$422d code reset_scores
+; counts down 3-2-1, then GO while the 1nvader rises into place
+$426d code countdown
+$4379 code play
+$437f code game_loop
+; the snapshot's PC was here, and the return address on the stack was
+; game_loop's next instruction
+$4395 code wait_frame
+$4382 code
+$43a3 code read_fire_buttons
+$43da code read_p1_fire
+$4402 code read_p2_fire
+$442a code update_game
+$4451 code check_shot_hits
+; unreferenced: an older version of check_shot_hits
+$4522 code
+$45f1 code invader_hit
+$465a code move_shots
+$4698 code move_invader
+; apply_trainer patches these two "adc #1 / sta invader_row" pairs
+$46fe row_add_right
+$4700 row_store_right
+$4722 row_add_left
+$4724 row_store_left
+$46af code step_invader
+$473e code bounce_cannons
+$477e code check_cannon_edges
+$47ef code move_p1
+$4864 code move_p2
+$48d9 code clear_fire_flags
+$48e8 code update_screen
+$490f code draw_scores
+$4a59 code position_invader
+$4a8b code position_p1
+$4aba code position_p2
+$4ae9 code position_p1_shot
+$4b30 code position_p2_shot
+$4b77 code draw_status
+$4bd8 code clear_status
+$4be5 code game_over
+$4c2e code show_game_over
+$4cb1 code wait_6_frames
+$4cbf code check_invader_collision
+; unreferenced: numbers the screen rows down the left edge, a debugging aid
+$4d07 code number_rows
+; sets hit_points from invader_row: the higher the 1nvader, the more points
+$4d63 code set_hit_points
+$4ede code play_voice1
+$4f05 code play_voice2
+$4f2c code play_voice3
+$4f53 code stop_voice1
+$4f59 code stop_voice2
+$4f5f code stop_voice3
+$4f65 code p1_shot_sound
+$4f8a code p2_shot_sound
+$4faf code hit_sound
+; copies the ROM font to charset, with custom_chars as characters $20-$5f
+$4fd4 code build_charset
+$5020 code build_sprites
+$5040 code twinkle_stars
+$509d code next_star_position
+
+; ---- game: data ----
+; BCD, low byte first
+$50a9 byte[3] high_score
+; BCD points for a hit, set by set_hit_points
+$50ac word hit_points
+$50ae byte game_over_flag
+; set to make draw_scores redraw
+$50af byte scores_changed
+$50b0 byte collisions
+$50b1 byte title_color
+$50b2 byte unused_50b2
+$50b3 byte scroll_offset
+$50b4 byte unused_50b4
+$50b5 byte countdown_digit
+$50b6 byte countdown_timer
+$50b7 byte scroll_timer
+; BCD, shown on the status line
+$50b8 word hit_counter
+; the sound play_voice1/2/3 start
+$50ba byte sound_attack_decay
+$50bb byte sound_sustain_release
+$50bc byte sound_volume
+$50bd word sound_frequency
+$50bf byte sound_waveform
+; ---- player 1 ----
+$50c0 {
+    $00 word p1_x
+    $02 byte p1_y
+    ; 0 = moving left, 1 = moving right
+    $03 byte p1_direction
+    ; 1 for the frame the fire button went down
+    $04 byte p1_fire
+    ; BCD, low byte first
+    $05 byte[3] p1_score
+    $08 byte p1_color
+    $09 byte p1_playing
+    ; set when the cannon turned this frame
+    $0a byte p1_turned
+    $0b word p1_shot_x
+    $0d byte p1_shot_y
+    ; 0 = no shot, $0c = flying, counting down from $0b = explosion
+    $0e byte p1_shot_state
+}
+; ---- player 2 ----
+$50cf {
+    $00 word p2_x
+    $02 byte p2_y
+    ; 0 = moving left, 1 = moving right
+    $03 byte p2_direction
+    ; 1 for the frame the fire button went down
+    $04 byte p2_fire
+    ; BCD, low byte first
+    $05 byte[3] p2_score
+    $08 byte p2_color
+    $09 byte p2_playing
+    ; set when the cannon turned this frame
+    $0a byte p2_turned
+    $0b word p2_shot_x
+    $0d byte p2_shot_y
+    ; 0 = no shot, $0c = flying, counting down from $0b = explosion
+    $0e byte p2_shot_state
+}
+$50de word invader_x
+$50e0 byte invader_y
+; 0 = moving left, 1 = moving right
+$50e1 byte invader_direction
+$50e2 byte invader_color
+; steps per frame
+$50e3 byte invader_speed
+$50e4 byte invader_steps
+$50e5 byte speedup_interval
+$50e6 byte speedup_counter
+; BCD; the game is over when it reaches $22
+$50e7 byte invader_row
+$50e8 byte unused_50e8
+$50e9 byte p1_fire_held
+$50ea byte unused_50ea
+$50eb byte p2_fire_held
+$50ec byte[6] star_positions
+$50f2 byte[2] unused_50f2
+$50f4 byte star_index
+; sprite y per invader_row, indexed by the BCD value, so $0a-$0f and $1a-$1f are unused
+$50f5 byte[35] row_y
+$5118 char[256] scroll_text
+; the title screen: the end of scroll_text, the logo and the copyright line
+$5218 byte[40*6] title_chars
+$5308 byte[40*6] ground_chars
+$53f8 byte[8*64] custom_chars
+$55f8 byte[64*4] sprite_shapes
+
+; ---- crack intro and high-score code ----
+; the cracker's intro: asks whether to enable the trainer
+$c000 code crack_intro
+$c04e code ask_trainer
+$c0ac byte trainer_flag
+$c0ad byte[2] unused_c0ad
+; patches the game: with the trainer, invader_row's increment calls trainer_next_row;
+; without it, title_screen calls save_highscore
+$c0af code apply_trainer
+; invader_row + 1, but never past $21
+$c0eb code trainer_next_row
+$c0f8 char[40] title_line
+$c120 char[40] question_line
+; saves high_score to disk if it changed since load_highscore read it
+$c148 code save_highscore
+$c1b7 byte saved_volume
+; SETNAM is given "S:HIGHSCORE" to scratch the old file, then "HIGHSCORE" to save it
+$c1b8 char[2] scratch_command
+$c1ba char[9] highscore_filename
+$c1c3 code load_highscore
+$c213 byte[3] loaded_highscore
