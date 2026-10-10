@@ -1,0 +1,6 @@
+deflower 2krace_snap.vsf
+; the hardware IRQ vector ($01 = $35: KERNAL banked out, so it's RAM)
+$fffe addr irq_vector
+$09fd code irq
+; where the CPU was when the snapshot was taken
+$091a code snapshot_pc

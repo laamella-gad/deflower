@@ -29,6 +29,46 @@ class DeflowerTest {
         assertDeflowered("zwark");
     }
 
+    @Test
+    void deflowerBigMac() throws IOException, URISyntaxException {
+        assertDeflowered("bigmac");
+    }
+
+    @Test
+    void deflower2KRace() throws IOException, URISyntaxException {
+        assertDeflowered("2krace");
+    }
+
+    @Test
+    void deflower3DGolf() throws IOException, URISyntaxException {
+        assertDeflowered("3dgolf");
+    }
+
+    @Test
+    void deflower3DGolfPic() throws IOException, URISyntaxException {
+        assertDeflowered("3dgolfpic");
+    }
+
+    @Test
+    void deflower1nvader() throws IOException, URISyntaxException {
+        assertDeflowered("1nvader");
+    }
+
+    @Test
+    void deflower2KRaceSnapshot() throws IOException, URISyntaxException {
+        assertDeflowered("2krace_snap");
+    }
+
+    @Test
+    void deflower3DGolfSnapshot() throws IOException, URISyntaxException {
+        assertDeflowered("3dgolf_snap");
+    }
+
+    @Test
+    void deflower1nvaderSnapshot() throws IOException, URISyntaxException {
+        assertDeflowered("1nvader_snap");
+    }
+
     /**
      * Every 'deflower' line starts a fresh decompilation run (issue 0010):
      * its own memory, its own flow analysis, its own output file named after

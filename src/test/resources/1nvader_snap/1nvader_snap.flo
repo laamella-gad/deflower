@@ -1,0 +1,5 @@
+deflower 1nvader_snap.vsf
+; where the CPU was when the snapshot was taken
+$4395 code snapshot_pc
+; the return address on the stack, after the jsr to snapshot_pc's routine
+$4382 code caller

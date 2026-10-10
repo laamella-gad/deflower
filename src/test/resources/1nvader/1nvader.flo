@@ -1,0 +1,4 @@
+deflower 1nvader.prg
+; BASIC stub: SYS 2061
+$0801-$080d byte basic_stub
+$080d code start

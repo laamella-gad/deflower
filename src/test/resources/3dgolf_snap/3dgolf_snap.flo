@@ -1,0 +1,8 @@
+deflower 3dgolf_snap.vsf
+; the KERNAL's IRQ and NMI vectors, pointing into RAM under BASIC
+$0314 addr irq_vector
+$0318 addr nmi_vector
+$a56b code irq
+$a5e9 code nmi
+; where the CPU was when the snapshot was taken
+$2ef7 code snapshot_pc

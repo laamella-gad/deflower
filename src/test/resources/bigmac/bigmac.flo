@@ -1,0 +1,7 @@
+deflower bigmac.vsf
+; the IRQ vector
+$0314 addr irq_vector
+; the IRQ handler the vector points to
+$c543 code irq
+; where the CPU was when the snapshot was taken
+$c54d code snapshot_pc

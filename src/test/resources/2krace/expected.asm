@@ -1,0 +1,59 @@
+
+*=$0100
+
+l0100:
+		brk 
+*=$013a
+
+l013A:
+		brk 
+*=$0801
+
+; BASIC stub: SYS 2061
+basic_stub:
+		.byte	$0b, $08, $14, $00, $9e, $32, $30, $36, $31, $00, $00, $00
+
+start:
+		ldy #$00
+		tsx 
+
+l0810:
+		lda $1175, x
+		sta @w $00fc, x
+		dex 
+		bne l0810
+		jmp l1140
+*=$1140
+
+l1140:
+		inx 
+		tya 
+		and #$0f
+		beq l115A
+		txa 
+		lsr 
+		ldx $0333, y
+
+l114B:
+		rol 
+		rol $9f
+		dex 
+		bpl l114B
+		adc $0367, y
+		tax 
+		lda $9f
+		adc $039b, y
+
+l115A:
+		sta $039c, y
+		txa 
+		sta $0368, y
+		ldx #$04
+		jsr l0100
+		sta $0334, y
+		iny 
+		cpy #$34
+		bne l1140
+		ldy #$00
+		sty $07e7
+		jmp l013A
