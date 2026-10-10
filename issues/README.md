@@ -83,3 +83,4 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0059](0059-convert-to-nim.md) | open | medium | Convert the whole project to Nim |
 | [0060](0060-investigate-da65-features.md) | open | low | Investigate da65 for features worth adopting |
 | [0061](0061-investigate-6502bench-features.md) | open | low | Investigate 6502bench SourceGen for features worth adopting |
+| [0062](0062-snippet-test-factories.md) | open | medium | Replace the fixture tests with two SnippetTestFactories |
