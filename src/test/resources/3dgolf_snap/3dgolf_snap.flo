@@ -144,6 +144,8 @@ $fffc virtual addr reset_hw_vector
 $fffe virtual addr irq_hw_vector
 $ea31 kernal_irq
 $ea87 kernal_scnkey
+; log-domain constants: +0 is 1/sqrt(2), +4 and +6 the projection scales, +$a the
+; current shape scale, +$c the log of the depth being projected
 $0b96 word[7] math_words
 $0c07 byte direction_flag
 $0c08 byte[8] direction_order
@@ -159,23 +161,23 @@ $0da8 addr[8] rotations
 $0db8 byte direction
 $0edd byte[16] double_bits
 $0eed byte v0eed
-$0eee word v0eee
-$0ef0 byte[4*13] list_0ef0
+$0eee word font_pointer
+$0ef0 byte[4*13] fill_stack
 $0f24-$0ff3 byte unused_z80_junk
 $0ffe code screen_off
 $1007 code screen_on
 ; sets the char output vector to CHROUT and turns the bitmap off
 $1057 code text_mode
-$107a byte v107a
-$107b byte v107b
-$107c byte[256] buffer_107c
-$117c byte[256] buffer_117c
-$127c byte v127c
+$107a byte seed_countdown
+$107b byte seed_enable
+$107c byte[256] fill_seeds
+$117c byte[256] seed_edges
+$127c byte seed_count
 $12ec byte v12ec
 $12ed byte v12ed
 $12ee byte v12ee
-$12ef byte v12ef
-$1368 byte v1368
+$12ef byte pixel_hit
+$1368 byte pixel_pattern
 ; masks that clear one multicolor pixel, and its bits
 $1369 byte[4] pixel_clear_masks
 $136d byte[4] pixel_bits
@@ -186,8 +188,8 @@ $17ac byte v17ac
 $17ad byte v17ad
 ; screen row addresses, bottom row first, each repeated for 4 pixel rows
 $17e3 word[100] screen_rows
-$1bb2 byte v1bb2
-$1bb3 byte v1bb3
+$1bb2 byte fill_color
+$1bb3 byte fill_color_high
 $1bfb byte unused_1bfb
 $1dcb byte[2] unused_1dcb
 $1f12 byte[2] unused_1f12
@@ -203,23 +205,22 @@ $1f1c byte v1f1c
 $1f1d byte v1f1d
 $1f1e byte v1f1e
 $1f1f byte v1f1f
-$1f20 byte v1f20
-$1f21 byte v1f21
-$1f22 byte v1f22
-$1f23 byte v1f23
-$1f24 word ball_sprite_x
-$1f26 word ball_sprite_y
-$1fc7 word[16] table_1fc7
-$1fe7 word[16] table_1fe7
+$1f20 word pen_x
+$1f22 word pen_y
+; a projected point on the screen
+$1f24 word proj_x
+$1f26 word proj_y
+$1fc7 word[16] near_scales
+$1fe7 word[16] far_scales
 $2007 byte v2007
 $20de byte v20de
 ; 8 steps of +-64 per direction, read through step_pointer
 $20df sbyte[8*8] direction_steps
 $211f word step_pointer
-$252e byte[8] v252e
-$2536 byte v2536
-$2537 byte v2537
-$2538 byte v2538
+$252e byte[8] empty_cell
+$2536 byte cell_x
+$2537 byte cell_y
+$2538 byte object_pass
 $28c5 byte unused_28c5
 ; shifts A right one bit, keeping its sign
 $2d62 code shift_right_signed
@@ -233,14 +234,14 @@ $30ae byte sprite_mode
 $31f7 code
 $31f8-$31fc byte unused_31f8
 $3208 byte unused_3208
-$21db byte[256] table_21db
-$22db byte[256] table_22db
-$23db byte[256] table_23db
-$2bfc byte[30] v2bfc
-$2c1a word[6] v2c1a
-$2c26 word[6] v2c26
-$2c32 word[6] v2c32
-$2c3e byte v2c3e
+$21db byte[256] object_types
+$22db byte[256] object_x
+$23db byte[256] object_y
+$2bfc byte[30] shape_visible
+$2c1a word[6] feature_pointers
+$2c26 word[6] feature_x
+$2c32 word[6] feature_y
+$2c3e byte feature_count
 $2c3f byte v2c3f
 $2c40 byte v2c40
 $2c41 byte v2c41
@@ -257,18 +258,19 @@ $2c4b byte v2c4b
 $2c4c byte v2c4c
 $2c4d byte v2c4d
 $2c4e byte v2c4e
-$2c4f byte[12] v2c4f
-$2c5b byte v2c5b
-$2c5c byte v2c5c
-$2c5d byte v2c5d
-$2c5e byte v2c5e
-$2c5f byte v2c5f
+$2c4f byte[12] polygon_color
+; a point turned to the view: x across, y the depth ($ff in the high byte when culled)
+$2c5b word view_x
+$2c5d word view_y
+; the screen row of the horizon (rows count up from the bottom)
+$2c5f byte horizon
 $0986 byte[256] log_table
 $0a86 byte[128] exp_table
-; reached through the jsr at $0bf9, which $0d91 points here; it then jumps on to
+; turns 45 degrees with (x-y)/sqrt(2), (x+y)/sqrt(2), then the 90-degree turn
+; reached through the jmp at $0bf9, which $0d91 points here; it then jumps on to
 ; the rotation $0d91 stores in the jmp at $0d01
-$0c73 code rotate_twice
-$0d02 rotate_twice_next
+$0c73 code rotate_45
+$0d02 rotate_45_next
 $1f28 byte[2] unused_1f28
 $3275 addr[4] pointers_3275
 $327d byte v327d
@@ -408,31 +410,29 @@ $02 virtual word text_pointer
 $04 virtual word pointer_04
 $06 virtual word pointer_06
 $08 virtual word pointer_08
-$0a virtual word v0a
+$0a virtual word bitmap_pointer
 $0c virtual byte v0c
 $0d virtual byte v0d
-$0e virtual word v0e
-$10 virtual word v10
-$12 virtual word v12
-$14 virtual byte v14
-$15 virtual byte v15
-$16 virtual byte v16
-$17 virtual byte v17
-$18 virtual byte v18
+$0e virtual word log_value
+$10 virtual word point_x
+$12 virtual word point_y
+; the start of the line being drawn
+$14 virtual word line_x
+$16 virtual word line_y
+$18 virtual byte plot_y
 $19-$1b virtual byte unused_19
 $1b virtual word ball_x
 $1d virtual word ball_y
 $1f virtual byte text_x
 $20 virtual byte text_y
 $21 virtual byte v21
-$22 virtual byte v22
-$23 virtual byte v23
-$24 virtual byte v24
-$25 virtual byte v25
-$26 virtual byte v26
-$27 virtual byte v27
-$28 virtual byte v28
-$29 virtual byte v29
+$22 virtual byte octant
+; the world position that a shape's relative points start from
+$23 virtual word base_x
+$25 virtual word base_y
+$27 virtual byte object_count
+$28 virtual byte object_depth
+$29 virtual byte clip_top
 $2a-$2d virtual byte unused_2a
 $2d virtual word decrunch_pointer
 $2f-$61 virtual byte unused_2f
@@ -440,7 +440,7 @@ $61 virtual word pointer_61
 $63 virtual byte v63
 $64 virtual word pointer_64
 $66 virtual byte hole_distance
-$67 virtual byte v67
+$67 virtual byte clip_bottom
 $68-$c5 virtual byte unused_68
 ; the KERNAL's last key pressed
 $c5 virtual byte kernal_lstx
@@ -617,8 +617,9 @@ $c018 word vc018
 $c177 code
 $c17d-$cb00 byte unused_nops
 ; unreferenced leftover data
-$cb00-$cdf8 byte unused_cb00
-$cdf8-$d000 byte unused_nops2
+; per screen cell, the depth of the nearest object drawn there; rebuilt each frame
+$cb00-$cee8 byte cell_depths
+$cee8-$d000 byte unused_nops2
 
 ; ---- VIC-II ----
 $d000 virtual {
@@ -831,7 +832,8 @@ $934d-$9359 byte terrain_934d
 $9359-$9382 byte terrain_9359
 $9382-$93bd byte terrain_9382
 $93bd-$93f5 byte terrain_93bd
-; indexed from 1 by hole number, through hole_shapes_base
+; 29 shapes, indexed from 1 through hole_shapes_base: 18 fairways with their greens,
+; then 4 drawn in color 12 and 7 in color 14
 $93f3 hole_shapes_base
 $93f5 addr[18] hole_shapes
 $9419 addr[4] pointers_9419
@@ -873,7 +875,8 @@ $9cc6-$9ff1 byte unused_9cc6
 $9ff1-$a000 byte leftover_9ff1
 
 ; ---- routine names ----
-$0900 multiply
+; converts the 16-bit A:X to a log: A the fraction (in 32nds of an octave), X the exponent
+$0900 to_log
 $0ffb print_char
 ; prints the $ff-terminated text after the jsr
 $2c75 print_inline
@@ -954,3 +957,68 @@ $b872 music_pop
 $bc01 silence_sid
 $bc0c init_sid
 $bc51 select_tune
+
+; ---- 3D engine ----
+; back from a log in A:X to a 16-bit value
+$091f from_log
+; log_value -= A:X, i.e. divides
+$094c log_divide
+; log_value += A:X, i.e. multiplies
+$094f log_multiply
+$0960 log_negate
+; log_value = A:X - log_value
+$0975 log_divide_into
+; projects view_x/view_y to proj_x/proj_y: x scaled by 1/depth around the middle, y = scale/depth
+$0b06 project
+; makes point_x/point_y relative to the ball and turns it to the view, or culls it when it's
+; outside the view's octants
+$0ba4 to_view
+$0d73 direction_down
+$0d79 set_direction
+$0db9 direction_up
+$0dc1 draw_char
+$0e79 scroll_text
+$1010 clear_bitmap
+$1034 bitmap_mode
+; every 10 pixels of an outline, remembers a point next to it to fill from
+$127d add_fill_seed
+$12f0 pixel_address
+$1306 test_pixel
+$1321 plot_pixel
+$154e horizontal_line
+$15c9 vertical_line
+; draws a line from line_x/line_y to X/Y
+$165f draw_line
+; colors the screen cell under a filled pixel, and keeps the nearest depth in cell_depths
+$17ae set_cell_color
+; fills the area around X/Y with color A, scanline by scanline through fill_stack
+$18ab flood_fill
+$1bb4 replot_seeds
+$1be6 draw_object
+; draws a list of polygons from pointer_04, scaled by math_words+$a, each outlined and filled
+$1bfc draw_shape
+$1d59 scale_x
+$1d75 scale_y
+$1d90 scale_step
+$1dcd line_start_on_screen
+$1de4 pen_on_screen
+; draws from line_x/line_y to pen_x/pen_y, finding the screen's edge by halving the line
+$1dff draw_clipped_line
+$1f2a draw_objects
+; draws the 3D view from the ball: collects the objects and features of the ball's map cell
+; and the cells ahead, then draws them nearest first; fills never cover what is already drawn
+$2008 draw_view
+$2121 collect_objects
+; sorts the objects by screen row, nearest first
+$2193 sort_objects
+; finds the map cell (7 by 7) for point_x/point_y
+$24db find_cell
+$2539 draw_terrain
+$25f4 draw_hole_shape
+; draws a polygon of world points, cut where it crosses behind the view, and fills it
+$2703 draw_polygon
+; halves an edge until its end is in front of the view
+$2920 clip_edge
+$2ac5 project_vertex
+$2b87 collect_features
+$28c0 reset_clip

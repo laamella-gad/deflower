@@ -7,17 +7,16 @@ text_pointer:		.word	?
 pointer_04:		.word	?
 pointer_06:		.word	?
 pointer_08:		.word	?
-v0a:		.word	?
+bitmap_pointer:		.word	?
 v0c:		.byte	?
 v0d:		.byte	?
-v0e:		.word	?
-v10:		.word	?
-v12:		.word	?
-v14:		.byte	?
-v15:		.byte	?
-v16:		.byte	?
-v17:		.byte	?
-v18:		.byte	?
+log_value:		.word	?
+point_x:		.word	?
+point_y:		.word	?
+; the start of the line being drawn
+line_x:		.word	?
+line_y:		.word	?
+plot_y:		.byte	?
 unused_19:
 		.fill	2
 ball_x:		.word	?
@@ -25,14 +24,13 @@ ball_y:		.word	?
 text_x:		.byte	?
 text_y:		.byte	?
 v21:		.byte	?
-v22:		.byte	?
-v23:		.byte	?
-v24:		.byte	?
-v25:		.byte	?
-v26:		.byte	?
-v27:		.byte	?
-v28:		.byte	?
-v29:		.byte	?
+octant:		.byte	?
+; the world position that a shape's relative points start from
+base_x:		.word	?
+base_y:		.word	?
+object_count:		.byte	?
+object_depth:		.byte	?
+clip_top:		.byte	?
 unused_2a:
 		.fill	3
 decrunch_pointer:		.word	?
@@ -42,7 +40,7 @@ pointer_61:		.word	?
 v63:		.byte	?
 pointer_64:		.word	?
 hole_distance:		.byte	?
-v67:		.byte	?
+clip_bottom:		.byte	?
 unused_68:
 		.fill	93
 ; the KERNAL's last key pressed
@@ -511,7 +509,8 @@ unused_08eb:
 		.byte	$e6, $fc, $85, $fb, $60
 
 ; ---- routine names ----
-multiply:
+; converts the 16-bit A:X to a log: A the fraction (in 32nds of an octave), X the exponent
+to_log:
 		stx pointer_06
 		ldx #$00
 		cmp #$00
@@ -538,7 +537,9 @@ l091B:
 		sec 
 		rts 
 
-l091F:
+; ---- 3D engine ----
+; back from a log in A:X to a 16-bit value
+from_log:
 		cmp #$80
 		bcc l0927
 		and #$7f
@@ -579,25 +580,27 @@ l0945:
 		bne l0945
 		beq l0941
 
-l094C:
-		jsr l0960
+; log_value -= A:X, i.e. divides
+log_divide:
+		jsr log_negate
 
-l094F:
+; log_value += A:X, i.e. multiplies
+log_multiply:
 		clc 
-		adc v0e
-		sta v0e
+		adc log_value
+		sta log_value
 		php 
 		txa 
-		adc v0e + $1
+		adc log_value + $1
 		plp 
 		bcc l095D
 		adc #$06
 
 l095D:
-		sta v0e + $1
+		sta log_value + $1
 		rts 
 
-l0960:
+log_negate:
 		clc 
 		eor #$ff
 		adc #$01
@@ -616,19 +619,20 @@ l0972:
 		pla 
 		rts 
 
-l0975:
+; log_value = A:X - log_value
+log_divide_into:
 		sec 
-		sbc v0e
-		sta v0e
+		sbc log_value
+		sta log_value
 		php 
 		txa 
-		sbc v0e + $1
+		sbc log_value + $1
 		plp 
 		bcs l0983
 		sbc #$06
 
 l0983:
-		sta v0e + $1
+		sta log_value + $1
 		rts 
 
 log_table:
@@ -658,67 +662,68 @@ exp_table:
 		.byte	$80, $83, $86, $89, $8c, $8f, $92, $95, $98, $9c, $9f, $a2, $a6, $aa, $ad, $b1
 		.byte	$b5, $b9, $bd, $c1, $c5, $ca, $ce, $d3, $d7, $dc, $e1, $e6, $eb, $f0, $f5, $fb
 
-l0B06:
-		lda v2c5e
-		ldx v2c5d
-		jsr multiply
-		sta v0e
-		stx v0e + $1
+; projects view_x/view_y to proj_x/proj_y: x scaled by 1/depth around the middle, y = scale/depth
+project:
+		lda view_y + $1
+		ldx view_y
+		jsr to_log
+		sta log_value
+		stx log_value + $1
 		sta math_words + $c
 		stx math_words + $d
 		lda math_words + $6
 		ldx math_words + $7
-		jsr l0975
-		lda v0e
-		ldx v0e + $1
-		jsr l091F
-		sta ball_sprite_y + $1
-		stx ball_sprite_y
-		lda v2c5c
+		jsr log_divide_into
+		lda log_value
+		ldx log_value + $1
+		jsr from_log
+		sta proj_y + $1
+		stx proj_y
+		lda view_x + $1
 		php 
 		bpl l0B46
 		lda #$00
 		sec 
-		sbc v2c5b
-		sta v2c5b
+		sbc view_x
+		sta view_x
 		lda #$00
-		sbc v2c5c
-		sta v2c5c
+		sbc view_x + $1
+		sta view_x + $1
 
 l0B46:
-		ldx v2c5b
-		jsr multiply
-		sta v0e
-		stx v0e + $1
+		ldx view_x
+		jsr to_log
+		sta log_value
+		stx log_value + $1
 		lda math_words + $4
 		ldx math_words + $5
-		jsr l094F
+		jsr log_multiply
 		lda math_words + $c
 		ldx math_words + $d
-		jsr l094C
-		lda v0e
-		ldx v0e + $1
-		jsr l091F
-		sta ball_sprite_x + $1
-		stx ball_sprite_x
+		jsr log_divide
+		lda log_value
+		ldx log_value + $1
+		jsr from_log
+		sta proj_x + $1
+		stx proj_x
 		lda #$80
 		plp 
 		bmi l0B85
 		clc 
-		adc ball_sprite_x
-		sta ball_sprite_x
-		lda ball_sprite_x + $1
+		adc proj_x
+		sta proj_x
+		lda proj_x + $1
 		adc #$00
-		sta ball_sprite_x + $1
+		sta proj_x + $1
 		bcc l0B94
 
 l0B85:
 		sec 
-		sbc ball_sprite_x
-		sta ball_sprite_x
+		sbc proj_x
+		sta proj_x
 		lda #$00
-		sbc ball_sprite_x + $1
-		sta ball_sprite_x + $1
+		sbc proj_x + $1
+		sta proj_x + $1
 
 l0B94:
 		rts 
@@ -726,23 +731,27 @@ l0B94:
 l0B95:
 		rts 
 
+; log-domain constants: +0 is 1/sqrt(2), +4 and +6 the projection scales, +$a the
+; current shape scale, +$c the log of the depth being projected
 math_words:
 		.word	$0010, $00f0, $00d0, $00f0, $0065, $fd00, $0000
 
-l0BA4:
+; makes point_x/point_y relative to the ball and turns it to the view, or culls it when it's
+; outside the view's octants
+to_view:
 		lda #$00
-		sta v22
-		lda v12
+		sta octant
+		lda point_y
 		sec 
 		sbc ball_y
-		sta v12
-		lda v12 + $1
+		sta point_y
+		lda point_y + $1
 		sbc ball_y + $1
-		sta v12 + $1
+		sta point_y + $1
 		asl 
-		rol v22
-		lda v12
-		ldx v12 + $1
+		rol octant
+		lda point_y
+		ldx point_y + $1
 		bpl l0BC3
 		clc 
 		eor #$ff
@@ -750,17 +759,17 @@ l0BA4:
 
 l0BC3:
 		sta v21
-		lda v10
+		lda point_x
 		sec 
 		sbc ball_x
-		sta v10
-		lda v10 + $1
+		sta point_x
+		lda point_x + $1
 		sbc ball_x + $1
-		sta v10 + $1
+		sta point_x + $1
 		asl 
-		rol v22
-		lda v10
-		ldx v10 + $1
+		rol octant
+		lda point_x
+		ldx point_x + $1
 		bpl l0BE0
 		clc 
 		eor #$ff
@@ -768,10 +777,10 @@ l0BC3:
 
 l0BE0:
 		cmp v21
-		rol v22
+		rol octant
 		ora v21
 		bmi l0BFC
-		ldx v22
+		ldx octant
 		lda direction_order, x
 		sec 
 		sbc direction
@@ -787,7 +796,7 @@ l0BFC:
 		lda #$ff
 		cmp direction_flag
 		beq l0BF9
-		sta v2c5e
+		sta view_y + $1
 		rts 
 
 direction_flag:
@@ -798,71 +807,72 @@ direction_order:
 rotate_0:
 		lda #$00
 		sec 
-		sbc v10
-		sta v10
+		sbc point_x
+		sta point_x
 		lda #$00
-		sbc v10 + $1
-		sta v10 + $1
+		sbc point_x + $1
+		sta point_x + $1
 		lda #$00
 		sec 
-		sbc v12
-		sta v12
+		sbc point_y
+		sta point_y
 		lda #$00
-		sbc v12 + $1
-		sta v12 + $1
+		sbc point_y + $1
+		sta point_y + $1
 
 rotate_1:
-		lda v10
-		sta v2c5b
-		lda v10 + $1
-		sta v2c5c
-		lda v12
-		sta v2c5d
-		lda v12 + $1
-		sta v2c5e
+		lda point_x
+		sta view_x
+		lda point_x + $1
+		sta view_x + $1
+		lda point_y
+		sta view_y
+		lda point_y + $1
+		sta view_y + $1
 		rts 
 
 rotate_2:
-		lda v12
-		sta v2c5b
-		lda v12 + $1
-		sta v2c5c
+		lda point_y
+		sta view_x
+		lda point_y + $1
+		sta view_x + $1
 		lda #$00
 		sec 
-		sbc v10
-		sta v2c5d
+		sbc point_x
+		sta view_y
 		lda #$00
-		sbc v10 + $1
-		sta v2c5e
+		sbc point_x + $1
+		sta view_y + $1
 		rts 
 
 rotate_3:
-		lda v10
-		sta v2c5d
-		lda v10 + $1
-		sta v2c5e
+		lda point_x
+		sta view_y
+		lda point_x + $1
+		sta view_y + $1
 		lda #$00
 		sec 
-		sbc v12
-		sta v2c5b
+		sbc point_y
+		sta view_x
 		lda #$00
-		sbc v12 + $1
-		sta v2c5c
+		sbc point_y + $1
+		sta view_x + $1
 		rts 
 
-; reached through the jsr at $0bf9, which $0d91 points here; it then jumps on to
+; turns 45 degrees with (x-y)/sqrt(2), (x+y)/sqrt(2), then the 90-degree turn
+; reached through the jmp at $0bf9, which $0d91 points here; it then jumps on to
 ; the rotation $0d91 stores in the jmp at $0d01
-rotate_twice:
+rotate_45:
 		lda math_words
-		sta v0e
+		sta log_value
 		lda math_words + $1
-		sta v0e + $1
-		lda v10
+		sta log_value + $1
+		lda point_x
 		clc 
-		adc v12
+		adc point_y
 		tax 
-		lda v10 + $1
-		adc v12 + $1
+		lda point_x + $1
+		adc point_y + $1
 		php 
 		bpl l0C97
 		pha 
@@ -876,11 +886,11 @@ rotate_twice:
 		adc #$00
 
 l0C97:
-		jsr multiply
-		jsr l0975
-		lda v0e
-		ldx v0e + $1
-		jsr l091F
+		jsr to_log
+		jsr log_divide_into
+		lda log_value
+		ldx log_value + $1
+		jsr from_log
 		plp 
 		bpl l0CB4
 		pha 
@@ -894,18 +904,18 @@ l0C97:
 		adc #$00
 
 l0CB4:
-		sta v2c5e
-		stx v2c5d
+		sta view_y + $1
+		stx view_y
 		lda math_words
-		sta v0e
+		sta log_value
 		lda math_words + $1
-		sta v0e + $1
-		lda v10
+		sta log_value + $1
+		lda point_x
 		sec 
-		sbc v12
+		sbc point_y
 		tax 
-		lda v10 + $1
-		sbc v12 + $1
+		lda point_x + $1
+		sbc point_y + $1
 		php 
 		bpl l0CDE
 		pha 
@@ -919,11 +929,11 @@ l0CB4:
 		adc #$00
 
 l0CDE:
-		jsr multiply
-		jsr l0975
-		lda v0e
-		ldx v0e + $1
-		jsr l091F
+		jsr to_log
+		jsr log_divide_into
+		lda log_value
+		ldx log_value + $1
+		jsr from_log
 		plp 
 		bpl l0CFB
 		pha 
@@ -937,72 +947,72 @@ l0CDE:
 		adc #$00
 
 l0CFB:
-		sta v2c5c
-		stx v2c5b
+		sta view_x + $1
+		stx view_x
 		jmp rotate_7
-rotate_twice_next = $0d02
+rotate_45_next = $0d02
 
 rotate_4:
 		lda #$00
 		sec 
-		sbc v2c5b
-		sta v2c5b
+		sbc view_x
+		sta view_x
 		lda #$00
-		sbc v2c5c
-		sta v2c5c
+		sbc view_x + $1
+		sta view_x + $1
 		lda #$00
 		sec 
-		sbc v2c5d
-		sta v2c5d
+		sbc view_y
+		sta view_y
 		lda #$00
-		sbc v2c5e
-		sta v2c5e
+		sbc view_y + $1
+		sta view_y + $1
 
 rotate_5:
 		rts 
 
 rotate_6:
-		lda v2c5d
-		sta v12
-		lda v2c5e
-		sta v12 + $1
-		lda v2c5b
-		sta v2c5d
-		lda v2c5c
-		sta v2c5e
+		lda view_y
+		sta point_y
+		lda view_y + $1
+		sta point_y + $1
+		lda view_x
+		sta view_y
+		lda view_x + $1
+		sta view_y + $1
 		lda #$00
 		sec 
-		sbc v12
-		sta v2c5b
+		sbc point_y
+		sta view_x
 		lda #$00
-		sbc v12 + $1
-		sta v2c5c
+		sbc point_y + $1
+		sta view_x + $1
 		rts 
 
 rotate_7:
-		lda v2c5b
-		sta v12
-		lda v2c5c
-		sta v12 + $1
-		lda v2c5d
-		sta v2c5b
-		lda v2c5e
-		sta v2c5c
+		lda view_x
+		sta point_y
+		lda view_x + $1
+		sta point_y + $1
+		lda view_y
+		sta view_x
+		lda view_y + $1
+		sta view_x + $1
 		lda #$00
 		sec 
-		sbc v12
-		sta v2c5d
+		sbc point_y
+		sta view_y
 		lda #$00
-		sbc v12 + $1
-		sta v2c5e
+		sbc point_y + $1
+		sta view_y + $1
 		rts 
 
-l0D73:
+direction_down:
 		lda direction
 		sec 
 		sbc #$01
 
-l0D79:
+set_direction:
 		and #$07
 		sta direction
 		asl 
@@ -1032,13 +1042,13 @@ rotations:
 direction:
 		.byte	$00
 
-l0DB9:
+direction_up:
 		lda direction
 		clc 
 		adc #$01
-		bpl l0D79
+		bpl set_direction
 
-l0DC1:
+draw_char:
 		pha 
 		jsr l0DC7
 		pla 
@@ -1064,10 +1074,10 @@ l0DD0:
 		sta pointer_04 + $1
 		lda pointer_04
 		clc 
-		adc v0eee
+		adc font_pointer
 		sta pointer_04
 		lda pointer_04 + $1
-		adc v0eee + $1
+		adc font_pointer + $1
 		sta pointer_04 + $1
 		lda text_x
 		cmp #$a0
@@ -1085,14 +1095,14 @@ l0DD0:
 
 l0E08:
 		ldx text_y
-		jsr l12F0
+		jsr pixel_address
 		tya 
 		clc 
-		adc v0a
-		sta v0a
-		lda v0a + $1
+		adc bitmap_pointer
+		sta bitmap_pointer
+		lda bitmap_pointer + $1
 		adc #$00
-		sta v0a + $1
+		sta bitmap_pointer + $1
 		ldy #$00
 
 l0E1B:
@@ -1107,11 +1117,11 @@ l0E1B:
 		bcc l0E1B
 		tya 
 		clc 
-		adc v0a
-		sta v0a
-		lda v0a + $1
+		adc bitmap_pointer
+		sta bitmap_pointer
+		lda bitmap_pointer + $1
 		adc #$00
-		sta v0a + $1
+		sta bitmap_pointer + $1
 		ldy #$00
 
 l0E37:
@@ -1142,7 +1152,7 @@ l0E53:
 		sec 
 		sbc #$08
 		bcs l0E60
-		jsr l0E79
+		jsr scroll_text
 		jmp l0E4A
 
 l0E60:
@@ -1154,7 +1164,7 @@ l0E65:
 		beq l0E53
 		cmp #$0c
 		bne l0E78
-		jsr l1010
+		jsr clear_bitmap
 		lda #$00
 		sta text_x
 		lda #$c7
@@ -1163,32 +1173,32 @@ l0E65:
 l0E78:
 		rts 
 
-l0E79:
+scroll_text:
 		lda #$ff
 		sta pointer_04
 		lda #$5f
 		sta pointer_04 + $1
 		lda #$3f
-		sta v0a
+		sta bitmap_pointer
 		lda #$61
-		sta v0a + $1
+		sta bitmap_pointer + $1
 		ldx #$30
 
 l0E8B:
 		ldy #$a0
 
 l0E8D:
-		lda (v0a), y
+		lda (bitmap_pointer), y
 		sta (pointer_04), y
 		dey 
 		bne l0E8D
 		lda #$a0
 		clc 
-		adc v0a
-		sta v0a
-		lda v0a + $1
+		adc bitmap_pointer
+		sta bitmap_pointer
+		lda bitmap_pointer + $1
 		adc #$00
-		sta v0a + $1
+		sta bitmap_pointer + $1
 		lda #$a0
 		clc 
 		adc pointer_04
@@ -1217,22 +1227,22 @@ l0EC7:
 		lda double_bits, x
 		pha 
 		eor #$ff
-		and (v0a), y
+		and (bitmap_pointer), y
 		sta v0eed
 		pla 
-		and v1368
+		and pixel_pattern
 		ora v0eed
-		sta (v0a), y
+		sta (bitmap_pointer), y
 		rts 
 
 double_bits:
 		.byte	$00, $03, $0c, $0f, $30, $33, $3c, $3f, $c0, $c3, $cc, $cf, $f0, $f3, $fc, $ff
 v0eed:		.byte	$aa
 
-v0eee:
+font_pointer:
 		.word	$7f4e
 
-list_0ef0:
+fill_stack:
 		.byte	$98, $98, $76, $01, $88, $8a, $87, $01, $84, $85, $88, $01, $7f, $81, $89, $01
 		.byte	$7d, $7e, $89, $01, $74, $76, $8b, $01, $70, $71, $8c, $01, $51, $52, $8d, $01
 		.byte	$4b, $4d, $8d, $01, $6c, $6d, $8e, $01, $68, $6a, $8f, $01, $66, $67, $8f, $01
@@ -1258,7 +1268,7 @@ l0FF3:
 		beq l0FF3
 
 print_char:
-		jmp l0DC1
+		jmp draw_char
 
 screen_off:
 		lda #$ef
@@ -1272,7 +1282,7 @@ screen_on:
 		sta vic_control1
 		rts 
 
-l1010:
+clear_bitmap:
 		lda #$00
 		sta pointer_06
 		lda #$60
@@ -1297,7 +1307,7 @@ l102B:
 		bne l1022
 		rts 
 
-l1034:
+bitmap_mode:
 		lda #$c1
 		sta print_char + 1
 		lda #$0d
@@ -1330,10 +1340,10 @@ text_mode:
 		sta vic_control2
 		rts 
 
-v107a:
+seed_countdown:
 		.byte	$0a
-v107b:		.byte	$ff
-buffer_107c:
+seed_enable:		.byte	$ff
+fill_seeds:
 		.byte	$41, $cd, $41, $86, $45, $88, $49, $8c, $4d, $8c, $51, $ff, $53, $8d, $5f, $8d
 		.byte	$62, $8d, $65, $8e, $6a, $8e, $74, $8a, $78, $89, $82, $87, $8b, $ff, $8c, $84
 		.byte	$90, $7e, $96, $77, $98, $75, $32, $99, $2d, $96, $30, $94, $2f, $93, $29, $99
@@ -1350,7 +1360,7 @@ buffer_107c:
 		.byte	$b7, $fc, $4c, $34, $cd, $de, $3c, $cd, $17, $36, $fe, $0d, $20, $ef, $e5, $2a
 		.byte	$f0, $41, $e5, $2a, $e3, $41, $e5, $c3, $22, $37, $2a, $e3, $41, $23, $af, $32
 		.byte	$de, $41, $c3, $fd, $36, $7d, $93, $5f, $7c, $9a, $57, $c9, $3a, $c4, $3f, $b7
-buffer_117c:
+seed_edges:
 		.byte	$c2, $bf, $41, $87, $45, $89, $49, $8d, $4d, $8d, $51, $8d, $53, $8e, $5f, $8e
 		.byte	$62, $8e, $65, $8f, $6a, $8f, $74, $8b, $78, $8a, $82, $88, $8b, $86, $8d, $84
 		.byte	$91, $7e, $96, $78, $98, $76, $33, $99, $2e, $96, $30, $95, $2f, $92, $28, $99
@@ -1367,21 +1377,22 @@ buffer_117c:
 		.byte	$23, $72, $7b, $f6, $04, $5f, $c9, $d5, $f5, $2a, $fd, $41, $eb, $7b, $e6, $1f
 		.byte	$cc, $b3, $3b, $2a, $f5, $41, $19, $f1, $f5, $77, $7b, $e6, $1f, $fe, $1f, $28
 		.byte	$01, $13, $cc, $54, $3c, $eb, $22, $fd, $41, $f1, $d1, $c9, $7b, $e6, $e0, $5f
-v127c:		.byte	$02
+seed_count:		.byte	$02
 
-l127D:
+; every 10 pixels of an outline, remembers a point next to it to fill from
+add_fill_seed:
 		tsx 
 		lda d0103, x
 		tay 
-		ldx v18
-		lda v127c
+		ldx plot_y
+		lda seed_count
 		beq l12AC
 		lda v17ad
 		bne l12AC
 		stx v12ed
 		sty v12ec
-		lda v10
-		cmp v10 + $1
+		lda point_x
+		cmp point_x + $1
 		bcs l129E
 
 d129A:
@@ -1396,7 +1407,7 @@ l129F:
 		pha 
 		tya 
 		pha 
-		jsr l1306
+		jsr test_pixel
 		beq l12AD
 
 l12A8:
@@ -1408,32 +1419,32 @@ l12AC:
 		rts 
 
 l12AD:
-		lda v12ef
+		lda pixel_hit
 		php 
 		ldx #$00
-		stx v12ef
+		stx pixel_hit
 		plp 
 		bne l12A8
 		dex 
-		stx v12ef
-		ldx v127c
+		stx pixel_hit
+		ldx seed_count
 		pla 
-		sta buffer_107c, x
+		sta fill_seeds, x
 		lda v12ec
-		sta buffer_117c, x
+		sta seed_edges, x
 		inx 
 		pla 
-		sta buffer_107c, x
+		sta fill_seeds, x
 		lda v12ed
-		sta buffer_117c, x
+		sta seed_edges, x
 		inx 
-		stx v127c
+		stx seed_count
 		lda v12ec
 		ldx v12ed
-		jsr l12F0
-		lda (v0a), y
+		jsr pixel_address
+		lda (bitmap_pointer), y
 		and pixel_clear_masks, x
-		sta (v0a), y
+		sta (bitmap_pointer), y
 		lda #$00
 		rts 
 
@@ -1441,81 +1452,81 @@ v12ec:
 		.byte	$98
 v12ed:		.byte	$76
 v12ee:		.byte	$ff
-v12ef:		.byte	$ff
+pixel_hit:		.byte	$ff
 
-l12F0:
+pixel_address:
 		pha 
 		and #$fc
 		asl 
 		tay 
 		lda bitmap_row_lo, x
-		sta v0a
+		sta bitmap_pointer
 		lda bitmap_row_hi, x
 		adc #$00
-		sta v0a + $1
+		sta bitmap_pointer + $1
 		pla 
 		and #$03
 		tax 
 		rts 
 
-l1306:
+test_pixel:
 		pha 
 		and #$fc
 		asl 
 		tay 
 		lda bitmap_row_lo, x
-		sta v0a
+		sta bitmap_pointer
 		lda bitmap_row_hi, x
 		adc #$00
-		sta v0a + $1
+		sta bitmap_pointer + $1
 		pla 
 		and #$03
 		tax 
-		lda (v0a), y
+		lda (bitmap_pointer), y
 		and pixel_bits, x
 		rts 
 
-l1321:
+plot_pixel:
 		pha 
 		and #$fc
 		asl 
 		tay 
 		lda bitmap_row_lo, x
-		sta v0a
+		sta bitmap_pointer
 		lda bitmap_row_hi, x
 		adc #$00
-		sta v0a + $1
+		sta bitmap_pointer + $1
 		pla 
 		and #$03
 		tax 
-		lda (v0a), y
+		lda (bitmap_pointer), y
 		sta pointer_06
 		and pixel_bits, x
 		bne l1354
 		lda pixel_bits, x
-		and v1368
+		and pixel_pattern
 		ora pointer_06
-		sta (v0a), y
-		lda v107b
+		sta (bitmap_pointer), y
+		lda seed_enable
 		beq l1357
-		jsr l127D
+		jsr add_fill_seed
 		jmp l1357
 
 l1354:
-		sta v12ef
+		sta pixel_hit
 
 l1357:
-		sta v107b
-		dec v107a
+		sta seed_enable
+		dec seed_countdown
 		bne l1367
-		inc v107b
+		inc seed_enable
 		lda #$0a
-		sta v107a
+		sta seed_countdown
 
 l1367:
 		rts 
 
-v1368:
+pixel_pattern:
 		.byte	$ff
 ; masks that clear one multicolor pixel, and its bits
 pixel_clear_masks:
@@ -1555,54 +1566,54 @@ bitmap_row_hi:
 l1501:
 		txa 
 		pha 
-		ldx v18
+		ldx plot_y
 		pha 
 		and #$fc
 		asl 
 		tay 
 		lda bitmap_row_lo, x
-		sta v0a
+		sta bitmap_pointer
 		lda bitmap_row_hi, x
 		adc #$00
-		sta v0a + $1
+		sta bitmap_pointer + $1
 		pla 
 		and #$03
 		tax 
-		lda (v0a), y
+		lda (bitmap_pointer), y
 		sta pointer_06
 		and pixel_bits, x
 		bne l1538
 		lda pixel_bits, x
-		and v1368
+		and pixel_pattern
 		ora pointer_06
-		sta (v0a), y
-		lda v107b
+		sta (bitmap_pointer), y
+		lda seed_enable
 		beq l153B
-		jsr l127D
+		jsr add_fill_seed
 		jmp l153B
 
 l1538:
-		sta v12ef
+		sta pixel_hit
 
 l153B:
-		sta v107b
-		dec v107a
+		sta seed_enable
+		dec seed_countdown
 		bne l154B
-		inc v107b
+		inc seed_enable
 		lda #$0a
-		sta v107a
+		sta seed_countdown
 
 l154B:
 		pla 
 		tax 
 		rts 
 
-l154E:
+horizontal_line:
 		lda #$ea
 		sta d129A
-		sty v18
-		ldx v14
-		cpx v12 + $1
+		sty plot_y
+		ldx line_x
+		cpx point_y + $1
 		bcc l1562
 		lda #$ca
 		sta l1567
@@ -1618,47 +1629,47 @@ l1567:
 		bcs l15C1
 		txa 
 		pha 
-		ldx v18
+		ldx plot_y
 		pha 
 		and #$fc
 		asl 
 		tay 
 		lda bitmap_row_lo, x
-		sta v0a
+		sta bitmap_pointer
 		lda bitmap_row_hi, x
 		adc #$00
-		sta v0a + $1
+		sta bitmap_pointer + $1
 		pla 
 		and #$03
 		tax 
-		lda (v0a), y
+		lda (bitmap_pointer), y
 		sta pointer_06
 		and pixel_bits, x
 		bne l15A3
 		lda pixel_bits, x
-		and v1368
+		and pixel_pattern
 		ora pointer_06
-		sta (v0a), y
-		lda v107b
+		sta (bitmap_pointer), y
+		lda seed_enable
 		beq l15A6
-		jsr l127D
+		jsr add_fill_seed
 		jmp l15A6
 
 l15A3:
-		sta v12ef
+		sta pixel_hit
 
 l15A6:
-		sta v107b
-		dec v107a
+		sta seed_enable
+		dec seed_countdown
 		bne l15B6
-		inc v107b
+		inc seed_enable
 		lda #$0a
-		sta v107a
+		sta seed_countdown
 
 l15B6:
 		pla 
 		tax 
-		cpx v12 + $1
+		cpx point_y + $1
 		bne l1567
 		lda v17ac
 		bne l1567
@@ -1666,13 +1677,13 @@ l15B6:
 l15C1:
 		lda #$00
 		sta v17ac
-		stx v14
+		stx line_x
 		rts 
 
-l15C9:
+vertical_line:
 		lda #$ea
 		sta l129E
-		cpy v16
+		cpy line_y
 		bne l15DF
 		txa 
 		pha 
@@ -1681,7 +1692,7 @@ l15C9:
 		tya 
 		tax 
 		pla 
-		jmp l1321
+		jmp plot_pixel
 
 l15DF:
 		bcc l15EB
@@ -1696,59 +1707,59 @@ l15EB:
 		sta l15F5
 
 l15F3:
-		ldy v16
+		ldy line_y
 
 l15F5:
 		dey 
-		cpy v29
+		cpy clip_top
 		bcc l1657
-		cpy v67
+		cpy clip_bottom
 		bcs l1657
-		sty v18
+		sty plot_y
 		txa 
 		pha 
-		ldx v18
+		ldx plot_y
 		pha 
 		and #$fc
 		asl 
 		tay 
 		lda bitmap_row_lo, x
-		sta v0a
+		sta bitmap_pointer
 		lda bitmap_row_hi, x
 		adc #$00
-		sta v0a + $1
+		sta bitmap_pointer + $1
 		pla 
 		and #$03
 		tax 
-		lda (v0a), y
+		lda (bitmap_pointer), y
 		sta pointer_06
 		and pixel_bits, x
 		bne l1637
 		lda pixel_bits, x
-		and v1368
+		and pixel_pattern
 		ora pointer_06
-		sta (v0a), y
-		lda v107b
+		sta (bitmap_pointer), y
+		lda seed_enable
 		beq l163A
-		jsr l127D
+		jsr add_fill_seed
 		jmp l163A
 
 l1637:
-		sta v12ef
+		sta pixel_hit
 
 l163A:
-		sta v107b
-		dec v107a
+		sta seed_enable
+		dec seed_countdown
 		bne l164A
-		inc v107b
+		inc seed_enable
 		lda #$0a
-		sta v107a
+		sta seed_countdown
 
 l164A:
 		pla 
 		tax 
-		ldy v18
-		cpy v12
+		ldy plot_y
+		cpy point_y
 		bne l15F5
 		lda v17ac
 		bne l15F5
@@ -1756,39 +1767,40 @@ l164A:
 l1657:
 		lda #$00
 		sta v17ac
-		sty v16
+		sty line_y
 		rts 
 
-l165F:
-		stx v12 + $1
+; draws a line from line_x/line_y to X/Y
+draw_line:
+		stx point_y + $1
 		lda #$ff
-		sta v1368
-		sty v12
+		sta pixel_pattern
+		sty point_y
 		txa 
 		pha 
 		tya 
 		pha 
-		ldx v14
-		ldy v16
-		sty v18
-		lda v107b
+		ldx line_x
+		ldy line_y
+		sty plot_y
+		lda seed_enable
 		pha 
 		lda #$00
-		sta v107b
+		sta seed_enable
 		jsr l1501
 		pla 
-		sta v107b
+		sta seed_enable
 		pla 
 		tay 
 		pla 
 		tax 
 		lda #$ff
-		sta v0e + $1
+		sta log_value + $1
 		txa 
 		sec 
-		sbc v14
+		sbc line_x
 		bne l1693
-		jmp l15C9
+		jmp vertical_line
 
 l1693:
 		bcs l1698
@@ -1801,12 +1813,12 @@ l1698:
 		stx l16EC
 
 l16A2:
-		sta v10
+		sta point_x
 		tya 
 		sec 
-		sbc v16
+		sbc line_y
 		bne l16AD
-		jmp l154E
+		jmp horizontal_line
 
 l16AD:
 		bcs l16B2
@@ -1818,27 +1830,27 @@ l16B2:
 		sty l16FA
 
 l16BA:
-		sta v10 + $1
-		ora v10
+		sta point_x + $1
+		ora point_x
 		bmi l16CA
 
 l16C0:
-		asl v10
-		asl v10 + $1
-		lda v10
-		ora v10 + $1
+		asl point_x
+		asl point_x + $1
+		lda point_x
+		ora point_x + $1
 		bpl l16C0
 
 l16CA:
-		ldx v14
-		ldy v16
-		sty v18
-		lda v10
+		ldx line_x
+		ldy line_y
+		sty plot_y
+		lda point_x
 		sta $16e5
-		ldy v10 + $1
+		ldy point_x + $1
 		sty $17a1
 		sty $16f5
-		ldy v18
+		ldy plot_y
 		lda #$80
 		pha 
 
@@ -1854,67 +1866,67 @@ l16EC:
 		inx 
 		cpx #$a0
 		bcs l1760
-		lda v0e + $1
+		lda log_value + $1
 		clc 
 		adc #$a0
-		sta v0e + $1
+		sta log_value + $1
 		bcc l1703
 
 l16FA:
 		dey 
-		cpy v29
+		cpy clip_top
 		bcc l1760
-		cpy v67
+		cpy clip_bottom
 		bcs l1760
 
 l1703:
-		sty v18
+		sty plot_y
 		txa 
 		pha 
-		ldx v18
+		ldx plot_y
 		pha 
 		and #$fc
 		asl 
 		tay 
 		lda bitmap_row_lo, x
-		sta v0a
+		sta bitmap_pointer
 		lda bitmap_row_hi, x
 		adc #$00
-		sta v0a + $1
+		sta bitmap_pointer + $1
 		pla 
 		and #$03
 		tax 
-		lda (v0a), y
+		lda (bitmap_pointer), y
 		sta pointer_06
 		and pixel_bits, x
 		bne l173C
 		lda pixel_bits, x
-		and v1368
+		and pixel_pattern
 		ora pointer_06
-		sta (v0a), y
-		lda v107b
+		sta (bitmap_pointer), y
+		lda seed_enable
 		beq l173F
-		jsr l127D
+		jsr add_fill_seed
 		jmp l173F
 
 l173C:
-		sta v12ef
+		sta pixel_hit
 
 l173F:
-		sta v107b
-		dec v107a
+		sta seed_enable
+		dec seed_countdown
 		bne l174F
-		inc v107b
+		inc seed_enable
 		lda #$0a
-		sta v107a
+		sta seed_countdown
 
 l174F:
 		pla 
 		tax 
-		ldy v18
-		cpx v12 + $1
+		ldy plot_y
+		cpx point_y + $1
 		bne l16E2
-		cpy v12
+		cpy point_y
 		bne l16E2
 		lda v17ac
 		bne l16E2
@@ -1922,16 +1934,16 @@ l174F:
 l1760:
 		lda #$00
 		sta v17ac
-		stx v14
-		sty v16
+		stx line_x
+		sty line_y
 		pla 
 		rts 
 
 l176B:
 		pha 
-		lda v0e + $1
+		lda log_value + $1
 		eor #$ff
-		sta v0e + $1
+		sta log_value + $1
 		pla 
 		ldx #$e8
 		stx l129E
@@ -1944,9 +1956,9 @@ l176B:
 
 l1785:
 		pha 
-		lda v0e + $1
+		lda log_value + $1
 		eor #$ff
-		sta v0e + $1
+		sta log_value + $1
 		pla 
 		clc 
 		eor #$ff
@@ -1957,10 +1969,10 @@ l1785:
 		jmp l16BA
 
 l179D:
-		lda v0e + $1
+		lda log_value + $1
 		clc 
 		adc #$a0
-		sta v0e + $1
+		sta log_value + $1
 		bcs l17A9
 		jmp l16E2
 
@@ -1971,11 +1983,12 @@ v17ac:
 		.byte	$00
 v17ad:		.byte	$00
 
-l17AE:
+; colors the screen cell under a filled pixel, and keeps the nearest depth in cell_depths
+set_cell_color:
 		tya 
 		pha 
-		ldy v18
-		lda v28
+		ldy plot_y
+		lda object_depth
 		cmp (pointer_64), y
 		bcs l17BA
 		sta (pointer_64), y
@@ -1985,26 +1998,26 @@ l17BA:
 		and #$0f
 		cmp #$0f
 		beq l17C9
-		cmp v1bb2
+		cmp fill_color
 		beq l17CE
 		bne l17D6
 
 l17C9:
-		lda v1bb2
+		lda fill_color
 		sta (pointer_08), y
 
 l17CE:
 		lda #$aa
-		sta v1368
+		sta pixel_pattern
 		pla 
 		tay 
 		rts 
 
 l17D6:
-		ora v1bb3
+		ora fill_color_high
 		sta (pointer_08), y
 		lda #$55
-		sta v1368
+		sta pixel_pattern
 		pla 
 		tay 
 		rts 
@@ -2019,20 +2032,21 @@ screen_rows:
 		.word	$44a0, $44a0, $44a0, $44a0, $4478, $4478, $4478, $4478, $4450, $4450, $4450, $4450, $4428, $4428, $4428, $4428
 		.word	$4400, $4400, $4400, $4400
 
-l18AB:
+; fills the area around X/Y with color A, scanline by scanline through fill_stack
+flood_fill:
 		cpy #$c8
 		bcc l18B0
 		rts 
 
 l18B0:
-		sta v1bb2
+		sta fill_color
 		asl 
 		asl 
 		asl 
 		asl 
-		sta v1bb3
-		stx v0e
-		stx v10
+		sta fill_color_high
+		stx log_value
+		stx point_x
 		sty v0d
 		txa 
 		ldx v0d
@@ -2041,25 +2055,25 @@ l18B0:
 		rts 
 
 l18C9:
-		ldx v10
+		ldx point_x
 		ldy v0d
 		lda #$ff
-		sta v12
+		sta point_y
 		ldy #$00
 		txa 
-		sta list_0ef0, y
+		sta fill_stack, y
 		iny 
-		sta list_0ef0, y
+		sta fill_stack, y
 		iny 
 		lda v0d
 		clc 
 		adc #$01
-		sta list_0ef0, y
+		sta fill_stack, y
 		iny 
 		lda #$01
-		sta list_0ef0, y
+		sta fill_stack, y
 		iny 
-		sty v12 + $1
+		sty point_y + $1
 		bne l1929
 
 l18EF:
@@ -2068,41 +2082,41 @@ l18EF:
 		asl 
 		tay 
 		lda bitmap_row_lo, x
-		sta v0a
+		sta bitmap_pointer
 		lda bitmap_row_hi, x
 		adc #$00
-		sta v0a + $1
+		sta bitmap_pointer + $1
 		pla 
 		and #$03
 		tax 
-		lda (v0a), y
+		lda (bitmap_pointer), y
 		and pixel_bits, x
 		rts 
 
 l190A:
-		ldy v12 + $1
+		ldy point_y + $1
 		bne l190F
 		rts 
 
 l190F:
 		dey 
-		lda list_0ef0, y
-		sta v12
+		lda fill_stack, y
+		sta point_y
 		dey 
-		lda list_0ef0, y
+		lda fill_stack, y
 		sta v0d
 		dey 
-		lda list_0ef0, y
-		sta v10
+		lda fill_stack, y
+		sta point_x
 		dey 
-		lda list_0ef0, y
-		sta v0e
-		sty v12 + $1
+		lda fill_stack, y
+		sta log_value
+		sty point_y + $1
 
 l1929:
-		lda v0e
+		lda log_value
 		clc 
-		adc v10
+		adc point_x
 		ror 
 		cmp #$a0
 		bcs l190A
@@ -2114,47 +2128,47 @@ l1929:
 		asl 
 		tay 
 		lda bitmap_row_lo, x
-		sta v0a
+		sta bitmap_pointer
 		lda bitmap_row_hi, x
 		adc #$00
-		sta v0a + $1
+		sta bitmap_pointer + $1
 		pla 
 		and #$03
 		tax 
-		lda (v0a), y
+		lda (bitmap_pointer), y
 		and pixel_bits, x
 		beq l19A7
-		lda v10
+		lda point_x
 		cmp v0c
 		beq l1994
 		sbc #$01
 		cmp v0c
 		beq l1994
 		ldx v0c
-		ldy v12 + $1
+		ldy point_y + $1
 		txa 
 		adc #$00
-		sta list_0ef0, y
+		sta fill_stack, y
 		iny 
-		lda v10
-		sta list_0ef0, y
+		lda point_x
+		sta fill_stack, y
 		iny 
 		lda v0d
-		sta list_0ef0, y
+		sta fill_stack, y
 		iny 
-		lda v12
-		sta list_0ef0, y
+		lda point_y
+		sta fill_stack, y
 		iny 
-		sty v12 + $1
+		sty point_y + $1
 		bne l1989
-		lda v12 + $1
+		lda point_y + $1
 		sec 
 		sbc #$04
-		sta v12 + $1
+		sta point_y + $1
 
 l1989:
-		stx v10
-		cpx v0e
+		stx point_x
+		cpx log_value
 		bne l1992
 		jmp l190A
 
@@ -2162,8 +2176,8 @@ l1992:
 		bne l1929
 
 l1994:
-		lda v0e
-		sta v10
+		lda log_value
+		sta point_x
 		ldx v0d
 		jsr l18EF
 		bne l19A2
@@ -2192,21 +2206,21 @@ l19A7:
 		lda v0c
 		lsr 
 		lsr 
-		sta v18
+		sta plot_y
 		pla 
 		tay 
-		jsr l17AE
+		jsr set_cell_color
 
 l19CE:
-		lda (v0a), y
+		lda (bitmap_pointer), y
 
 l19D0:
 		and pixel_bits, x
 		bne l1A1F
 		lda pixel_bits, x
-		and v1368
-		ora (v0a), y
-		sta (v0a), y
+		and pixel_pattern
+		ora (bitmap_pointer), y
+		sta (bitmap_pointer), y
 		dex 
 		dec pointer_06
 		lda pointer_06
@@ -2221,21 +2235,21 @@ l19EC:
 		eor #$ff
 		adc #$01
 		clc 
-		adc v0a
-		sta v0a
-		lda v0a + $1
+		adc bitmap_pointer
+		sta bitmap_pointer
+		lda bitmap_pointer + $1
 		sbc #$00
-		sta v0a + $1
+		sta bitmap_pointer + $1
 		ldx #$03
-		lda (v0a), y
+		lda (bitmap_pointer), y
 		and #$03
 		bne l1A1F
-		dec v18
-		jsr l17AE
-		lda (v0a), y
+		dec plot_y
+		jsr set_cell_color
+		lda (bitmap_pointer), y
 		bne l19D0
-		lda v1368
-		sta (v0a), y
+		lda pixel_pattern
+		sta (bitmap_pointer), y
 		lda pointer_06
 		sec 
 		sbc #$04
@@ -2245,10 +2259,10 @@ l19EC:
 
 l1A1F:
 		inc pointer_06
-		lda v0e
-		sta v0e + $1
+		lda log_value
+		sta log_value + $1
 		ldx pointer_06
-		stx v0e
+		stx log_value
 		tya 
 		pha 
 		lda v0d
@@ -2267,10 +2281,10 @@ l1A1F:
 		lda v0c
 		lsr 
 		lsr 
-		sta v18
+		sta plot_y
 		pla 
 		tay 
-		jsr l17AE
+		jsr set_cell_color
 		lda v0c
 		sta pointer_06
 		ldx v0d
@@ -2279,25 +2293,25 @@ l1A1F:
 		asl 
 		tay 
 		lda bitmap_row_lo, x
-		sta v0a
+		sta bitmap_pointer
 		lda bitmap_row_hi, x
 		adc #$00
-		sta v0a + $1
+		sta bitmap_pointer + $1
 		pla 
 		and #$03
 		tax 
 		bcc l1A7E
 
 l1A6D:
-		lda (v0a), y
+		lda (bitmap_pointer), y
 
 l1A6F:
 		and pixel_bits, x
 		bne l1AB9
 		lda pixel_bits, x
-		and v1368
-		ora (v0a), y
-		sta (v0a), y
+		and pixel_pattern
+		ora (bitmap_pointer), y
+		sta (bitmap_pointer), y
 
 l1A7E:
 		inx 
@@ -2311,21 +2325,21 @@ l1A7E:
 l1A8B:
 		lda #$08
 		clc 
-		adc v0a
-		sta v0a
-		lda v0a + $1
+		adc bitmap_pointer
+		sta bitmap_pointer
+		lda bitmap_pointer + $1
 		adc #$00
-		sta v0a + $1
+		sta bitmap_pointer + $1
 		ldx #$00
-		lda (v0a), y
+		lda (bitmap_pointer), y
 		and #$c0
 		bne l1AB9
-		inc v18
-		jsr l17AE
-		lda (v0a), y
+		inc plot_y
+		jsr set_cell_color
+		lda (bitmap_pointer), y
 		bne l1A6F
-		lda v1368
-		sta (v0a), y
+		lda pixel_pattern
+		sta (bitmap_pointer), y
 		lda pointer_06
 		clc 
 		adc #$04
@@ -2335,178 +2349,178 @@ l1A8B:
 
 l1AB9:
 		dec pointer_06
-		lda v10
-		sta v10 + $1
+		lda point_x
+		sta point_x + $1
 		ldx pointer_06
-		stx v10
-		cpx v0e
+		stx point_x
+		cpx log_value
 		bcs l1ACA
 		jmp l1BE3
 
 l1ACA:
-		lda v0e
+		lda log_value
 		sec 
-		sbc v0e + $1
+		sbc log_value + $1
 		bcs l1B04
 		cmp #$fe
 		bcs l1B2D
-		ldy v12 + $1
-		lda v0e
-		sta list_0ef0, y
+		ldy point_y + $1
+		lda log_value
+		sta fill_stack, y
 		iny 
-		lda v0e + $1
-		sta list_0ef0, y
+		lda log_value + $1
+		sta fill_stack, y
 		iny 
 		lda v0d
 		sec 
-		sbc v12
-		sta list_0ef0, y
+		sbc point_y
+		sta fill_stack, y
 		iny 
-		lda v12
+		lda point_y
 		clc 
 		eor #$ff
 		adc #$01
-		sta list_0ef0, y
+		sta fill_stack, y
 		iny 
-		sty v12 + $1
+		sty point_y + $1
 		bne l1B2D
-		lda v12 + $1
+		lda point_y + $1
 		sec 
 		sbc #$04
-		sta v12 + $1
+		sta point_y + $1
 		bne l1B2D
 
 l1B04:
 		cmp #$03
 		bcc l1B2D
-		ldy v12 + $1
-		lda v0e + $1
-		sta list_0ef0, y
+		ldy point_y + $1
+		lda log_value + $1
+		sta fill_stack, y
 		iny 
-		lda v0e
-		sta list_0ef0, y
+		lda log_value
+		sta fill_stack, y
 		iny 
 		lda v0d
-		sta list_0ef0, y
+		sta fill_stack, y
 		iny 
-		lda v12
-		sta list_0ef0, y
+		lda point_y
+		sta fill_stack, y
 		iny 
-		sty v12 + $1
+		sty point_y + $1
 		bne l1B2D
-		lda v12 + $1
+		lda point_y + $1
 		sec 
 		sbc #$04
-		sta v12 + $1
+		sta point_y + $1
 
 l1B2D:
-		lda v10
+		lda point_x
 		sec 
-		sbc v10 + $1
+		sbc point_x + $1
 		bcs l1B5F
 		cmp #$fe
 		bcs l1B90
-		ldy v12 + $1
-		lda v10
-		sta list_0ef0, y
+		ldy point_y + $1
+		lda point_x
+		sta fill_stack, y
 		iny 
-		lda v10 + $1
-		sta list_0ef0, y
+		lda point_x + $1
+		sta fill_stack, y
 		iny 
 		lda v0d
-		sta list_0ef0, y
+		sta fill_stack, y
 		iny 
-		lda v12
-		sta list_0ef0, y
+		lda point_y
+		sta fill_stack, y
 		iny 
-		sty v12 + $1
+		sty point_y + $1
 		bne l1B90
-		lda v12 + $1
+		lda point_y + $1
 		sec 
 		sbc #$04
-		sta v12 + $1
+		sta point_y + $1
 		bne l1B90
 
 l1B5F:
 		cmp #$03
 		bcc l1B90
-		ldy v12 + $1
-		lda v10 + $1
-		sta list_0ef0, y
+		ldy point_y + $1
+		lda point_x + $1
+		sta fill_stack, y
 		iny 
-		lda v10
-		sta list_0ef0, y
+		lda point_x
+		sta fill_stack, y
 		iny 
 		lda v0d
 		sec 
-		sbc v12
-		sta list_0ef0, y
+		sbc point_y
+		sta fill_stack, y
 		iny 
-		lda v12
+		lda point_y
 		clc 
 		eor #$ff
 		adc #$01
-		sta list_0ef0, y
+		sta fill_stack, y
 		iny 
-		sty v12 + $1
+		sty point_y + $1
 		bne l1B90
-		lda v12 + $1
+		lda point_y + $1
 		sec 
 		sbc #$04
-		sta v12 + $1
+		sta point_y + $1
 
 l1B90:
-		ldy v12 + $1
+		ldy point_y + $1
 		beq l1BA1
 		dey 
 		dey 
 		dey 
 		lda #$ff
-		sta v12ef
+		sta pixel_hit
 		lda #$0a
-		sta v107a
+		sta seed_countdown
 
 l1BA1:
 		lda v0d
 		clc 
-		adc v12
+		adc point_y
 		sta v0d
-		cmp v67
+		cmp clip_bottom
 		bcc l1BAF
 		jmp l190A
 
 l1BAF:
 		jmp l1929
 
-v1bb2:
+fill_color:
 		.byte	$0d
-v1bb3:		.byte	$d0
+fill_color_high:		.byte	$d0
 
-l1BB4:
+replot_seeds:
 		ldy #$02
 
 l1BB6:
-		cpy v127c
+		cpy seed_count
 		beq l1BE2
-		lda buffer_117c, y
+		lda seed_edges, y
 		iny 
-		ldx buffer_117c, y
-		sty v18
+		ldx seed_edges, y
+		sty plot_y
 		jsr lA026
 		bne l1BD5
 		lda pixel_bits, x
-		and v1368
-		ora (v0a), y
-		sta (v0a), y
+		and pixel_pattern
+		ora (bitmap_pointer), y
+		sta (bitmap_pointer), y
 		bne l1BDC
 
 l1BD5:
 		lda #$ff
-		ldy v18
-		sta buffer_107c, y
+		ldy plot_y
+		sta fill_seeds, y
 
 l1BDC:
-		ldy v18
+		ldy plot_y
 		iny 
 		jmp l1BB6
 
@@ -2516,11 +2530,11 @@ l1BE2:
 l1BE3:
 		jmp l1BE3
 
-l1BE6:
-		lda ball_sprite_y
-		sta v28
+draw_object:
+		lda proj_y
+		sta object_depth
 		lda #$02
-		sta v127c
+		sta seed_count
 		lda #$ff
 		sta v12ee
 		jsr lA020
@@ -2529,44 +2543,45 @@ l1BE6:
 unused_1bfb:
 		.byte	$ea
 
-l1BFC:
+; draws a list of polygons from pointer_04, scaled by math_words+$a, each outlined and filled
+draw_shape:
 		ldy #$00
-		sty v107b
+		sty seed_enable
 		lda (pointer_04), y
 		iny 
-		jsr l1D59
-		lda ball_sprite_x
+		jsr scale_x
+		lda proj_x
 		clc 
-		adc v1f20
-		sta v1f20
-		lda ball_sprite_x + $1
-		adc v1f21
-		sta v1f21
+		adc pen_x
+		sta pen_x
+		lda proj_x + $1
+		adc pen_x + $1
+		sta pen_x + $1
 		lda (pointer_04), y
 		iny 
-		jsr l1D75
-		lda ball_sprite_y
+		jsr scale_y
+		lda proj_y
 		clc 
-		adc v1f22
-		sta v1f22
-		lda ball_sprite_y + $1
-		adc v1f23
-		sta v1f23
-		lda v1f20
-		sta v14
-		lda v1f21
-		sta v15
-		lda v1f20
+		adc pen_y
+		sta pen_y
+		lda proj_y + $1
+		adc pen_y + $1
+		sta pen_y + $1
+		lda pen_x
+		sta line_x
+		lda pen_x + $1
+		sta line_x + $1
+		lda pen_x
 		sta v1f18
-		lda v1f21
+		lda pen_x + $1
 		sta v1f19
-		lda v1f22
-		sta v16
-		lda v1f23
-		sta v17
-		lda v1f22
+		lda pen_y
+		sta line_y
+		lda pen_y + $1
+		sta line_y + $1
+		lda pen_y
 		sta v1f1e
-		lda v1f23
+		lda pen_y + $1
 		sta v1f1f
 
 l1C5F:
@@ -2574,76 +2589,76 @@ l1C5F:
 		iny 
 		cmp #$80
 		beq l1CA0
-		jsr l1D59
-		lda ball_sprite_x
+		jsr scale_x
+		lda proj_x
 		clc 
-		adc v1f20
-		sta v1f20
-		lda ball_sprite_x + $1
-		adc v1f21
-		sta v1f21
+		adc pen_x
+		sta pen_x
+		lda proj_x + $1
+		adc pen_x + $1
+		sta pen_x + $1
 		lda (pointer_04), y
 		iny 
 		sty v1f16
-		jsr l1D75
-		lda ball_sprite_y
+		jsr scale_y
+		lda proj_y
 		clc 
-		adc v1f22
-		sta v1f22
-		lda ball_sprite_y + $1
-		adc v1f23
-		sta v1f23
-		jsr l1DFF
+		adc pen_y
+		sta pen_y
+		lda proj_y + $1
+		adc pen_y + $1
+		sta pen_y + $1
+		jsr draw_clipped_line
 		ldy v1f16
 		bne l1C5F
 
 l1CA0:
 		sty v1f16
 		lda v1f18
-		sta v1f20
+		sta pen_x
 		lda v1f19
-		sta v1f21
+		sta pen_x + $1
 		lda v1f1e
-		sta v1f22
+		sta pen_y
 		lda v1f1f
-		sta v1f23
-		jsr l1DFF
+		sta pen_y + $1
+		jsr draw_clipped_line
 		ldy v1f16
 		lda (pointer_04), y
 		iny 
 		sty v1f16
 		pha 
-		jsr l1BB4
-		lda ball_sprite_x
-		sta v1f20
-		lda ball_sprite_x + $1
-		sta v1f21
-		lda ball_sprite_y
-		sta v1f22
-		lda ball_sprite_y + $1
-		sta v1f23
-		jsr l1DE4
+		jsr replot_seeds
+		lda proj_x
+		sta pen_x
+		lda proj_x + $1
+		sta pen_x + $1
+		lda proj_y
+		sta pen_y
+		lda proj_y + $1
+		sta pen_y + $1
+		jsr pen_on_screen
 		bcs l1CF3
-		ldx ball_sprite_x
-		ldy ball_sprite_y
+		ldx proj_x
+		ldy proj_y
 		pla 
 		pha 
-		jsr l18AB
+		jsr flood_fill
 
 l1CF3:
-		ldx v127c
+		ldx seed_count
 		dex 
 		cpx #$02
 		bcc l1D0F
-		lda buffer_107c, x
+		lda fill_seeds, x
 		tay 
 		dex 
-		lda buffer_107c, x
-		stx v127c
+		lda fill_seeds, x
+		stx seed_count
 		tax 
 		pla 
 		pha 
-		jsr l18AB
+		jsr flood_fill
 		jmp l1CF3
 
 l1D0F:
@@ -2658,24 +2673,24 @@ l1D13:
 		rts 
 
 l1D1B:
-		jsr l1D59
-		lda v1f20
+		jsr scale_x
+		lda pen_x
 		clc 
-		adc ball_sprite_x
-		sta ball_sprite_x
-		lda v1f21
-		adc ball_sprite_x + $1
-		sta ball_sprite_x + $1
+		adc proj_x
+		sta proj_x
+		lda pen_x + $1
+		adc proj_x + $1
+		sta proj_x + $1
 		lda (pointer_04), y
 		iny 
-		jsr l1D75
-		lda v1f22
+		jsr scale_y
+		lda pen_y
 		clc 
-		adc ball_sprite_y
-		sta ball_sprite_y
-		lda v1f23
-		adc ball_sprite_y + $1
-		sta ball_sprite_y + $1
+		adc proj_y
+		sta proj_y
+		lda pen_y + $1
+		adc proj_y + $1
+		sta proj_y + $1
 		tya 
 		clc 
 		adc pointer_04
@@ -2685,31 +2700,31 @@ l1D1B:
 		sta pointer_04 + $1
 		jmp lA023
 
-l1D59:
+scale_x:
 		stx v1f17
 		sty v1f16
 		ldx v1f14
 		stx v1f15
-		jsr l1D90
-		sta v1f21
-		stx v1f20
+		jsr scale_step
+		sta pen_x + $1
+		stx pen_x
 		ldx v1f17
 		ldy v1f16
 		rts 
 
-l1D75:
+scale_y:
 		stx v1f17
 		sty v1f16
 		ldy #$ff
 		sty v1f15
-		jsr l1D90
-		stx v1f22
-		sta v1f23
+		jsr scale_step
+		stx pen_y
+		sta pen_y + $1
 		ldx v1f17
 		ldy v1f16
 		rts 
 
-l1D90:
+scale_step:
 		cmp #$80
 		php 
 		bcc l1D9A
@@ -2720,20 +2735,20 @@ l1D90:
 l1D9A:
 		tax 
 		lda #$00
-		jsr multiply
-		sta v0e
+		jsr to_log
+		sta log_value
 		lda v1f15
 		bne l1DA8
 		dex 
 
 l1DA8:
-		stx v0e + $1
+		stx log_value + $1
 		lda math_words + $a
 		ldx math_words + $b
-		jsr l094F
-		lda v0e
-		ldx v0e + $1
-		jsr l091F
+		jsr log_multiply
+		lda log_value
+		ldx log_value + $1
+		jsr from_log
 		plp 
 		bcc l1DCA
 		pha 
@@ -2752,142 +2767,143 @@ l1DCA:
 unused_1dcb:
 		.byte	$00, $00
 
-l1DCD:
-		lda v15
-		ora v17
+line_start_on_screen:
+		lda line_x + $1
+		ora line_y + $1
 		bne l1DE2
-		lda v14
+		lda line_x
 		cmp #$a0
 		bcs l1DE2
-		lda v16
-		cmp v29
+		lda line_y
+		cmp clip_top
 		bcc l1DE2
-		cmp v67
+		cmp clip_bottom
 		rts 
 
 l1DE2:
 		sec 
 		rts 
 
-l1DE4:
-		lda v1f21
-		ora v1f23
+pen_on_screen:
+		lda pen_x + $1
+		ora pen_y + $1
 		bne l1DFD
-		lda v1f20
+		lda pen_x
 		cmp #$a0
 		bcs l1DFD
-		lda v1f22
-		cmp v29
+		lda pen_y
+		cmp clip_top
 		bcc l1DFD
-		cmp v67
+		cmp clip_bottom
 		rts 
 
 l1DFD:
 		sec 
 		rts 
 
-l1DFF:
-		lda v1f21
+; draws from line_x/line_y to pen_x/pen_y, finding the screen's edge by halving the line
+draw_clipped_line:
+		lda pen_x + $1
 		pha 
-		lda v1f20
+		lda pen_x
 		pha 
-		lda v1f23
+		lda pen_y + $1
 		pha 
-		lda v1f22
+		lda pen_y
 		pha 
 		lda #$00
 		sta v17ad
-		jsr l1DCD
+		jsr line_start_on_screen
 		bcc l1E1C
 		jmp l1ED2
 
 l1E1C:
-		jsr l1DE4
+		jsr pen_on_screen
 		bcs l1E41
 
 l1E21:
-		ldx v1f20
-		ldy v1f22
-		jsr l165F
+		ldx pen_x
+		ldy pen_y
+		jsr draw_line
 
 l1E2A:
 		lda #$ff
-		sta v107b
+		sta seed_enable
 		lda #$00
 		sta v17ad
 		pla 
-		sta v16
+		sta line_y
 		pla 
-		sta v17
+		sta line_y + $1
 		pla 
-		sta v14
+		sta line_x
 		pla 
-		sta v15
+		sta line_x + $1
 		rts 
 
 l1E41:
-		lda v1f20
+		lda pen_x
 		sta v1f1a
-		lda v1f21
+		lda pen_x + $1
 		sta v1f1b
-		lda v1f22
+		lda pen_y
 		sta v1f1c
-		lda v1f23
+		lda pen_y + $1
 		sta v1f1d
-		lda v1f20
+		lda pen_x
 		clc 
-		adc v14
-		sta v1f20
-		lda v1f21
-		adc v15
+		adc line_x
+		sta pen_x
+		lda pen_x + $1
+		adc line_x + $1
 		asl 
 		php 
 		ror 
 		plp 
 		ror 
-		sta v1f21
-		ror v1f20
-		lda v1f22
+		sta pen_x + $1
+		ror pen_x
+		lda pen_y
 		clc 
-		adc v16
-		sta v1f22
-		lda v1f23
-		adc v17
+		adc line_y
+		sta pen_y
+		lda pen_y + $1
+		adc line_y + $1
 		asl 
 		php 
 		ror 
 		plp 
 		ror 
-		sta v1f23
-		ror v1f22
-		lda v1f20
+		sta pen_y + $1
+		ror pen_y
+		lda pen_x
 		cmp v1f1a
 		bne l1E99
-		lda v1f21
+		lda pen_x + $1
 		cmp v1f1b
 
 l1E99:
 		bne l1EC2
-		lda v1f22
+		lda pen_y
 		cmp v1f1c
 		bne l1EA9
-		lda v1f23
+		lda pen_y + $1
 		cmp v1f1d
 
 l1EA9:
 		bne l1EC2
-		lda v14
-		sta v1f20
-		lda v15
-		sta v1f21
-		lda v16
-		sta v1f22
-		lda v17
-		sta v1f23
+		lda line_x
+		sta pen_x
+		lda line_x + $1
+		sta pen_x + $1
+		lda line_y
+		sta pen_y
+		lda line_y + $1
+		sta pen_y + $1
 		jmp l1E21
 
 l1EC2:
-		jsr l1DE4
+		jsr pen_on_screen
 		bcc l1ECA
 		jmp l1E41
 
@@ -2897,35 +2913,35 @@ l1ECA:
 		jmp l1E21
 
 l1ED2:
-		jsr l1DE4
+		jsr pen_on_screen
 		bcc l1EDA
 		jmp l1E2A
 
 l1EDA:
-		lda v1f21
+		lda pen_x + $1
 		pha 
-		lda v1f20
+		lda pen_x
 		pha 
-		lda v1f23
+		lda pen_y + $1
 		pha 
-		lda v1f22
+		lda pen_y
 		pha 
-		lda v14
-		sta v1f20
-		lda v15
-		sta v1f21
-		lda v16
-		sta v1f22
-		lda v17
-		sta v1f23
+		lda line_x
+		sta pen_x
+		lda line_x + $1
+		sta pen_x + $1
+		lda line_y
+		sta pen_y
+		lda line_y + $1
+		sta pen_y + $1
 		pla 
-		sta v16
+		sta line_y
 		pla 
-		sta v17
+		sta line_y + $1
 		pla 
-		sta v14
+		sta line_x
 		pla 
-		sta v15
+		sta line_x + $1
 		lda #$ff
 		sta v17ad
 		jmp l1E41
@@ -2944,49 +2960,48 @@ v1f1c:		.byte	$6f
 v1f1d:		.byte	$00
 v1f1e:		.byte	$97
 v1f1f:		.byte	$00
-v1f20:		.byte	$9a
-v1f21:		.byte	$00
-v1f22:		.byte	$74
-v1f23:		.byte	$00
 
-ball_sprite_x:
-		.word	$0160
-ball_sprite_y:		.word	$ffdb
+pen_x:
+		.word	$009a
+pen_y:		.word	$0074
+; a projected point on the screen
+proj_x:		.word	$0160
+proj_y:		.word	$ffdb
 
 unused_1f28:
 		.byte	$32, $63
 
-l1F2A:
+draw_objects:
 		ldy #$00
-		cpy v27
+		cpy object_count
 		bne l1F33
 		jmp l1FC4
 
 l1F33:
-		lda table_22db, y
+		lda object_x, y
 		sec 
 		sbc #$30
-		sta ball_sprite_x
+		sta proj_x
 		lda #$00
 		sbc #$00
-		sta ball_sprite_x + $1
-		lda v2c5f
+		sta proj_x + $1
+		lda horizon
 		sec 
-		sbc table_23db, y
-		sta ball_sprite_y
+		sbc object_y, y
+		sta proj_y
 		lda #$00
 		sbc #$00
-		sta ball_sprite_y + $1
-		lda table_23db, y
+		sta proj_y + $1
+		lda object_y, y
 		cmp #$50
 		bcs l1FB3
 		and #$fe
 		cmp #$10
 		bcs l1F71
 		tax 
-		lda table_1fc7, x
+		lda near_scales, x
 		sta math_words + $a
-		lda table_1fc7 + $1, x
+		lda near_scales + $1, x
 		sta math_words + $b
 		jmp l1F83
 
@@ -2996,13 +3011,13 @@ l1F71:
 		lsr 
 		and #$fe
 		tax 
-		lda table_1fe7, x
+		lda far_scales, x
 		sta math_words + $a
-		lda table_1fe7 + $1, x
+		lda far_scales + $1, x
 		sta math_words + $b
 
 l1F83:
-		lda table_21db, y
+		lda object_types, y
 		sty v2007
 		ldx #$00
 		stx v1f14
@@ -3026,14 +3041,14 @@ l1FA1:
 		sta pointer_04
 		lda shapes + $1, x
 		sta pointer_04 + $1
-		jsr l1BE6
+		jsr draw_object
 		ldy v2007
 
 l1FB3:
 		iny 
 		cpy #$30
 		beq l1FC4
-		cpy v27
+		cpy object_count
 		bcs l1FBF
 		jmp l1F33
 
@@ -3042,36 +3057,38 @@ l1FBF:
 		jmp l1F33
 
 l1FC4:
-		jmp l2539
+		jmp draw_terrain
 
-table_1fc7:
+near_scales:
 		.word	$fc00, $fd00, $fe00, $fe00, $ff00, $ff00, $ff00, $ff00, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0100
-table_1fe7:
+far_scales:
 		.word	$fc00, $0000, $0100, $0100, $0200, $0200, $0200, $0200, $0300, $0300, $0300, $0300, $0300, $0400, $0400, $0400
 
 v2007:
 		.byte	$25
 
-l2008:
+; draws the 3D view from the ball: collects the objects and features of the ball's map cell
+; and the cells ahead, then draws them nearest first; fills never cover what is already drawn
+draw_view:
 		lda #$00
-		sta v2c3e
+		sta feature_count
 		ldx #$1d
 
 l200F:
-		sta v2bfc, x
+		sta shape_visible, x
 		dex 
 		bne l200F
-		sta v27
+		sta object_count
 		lda ball_x
-		sta v10
+		sta point_x
 		lda ball_x + $1
-		sta v10 + $1
+		sta point_x + $1
 		lda ball_y
-		sta v12
+		sta point_y
 		lda ball_y + $1
-		sta v12 + $1
-		jsr l24DB
-		jsr l2121
+		sta point_y + $1
+		jsr find_cell
+		jsr collect_objects
 		lda #$df
 		sta step_pointer
 		lda #$20
@@ -3102,13 +3119,13 @@ l204B:
 l205B:
 		sty v20de
 		lda ball_x
-		sta v10
+		sta point_x
 		lda ball_x + $1
-		sta v10 + $1
+		sta point_x + $1
 		lda ball_y
-		sta v12
+		sta point_y
 		lda ball_y + $1
-		sta v12 + $1
+		sta point_y + $1
 		lda step_pointer
 		sta pointer_08
 		lda step_pointer + $1
@@ -3116,11 +3133,11 @@ l205B:
 		lda (pointer_08), y
 		bmi l2089
 		clc 
-		adc v10
-		sta v10
-		lda v10 + $1
+		adc point_x
+		sta point_x
+		lda point_x + $1
 		adc #$00
-		sta v10 + $1
+		sta point_x + $1
 		bcc l209E
 
 l2089:
@@ -3131,22 +3148,22 @@ l2089:
 		eor #$ff
 		adc #$01
 		clc 
-		adc v10
-		sta v10
-		lda v10 + $1
+		adc point_x
+		sta point_x
+		lda point_x + $1
 		sbc #$00
-		sta v10 + $1
+		sta point_x + $1
 
 l209E:
 		dey 
 		lda (pointer_08), y
 		bmi l20B0
 		clc 
-		adc v12
-		sta v12
-		lda v12 + $1
+		adc point_y
+		sta point_y
+		lda point_y + $1
 		adc #$00
-		sta v12 + $1
+		sta point_y + $1
 		bcc l20C5
 
 l20B0:
@@ -3157,24 +3174,24 @@ l20B0:
 		eor #$ff
 		adc #$01
 		clc 
-		adc v12
-		sta v12
-		lda v12 + $1
+		adc point_y
+		sta point_y
+		lda point_y + $1
 		sbc #$00
-		sta v12 + $1
+		sta point_y + $1
 
 l20C5:
 		dey 
 		sty v20de
-		jsr l24DB
-		jsr l2121
+		jsr find_cell
+		jsr collect_objects
 		ldy v20de
 		bmi l20D7
 		jmp l205B
 
 l20D7:
-		jsr l2193
-		jsr l1F2A
+		jsr sort_objects
+		jsr draw_objects
 		rts 
 
 v20de:
@@ -3190,9 +3207,9 @@ direction_steps:
 step_pointer:
 		.word	$20df
 
-l2121:
+collect_objects:
 		lda #$10
-		sta v2538
+		sta object_pass
 		inc pointer_08
 		bne l212C
 		inc pointer_08 + $1
@@ -3206,19 +3223,19 @@ l212E:
 		cmp #$80
 		beq l2184
 		clc 
-		adc v23
-		sta v10
+		adc base_x
+		sta point_x
 		lda #$00
-		adc v24
-		sta v10 + $1
+		adc base_x + $1
+		sta point_x + $1
 		iny 
 		lda (pointer_08), y
 		clc 
-		adc v25
-		sta v12
+		adc base_y
+		sta point_y
 		lda #$00
-		adc v26
-		sta v12 + $1
+		adc base_y + $1
+		sta point_y + $1
 		iny 
 		tya 
 		clc 
@@ -3227,75 +3244,76 @@ l212E:
 		lda pointer_08 + $1
 		adc #$00
 		sta pointer_08 + $1
-		jsr l0BA4
-		lda v2c5e
+		jsr to_view
+		lda view_y + $1
 		bmi l212C
-		jsr l0B06
+		jsr project
 		ldy #$00
 		lda (pointer_08), y
-		ora v2538
-		ldy v27
-		sta table_21db, y
-		lda ball_sprite_x
-		sta table_22db, y
-		lda ball_sprite_y
-		sta table_23db, y
-		inc v27
+		ora object_pass
+		ldy object_count
+		sta object_types, y
+		lda proj_x
+		sta object_x, y
+		lda proj_y
+		sta object_y, y
+		inc object_count
 		bne l212C
-		dec v27
+		dec object_count
 
 l2184:
-		lda v2538
+		lda object_pass
 		beq l2190
 		lda #$00
-		sta v2538
+		sta object_pass
 		beq l212E
 
 l2190:
-		jmp l2B87
+		jmp collect_features
 
-l2193:
-		lda v27
-		dec v27
+; sorts the objects by screen row, nearest first
+sort_objects:
+		lda object_count
+		dec object_count
 
 l2197:
 		ldy #$00
-		sty v0e
+		sty log_value
 
 l219B:
-		lda table_23db, y
-		cmp table_23db + $1, y
+		lda object_y, y
+		cmp object_y + $1, y
 		bcs l21CF
-		lda table_23db, y
+		lda object_y, y
 		pha 
-		lda table_22db, y
+		lda object_x, y
 		pha 
-		lda table_21db, y
+		lda object_types, y
 		pha 
-		lda table_22db + $1, y
-		sta table_22db, y
-		lda table_23db + $1, y
-		sta table_23db, y
-		lda table_21db + $1, y
-		sta table_21db, y
+		lda object_x + $1, y
+		sta object_x, y
+		lda object_y + $1, y
+		sta object_y, y
+		lda object_types + $1, y
+		sta object_types, y
 		pla 
-		sta table_21db + $1, y
+		sta object_types + $1, y
 		pla 
-		sta table_22db + $1, y
+		sta object_x + $1, y
 		pla 
-		sta table_23db + $1, y
-		inc v0e
+		sta object_y + $1, y
+		inc log_value
 
 l21CF:
 		iny 
-		cpy v27
+		cpy object_count
 		bcc l219B
-		lda v0e
+		lda log_value
 		bne l2197
-		inc v27
+		inc object_count
 		rts 
 
-table_21db:
+object_types:
 		.byte	$00, $07, $09, $01, $01, $0a, $0b, $0b, $04, $01, $0b, $05, $0c, $0a, $04, $09
 		.byte	$04, $03, $07, $0e, $00, $06, $01, $06, $00, $06, $00, $09, $05, $05, $05, $0c
 		.byte	$05, $0e, $05, $05, $0c, $0a, $ed, $4b, $fe, $41, $d2, $e9, $4b, $fe, $3a, $d2
@@ -3312,7 +3330,7 @@ table_21db:
 		.byte	$4c, $fe, $0d, $c2, $ba, $4c, $23, $22, $71, $48, $c9, $f1, $e5, $d5, $c5, $f5
 		.byte	$0e, $02, $e6, $7f, $5f, $cd, $05, $00, $f1, $c1, $d1, $e1, $b7, $c9, $e5, $2a
 		.byte	$71, $48, $2b, $7e, $e6, $7f, $fe, $0a, $23, $cc, $f0, $4b, $23, $22, $71, $48
-table_22db:
+object_x:
 		.byte	$2f, $d3, $67, $c4, $c7, $b0, $ad, $b7, $a7, $a4, $b0, $d9, $d5, $78, $a8, $a6
 		.byte	$aa, $ca, $c4, $ca, $76, $7c, $7f, $9f, $a9, $aa, $b2, $c0, $b9, $c4, $c0, $bc
 		.byte	$c3, $c7, $c1, $c0, $c9, $d9, $c3, $f3, $4c, $f5, $c5, $d5, $e5, $11, $1b, $43
@@ -3329,7 +3347,7 @@ table_22db:
 		.byte	$4a, $d5, $3a, $8c, $42, $3c, $ca, $7d, $4d, $fa, $09, $4e, $3e, $0d, $cd, $1b
 		.byte	$4e, $3e, $0a, $cd, $1b, $4e, $3e, $1a, $cd, $1b, $4e, $e5, $2a, $1b, $44, $11
 		.byte	$1d, $44, $c5, $01, $8c, $42, $cd, $f3, $4d, $11, $1d, $44, $0e, $1a, $cd, $05
-table_23db:
+object_y:
 		.byte	$12, $0f, $0a, $09, $07, $06, $05, $05, $04, $04, $04, $04, $04, $03, $03, $03
 		.byte	$03, $03, $03, $03, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02
 		.byte	$02, $02, $02, $02, $02, $02, $01, $6b, $42, $cd, $f3, $4d, $11, $1b, $43, $0e
@@ -3347,36 +3365,37 @@ table_23db:
 		.byte	$7c, $3d, $cc, $77, $4e, $23, $22, $19, $43, $11, $1a, $43, $19, $d1, $f1, $77
 		.byte	$e1, $c9, $3a, $ad, $42, $3c, $ca, $a5, $4c, $fa, $35, $4f, $e5, $d5, $2a, $1d
 
-l24DB:
-		lda v10
+; finds the map cell (7 by 7) for point_x/point_y
+find_cell:
+		lda point_x
 		and #$c0
-		sta v23
-		lda v10 + $1
-		sta v24
-		asl v10
+		sta base_x
+		lda point_x + $1
+		sta base_x + $1
+		asl point_x
 		rol 
-		asl v10
+		asl point_x
 		rol 
 		cmp #$07
 		bcs l251D
-		sta v2536
-		lda v12
+		sta cell_x
+		lda point_y
 		and #$c0
-		sta v25
-		lda v12 + $1
-		sta v26
-		asl v12
+		sta base_y
+		lda point_y + $1
+		sta base_y + $1
+		asl point_y
 		rol 
-		asl v12
+		asl point_y
 		rol 
 		cmp #$07
 		bcs l251D
-		sta v2537
+		sta cell_y
 		asl 
 		asl 
 		asl 
 		clc 
-		adc v2536
+		adc cell_x
 		asl 
 		tax 
 		lda terrain_pointers, x
@@ -3387,62 +3406,62 @@ l24DB:
 
 l251D:
 		lda #$ff
-		sta v2536
-		sta v2537
+		sta cell_x
+		sta cell_y
 		lda #$2e
 		sta pointer_08
 		lda #$25
 		sta pointer_08 + $1
 		rts 
 
-v252e:
+empty_cell:
 		.byte	$80, $80, $80, $80, $80, $80, $80, $80
-v2536:		.byte	$01
-v2537:		.byte	$05
-v2538:		.byte	$00
+cell_x:		.byte	$01
+cell_y:		.byte	$05
+object_pass:		.byte	$00
 
-l2539:
-		lda v2c5f
+draw_terrain:
+		lda horizon
 		clc 
 		adc #$01
-		sta v67
+		sta clip_bottom
 		nop 
 		lda #$07
-		sta v2c4f
+		sta polygon_color
 
 l2547:
-		ldx v2c3e
+		ldx feature_count
 		beq l25C1
 		dex 
 		dex 
-		stx v2c3e
-		lda v2c1a, x
+		stx feature_count
+		lda feature_pointers, x
 		sta pointer_08
-		lda v2c1a + $1, x
+		lda feature_pointers + $1, x
 		sta pointer_08 + $1
-		lda v2c26, x
-		sta v23
-		lda v2c26 + $1, x
-		sta v24
-		lda v2c32, x
-		sta v25
-		lda v2c32 + $1, x
-		sta v26
+		lda feature_x, x
+		sta base_x
+		lda feature_x + $1, x
+		sta base_x + $1
+		lda feature_y, x
+		sta base_y
+		lda feature_y + $1, x
+		sta base_y + $1
 		ldy #$00
 
 l2571:
 		lda (pointer_08), y
 		cmp #$80
 		beq l2547
-		lda v23
+		lda base_x
 		and #$c0
 		ora (pointer_08), y
-		sta v23
-		lda v25
+		sta base_x
+		lda base_y
 		and #$c0
 		iny 
 		ora (pointer_08), y
-		sta v25
+		sta base_y
 		iny 
 		lda (pointer_08), y
 		iny 
@@ -3469,7 +3488,7 @@ l2571:
 		lda pointer_08 + $1
 		sbc #$00
 		sta pointer_08 + $1
-		jsr l2703
+		jsr draw_polygon
 		pla 
 		tay 
 		pla 
@@ -3484,10 +3503,10 @@ l25C1:
 l25C3:
 		dex 
 		bne l25C9
-		jmp l28C0
+		jmp reset_clip
 
 l25C9:
-		lda v2bfc, x
+		lda shape_visible, x
 		beq l25C3
 		txa 
 		pha 
@@ -3506,31 +3525,31 @@ l25C9:
 		lda #$0c
 
 l25EA:
-		sta v2c4f
-		jsr l25F4
+		sta polygon_color
+		jsr draw_hole_shape
 		pla 
 		tax 
 		bne l25C3
 
-l25F4:
+draw_hole_shape:
 		ldy #$00
-		sty v23
-		sty v25
+		sty base_x
+		sty base_y
 		lda (pointer_08), y
 		lsr 
-		ror v23
+		ror base_x
 		lsr 
-		ror v23
-		sta v24
+		ror base_x
+		sta base_x + $1
 		iny 
 		lda (pointer_08), y
 		lsr 
-		ror v25
+		ror base_y
 		lsr 
-		ror v25
-		sta v26
+		ror base_y
+		sta base_y + $1
 		iny 
-		lda v2c4f
+		lda polygon_color
 		cmp #$0d
 		beq l262D
 		lda #$02
@@ -3548,72 +3567,72 @@ l25F4:
 
 l262D:
 		lda (pointer_08), y
-		ora v23
-		sta v23
+		ora base_x
+		sta base_x
 		iny 
 		lda (pointer_08), y
-		ora v25
-		sta v25
+		ora base_y
+		sta base_y
 		iny 
 
 l263B:
 		lda (pointer_08), y
 		bmi l264C
 		clc 
-		adc v23
-		sta v23
+		adc base_x
+		sta base_x
 		lda #$00
-		adc v24
-		sta v24
+		adc base_x + $1
+		sta base_x + $1
 		bcc l2657
 
 l264C:
 		clc 
-		adc v23
-		sta v23
-		lda v24
+		adc base_x
+		sta base_x
+		lda base_x + $1
 		sbc #$00
-		sta v24
+		sta base_x + $1
 
 l2657:
 		iny 
 		lda (pointer_08), y
 		bmi l2669
 		clc 
-		adc v25
-		sta v25
+		adc base_y
+		sta base_y
 		lda #$00
-		adc v26
-		sta v26
+		adc base_y + $1
+		sta base_y + $1
 		bcc l2674
 
 l2669:
 		clc 
-		adc v25
-		sta v25
-		lda v26
+		adc base_y
+		sta base_y
+		lda base_y + $1
 		sbc #$00
-		sta v26
+		sta base_y + $1
 
 l2674:
 		iny 
-		lda v2c4f
+		lda polygon_color
 		cmp #$0d
 		beq l267F
-		jmp l2703
+		jmp draw_polygon
 
 l267F:
 		lda pointer_08 + $1
 		pha 
 		lda pointer_08
 		pha 
-		lda v26
+		lda base_y + $1
 		pha 
-		lda v25
+		lda base_y
 		pha 
-		lda v24
+		lda base_x + $1
 		pha 
-		lda v23
+		lda base_x
 		pha 
 
 l2691:
@@ -3624,40 +3643,40 @@ l2691:
 		lda (pointer_08), y
 		bmi l26A9
 		clc 
-		adc v23
-		sta v23
+		adc base_x
+		sta base_x
 		lda #$00
-		adc v24
-		sta v24
+		adc base_x + $1
+		sta base_x + $1
 		bcc l26B4
 
 l26A9:
 		clc 
-		adc v23
-		sta v23
-		lda v24
+		adc base_x
+		sta base_x
+		lda base_x + $1
 		sbc #$00
-		sta v24
+		sta base_x + $1
 
 l26B4:
 		iny 
 		lda (pointer_08), y
 		bmi l26C6
 		clc 
-		adc v25
-		sta v25
+		adc base_y
+		sta base_y
 		lda #$00
-		adc v26
-		sta v26
+		adc base_y + $1
+		sta base_y + $1
 		bcc l26D1
 
 l26C6:
 		clc 
-		adc v25
-		sta v25
-		lda v26
+		adc base_y
+		sta base_y
+		lda base_y + $1
 		sbc #$00
-		sta v26
+		sta base_y + $1
 
 l26D1:
 		tya 
@@ -3671,44 +3690,45 @@ l26D1:
 		sta pointer_08 + $1
 		ldy #$06
 		lda #$05
-		sta v2c4f
-		jsr l2703
+		sta polygon_color
+		jsr draw_polygon
 		pla 
-		sta v23
+		sta base_x
 		pla 
-		sta v24
+		sta base_x + $1
 		pla 
-		sta v25
+		sta base_y
 		pla 
-		sta v26
+		sta base_y + $1
 		lda #$0d
-		sta v2c4f
+		sta polygon_color
 		pla 
 		sta pointer_08
 		pla 
 		sta pointer_08 + $1
 		ldy #$06
 
-l2703:
+; draws a polygon of world points, cut where it crosses behind the view, and fills it
+draw_polygon:
 		lda #$00
 		sta v2c4d
-		sta v107b
+		sta seed_enable
 		lda #$02
-		sta v127c
-		jsr l2AC5
+		sta seed_count
+		jsr project_vertex
 		beq l2718
 		jmp l2775
 
 l2718:
-		lda ball_sprite_x
-		sta v14
-		lda ball_sprite_x + $1
-		sta v15
-		lda ball_sprite_y
-		sta v16
-		lda ball_sprite_y + $1
-		sta v17
-		jsr l1DCD
+		lda proj_x
+		sta line_x
+		lda proj_x + $1
+		sta line_x + $1
+		lda proj_y
+		sta line_y
+		lda proj_y + $1
+		sta line_y + $1
+		jsr line_start_on_screen
 		bcc l2734
 		jmp l2804
 
@@ -3753,17 +3773,17 @@ l277D:
 		jsr l2862
 
 l2786:
-		jsr l2AC5
+		jsr project_vertex
 		bne l2775
-		lda ball_sprite_x
-		sta v14
-		lda ball_sprite_x + $1
-		sta v15
-		lda ball_sprite_y
-		sta v16
-		lda ball_sprite_y + $1
-		sta v17
-		jsr l1DCD
+		lda proj_x
+		sta line_x
+		lda proj_x + $1
+		sta line_x + $1
+		lda proj_y
+		sta line_y
+		lda proj_y + $1
+		sta line_y + $1
+		jsr line_start_on_screen
 		bcs l2804
 		lda v2c44
 		pha 
@@ -3799,7 +3819,7 @@ l2786:
 		sta v2c4a
 		lda #$ff
 		sta v2c4e
-		jsr l2920
+		jsr clip_edge
 		pla 
 		sta v2c47
 		pla 
@@ -3818,41 +3838,41 @@ l2804:
 		jsr l2862
 
 l2812:
-		jsr l2AC5
+		jsr project_vertex
 		beq l281A
 		jmp l28C6
 
 l281A:
-		lda ball_sprite_x
-		sta v1f20
-		lda ball_sprite_x + $1
-		sta v1f21
-		lda ball_sprite_y
-		sta v1f22
-		lda ball_sprite_y + $1
-		sta v1f23
+		lda proj_x
+		sta pen_x
+		lda proj_x + $1
+		sta pen_x + $1
+		lda proj_y
+		sta pen_y
+		lda proj_y + $1
+		sta pen_y + $1
 		sty v2c4b
-		jsr l1DFF
+		jsr draw_clipped_line
 		ldy v2c4b
 		jmp l2804
 
 l283E:
 		ldy v2c4c
-		jsr l1BB4
+		jsr replot_seeds
 
 l2844:
-		ldx v127c
+		ldx seed_count
 		dex 
 		cpx #$02
 		bcc l2861
-		lda buffer_107c, x
+		lda fill_seeds, x
 		tay 
 		dex 
-		lda buffer_107c, x
-		stx v127c
+		lda fill_seeds, x
+		stx seed_count
 		tax 
-		lda v2c4f
-		jsr l18AB
+		lda polygon_color
+		jsr flood_fill
 		jmp l2844
 
 l2861:
@@ -3880,18 +3900,18 @@ l286E:
 		lda (pointer_08), y
 		bmi l288E
 		clc 
-		adc v23
+		adc base_x
 		sta v2c43
 		lda #$00
-		adc v24
+		adc base_x + $1
 		sta v2c44
 		bcc l289B
 
 l288E:
 		clc 
-		adc v23
+		adc base_x
 		sta v2c43
-		lda v24
+		lda base_x + $1
 		sbc #$00
 		sta v2c44
 
@@ -3900,18 +3920,18 @@ l289B:
 		lda (pointer_08), y
 		bmi l28AF
 		clc 
-		adc v25
+		adc base_y
 		sta v2c47
 		lda #$00
-		adc v26
+		adc base_y + $1
 		sta v2c48
 		bcc l28BC
 
 l28AF:
 		clc 
-		adc v25
+		adc base_y
 		sta v2c47
-		lda v26
+		lda base_y + $1
 		sbc #$00
 		sta v2c48
 
@@ -3919,16 +3939,16 @@ l28BC:
 		ldy v2c4b
 		rts 
 
-l28C0:
+reset_clip:
 		lda #$c8
-		sta v67
+		sta clip_bottom
 		rts 
 
 unused_28c5:
 		.byte	$ea
 
 l28C6:
-		jsr l1DCD
+		jsr line_start_on_screen
 		bcc l28CE
 		jmp l2775
 
@@ -3939,7 +3959,7 @@ l28CE:
 		pha 
 		lda #$00
 		sta v2c4e
-		jsr l2920
+		jsr clip_edge
 		pla 
 		sta v2c43
 		pla 
@@ -3948,33 +3968,34 @@ l28CE:
 
 l28E9:
 		lda v2c43
-		sta v10
+		sta point_x
 		lda v2c44
-		sta v10 + $1
+		sta point_x + $1
 		lda v2c47
-		sta v12
+		sta point_y
 		lda v2c48
-		sta v12 + $1
+		sta point_y + $1
 		lda #$ff
 		sta direction_flag
-		jsr l0BA4
+		jsr to_view
 		lda #$00
 		sta direction_flag
-		lda v2c5e
+		lda view_y + $1
 		bne l2914
-		lda v2c5d
+		lda view_y
 		bne l291C
 
 l2914:
 		lda #$ff
 		sta v2c4e
-		jsr l2920
+		jsr clip_edge
 
 l291C:
 		ldy v2c4b
 		rts 
 
-l2920:
+; halves an edge until its end is in front of the view
+clip_edge:
 		lda v2c43
 		clc 
 		adc v2c45
@@ -3994,88 +4015,88 @@ l2920:
 		sta v2c42
 		ror v2c41
 		lda v2c3f
-		sta v10
+		sta point_x
 		lda v2c40
-		sta v10 + $1
+		sta point_x + $1
 		lda v2c41
-		sta v12
+		sta point_y
 		lda v2c42
-		sta v12 + $1
+		sta point_y + $1
 		lda #$ff
 		sta direction_flag
-		jsr l0BA4
+		jsr to_view
 		lda #$00
 		sta direction_flag
-		lda v2c5e
+		lda view_y + $1
 		beq l2977
 		jmp l2A06
 
 l2977:
-		lda v2c5d
+		lda view_y
 		bne l297F
 		jmp l2A06
 
 l297F:
-		jsr l0B06
+		jsr project
 		lda #$30
 		clc 
 		eor #$ff
 		adc #$01
 		clc 
-		adc ball_sprite_x
-		sta ball_sprite_x
-		lda ball_sprite_x + $1
+		adc proj_x
+		sta proj_x
+		lda proj_x + $1
 		sbc #$00
-		sta ball_sprite_x + $1
-		lda v2c5f
+		sta proj_x + $1
+		lda horizon
 		sec 
-		sbc ball_sprite_y
-		sta ball_sprite_y
+		sbc proj_y
+		sta proj_y
 		lda #$00
-		sbc ball_sprite_y + $1
-		sta ball_sprite_y + $1
-		lda ball_sprite_x
-		sta v1f20
-		lda ball_sprite_x + $1
-		sta v1f21
-		lda ball_sprite_y
-		sta v1f22
-		lda ball_sprite_y + $1
-		sta v1f23
-		jsr l1DE4
+		sbc proj_y + $1
+		sta proj_y + $1
+		lda proj_x
+		sta pen_x
+		lda proj_x + $1
+		sta pen_x + $1
+		lda proj_y
+		sta pen_y
+		lda proj_y + $1
+		sta pen_y + $1
+		jsr pen_on_screen
 		bcs l29CA
 		jmp l2A44
 
 l29CA:
 		lda v2c4e
 		beq l29FF
-		lda v15
+		lda line_x + $1
 		pha 
-		lda v14
+		lda line_x
 		pha 
-		lda v1f20
-		sta v14
-		lda v1f21
-		sta v15
+		lda pen_x
+		sta line_x
+		lda pen_x + $1
+		sta line_x + $1
 		pla 
-		sta v1f20
+		sta pen_x
 		pla 
-		sta v1f21
-		lda v17
+		sta pen_x + $1
+		lda line_y + $1
 		pha 
-		lda v16
+		lda line_y
 		pha 
-		lda v1f22
-		sta v16
-		lda v1f23
-		sta v17
+		lda pen_y
+		sta line_y
+		lda pen_y + $1
+		sta line_y + $1
 		pla 
-		sta v1f22
+		sta pen_y
 		pla 
-		sta v1f23
+		sta pen_y + $1
 
 l29FF:
-		jsr l1DFF
+		jsr draw_clipped_line
 		ldy v2c4b
 		rts 
 
@@ -4107,7 +4128,7 @@ l2A29:
 		sta v2c47
 		lda v2c42
 		sta v2c48
-		jmp l2920
+		jmp clip_edge
 
 l2A44:
 		lda v2c3f
@@ -4127,32 +4148,32 @@ l2A52:
 l2A62:
 		bne l2AAA
 		lda v2c3f
-		sta v1f20
+		sta pen_x
 		lda v2c40
-		sta v1f21
+		sta pen_x + $1
 		lda v2c41
-		sta v1f22
+		sta pen_y
 		lda v2c42
-		sta v1f23
+		sta pen_y + $1
 
 l2A7C:
 		lda v2c3f
-		sta v10
+		sta point_x
 		lda v2c40
-		sta v10 + $1
+		sta point_x + $1
 		lda v2c41
-		sta v12
+		sta point_y
 		lda v2c42
-		sta v12 + $1
+		sta point_y + $1
 		lda #$ff
 		sta direction_flag
-		jsr l0BA4
+		jsr to_view
 		lda #$00
 		sta direction_flag
 		lda #$01
-		sta v2c5d
+		sta view_y
 		lda #$00
-		sta v2c5e
+		sta view_y + $1
 		jmp l297F
 
 l2AAA:
@@ -4164,46 +4185,46 @@ l2AAA:
 		sta v2c45
 		lda v2c40
 		sta v2c46
-		jmp l2920
+		jmp clip_edge
 
-l2AC5:
+project_vertex:
 		lda (pointer_08), y
 		bmi l2AD6
 		clc 
-		adc v23
-		sta v10
+		adc base_x
+		sta point_x
 		lda #$00
-		adc v24
-		sta v10 + $1
+		adc base_x + $1
+		sta point_x + $1
 		bcc l2AE1
 
 l2AD6:
 		clc 
-		adc v23
-		sta v10
-		lda v24
+		adc base_x
+		sta point_x
+		lda base_x + $1
 		sbc #$00
-		sta v10 + $1
+		sta point_x + $1
 
 l2AE1:
 		iny 
 		lda (pointer_08), y
 		bmi l2AF3
 		clc 
-		adc v25
-		sta v12
+		adc base_y
+		sta point_y
 		lda #$00
-		adc v26
-		sta v12 + $1
+		adc base_y + $1
+		sta point_y + $1
 		bcc l2AFE
 
 l2AF3:
 		clc 
-		adc v25
-		sta v12
-		lda v26
+		adc base_y
+		sta point_y
+		lda base_y + $1
 		sbc #$00
-		sta v12 + $1
+		sta point_y + $1
 
 l2AFE:
 		lda v2c43
@@ -4214,54 +4235,54 @@ l2AFE:
 		sta v2c49
 		lda v2c48
 		sta v2c4a
-		lda v10
+		lda point_x
 		sta v2c43
-		lda v10 + $1
+		lda point_x + $1
 		sta v2c44
-		lda v12
+		lda point_y
 		sta v2c47
-		lda v12 + $1
+		lda point_y + $1
 		sta v2c48
 		iny 
 		sty v2c4b
 		lda #$ff
 		sta direction_flag
-		jsr l0BA4
+		jsr to_view
 		lda #$00
 		sta direction_flag
-		lda v2c5e
+		lda view_y + $1
 		bmi l2B81
 		beq l2B4B
 		ldy #$00
-		sty v2c5e
+		sty view_y + $1
 		dey 
-		sty v2c5d
+		sty view_y
 
 l2B4B:
-		lda v2c5d
+		lda view_y
 		bne l2B54
 		lda #$ff
 		bne l2B81
 
 l2B54:
-		jsr l0B06
+		jsr project
 		lda #$30
 		clc 
 		eor #$ff
 		adc #$01
 		clc 
-		adc ball_sprite_x
-		sta ball_sprite_x
-		lda ball_sprite_x + $1
+		adc proj_x
+		sta proj_x
+		lda proj_x + $1
 		sbc #$00
-		sta ball_sprite_x + $1
-		lda v2c5f
+		sta proj_x + $1
+		lda horizon
 		sec 
-		sbc ball_sprite_y
-		sta ball_sprite_y
+		sbc proj_y
+		sta proj_y
 		lda #$00
-		sbc ball_sprite_y + $1
-		sta ball_sprite_y + $1
+		sbc proj_y + $1
+		sta proj_y + $1
 		lda #$00
 
 l2B81:
@@ -4270,7 +4291,7 @@ l2B81:
 		plp 
 		rts 
 
-l2B87:
+collect_features:
 		iny 
 		lda (pointer_08), y
 		cmp #$80
@@ -4282,22 +4303,22 @@ l2B87:
 		lda pointer_08 + $1
 		adc #$00
 		sta pointer_08 + $1
-		ldx v2c3e
+		ldx feature_count
 		lda pointer_08
-		sta v2c1a, x
+		sta feature_pointers, x
 		lda pointer_08 + $1
-		sta v2c1a + $1, x
-		lda v23
-		sta v2c26, x
-		lda v24
-		sta v2c26 + $1, x
-		lda v25
-		sta v2c32, x
-		lda v26
-		sta v2c32 + $1, x
+		sta feature_pointers + $1, x
+		lda base_x
+		sta feature_x, x
+		lda base_x + $1
+		sta feature_x + $1, x
+		lda base_y
+		sta feature_y, x
+		lda base_y + $1
+		sta feature_y + $1, x
 		inx 
 		inx 
-		stx v2c3e
+		stx feature_count
 		ldy #$00
 
 l2BC2:
@@ -4307,7 +4328,7 @@ l2BC2:
 		bne l2BC2
 		bne l2BC2
 		lda #$16
-		sta v2bfc
+		sta shape_visible
 
 l2BD0:
 		lda (pointer_08), y
@@ -4315,40 +4336,40 @@ l2BD0:
 		cmp #$80
 		beq l2BE2
 		clc 
-		adc v2bfc
+		adc shape_visible
 		tax 
-		inc v2bfc, x
+		inc shape_visible, x
 		jmp l2BD0
 
 l2BE2:
-		lda v2bfc
+		lda shape_visible
 		beq l2BFB
 		cmp #$16
 		beq l2BF3
 		lda #$00
-		sta v2bfc
+		sta shape_visible
 		jmp l2BD0
 
 l2BF3:
 		lda #$12
-		sta v2bfc
+		sta shape_visible
 		jmp l2BD0
 
 l2BFB:
 		rts 
 
-v2bfc:
+shape_visible:
 		.byte	$00, $02, $02, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $01, $01, $00, $02, $00, $00, $00, $00, $00, $00
 
-v2c1a:
+feature_pointers:
 		.word	$86ae, $8723, $ffff, $ffff, $ffff, $0000
-v2c26:
+feature_x:
 		.word	$0000, $0040, $0000, $0000, $0000, $0000
-v2c32:
+feature_y:
 		.word	$0140, $0140, $0000, $0000, $0000, $0000
 
-v2c3e:
+feature_count:
 		.byte	$00
 v2c3f:		.byte	$00
 v2c40:		.byte	$00
@@ -4366,13 +4387,17 @@ v2c4b:		.byte	$08
 v2c4c:		.byte	$3c
 v2c4d:		.byte	$06
 v2c4e:		.byte	$00
-v2c4f:
+polygon_color:
 		.byte	$0d, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-v2c5b:		.byte	$00
-v2c5c:		.byte	$00
-v2c5d:		.byte	$00
-v2c5e:		.byte	$00
-v2c5f:		.byte	$90
+
+; a point turned to the view: x across, y the depth ($ff in the high byte when culled)
+view_x:
+		.word	$0000
+view_y:		.word	$0000
+
+; the screen row of the horizon (rows count up from the bottom)
+horizon:
+		.byte	$90
 
 l2C60:
 		ldy #$00
@@ -5594,38 +5619,38 @@ club_power:
 compute_shot:
 		ldx terrain_type
 		lda #$00
-		jsr multiply
-		sta v0e
-		stx v0e + $1
+		jsr to_log
+		sta log_value
+		stx log_value + $1
 		lda v0458
 		clc 
 		adc #$5b
 		tax 
 		lda #$00
-		jsr multiply
-		jsr l094F
+		jsr to_log
+		jsr log_multiply
 		lda #$bd
 		ldx #$74
-		jsr multiply
+		jsr to_log
 		inx 
-		jsr l094C
+		jsr log_divide
 		ldx club
 		lda club_power, x
 		tax 
 		lda #$00
-		jsr multiply
-		jsr l094F
-		lda v0e
+		jsr to_log
+		jsr log_multiply
+		lda log_value
 		sta v377c
-		lda v0e + $1
+		lda log_value + $1
 		sta v377d
 		jmp l36E6
 
 l34C1:
 		lda v377c
-		sta v0e
+		sta log_value
 		lda v377d
-		sta v0e + $1
+		sta log_value + $1
 		lda v0463
 		asl 
 		asl 
@@ -5633,18 +5658,18 @@ l34C1:
 		adc v045e
 		tax 
 		lda #$00
-		jsr multiply
+		jsr to_log
 		sta v3599
 		stx v359a
-		jsr l094F
-		lda v0e
-		ldx v0e + $1
-		jsr l091F
+		jsr log_multiply
+		lda log_value
+		ldx log_value + $1
+		jsr from_log
 		txa 
 		sta shot_speed
 		lda v3599
 		ldx v359a
-		jsr l094F
+		jsr log_multiply
 		lda v045e
 		sec 
 		sbc v0461
@@ -5667,15 +5692,15 @@ l3510:
 l3516:
 		tax 
 		lda #$00
-		jsr multiply
-		jsr l094F
+		jsr to_log
+		jsr log_multiply
 		lda #$29
 		ldx #$ae
-		jsr multiply
-		jsr l094C
-		lda v0e
-		ldx v0e + $1
-		jsr l091F
+		jsr to_log
+		jsr log_divide
+		lda log_value
+		ldx log_value + $1
+		jsr from_log
 		txa 
 		clc 
 		eor #$ff
@@ -5764,13 +5789,13 @@ l35A1:
 l35A8:
 		tax 
 		lda #$00
-		jsr multiply
-		sta v0e
-		stx v0e + $1
-		jsr l094F
-		lda v0e
-		ldx v0e + $1
-		jmp l091F
+		jsr to_log
+		sta log_value
+		stx log_value + $1
+		jsr log_multiply
+		lda log_value
+		ldx log_value + $1
+		jmp from_log
 
 l35BC:
 		pha 
@@ -5972,53 +5997,53 @@ l3711:
 		sta v3781
 		jsr l369A
 		lda @w ball_x
-		sta v10
+		sta point_x
 		lda @w ball_x + $1
-		sta v10 + $1
+		sta point_x + $1
 		lda @w ball_y
-		sta v12
+		sta point_y
 		lda @w ball_y + $1
-		sta v12 + $1
+		sta point_y + $1
 		lda v3782
 		bmi l3747
 		clc 
-		adc v10
-		sta v10
+		adc point_x
+		sta point_x
 		lda #$00
-		adc v10 + $1
-		sta v10 + $1
+		adc point_x + $1
+		sta point_x + $1
 		jmp l3750
 
 l3747:
 		clc 
-		adc v10
-		sta v10
+		adc point_x
+		sta point_x
 		bcs l3750
-		dec v10 + $1
+		dec point_x + $1
 
 l3750:
 		lda v3783
 		bmi l3763
 		clc 
-		adc v12
-		sta v12
+		adc point_y
+		sta point_y
 		lda #$00
-		adc v12 + $1
-		sta v12 + $1
+		adc point_y + $1
+		sta point_y + $1
 		jmp l376C
 
 l3763:
 		clc 
-		adc v12
-		sta v12
+		adc point_y
+		sta point_y
 		bcs l376C
-		dec v12 + $1
+		dec point_y + $1
 
 l376C:
-		jsr l0BA4
-		lda v2c5b
+		jsr to_view
+		lda view_x
 		sta shot_sideways
-		lda v2c5d
+		lda view_y
 		sta shot_speed
 		rts 
 
@@ -6272,7 +6297,7 @@ l393E:
 
 l3950:
 		lda v3982
-		jmp l0D79
+		jmp set_direction
 
 l3956:
 		lda v0453
@@ -6443,25 +6468,25 @@ digit_text_index:
 
 turn_left:
 		jsr l3AC4
-		jsr l0DB9
-		jsr l0DB9
-		jsr l0DB9
+		jsr direction_up
+		jsr direction_up
+		jsr direction_up
 		jsr l3AC4
 		jmp l3AB8
 
 turn_right:
 		jsr l3AC4
-		jsr l0D73
-		jsr l0D73
-		jsr l0D73
+		jsr direction_down
+		jsr direction_down
+		jsr direction_down
 		jsr l3AC4
 		jmp l3AB8
 
 l3AB8:
-		jsr l0DB9
-		jsr l0DB9
-		jsr l0DB9
-		jmp l0DB9
+		jsr direction_up
+		jsr direction_up
+		jsr direction_up
+		jmp direction_up
 
 l3AC4:
 		jsr l3AC7
@@ -6603,21 +6628,21 @@ l3B9C:
 		bne l3BC0
 		lda #$0c
 		clc 
-		adc ball_sprite_x
-		sta ball_sprite_x
-		lda ball_sprite_x + $1
+		adc proj_x
+		sta proj_x
+		lda proj_x + $1
 		adc #$00
-		sta ball_sprite_x + $1
-		lda ball_sprite_y
+		sta proj_x + $1
+		lda proj_y
 		clc 
 		adc #$0a
-		sta ball_sprite_y
+		sta proj_y
 
 l3BC0:
-		lda ball_sprite_x
+		lda proj_x
 		sta sprite6_x
 		sta sprite7_x
-		lda ball_sprite_x + $1
+		lda proj_x + $1
 		beq l3BD8
 		lda sprites_x_msb
 		ora #$c0
@@ -6630,7 +6655,7 @@ l3BD8:
 		sta sprites_x_msb
 
 l3BE0:
-		lda ball_sprite_y
+		lda proj_y
 		sta sprite6_y
 		clc 
 		adc shadow_offset
@@ -6665,11 +6690,11 @@ l3C16:
 		adc v420d
 		sta v420d
 		lda v420a
-		sta ball_sprite_x
+		sta proj_x
 		lda v420b
-		sta ball_sprite_x + $1
+		sta proj_x + $1
 		lda v420d
-		sta ball_sprite_y
+		sta proj_y
 		rts 
 
 v3c3c:
@@ -6680,26 +6705,26 @@ ball_landed:		.byte	$00
 l3C3F:
 		lda green_view
 		beq l3C8E
-		lda ball_sprite_y
+		lda proj_y
 		pha 
-		lda ball_sprite_x + $1
+		lda proj_x + $1
 		pha 
-		lda ball_sprite_x
+		lda proj_x
 		pha 
 		lda #$e6
 		sec 
-		sbc ball_sprite_y
+		sbc proj_y
 		cmp #$30
 		bcc l3C86
 		tax 
 		lda #$0c
-		lda ball_sprite_x + $1
+		lda proj_x + $1
 		lsr 
 		php 
-		lda ball_sprite_x
+		lda proj_x
 		plp 
 		ror 
-		jsr l1306
+		jsr test_pixel
 		beq l3C6F
 		jmp l3D54
 
@@ -6711,11 +6736,11 @@ l3C74:
 		and #$7f
 		sta sprite_enable
 		pla 
-		sta ball_sprite_x
+		sta proj_x
 		pla 
-		sta ball_sprite_x + $1
+		sta proj_x + $1
 		pla 
-		sta ball_sprite_y
+		sta proj_y
 		rts 
 
 l3C86:
@@ -6724,16 +6749,16 @@ l3C86:
 		jmp l3C74
 
 l3C8E:
-		lda ball_sprite_y
+		lda proj_y
 		pha 
-		sta ball_sprite_y
-		lda ball_sprite_x + $1
+		sta proj_y
+		lda proj_x + $1
 		pha 
-		lda ball_sprite_x
+		lda proj_x
 		pha 
 		lda v3c3c
 		sta v3c3d
-		lda ball_sprite_y
+		lda proj_y
 		sec 
 		sbc #$e5
 		clc 
@@ -6763,8 +6788,8 @@ l3CC7:
 		clc 
 		adc #$87
 		sta $3cf6
-		lda ball_sprite_x
-		lsr ball_sprite_x + $1
+		lda proj_x
+		lsr proj_x + $1
 		ror 
 		ldx green_view
 		beq l3CF1
@@ -6797,9 +6822,9 @@ l3CFA:
 		ldx green_view
 		bne l3D17
 		jsr l3D9F
-		lda v2c5f
+		lda horizon
 		sec 
-		sbc ball_sprite_y
+		sbc proj_y
 		ldx flight_time
 		cpx #$40
 		bcs l3D17
@@ -6807,20 +6832,20 @@ l3CFA:
 		sbc #$10
 
 l3D17:
-		sta ball_sprite_y
+		sta proj_y
 		pla 
-		sta ball_sprite_x
+		sta proj_x
 		pla 
-		sta ball_sprite_x + $1
-		lda ball_sprite_x + $1
+		sta proj_x + $1
+		lda proj_x + $1
 		pha 
-		lda ball_sprite_x
+		lda proj_x
 		pha 
-		lda ball_sprite_y
+		lda proj_y
 		jsr l3CB7
 		sta v3cf9
 		lda v3c3c
-		cmp ball_sprite_y
+		cmp proj_y
 		bcc l3D45
 		lda sprite_enable
 		ora #$40
@@ -6846,7 +6871,7 @@ l3D59:
 
 l3D61:
 		lda v3cf9
-		cmp ball_sprite_y
+		cmp proj_y
 		bcc l3D8A
 		lda club
 		cmp #$0c
@@ -6856,7 +6881,7 @@ l3D61:
 		sta sprite_enable
 		lda shadow_offset
 		sec 
-		sbc ball_sprite_y
+		sbc proj_y
 		bcc l3D8A
 		sta shadow_offset
 		cmp #$03
@@ -6870,16 +6895,16 @@ l3D8A:
 
 l3D92:
 		pla 
-		sta ball_sprite_x
+		sta proj_x
 		pla 
-		sta ball_sprite_x + $1
+		sta proj_x + $1
 		pla 
-		sta ball_sprite_y
+		sta proj_y
 		rts 
 
 l3D9F:
 		lda v359e
-		sta v2c5b
+		sta view_x
 		bmi l3DAB
 		lda #$00
 		beq l3DAD
@@ -6888,63 +6913,63 @@ l3DAB:
 		lda #$ff
 
 l3DAD:
-		sta v2c5c
+		sta view_x + $1
 		lda v35a0
-		sta v2c5d
+		sta view_y
 		lda #$00
-		sta v2c5e
+		sta view_y + $1
 		lda green_view
 		bne l3DC3
-		jmp l0B06
+		jmp project
 
 l3DC3:
-		lda v2c5b
+		lda view_x
 		jsr l4354
-		sta v2c5b
-		lda v2c5d
+		sta view_x
+		lda view_y
 		sec 
 		sbc #$02
 		jsr l4354
-		sta v2c5d
+		sta view_y
 		lda green_flag_y
 		clc 
-		adc v2c5d
-		sta ball_sprite_y
+		adc view_y
+		sta proj_y
 		lda #$00
-		sta ball_sprite_y + $1
-		sta ball_sprite_x + $1
+		sta proj_y + $1
+		sta proj_x + $1
 		lda green_flag_x
 		clc 
-		adc v2c5b
+		adc view_x
 		asl 
-		rol ball_sprite_x + $1
-		sta ball_sprite_x
+		rol proj_x + $1
+		sta proj_x
 		lda #$e6
 		sec 
-		sbc ball_sprite_y
-		sta ball_sprite_y
+		sbc proj_y
+		sta proj_y
 		pla 
 		pla 
 		rts 
 
 l3E04:
 		jsr l3D9F
-		lda ball_sprite_x
+		lda proj_x
 		sec 
 		sbc #$30
 		asl 
-		sta ball_sprite_x
+		sta proj_x
 		lda #$00
 		rol 
-		sta ball_sprite_x + $1
-		lda ball_sprite_y
+		sta proj_x + $1
+		lda proj_y
 		and #$fe
 		cmp #$10
 		bcs l3E30
 		tax 
-		lda table_1fc7, x
+		lda near_scales, x
 		sta math_words + $a
-		lda table_1fc7 + $1, x
+		lda near_scales + $1, x
 		sta math_words + $b
 		jmp l3E42
 
@@ -6954,36 +6979,36 @@ l3E30:
 		lsr 
 		and #$fe
 		tax 
-		lda table_1fe7, x
+		lda far_scales, x
 		sta math_words + $a
-		lda table_1fe7 + $1, x
+		lda far_scales + $1, x
 		sta math_words + $b
 
 l3E42:
 		lda #$e5
 		sec 
-		sbc v2c5f
+		sbc horizon
 		clc 
-		adc ball_sprite_y
-		sta ball_sprite_y
+		adc proj_y
+		sta proj_y
 		lda v417e
 		ldy #$ff
 		sty v1f15
-		jsr l1D90
-		jsr multiply
-		sta v0e
-		stx v0e + $1
+		jsr scale_step
+		jsr to_log
+		sta log_value
+		stx log_value + $1
 		lda #$00
 		ldx shot_speed
-		jsr multiply
-		jsr l094F
+		jsr to_log
+		jsr log_multiply
 		lda #$00
 		ldx #$40
-		jsr multiply
-		jsr l094C
-		lda v0e
-		ldx v0e + $1
-		jsr l091F
+		jsr to_log
+		jsr log_divide
+		lda log_value
+		ldx log_value + $1
+		jsr from_log
 		txa 
 		asl 
 		asl 
@@ -6991,8 +7016,8 @@ l3E42:
 		eor #$ff
 		adc #$01
 		clc 
-		adc ball_sprite_y
-		sta ball_sprite_y
+		adc proj_y
+		sta proj_y
 		rts 
 
 ball_flight:
@@ -7397,11 +7422,11 @@ color_text:
 		eor #$ff
 		adc #$01
 		clc 
-		adc v0a
-		sta v0a
-		lda v0a + $1
+		adc bitmap_pointer
+		sta bitmap_pointer
+		lda bitmap_pointer + $1
 		sbc #$00
-		sta v0a + $1
+		sta bitmap_pointer + $1
 		pla 
 		asl 
 		tay 
@@ -7414,11 +7439,11 @@ color_text:
 		asl 
 		asl 
 		pha 
-		lda v0a
+		lda bitmap_pointer
 		sec 
 		sbc #$00
 		sta pointer_04
-		lda v0a + $1
+		lda bitmap_pointer + $1
 		sbc #$60
 		sta pointer_04 + $1
 		inc pointer_04
@@ -7454,14 +7479,14 @@ l41E6:
 		bne l41E6
 		pla 
 		tay 
-		lda (v0a), y
+		lda (bitmap_pointer), y
 
 l41EF:
-		sta (v0a), y
+		sta (bitmap_pointer), y
 		dey 
 		bne l41EF
 		lda #$ff
-		sta v1368
+		sta pixel_pattern
 		pla 
 		sta pointer_04
 		pla 
@@ -7486,9 +7511,9 @@ unused_420e:
 
 l4210:
 		lda #$00
-		jsr multiply
-		sta v0e
-		stx v0e + $1
+		jsr to_log
+		sta log_value
+		stx log_value + $1
 		lda #$00
 		ldx club
 		inx 
@@ -7497,15 +7522,15 @@ l4210:
 		ldx #$00
 
 l4225:
-		jsr multiply
-		jsr l094F
+		jsr to_log
+		jsr log_multiply
 		lda #$00
 		ldx #$10
-		jsr multiply
-		jsr l094C
-		lda v0e
-		ldx v0e + $1
-		jsr l091F
+		jsr to_log
+		jsr log_divide
+		lda log_value
+		ldx log_value + $1
+		jsr from_log
 		rts 
 
 l423D:
@@ -7576,13 +7601,13 @@ l42C0:
 		jsr l4210
 		stx v417e
 		jsr l3E04
-		lda ball_sprite_x + $1
+		lda proj_x + $1
 		sec 
 		sbc v420b
-		lda ball_sprite_x
+		lda proj_x
 		sbc v420a
 		sta v4205
-		lda ball_sprite_y
+		lda proj_y
 		sec 
 		sbc v420d
 		bmi l42ED
@@ -8496,7 +8521,8 @@ terrain_93bd:
 		.byte	$28, $09, $39, $13, $0b, $3a, $3e, $07, $3d, $3c, $06, $3e, $30, $06, $3e, $3e
 		.byte	$06, $3f, $2a, $00, $80, $24, $21, $15, $2c, $10, $07, $2f, $1d, $05, $34, $3c
 		.byte	$12, $80, $05, $80, $80, $0a, $0b, $80
-; indexed from 1 by hole number, through hole_shapes_base
+; 29 shapes, indexed from 1 through hole_shapes_base: 18 fairways with their greens,
+; then 4 drawn in color 12 and 7 in color 14
 hole_shapes_base = $93f3
 
 hole_shapes:
@@ -8800,9 +8826,9 @@ main:
 		lda #$c7
 		sta text_y
 		lda #$30
-		sta v29
+		sta clip_top
 		lda #$c8
-		sta v67
+		sta clip_bottom
 		lda #$0f
 		sta border_color
 		lda cia2_direction_a
@@ -8822,7 +8848,7 @@ main:
 		lda #$20
 		sta vabf4
 		lda #$90
-		sta v2c5f
+		sta horizon
 		jsr l0B95
 		jsr random_wind
 		jsr fill_colors
@@ -8834,7 +8860,7 @@ new_game:
 		sta leader
 		sta sprite_enable
 		jsr clear_screen
-		jsr l1034
+		jsr bitmap_mode
 		lda #$13
 		jsr lA95B
 		jsr change_wind
@@ -8886,7 +8912,7 @@ lA175:
 
 print_score_labels:
 		lda #$ff
-		sta v1368
+		sta pixel_pattern
 		lda #$00
 		sta text_x
 		lda #$2f
@@ -9491,9 +9517,9 @@ lA5FA:
 		pha 
 		lda text_x
 		pha 
-		lda v0a + $1
+		lda bitmap_pointer + $1
 		pha 
-		lda v0a
+		lda bitmap_pointer
 		pha 
 		jsr lB5EE
 		jsr print_inline
@@ -9518,9 +9544,9 @@ lA64F:
 		bne lA63E
 		jsr lB5EE
 		pla 
-		sta v0a
+		sta bitmap_pointer
 		pla 
-		sta v0a + $1
+		sta bitmap_pointer + $1
 		pla 
 		sta text_x
 		pla 
@@ -9958,21 +9984,21 @@ lA8E7:
 
 lA901:
 		ldx #$00
-		stx v127c
-		stx v14
+		stx seed_count
+		stx line_x
 		ldy #$30
-		sty v16
+		sty line_y
 		ldx #$9f
-		jsr l165F
+		jsr draw_line
 		ldx #$9f
 		ldy #$c7
-		jsr l165F
+		jsr draw_line
 		ldx #$00
 		ldy #$c7
-		jsr l165F
+		jsr draw_line
 		ldx #$00
 		ldy #$30
-		jsr l165F
+		jsr draw_line
 		rts 
 
 lA927:
@@ -10032,26 +10058,26 @@ lA964:
 lA967:
 		jmp (a2CED)
 		jsr lA99A
-		jsr l0DB9
-		jsr l0DB9
-		jsr l0DB9
+		jsr direction_up
+		jsr direction_up
+		jsr direction_up
 		jsr lA99A
 		jmp lA98E
 
 ; unreferenced
 
 		jsr lA99A
-		jsr l0D73
-		jsr l0D73
-		jsr l0D73
+		jsr direction_down
+		jsr direction_down
+		jsr direction_down
 		jsr lA99A
 		jmp lA98E
 
 lA98E:
-		jsr l0DB9
-		jsr l0DB9
-		jsr l0DB9
-		jmp l0DB9
+		jsr direction_up
+		jsr direction_up
+		jsr direction_up
+		jmp direction_up
 
 lA99A:
 		jsr lA99D
@@ -10654,78 +10680,78 @@ draw_flag:
 		sta green_flag_y
 		jsr lB396
 		lda hole_x
-		sta v10
+		sta point_x
 		lda hole_x + $1
-		sta v10 + $1
+		sta point_x + $1
 		lda hole_y
-		sta v12
+		sta point_y
 		lda hole_y + $1
-		sta v12 + $1
-		jsr l0BA4
-		lda v2c5b
+		sta point_y + $1
+		jsr to_view
+		lda view_x
 		jsr lAE18
-		sta v2c5b
-		lda v2c5d
+		sta view_x
+		lda view_y
 		sec 
 		sbc #$02
 		jsr lAE18
-		sta v2c5d
+		sta view_y
 		lda #$ff
-		sta v1368
-		lda v2c5b
+		sta pixel_pattern
+		lda view_x
 		clc 
 		adc green_flag_x
 		tax 
 		ldy green_flag_y
 		dex 
 		dex 
-		stx v14
+		stx line_x
 		dey 
 		dey 
-		sty v16
-		ldy v16
+		sty line_y
+		ldy line_y
 		tya 
 		clc 
 		adc #$04
-		sta v16
-		ldx v14
-		jsr l165F
-		inc v14
-		dec v16
-		ldy v16
+		sta line_y
+		ldx line_x
+		jsr draw_line
+		inc line_x
+		dec line_y
+		ldy line_y
 		tya 
 		clc 
 		adc #$06
-		sta v16
-		ldx v14
-		jsr l165F
-		inc v14
-		ldy v16
+		sta line_y
+		ldx line_x
+		jsr draw_line
+		inc line_x
+		ldy line_y
 		tya 
 		clc 
 		adc #$06
-		sta v16
-		ldx v14
-		jsr l165F
-		inc v14
-		inc v16
-		ldy v16
+		sta line_y
+		ldx line_x
+		jsr draw_line
+		inc line_x
+		inc line_y
+		ldy line_y
 		tya 
 		clc 
 		adc #$04
-		sta v16
-		ldx v14
-		jsr l165F
-		inc v14
+		sta line_y
+		ldx line_x
+		jsr draw_line
+		inc line_x
 		lda green_flag_y
 		sec 
-		sbc v2c5d
+		sbc view_y
 		tay 
 		sta green_flag_y
 		ldx green_flag_x
-		stx v14
-		sty v16
-		lda v14
+		stx line_x
+		sty line_y
+		lda line_x
 		clc 
 		adc #$06
 		asl 
@@ -10738,7 +10764,7 @@ draw_flag:
 lAE0A:
 		lda #$f0
 		sec 
-		sbc v16
+		sbc line_y
 		sta sprite6_y
 		lda #$21
 		sta sprite_pointers + $6
@@ -10755,17 +10781,17 @@ lAE18:
 lAE22:
 		tax 
 		lda #$00
-		jsr multiply
-		sta v0e
-		stx v0e + $1
+		jsr to_log
+		sta log_value
+		stx log_value + $1
 		lda #$00
 		ldx #$03
-		jsr multiply
+		jsr to_log
 		dex 
-		jsr l094C
-		lda v0e
-		ldx v0e + $1
-		jsr l091F
+		jsr log_divide
+		lda log_value
+		ldx log_value + $1
+		jsr from_log
 		txa 
 		plp 
 		bpl lAE47
@@ -10778,7 +10804,7 @@ lAE47:
 
 read_aim_cursor:
 		lda sprite5_x
-		sta ball_sprite_x
+		sta proj_x
 		ldx #$00
 		lda sprites_x_msb
 		and #$20
@@ -10786,28 +10812,28 @@ read_aim_cursor:
 		inx 
 
 lAE58:
-		stx ball_sprite_x + $1
+		stx proj_x + $1
 		lda sprite5_y
-		sta ball_sprite_y
-		lda ball_sprite_x
-		lsr ball_sprite_x + $1
+		sta proj_y
+		lda proj_x
+		lsr proj_x + $1
 		ror 
 		sec 
 		sbc #$06
-		sta ball_sprite_x
+		sta proj_x
 		lda #$ef
 		sec 
-		sbc ball_sprite_y
-		sta ball_sprite_y
-		lda ball_sprite_x
+		sbc proj_y
+		sta proj_y
+		lda proj_x
 		cmp #$65
 		bcc lAE8F
 		lda #$9e
-		cmp ball_sprite_x
+		cmp proj_x
 		bcc lAE8F
-		lda ball_sprite_x
-		ldx ball_sprite_y
-		jsr l1306
+		lda proj_x
+		ldx proj_y
+		jsr test_pixel
 		rts 
 
 lAE8F:
@@ -11191,7 +11217,7 @@ lB133:
 draw_wind:
 		jsr lA8CB
 		lda #$ff
-		sta v1368
+		sta pixel_pattern
 		lda #$78
 		sta text_x
 		lda #$27
@@ -11233,11 +11259,11 @@ lB14A:
 		sta bcd_leading_zero
 		lda drift_strength
 		jsr lAD35
-		lda v29
+		lda clip_top
 		pha 
 		lda #$00
-		sta v127c
-		sta v29
+		sta seed_count
+		sta clip_top
 		lda v0459
 		asl 
 		asl 
@@ -11245,43 +11271,43 @@ lB14A:
 		pha 
 		lda arrow_lines + $1, x
 		jsr lB23A
-		stx v14
-		sty v16
+		stx line_x
+		sty line_y
 		pla 
 		pha 
 		tax 
 		lda arrow_lines, x
 		jsr lB23A
-		jsr l165F
+		jsr draw_line
 		pla 
 		pha 
 		tax 
-		lda v15
+		lda line_x + $1
 		pha 
-		lda v14
+		lda line_x
 		pha 
-		lda v17
+		lda line_y + $1
 		pha 
-		lda v16
+		lda line_y
 		pha 
 		lda arrow_lines + $2, x
 		jsr lB23A
-		jsr l165F
+		jsr draw_line
 		pla 
-		sta v16
+		sta line_y
 		pla 
-		sta v17
+		sta line_y + $1
 		pla 
-		sta v14
+		sta line_x
 		pla 
-		sta v15
+		sta line_x + $1
 		pla 
 		tax 
 		lda arrow_lines + $3, x
 		jsr lB23A
-		jsr l165F
+		jsr draw_line
 		pla 
-		sta v29
+		sta clip_top
 		lda #$2f
 		sta pointer_04
 		lda #$7b
@@ -11400,7 +11426,7 @@ lB2AE:
 		inc pointer_08 + $1
 		bne lB2A5
 		lda #$ff
-		sta v1368
+		sta pixel_pattern
 		lda #$20
 		sta text_x
 		lda #$1f
@@ -11570,22 +11596,22 @@ lB3BF:
 		dey 
 		bne lB3B2
 		ldx #$9f
-		stx v14
+		stx line_x
 		ldy #$30
-		sty v16
+		sty line_y
 		ldy #$87
 		lda #$00
-		sta v127c
-		jsr l165F
+		sta seed_count
+		jsr draw_line
 		ldx #$64
 		ldy #$87
-		jsr l165F
+		jsr draw_line
 		ldx #$64
 		ldy #$30
-		jsr l165F
+		jsr draw_line
 		ldx #$9f
 		ldy #$30
-		jmp l165F
+		jmp draw_line
 
 read_joystick:
 		pha 
@@ -11754,23 +11780,23 @@ lB508:
 lB525:
 		tax 
 		lda #$00
-		jsr multiply
-		sta v0e
-		stx v0e + $1
+		jsr to_log
+		sta log_value
+		stx log_value + $1
 		lda #$6c
 		sec 
 		sbc green_flag_y
 		tax 
 		lda #$00
-		jsr multiply
-		jsr l094C
+		jsr to_log
+		jsr log_divide
 		lda #$00
 		ldx #$28
-		jsr multiply
-		jsr l094F
-		lda v0e
-		ldx v0e + $1
-		jsr l091F
+		jsr to_log
+		jsr log_multiply
+		lda log_value
+		ldx log_value + $1
+		jsr from_log
 		txa 
 		plp 
 		bpl lB558
@@ -11829,7 +11855,7 @@ lB5A7:
 lB5B0:
 		jsr silence_sid
 		jsr bank_out_io
-		jsr l2008
+		jsr draw_view
 		jmp bank_in_io
 
 bank_out_io:
@@ -11850,7 +11876,7 @@ bank_in_io:
 
 lB5CC:
 		lda shapes, x
-		sta unused_cb00 + $200, x
+		sta cell_depths + $200, x
 		inx 
 		bne lB5CC
 		rts 
@@ -11859,7 +11885,7 @@ lB5CC:
 lB5D8:
 		txa 
 		pha 
-		lda unused_cb00 + $200, x
+		lda cell_depths + $200, x
 		jsr print_hex
 		pla 
 		tax 
@@ -11924,18 +11950,18 @@ lB623:
 		cpx #$a0
 		bcc lB623
 		lda #$ff
-		sta v1368
+		sta pixel_pattern
 		ldx #$00
-		stx v127c
-		stx v14
+		stx seed_count
+		stx line_x
 		ldy #$30
-		sty v16
+		sty line_y
 		ldy #$50
-		jsr l165F
+		jsr draw_line
 		ldx #$9f
-		stx v14
+		stx line_x
 		ldy #$30
-		jsr l165F
+		jsr draw_line
 		jmp (a2CEF)
 
 table_b660:
@@ -11958,36 +11984,36 @@ lB6F8:
 
 lB700:
 		lda hole_x
-		sta v10
+		sta point_x
 		lda hole_x + $1
-		sta v10 + $1
+		sta point_x + $1
 		lda hole_y
-		sta v12
+		sta point_y
 		lda hole_y + $1
-		sta v12 + $1
+		sta point_y + $1
 		lda direction_flag
 		pha 
 		lda #$ff
 		sta direction_flag
-		jsr l0BA4
+		jsr to_view
 		pla 
 		sta direction_flag
-		jsr l0B06
+		jsr project
 		lda #$2a
 		clc 
 		eor #$ff
 		adc #$01
 		clc 
-		adc ball_sprite_x
-		sta ball_sprite_x
-		lda ball_sprite_x + $1
+		adc proj_x
+		sta proj_x
+		lda proj_x + $1
 		sbc #$00
-		sta ball_sprite_x + $1
-		lda v2c5f
+		sta proj_x + $1
+		lda horizon
 		sec 
-		sbc ball_sprite_y
-		sta ball_sprite_y
-		lda ball_sprite_x
+		sbc proj_y
+		sta proj_y
+		lda proj_x
 		asl 
 		sta sprite7_x
 		bcc lB757
@@ -12003,7 +12029,7 @@ lB75C:
 		sta sprites_x_msb
 		lda #$ee
 		sec 
-		sbc ball_sprite_y
+		sbc proj_y
 		sta sprite7_y
 		lda #$21
 		sta sprite_pointers + $7
@@ -12053,13 +12079,13 @@ lB79F:
 		bne lB7CF
 		lda #$00
 		sta vb800
-		lda ball_sprite_x
+		lda proj_x
 		sta vb801
-		lda ball_sprite_x + $1
+		lda proj_x + $1
 		sta vb802
-		lda ball_sprite_y
+		lda proj_y
 		sta vb803
-		lda ball_sprite_y + $1
+		lda proj_y + $1
 		sta vb804
 
 lB7CF:
@@ -12069,23 +12095,23 @@ lB7CF:
 lB7D2:
 		lda vb800
 		bne lB7FD
-		lda v1f20
+		lda pen_x
 		clc 
 		adc vb801
-		sta ball_sprite_x
-		lda v1f21
+		sta proj_x
+		lda pen_x + $1
 		adc vb802
-		sta ball_sprite_x + $1
-		lda v1f22
+		sta proj_x + $1
+		lda pen_y
 		clc 
 		adc vb803
-		sta ball_sprite_y
-		lda v1f23
+		sta proj_y
+		lda pen_y + $1
 		adc vb804
-		sta ball_sprite_y + $1
+		sta proj_y + $1
 
 lB7FD:
-		jmp l1BFC
+		jmp draw_shape
 
 vb800:
 		.byte	$14
@@ -12095,7 +12121,7 @@ vb803:		.byte	$87
 vb804:		.byte	$00
 
 lB805:
-		jsr l1306
+		jsr test_pixel
 		bne lB852
 		php 
 		pha 
@@ -12105,22 +12131,22 @@ lB805:
 		pha 
 		lda #$ff
 		sta vb853
-		ldy v18
-		lda buffer_117c, y
+		ldy plot_y
+		lda seed_edges, y
 		sta vb854
-		ldx buffer_107c + $ff, y
+		ldx fill_seeds + $ff, y
 		ldy #$00
 
 lB822:
 		iny 
 		iny 
-		cpy v127c
+		cpy seed_count
 		bcs lB83D
 		txa 
-		cmp buffer_117c, y
+		cmp seed_edges, y
 		bne lB822
 		lda vb854
-		cmp buffer_117c + $1, y
+		cmp seed_edges + $1, y
 		bne lB822
 		inc vb853
 		jmp lB822
@@ -12135,9 +12161,9 @@ lB83D:
 		lda vb853
 		beq lB852
 		lda pixel_bits, x
-		and v1368
-		ora (v0a), y
-		sta (v0a), y
+		and pixel_pattern
+		ora (bitmap_pointer), y
+		sta (bitmap_pointer), y
 
 lB852:
 		rts 
@@ -13145,7 +13171,8 @@ unused_nops:
 		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
 		.byte	$ea, $ea, $ea
 ; unreferenced leftover data
-unused_cb00:
+; per screen cell, the depth of the nearest object drawn there; rebuilt each frame
+cell_depths:
 		.byte	$7e, $7e, $7e, $7e, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
 		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
 		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $7e, $7e, $7e, $7e, $7e, $ff, $ff, $ff
@@ -13193,23 +13220,23 @@ unused_cb00:
 		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
 		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
 		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
-		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
 unused_nops2:
-		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
-		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
-		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
-		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
-		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
-		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
-		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
-		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
-		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
-		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
-		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
-		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
-		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
-		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
-		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
 		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
 		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
 		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
