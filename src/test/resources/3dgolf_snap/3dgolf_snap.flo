@@ -6,3 +6,951 @@ $a56b code irq
 $a5e9 code nmi
 ; where the CPU was when the snapshot was taken
 $2ef7 code snapshot_pc
+$2cd0 code start
+$2da9 char[11] text_swing_club
+$2db4 code
+$2e55 byte
+$2e56 code
+$2eca char[8] text_down
+$2ed2 code
+$30dd char[13] text_in_the_water
+$30ea code
+$313e char[14] text_out_of_bounds
+$314c code
+$3167 char[12] text_select_club
+$3173 code
+$31a9 byte
+$31aa code
+$a18f char[7] text_player
+$a196 code
+$a1a0 char[2] text_1
+$a1a2 code
+$a1a5 byte[2] newline
+$a1a7 code
+$a1b1 char[7] text_player2
+$a1b8 code
+$a1c2 char[2] text_2
+$a1c4 code
+$a1c7 byte[2] newline2
+$a1c9 code
+$a1d3 char[9] text_hole
+$a1dc code
+$a1e6 char[5] text_club
+$a1eb code
+$a1ee byte[2] newline3
+$a1f0 code
+$a1fa char[4] text_yds
+$a1fe code
+$a201 byte[2] newline4
+$a203 code
+$a20d char[4] text_par
+$a211 code
+$a630 char[14] text_quit_y_n
+$a63e code
+$afdb char[9] text_over_par
+$afe4 code
+$afec char[10] text_under_par
+$aff6 code
+$affe char[10] text_level_par
+$b008 code
+$b2c6 char[13] text_f1_1_player
+$b2d3 code
+$b2d6 byte[2] newline5
+$b2d8 code
+$b2db char[17] text_f3_2_player
+$b2ec code
+$b2ef byte[2] newline6
+$b2f1 code
+$b2f4 char[17] text_f5_practice
+$b305 code
+$b320 byte[2] newline7
+$b322 code
+$b325 char[17] text_hole_1_18
+$b336 code
+$b4c8 char[4] text_aim
+$b4cc code
+$b9c4 char[6] text_error
+$b9ca code
+$c114 char[18] text_error_in_setlfs
+$c126 code
+$c161 char[21] text_save_routine_error
+$c176 code
+$0801-$080d byte basic_stub
+$080d code decrunch
+$0843-$0878 byte decruncher_leftover
+$0878 code old_loader
+$08da byte[2] loader_part
+$08dc code
+$08ea byte loader_part2
+$08eb-$0900 byte unused_08eb
+$033c byte[5] tape_header
+$0341 char[16] tape_name
+$2c8b code print_hex
+$2c99 code store_hex
+$2cca-$2cd0 byte unused_2cca
+$2cd3 code start2
+$4348 code
+$a00c addr[10] vectors
+$0100 code
+$01a6 byte[32] decrunch_table
+$01c6-$01f9 byte unused_stack
+$01f9-$0200 byte stack
+$0200 code decrunch_get_byte
+$fe00-$ff81 virtual byte kernal_copy
+$ff00 virtual {
+    $81 byte[3] cint
+    $84 byte[3] ioinit
+    $87 byte[3] ramtas
+    $8a byte[3] restor
+    $8d byte[3] vector
+    $90 byte[3] setmsg
+    $93 byte[3] second
+    $96 byte[3] tksa
+    $99 byte[3] memtop
+    $9c byte[3] membot
+    $9f byte[3] scnkey
+    $a2 byte[3] settmo
+    $a5 byte[3] acptr
+    $a8 byte[3] ciout
+    $ab byte[3] untlk
+    $ae byte[3] unlsn
+    $b1 byte[3] listen
+    $b4 byte[3] talk
+    $b7 byte[3] readst
+    $ba byte[3] setlfs
+    $bd byte[3] setnam
+    $c0 byte[3] open
+    $c3 byte[3] close
+    $c6 byte[3] chkin
+    $c9 byte[3] chkout
+    $cc byte[3] clrchn
+    $cf byte[3] chrin
+    $d2 byte[3] chrout
+    $d5 byte[3] load
+    $d8 byte[3] save
+    $db byte[3] settim
+    $de byte[3] rdtim
+    $e1 byte[3] stop
+    $e4 byte[3] getin
+    $e7 byte[3] clall
+    $ea byte[3] udtim
+    $ed byte[3] screen_size
+    $f0 byte[3] plot
+    $f3 byte[3] iobase
+}
+$fff6-$fffa virtual byte unused_fff6
+$fffa virtual addr nmi_hw_vector
+$fffc virtual addr reset_hw_vector
+$fffe virtual addr irq_hw_vector
+$ea31 kernal_irq
+$ea87 kernal_scnkey
+$0b96 word[7] math_words
+$0c07 byte direction_flag
+$0c08 byte[8] direction_order
+$0c10 code rotate_0
+$0c2a code rotate_1
+$0c3f code rotate_2
+$0c59 code rotate_3
+$0d04 code rotate_4
+$0d26 code rotate_5
+$0d27 code rotate_6
+$0d4d code rotate_7
+$0da8 addr[8] rotations
+$0db8 byte direction
+$0edd byte[16] double_bits
+$0eed byte v0eed
+$0eee word v0eee
+$0ef0 byte[4*13] list_0ef0
+$0f24-$0ff3 byte unused_z80_junk
+$0ffe code screen_off
+$1007 code screen_on
+; sets the char output vector to CHROUT and turns the bitmap off
+$1057 code text_mode
+$107a byte v107a
+$107b byte v107b
+$107c byte[256] buffer_107c
+$117c byte[256] buffer_117c
+$127c byte v127c
+$12ec byte v12ec
+$12ed byte v12ed
+$12ee byte v12ee
+$12ef byte v12ef
+$1368 byte v1368
+; masks that clear one multicolor pixel, and its bits
+$1369 byte[4] pixel_clear_masks
+$136d byte[4] pixel_bits
+; bitmap row addresses, bottom row first
+$1371 byte[200] bitmap_row_lo
+$1439 byte[200] bitmap_row_hi
+$17ac byte v17ac
+$17ad byte v17ad
+; screen row addresses, bottom row first, each repeated for 4 pixel rows
+$17e3 word[100] screen_rows
+$1bb2 byte v1bb2
+$1bb3 byte v1bb3
+$1bfb byte unused_1bfb
+$1dcb byte[2] unused_1dcb
+$1f12 byte[2] unused_1f12
+$1f14 byte v1f14
+$1f15 byte v1f15
+$1f16 byte v1f16
+$1f17 byte v1f17
+$1f18 byte v1f18
+$1f19 byte v1f19
+$1f1a byte v1f1a
+$1f1b byte v1f1b
+$1f1c byte v1f1c
+$1f1d byte v1f1d
+$1f1e byte v1f1e
+$1f1f byte v1f1f
+$1f20 byte v1f20
+$1f21 byte v1f21
+$1f22 byte v1f22
+$1f23 byte v1f23
+$1f24 word ball_sprite_x
+$1f26 word ball_sprite_y
+$1fc7 word[16] table_1fc7
+$1fe7 word[16] table_1fe7
+$2007 byte v2007
+$20de byte v20de
+; 8 steps of +-64 per direction, read through step_pointer
+$20df sbyte[8*8] direction_steps
+$211f word step_pointer
+$252e byte[8] v252e
+$2536 byte v2536
+$2537 byte v2537
+$2538 byte v2538
+$28c5 byte unused_28c5
+; shifts A right one bit, keeping its sign
+$2d62 code shift_right_signed
+$2d91 byte unused_2d91
+$2f11 byte[16] golfer_colors
+$2f77 byte swing_cutoff
+; unreferenced
+$2fa1 code
+$2fae-$2fb1 byte unused_2fae
+$30ae byte sprite_mode
+$31f7 code
+$31f8-$31fc byte unused_31f8
+$3208 byte unused_3208
+$21db byte[256] table_21db
+$22db byte[256] table_22db
+$23db byte[256] table_23db
+$2bfc byte[30] v2bfc
+$2c1a word[6] v2c1a
+$2c26 word[6] v2c26
+$2c32 word[6] v2c32
+$2c3e byte v2c3e
+$2c3f byte v2c3f
+$2c40 byte v2c40
+$2c41 byte v2c41
+$2c42 byte v2c42
+$2c43 byte v2c43
+$2c44 byte v2c44
+$2c45 byte v2c45
+$2c46 byte v2c46
+$2c47 byte v2c47
+$2c48 byte v2c48
+$2c49 byte v2c49
+$2c4a byte v2c4a
+$2c4b byte v2c4b
+$2c4c byte v2c4c
+$2c4d byte v2c4d
+$2c4e byte v2c4e
+$2c4f byte[12] v2c4f
+$2c5b byte v2c5b
+$2c5c byte v2c5c
+$2c5d byte v2c5d
+$2c5e byte v2c5e
+$2c5f byte v2c5f
+$0986 byte[256] log_table
+$0a86 byte[128] exp_table
+; reached through the jsr at $0bf9, which $0d91 points here; it then jumps on to
+; the rotation $0d91 stores in the jmp at $0d01
+$0c73 code rotate_twice
+$0d02 rotate_twice_next
+$1f28 byte[2] unused_1f28
+$3275 addr[4] pointers_3275
+$327d byte v327d
+$327e byte[16] table_327e
+$328e byte[5] buffer_328e
+$3294 byte v3294
+$32bc byte v32bc
+; unreferenced
+$32bd code
+$32dc byte frame_delay
+$3360 byte[8] bit_values
+$3368 byte v3368
+$3369 byte v3369
+$336a byte anim_pointer_base
+$336b byte anim_sprite_count
+$336c byte[9] anim_sprite_flags
+; an older copy of the start of buffer_336c
+$3417 byte[8] unused_3417
+$3470 byte anim_frame_count
+$3471 byte[14] club_power
+$3594 byte v3594
+$3595 byte shot_speed
+$3596 byte shot_sideways
+$3597 byte club
+$3598 byte terrain_type
+$3599 byte v3599
+$359a byte v359a
+; old text "ROS" under the variables
+$359b byte[2] unused_359b
+$359d byte v359d
+$359e byte v359e
+$359f byte v359f
+$35a0 byte v35a0
+$377c byte v377c
+$377d byte v377d
+$377e byte v377e
+$377f byte v377f
+$3780 byte v3780
+$3781 byte v3781
+$3782 byte v3782
+$3783 byte v3783
+$3784 byte v3784
+$3785 byte v3785
+$3786 byte v3786
+$3787 byte v3787
+$3788 byte v3788
+$3789 byte v3789
+$378a byte v378a
+$378b byte v378b
+; unreferenced
+$3844 code
+; two letters per club: 1W 3W 1I 3I ... 9I PW SW PT
+$389a char[28] club_names
+$3982 byte v3982
+$3983 byte[8] octant_directions
+$3a93 byte digit_text_index
+$3b35 sbyte[8] steps_x
+$3b3d sbyte[8] steps_y
+; unreferenced
+$3b45 code
+; unreferenced: reads a hex word from the keyboard into $06/$07
+$3b46 code read_hex_word
+$3b51 code read_hex_byte
+$3b62 byte hex_high_nibble
+; waits for a key 0-9 or A-F, echoes it and returns its value
+$3b63 code read_hex_digit
+$3c3c byte v3c3c
+$3c3d byte v3c3d
+$3c3e byte ball_landed
+$3cf8 byte shadow_offset
+$3cf9 byte v3cf9
+; old text "CAL" under the variables
+$417d byte unused_417d
+$417e byte v417e
+$417f byte flight_time
+$4200 byte[3] unused_4200
+$4203 byte v4203
+$4204 byte v4204
+$4205 byte v4205
+$4206 byte v4206
+$4207 byte v4207
+$4208 byte v4208
+$4209 byte v4209
+$420a byte v420a
+$420b byte v420b
+$420c byte v420c
+$420d byte v420d
+$420e byte[2] unused_420e
+$4341 byte v4341
+$4342 byte v4342
+$4343 byte v4343
+$4344 byte v4344
+; printed piece by piece through print_char, from digit_text_index on
+$a02b char[114] digit_text
+$a42c byte menu_sprite_flag
+; sprite registers saved while a menu sprite is shown, and the values it sets
+$a533 byte[40] saved_sprite_registers
+$a55b byte[16] menu_sprite_registers
+$a96a code
+$a9fb sbyte[8] steps_x2
+$aa03 sbyte[8] steps_y2
+$aa0b code tamper_check
+$ad45 byte bcd_leading_zero
+$ad46 byte vad46
+$ad47 byte vad47
+$ad48 byte[2] strokes
+$ad4a word[2] score_vs_par
+$ad4e word[2] total_strokes
+$ad52 byte vad52
+$ad53 byte vad53
+$af2e byte leader
+$b0dd sbyte[8] table_b0dd
+$b0e5 sbyte[8] table_b0e5
+$b0ed byte[10] strength_scale
+$b0f7 byte drift_strength
+$b0f8 byte drift_direction
+$b0f9 byte tilt_strength
+$b0fa byte tilt_direction
+; 1 to print "WIND", 5 to print "TILT"
+$b0fb byte wind_or_tilt
+$b0fc char[8] text_wind_tilt
+; the green's tilt per hole, indexed from 1: strength in the high nibble, direction in the low
+$b104 byte[18] green_tilt
+$b200 byte arrow_x
+$b201 byte arrow_y
+$b202 byte[4*8] arrow_lines
+$b222 sbyte[24] arrow_points
+$b467 byte[8] aim_limits
+; unreferenced debugging code: copies $e000 to $cd00, and prints it in hex
+$b5ca code
+$b5d6 code
+$b5fb byte unused_b5fb
+; ---- zero page ----
+$00 virtual byte cpu_port_direction
+$01 virtual byte cpu_port
+$02 virtual word text_pointer
+$04 virtual word pointer_04
+$06 virtual word pointer_06
+$08 virtual word pointer_08
+$0a virtual word v0a
+$0c virtual byte v0c
+$0d virtual byte v0d
+$0e virtual word v0e
+$10 virtual word v10
+$12 virtual word v12
+$14 virtual byte v14
+$15 virtual byte v15
+$16 virtual byte v16
+$17 virtual byte v17
+$18 virtual byte v18
+$19-$1b virtual byte unused_19
+$1b virtual word ball_x
+$1d virtual word ball_y
+$1f virtual byte text_x
+$20 virtual byte text_y
+$21 virtual byte v21
+$22 virtual byte v22
+$23 virtual byte v23
+$24 virtual byte v24
+$25 virtual byte v25
+$26 virtual byte v26
+$27 virtual byte v27
+$28 virtual byte v28
+$29 virtual byte v29
+$2a-$2d virtual byte unused_2a
+$2d virtual word decrunch_pointer
+$2f-$61 virtual byte unused_2f
+$61 virtual word pointer_61
+$63 virtual byte v63
+$64 virtual word pointer_64
+$66 virtual byte hole_distance
+$67 virtual byte v67
+$68-$c5 virtual byte unused_68
+; the KERNAL's last key pressed
+$c5 virtual byte kernal_lstx
+$c6-$f7 virtual byte unused_c6
+$f7 virtual byte vf7
+$f8 virtual byte vf8
+$f9 virtual byte vf9
+$fa virtual byte vfa
+$fb virtual byte vfb
+$fc virtual byte vfc
+$fd virtual word pointer_fd
+$ff virtual byte unused_ff
+
+; ---- KERNAL workspace ----
+$0233-$0314 virtual byte kernal_workspace
+$0316 virtual addr brk_vector
+$031a-$033c virtual byte kernal_vectors
+$0351-$0400 virtual byte tape_buffer_rest
+; ---- game variables, in the old text screen ----
+; the hole (flag) position
+$0400 virtual word hole_x
+$0402 virtual word hole_y
+$0404 virtual byte green_view
+; per player: where the ball was before the shot, put back after water
+$0405 virtual word[2] safe_ball_x
+$0409 virtual word[2] safe_ball_y
+$040d virtual byte v040d
+$040e virtual byte v040e
+$040f virtual byte v040f
+$0410 virtual byte v0410
+$0411 virtual byte v0411
+$0412 virtual byte v0412
+$0413 virtual byte v0413
+$0414-$0416 virtual byte unused_0414
+$0416 virtual byte v0416
+$0417 virtual byte v0417
+$0418-$0419 virtual byte unused_0418
+$0419 virtual byte v0419
+$041a virtual byte v041a
+$041b-$041d virtual byte unused_041b
+$041d virtual byte v041d
+$041e virtual byte v041e
+$041f-$0420 virtual byte unused_041f
+$0420 virtual byte v0420
+$0421 virtual byte v0421
+$0422-$0424 virtual byte unused_0422
+$0424 virtual byte v0424
+$0425 virtual byte v0425
+$0426-$0427 virtual byte unused_0426
+$0427 virtual byte v0427
+$0428 virtual byte v0428
+$0429 virtual byte v0429
+$042a virtual byte v042a
+$042b virtual byte music_note
+$042c virtual byte music_duration
+$042d virtual byte music_tempo
+$042e virtual byte music_voice
+$042f virtual byte v042f
+$0430 virtual byte v0430
+$0431 virtual byte v0431
+$0432 virtual byte v0432
+$0433 virtual byte v0433
+$0434 virtual byte v0434
+$0435 virtual byte v0435
+$0436 virtual byte v0436
+$0437 virtual byte v0437
+$0438 virtual byte music_saved_stack
+$0439 virtual byte v0439
+$043a virtual byte v043a
+$043b virtual byte v043b
+$043c virtual byte v043c
+$043d virtual byte v043d
+$043e virtual byte v043e
+$043f virtual byte v043f
+$0440 virtual byte v0440
+$0441 virtual byte v0441
+$0442 virtual byte v0442
+$0443 virtual byte v0443
+$0444-$0448 virtual byte unused_0444
+$0448 virtual byte v0448
+$0449 virtual byte v0449
+$044a virtual byte v044a
+$044b virtual byte v044b
+$044c-$044d virtual byte unused_044c
+$044d virtual byte v044d
+$044e virtual byte game_mode
+$044f virtual byte current_player
+$0450 virtual byte par
+$0451 virtual byte hole_number
+$0452 virtual byte v0452
+$0453 virtual byte v0453
+$0454 virtual byte v0454
+$0455 virtual byte v0455
+$0456 virtual byte v0456
+$0457 virtual byte v0457
+$0458 virtual byte v0458
+$0459 virtual byte v0459
+$045a virtual byte wind_direction
+$045b virtual byte wind_strength
+$045c virtual byte frame_timer_reload
+$045d virtual byte frame_timer
+$045e virtual byte v045e
+$045f virtual byte v045f
+$0460 virtual byte v0460
+$0461 virtual byte v0461
+$0462-$0463 virtual byte unused_0462
+$0463 virtual byte v0463
+$0464 virtual byte golfer_x
+$0465-$0466 virtual byte unused_0465
+$0466 virtual byte golfer_y
+$0467-$046a virtual byte unused_0467
+$046a virtual byte power_level
+$046b-$046c virtual byte unused_046b
+$046c virtual byte v046c
+$046d virtual byte v046d
+$046e virtual byte v046e
+$046f virtual byte v046f
+$0470 virtual byte green_flag_x
+$0471 virtual byte green_flag_y
+$0472 virtual byte aim_x
+$0473 virtual byte aim_y
+$0474 virtual byte aim_max
+$0475 virtual byte aim_min
+$0476 virtual byte aim_offset
+$0477 virtual byte v0477
+$0478 virtual byte text_color
+$0479 virtual byte v0479
+$047a virtual byte v047a
+$047b virtual byte v047b
+$047c virtual byte v047c
+$047d virtual byte v047d
+; what the KERNAL printed while loading, under the game variables
+$047e-$07e8 virtual byte old_screen
+$07e8-$0800 virtual byte unused_07e8
+$0800 byte basic_start
+; unreferenced
+$a97c code
+; the tamper check at $aa0b ends here when the $7f40 table or the loader at
+; $08c0 was changed: the jsr runs the old screen as code, so the jmp after it
+; never runs
+$abe8 code tamper_crash
+$abeb byte[3] never_reached_abeb
+$abee code tamper_crash2
+$abf1 byte[3] never_reached_abf1
+; start-up sets this to $20
+$abf4 byte vabf4
+$b660 byte[24] table_b660
+$b678 byte[16*8] table_b678
+$b800 byte vb800
+$b801 byte vb801
+$b802 byte vb802
+$b803 byte vb803
+$b804 byte vb804
+$b853 byte vb853
+$b854 byte vb854
+; unreferenced
+$b998 code
+; unreferenced: a sound effect
+$bafa code
+$bbb8 byte[5] voice_offsets
+; ---- music ----
+; notes and durations; $8x bytes are commands
+$bd19-$bf16 byte music_data
+; SID frequencies: 16 words per octave, 12 of them used
+$bf16 word[16*7+12] note_frequencies
+$c00e byte vc00e
+$c00f char[4] unused_golf
+$c013 byte vc013
+$c014 byte vc014
+$c015 word vc015
+$c017 byte vc017
+$c018 word vc018
+; unreferenced: flashes the border forever
+$c177 code
+$c17d-$cb00 byte unused_nops
+; unreferenced leftover data
+$cb00-$cdf8 byte unused_cb00
+$cdf8-$d000 byte unused_nops2
+
+; ---- VIC-II ----
+$d000 virtual {
+    $00 byte sprite0_x
+    $01 byte sprite0_y
+    $02 byte sprite1_x
+    $03 byte sprite1_y
+    $04 byte sprite2_x
+    $05 byte sprite2_y
+    $06 byte sprite3_x
+    $07 byte sprite3_y
+    $08 byte sprite4_x
+    $09 byte sprite4_y
+    $0a byte sprite5_x
+    $0b byte sprite5_y
+    $0c byte sprite6_x
+    $0d byte sprite6_y
+    $0e byte sprite7_x
+    $0f byte sprite7_y
+    $10 byte sprites_x_msb
+    $11 byte vic_control1
+    $12 byte raster
+    $13 byte light_pen_x
+    $14 byte light_pen_y
+    $15 byte sprite_enable
+    $16 byte vic_control2
+    $17 byte sprite_expand_y
+    $18 byte vic_memory
+    $19 byte vic_irq_status
+    $1a byte vic_irq_enable
+    $1b byte sprite_priority
+    $1c byte sprite_multicolor
+    $1d byte sprite_expand_x
+    $1e byte sprite_sprite_collision
+    $1f byte sprite_background_collision
+    $20 byte border_color
+    $21 byte background_color
+    $22 byte background_color1
+    $23 byte background_color2
+    $24 byte background_color3
+    $25 byte sprite_multicolor0
+    $26 byte sprite_multicolor1
+    $27 byte sprite0_color
+    $28 byte sprite1_color
+    $29 byte sprite2_color
+    $2a byte sprite3_color
+    $2b byte sprite4_color
+    $2c byte sprite5_color
+    $2d byte sprite6_color
+    $2e byte sprite7_color
+    $2f byte vic_unused_2f
+    ; the C128's clock speed register; the decruncher runs at 2 MHz on a C128
+    $30 byte c128_clock
+    $31-$400 byte vic_mirrors
+}
+
+; ---- SID ----
+$d400 virtual {
+    $00 word voice1_frequency
+    $02 word voice1_pulse_width
+    $04 byte voice1_control
+    $05 byte voice1_attack_decay
+    $06 byte voice1_sustain_release
+    $07 word voice2_frequency
+    $09 word voice2_pulse_width
+    $0b byte voice2_control
+    $0c byte voice2_attack_decay
+    $0d byte voice2_sustain_release
+    $0e word voice3_frequency
+    $10 word voice3_pulse_width
+    $12 byte voice3_control
+    $13 byte voice3_attack_decay
+    $14 byte voice3_sustain_release
+    $15 word filter_cutoff
+    $17 byte filter_control
+    $18 byte volume_filter_mode
+    $19-$400 byte sid_mirrors
+}
+
+; ---- color RAM ----
+$d800-$dc00 virtual byte color_ram
+
+; ---- CIAs ----
+$dc00 virtual {
+    $00 byte cia1_port_a
+    $01 byte cia1_port_b
+    $02-$0d byte cia1_unused
+    $0d byte cia1_interrupt_control
+    $0e-$100 byte cia1_rest
+}
+$dd00 virtual {
+    $00 byte cia2_port_a
+    $01 byte cia2_port_b
+    $02 byte cia2_direction_a
+    $03-$100 byte cia2_rest
+}
+$de00-$e000 virtual byte io_expansion
+
+; ---- shape data, read with all RAM banked in ----
+; lists of x/y steps, each ending with $80
+$e000 addr[19] shapes
+$e026-$e0b1 byte shape_e026
+$e0b1-$e11c byte shape_e0b1
+$e11c-$e1d0 byte shape_e11c
+$e1d0-$e2a6 byte shape_e1d0
+$e2a6-$e2bd byte shape_e2a6
+$e2bd-$e35c byte shape_e2bd
+$e35c-$e3c5 byte shape_e35c
+$e3c5-$e3fe byte shape_e3c5
+$e3fe-$e443 byte shape_e3fe
+$e443-$e4e4 byte shape_e443
+$e4e4-$e8ef byte shape_e4e4
+$e8ef-$e9a0 byte shape_e8ef
+$e9a0-$ea63 byte shape_e9a0
+$ea63-$ea86 byte shape_ea63
+$ea86-$eb0d byte shape_ea86
+$eb0d-$eb26 byte shape_eb0d
+$eb26-$eb36 byte shape_eb26
+$eb36 byte shape_eb36
+$eb37 addr[22] shapes2
+$eb63-$eb70 byte shape_eb63
+$eb70-$eb7d byte shape_eb70
+$eb7d-$eb8a byte shape_eb7d
+$eb8a-$eb97 byte shape_eb8a
+$eb97-$eba8 byte shape_eb97
+$eba8-$ebb9 byte shape_eba8
+$ebb9-$ebca byte shape_ebb9
+$ebca-$ebdb byte shape_ebca
+$ebdb-$ebf0 byte shape_ebdb
+$ebf0-$ec05 byte shape_ebf0
+$ec05-$ec1a byte shape_ec05
+$ec1a-$ec2f byte shape_ec1a
+$ec2f-$ec44 byte shape_ec2f
+$ec44-$ec59 byte shape_ec44
+$ec59-$ec6e byte shape_ec59
+$ec6e-$ec83 byte shape_ec6e
+$ec83-$ec94 byte shape_ec83
+$ec94-$eca5 byte shape_ec94
+$eca5-$ecc4 byte shape_eca5
+$ecc4-$ecdd byte shape_ecc4
+$ecdd-$ecf2 byte shape_ecdd
+$ecf2-$ed07 byte shape_ecf2
+; never written: still the RAM's power-on pattern
+$ed07-$fe00 virtual byte unused_ed07
+
+; ---- video bank 1 ($4000-$7fff) ----
+; never written: still the RAM's power-on pattern
+$4357-$4400 byte unused_4357
+; the bitmap's colors, drawn at run time
+$4400-$47e8 virtual byte bitmap_colors
+$47e8-$47f8 byte unused_47e8
+$47f8 virtual byte[8] sprite_pointers
+$4800 byte[64*68] sprites
+; unreferenced records
+$5900-$5c58 byte unknown_5900
+$5c58-$6000 byte unused_5c58
+; the multicolor bitmap, drawn at run time
+$6000-$7f40 virtual byte bitmap
+; the tamper check at $aa0b compares this table
+$7f40 addr[7] data_pointers
+$7f4e byte[8*96] font
+; 7 rows of 7 pointers; the 8th word of each row is unused
+$824e word[55] terrain_pointers
+$82bc-$8379 byte terrain_82bc
+$8379-$8413 byte terrain_8379
+$8413-$8460 byte terrain_8413
+$8460-$84cd byte terrain_8460
+$84cd-$852a byte terrain_84cd
+$852a-$8562 byte terrain_852a
+$8562-$863b byte terrain_8562
+$863b-$86b6 byte terrain_863b
+$86b6-$8731 byte terrain_86b6
+$8731-$876e byte terrain_8731
+$876e-$87a1 byte terrain_876e
+$87a1-$87ff byte terrain_87a1
+$87ff-$8860 byte terrain_87ff
+$8860-$88ba byte terrain_8860
+$88ba-$8904 byte terrain_88ba
+$8904-$896c byte terrain_8904
+$896c-$89d6 byte terrain_896c
+$89d6-$8a01 byte terrain_89d6
+$8a01-$8a68 byte terrain_8a01
+$8a68-$8af0 byte terrain_8a68
+$8af0-$8b3c byte terrain_8af0
+$8b3c-$8b9f byte terrain_8b3c
+$8b9f-$8c75 byte terrain_8b9f
+$8c75-$8cd9 byte terrain_8c75
+$8cd9-$8d29 byte terrain_8cd9
+$8d29-$8d5d byte terrain_8d29
+$8d5d-$8db2 byte terrain_8d5d
+$8db2-$8e06 byte terrain_8db2
+$8e06-$8e4f byte terrain_8e06
+$8e4f-$8e7d byte terrain_8e4f
+$8e7d-$8f02 byte terrain_8e7d
+$8f02-$8f4b byte terrain_8f02
+$8f4b-$8fc5 byte terrain_8f4b
+$8fc5-$9021 byte terrain_8fc5
+$9021-$90bb byte terrain_9021
+$90bb-$9113 byte terrain_90bb
+$9113-$9171 byte terrain_9113
+$9171-$919f byte terrain_9171
+$919f-$91b8 byte terrain_919f
+$91b8-$91ff byte terrain_91b8
+$91ff-$9272 byte terrain_91ff
+$9272-$931b byte terrain_9272
+$931b-$9327 byte terrain_931b
+$9327-$9340 byte terrain_9327
+$9340-$934d byte terrain_9340
+$934d-$9359 byte terrain_934d
+$9359-$9382 byte terrain_9359
+$9382-$93bd byte terrain_9382
+$93bd-$93f5 byte terrain_93bd
+; indexed from 1 by hole number, through hole_shapes_base
+$93f3 hole_shapes_base
+$93f5 addr[18] hole_shapes
+$9419 addr[4] pointers_9419
+$9421 addr[7] pointers_9421
+; per hole: two words, indexed from 1 by hole number through hole_positions_base
+$942b hole_positions_base
+$942f word[2*18] hole_positions
+$9477-$94c5 byte shape_9477
+$94c5-$9507 byte shape_94c5
+$9507-$9541 byte shape_9507
+$9541-$9587 byte shape_9541
+$9587-$9607 byte shape_9587
+$9607-$9659 byte shape_9607
+$9659-$969f byte shape_9659
+$969f-$970f byte shape_969f
+$970f-$9775 byte shape_970f
+$9775-$97cb byte shape_9775
+$97cb-$980b byte shape_97cb
+$980b-$984d byte shape_980b
+$984d-$989d byte shape_984d
+$989d-$9907 byte shape_989d
+$9907-$9963 byte shape_9907
+$9963-$99a9 byte shape_9963
+$99a9-$9a0f byte shape_99a9
+$9a0f-$9a63 byte shape_9a0f
+$9a63-$9abc byte shape_9a63
+$9abc-$9b6d byte shape_9abc
+$9b6d-$9b8e byte shape_9b6d
+$9b8e-$9ba9 byte shape_9b8e
+$9ba9-$9bd0 byte shape_9ba9
+$9bd0-$9c19 byte shape_9bd0
+$9c19-$9c36 byte shape_9c19
+$9c36-$9c7b byte shape_9c36
+$9c7b-$9c90 byte shape_9c7b
+$9c90-$9cb1 byte shape_9c90
+$9cb1-$9cc6 byte shape_9cb1
+$9cc6-$9ff1 byte unused_9cc6
+; leftover text
+$9ff1-$a000 byte leftover_9ff1
+
+; ---- routine names ----
+$0900 multiply
+$0ffb print_char
+; prints the $ff-terminated text after the jsr
+$2c75 print_inline
+$2c93 print_nibble
+$2cf1 draw_golfer
+$2d21 set_golfer_colors
+$2d68 raise_meter
+$2d7e lower_meter
+$2d92 swing
+$2edf silence_voices
+; waits a frame and returns the key or joystick direction
+$2eed get_key
+$2f21 swing_sound
+$2f6d click_sound
+$303c mirror_golfer
+$305e mirror_sprite
+$3096 reverse_bits
+$30af check_landing
+$3113 check_out_of_bounds
+$31ee wait_16_frames
+$3209 check_terrain
+$3295 message_line
+$32cb wait_frames
+$32dd load_animation
+$3375 draw_animation_frame
+$341f play_animation
+$347f compute_shot
+$37ff select_club
+$3879 print_club_name
+$38b6 face_hole
+$398b setup_hole
+$3a4a setup_practice_hole
+$3a94 turn_left
+$3aa6 turn_right
+$3b87 position_ball_sprite
+$3e8d ball_flight
+; colors A characters at text_x/text_y with text_color
+$4180 color_text
+$a09d main
+$a0ff new_game
+$a14c hole_loop
+$a178 print_score_labels
+$a212 shot_loop
+$a2e9 clear_screen
+$a5af install_interrupts
+$a688 enable_raster_irq
+$a6aa fill_colors
+$abf5 add_stroke
+$ac4e update_scores
+$ad54 draw_flag
+$ae48 read_aim_cursor
+$af2f select_player
+$af65 save_player
+$afb6 print_par_result
+; changes the wind a little at random
+$b00d change_wind
+$b061 random_wind
+; the wind's push when far from the hole, the green's tilt when near
+$b075 compute_drift
+; returns the next byte of $a000-$b0ff
+$b116 random
+$b135 draw_wind
+$b24d title_screen
+$b353 read_hole_number
+$b41d read_joystick
+$b46f beep
+$b4a0 delay
+$b4b1 aim
+$b5bc bank_out_io
+$b5c3 bank_in_io
+; plays tune A until it ends or F1/F3/F5 is pressed
+$b90d play_tune
+$b916 music_start
+$b97f music_step
+$b88f next_music_byte
+$b855 music_push
+$b872 music_pop
+$bc01 silence_sid
+$bc0c init_sid
+$bc51 select_tune

@@ -1,16 +1,518 @@
 
+.virtual $0000
+; ---- zero page ----
+cpu_port_direction:		.byte	?
+cpu_port:		.byte	?
+text_pointer:		.word	?
+pointer_04:		.word	?
+pointer_06:		.word	?
+pointer_08:		.word	?
+v0a:		.word	?
+v0c:		.byte	?
+v0d:		.byte	?
+v0e:		.word	?
+v10:		.word	?
+v12:		.word	?
+v14:		.byte	?
+v15:		.byte	?
+v16:		.byte	?
+v17:		.byte	?
+v18:		.byte	?
+unused_19:
+		.fill	2
+ball_x:		.word	?
+ball_y:		.word	?
+text_x:		.byte	?
+text_y:		.byte	?
+v21:		.byte	?
+v22:		.byte	?
+v23:		.byte	?
+v24:		.byte	?
+v25:		.byte	?
+v26:		.byte	?
+v27:		.byte	?
+v28:		.byte	?
+v29:		.byte	?
+unused_2a:
+		.fill	3
+decrunch_pointer:		.word	?
+unused_2f:
+		.fill	50
+pointer_61:		.word	?
+v63:		.byte	?
+pointer_64:		.word	?
+hole_distance:		.byte	?
+v67:		.byte	?
+unused_68:
+		.fill	93
+; the KERNAL's last key pressed
+kernal_lstx:		.byte	?
+unused_c6:
+		.fill	49
+vf7:		.byte	?
+vf8:		.byte	?
+vf9:		.byte	?
+vfa:		.byte	?
+vfb:		.byte	?
+vfc:		.byte	?
+pointer_fd:		.word	?
+unused_ff:		.byte	?
+.endv
+
+*=$0100
+		inc vfb
+		dex 
+
+d0103:
+		rts 
+
+l0104:
+		ldy vf8
+		ldx #$02
+		jsr l022F
+		sta vf8
+		tya 
+
+l010E:
+		ldx #$06
+		jsr l022F
+		jsr @w vf9
+
+l0116:
+		ldy #$00
+		tya 
+		ldx #$02
+		jsr l022F
+		cmp vf8
+		bne l010E
+		jsr l0211
+		sta decrunch_pointer
+		lsr 
+		bne l0169
+		jsr l0225
+		lsr 
+		bcc l0177
+		jsr l0225
+		lsr 
+		bcc l0104
+		iny 
+		jsr l0211
+		sta decrunch_pointer
+		cmp #$80
+		bcc l014B
+		ldx #$01
+		jsr l0226
+		sta decrunch_pointer
+		jsr l0211
+		tay 
+
+l014B:
+		jsr l0211
+		tax 
+		lda $01a5, x
+		cpx #$20
+		bcc l015C
+		txa 
+		ldx #$03
+		jsr l0226
+
+l015C:
+		ldx decrunch_pointer
+		inx 
+
+l015F:
+		jsr @w vf9
+		bne l015F
+		dey 
+		bne l015F
+
+l0167:
+		beq l0116
+
+l0169:
+		jsr l0211
+		cmp #$ff
+		beq l0193
+		sbc #$00
+		ldx #$00
+		jsr l022F
+
+l0177:
+		sta decrunch_pointer + $1
+		jsr l0223
+		adc vfa
+		ldx decrunch_pointer
+		sta decrunch_pointer
+		lda vfb
+		sbc decrunch_pointer + $1
+		sta decrunch_pointer + $1
+		inx 
+
+l0189:
+		lda (decrunch_pointer), y
+		iny 
+		jsr @w vf9
+		bne l0189
+		beq l0167
+
+l0193:
+		lda #$37
+		sta cpu_port
+		dec c128_clock
+		lda vfa
+		sta decrunch_pointer
+		lda vfb
+		sta decrunch_pointer + $1
+		cli 
+		jmp start
+
+decrunch_table:
+		.byte	$00, $ff, $04, $fe, $01, $fc, $0a, $4a, $80, $02, $03, $06, $08, $20, $0d, $60
+		.byte	$ea, $f8, $fa, $fd, $05, $0c, $10, $38, $c0, $ca, $cc, $d0, $09, $21, $30, $a2
+unused_stack:
+		.byte	$00, $00, $00, $00, $ff, $ff, $ff, $ff, $00, $00, $00, $00, $ff, $ff, $ff, $ff
+		.byte	$00, $00, $00, $70, $70, $a5, $70, $a5, $70, $a5, $6f, $70, $a5, $70, $70, $a5
+		.byte	$06, $04, $70, $a5, $06, $00, $70, $70, $a5, $06, $70, $a5, $06, $2a, $05, $fc
+		.byte	$a1, $f6, $2e
+stack:
+		.byte	$05, $0f, $38, $9f, $31, $a3, $a2
+
+decrunch_get_byte:
+		pha 
+		lda unused_ed07 + $c
+d0202 = $0202
+d0203 = $0203
+		rol 
+		sta vf7
+		inc $0202
+		bne l020F
+		inc $0203
+
+l020F:
+		pla 
+		rts 
+
+l0211:
+		inx 
+		txa 
+
+l0213:
+		asl vf7
+		bne l021A
+		jsr decrunch_get_byte
+
+l021A:
+		bcc l022E
+		inx 
+		cpx #$08
+		bne l0213
+		beq l022E
+
+l0223:
+		ldx #$07
+
+l0225:
+		inx 
+
+l0226:
+		asl vf7
+		bne l022D
+		jsr decrunch_get_byte
+
+l022D:
+		rol 
+
+l022E:
+		dex 
+
+l022F:
+		bne l0226
+		clc 
+		rts 
+
+.virtual $0233
+; ---- KERNAL workspace ----
+kernal_workspace:
+		.fill	225
+.endv
+
 *=$0314
 
 ; the KERNAL's IRQ and NMI vectors, pointing into RAM under BASIC
 irq_vector:
 		.addr	irq
+
+.virtual $0316
+brk_vector:		.addr	?
+.endv
+
 *=$0318
 
-nmi_vector:		.addr	nmi
-*=$0900
+nmi_vector:
+		.addr	nmi
 
-l0900:
-		stx $06
+.virtual $031a
+kernal_vectors:
+		.fill	34
+.endv
+
+*=$033c
+
+tape_header:
+		.byte	$03, $01, $08, $7b, $71
+
+tape_name:
+		.text	"3D GOLF         "
+
+.virtual $0351
+tape_buffer_rest:
+		.fill	175
+; ---- game variables, in the old text screen ----
+; the hole (flag) position
+hole_x:		.word	?
+hole_y:		.word	?
+green_view:		.byte	?
+; per player: where the ball was before the shot, put back after water
+safe_ball_x:
+		.fill	4
+safe_ball_y:
+		.fill	4
+v040d:		.byte	?
+v040e:		.byte	?
+v040f:		.byte	?
+v0410:		.byte	?
+v0411:		.byte	?
+v0412:		.byte	?
+v0413:		.byte	?
+unused_0414:
+		.fill	2
+v0416:		.byte	?
+v0417:		.byte	?
+unused_0418:		.byte	?
+v0419:		.byte	?
+v041a:		.byte	?
+unused_041b:
+		.fill	2
+v041d:		.byte	?
+v041e:		.byte	?
+unused_041f:		.byte	?
+v0420:		.byte	?
+v0421:		.byte	?
+unused_0422:
+		.fill	2
+v0424:		.byte	?
+v0425:		.byte	?
+unused_0426:		.byte	?
+v0427:		.byte	?
+v0428:		.byte	?
+v0429:		.byte	?
+v042a:		.byte	?
+music_note:		.byte	?
+music_duration:		.byte	?
+music_tempo:		.byte	?
+music_voice:		.byte	?
+v042f:		.byte	?
+v0430:		.byte	?
+v0431:		.byte	?
+v0432:		.byte	?
+v0433:		.byte	?
+v0434:		.byte	?
+v0435:		.byte	?
+v0436:		.byte	?
+v0437:		.byte	?
+music_saved_stack:		.byte	?
+v0439:		.byte	?
+v043a:		.byte	?
+v043b:		.byte	?
+v043c:		.byte	?
+v043d:		.byte	?
+v043e:		.byte	?
+v043f:		.byte	?
+v0440:		.byte	?
+v0441:		.byte	?
+v0442:		.byte	?
+v0443:		.byte	?
+unused_0444:
+		.fill	4
+v0448:		.byte	?
+v0449:		.byte	?
+v044a:		.byte	?
+v044b:		.byte	?
+unused_044c:		.byte	?
+v044d:		.byte	?
+game_mode:		.byte	?
+current_player:		.byte	?
+par:		.byte	?
+hole_number:		.byte	?
+v0452:		.byte	?
+v0453:		.byte	?
+v0454:		.byte	?
+v0455:		.byte	?
+v0456:		.byte	?
+v0457:		.byte	?
+v0458:		.byte	?
+v0459:		.byte	?
+wind_direction:		.byte	?
+wind_strength:		.byte	?
+frame_timer_reload:		.byte	?
+frame_timer:		.byte	?
+v045e:		.byte	?
+v045f:		.byte	?
+v0460:		.byte	?
+v0461:		.byte	?
+unused_0462:		.byte	?
+v0463:		.byte	?
+golfer_x:		.byte	?
+unused_0465:		.byte	?
+golfer_y:		.byte	?
+unused_0467:
+		.fill	3
+power_level:		.byte	?
+unused_046b:		.byte	?
+v046c:		.byte	?
+v046d:		.byte	?
+v046e:		.byte	?
+v046f:		.byte	?
+green_flag_x:		.byte	?
+green_flag_y:		.byte	?
+aim_x:		.byte	?
+aim_y:		.byte	?
+aim_max:		.byte	?
+aim_min:		.byte	?
+aim_offset:		.byte	?
+v0477:		.byte	?
+text_color:		.byte	?
+v0479:		.byte	?
+v047a:		.byte	?
+v047b:		.byte	?
+v047c:		.byte	?
+v047d:		.byte	?
+; what the KERNAL printed while loading, under the game variables
+old_screen:
+		.fill	837
+l07C3:
+		.fill	3
+l07C6:
+		.fill	34
+unused_07e8:
+		.fill	24
+.endv
+
+*=$0800
+
+basic_start:
+		.byte	$00
+basic_stub:
+		.byte	$0b, $08, $ef, $00, $9e, $32, $30, $36, $31, $00, $00, $00
+
+decrunch:
+		sei 
+		inc c128_clock
+		lda #$38
+		sta cpu_port
+		ldx #$34
+
+l0817:
+		lda $0842, x
+		sta stack + $6, x
+		dex 
+		bne l0817
+		ldx #$cf
+
+l0822:
+		lda decruncher_leftover + $32, x
+		sta @w unused_c6 + $30, x
+		dex 
+		bne l0822
+		ldy #$69
+
+l082D:
+		dex 
+		lda old_screen + $2fd, x
+d0830 = $0830
+		sta terrain_82bc + $57, x
+d0833 = $0833
+		txa 
+		bne l082D
+		dec $0833
+		dec $0830
+		dey 
+		bne l082D
+		jmp l0116
+
+decruncher_leftover:
+		.byte	$48, $ad, $dc, $84, $2a, $85, $f7, $ee, $02, $02, $d0, $03, $ee, $a2, $01, $20
+		.byte	$3c, $03, $4c, $80, $08, $4c, $80, $08, $69, $a0, $08, $20, $bd, $ff, $a9, $00
+		.byte	$20, $d5, $ff, $4c, $80, $08, $42, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00
+
+old_loader:
+		lda #$00
+		sta background_color
+		sta vfb
+		lda #$20
+		bne $088b
+		jsr l08D0
+		jsr l08D0
+		jsr l08D0
+l088B = $088b
+		lda #$06
+		sta background_color
+		lda cia2_port_a
+		ora #$03
+		sta cia2_port_a
+		lda #$15
+		sta vic_memory
+		lda vic_control1
+		and #$df
+		sta vic_control1
+		lda vic_control2
+		and #$ef
+		sta vic_control2
+		ldy #$00
+		sty vfb
+		sty pointer_fd
+		lda #$60
+		sta vfc
+		lda #$e0
+		sta pointer_fd + $1
+
+l08BC:
+		lda (vfb), y
+		sta (pointer_fd), y
+		iny 
+		bne l08BC
+		inc vfc
+		inc pointer_fd + $1
+		lda vfc
+		cmp #$70
+		bne l08BC
+		jmp start
+
+l08D0:
+		ldx loader_part
+		jsr tape_header
+		inc loader_part
+		rts 
+
+loader_part:
+		.byte	$06, $ea
+		ldy #$08
+		jsr setnam
+		lda #$00
+		jsr load
+		inc loader_part2
+		rts 
+
+loader_part2:
+		.byte	$43
+unused_08eb:
+		.byte	$f9, $d0, $04, $a4, $ff, $d0, $f3, $c6, $fc, $a5, $fb, $18, $65, $ff, $90, $02
+		.byte	$e6, $fc, $85, $fb, $60
+
+; ---- routine names ----
+multiply:
+		stx pointer_06
 		ldx #$00
 		cmp #$00
 		beq l0910
@@ -19,13 +521,13 @@ l0908:
 		inx 
 		lsr 
 		php 
-		ror $06
+		ror pointer_06
 		plp 
 		bne l0908
 
 l0910:
-		ldy $06
-		lda $0986, y
+		ldy pointer_06
+		lda log_table, y
 		cpy #$00
 		beq l091B
 		clc 
@@ -50,15 +552,15 @@ l0927:
 
 l092B:
 		tay 
-		lda $0a86, y
-		sta $06
+		lda exp_table, y
+		sta pointer_06
 		lda #$00
 		cpx #$00
 		beq l0941
 		bmi l0945
 
 l0939:
-		asl $06
+		asl pointer_06
 		rol 
 		bcs l0942
 		dex 
@@ -68,11 +570,11 @@ l0941:
 		clc 
 
 l0942:
-		ldx $06
+		ldx pointer_06
 		rts 
 
 l0945:
-		lsr $06
+		lsr pointer_06
 		inx 
 		bne l0945
 		beq l0941
@@ -82,17 +584,17 @@ l094C:
 
 l094F:
 		clc 
-		adc $0e
-		sta $0e
+		adc v0e
+		sta v0e
 		php 
 		txa 
-		adc $0f
+		adc v0e + $1
 		plp 
 		bcc l095D
 		adc #$06
 
 l095D:
-		sta $0f
+		sta v0e + $1
 		rts 
 
 l0960:
@@ -116,178 +618,400 @@ l0972:
 
 l0975:
 		sec 
-		sbc $0e
-		sta $0e
+		sbc v0e
+		sta v0e
 		php 
 		txa 
-		sbc $0f
+		sbc v0e + $1
 		plp 
 		bcs l0983
 		sbc #$06
 
 l0983:
-		sta $0f
+		sta v0e + $1
 		rts 
-*=$0b06
+
+log_table:
+		.byte	$00, $00, $20, $33, $40, $4a, $53, $5a, $60, $65, $6a, $6f, $73, $76, $7a, $7d
+		.byte	$80, $83, $85, $88, $8a, $8d, $8f, $91, $93, $95, $96, $98, $9a, $9b, $9d, $9f
+		.byte	$a0, $a1, $a3, $a4, $a5, $a7, $a8, $a9, $aa, $ab, $ad, $ae, $af, $b0, $b1, $b2
+		.byte	$b3, $b4, $b5, $b6, $b6, $b7, $b8, $b9, $ba, $bb, $bb, $bc, $bd, $be, $bf, $bf
+		.byte	$c0, $c1, $c1, $c2, $c3, $c3, $c4, $c5, $c5, $c6, $c7, $c7, $c8, $c9, $c9, $ca
+		.byte	$ca, $cb, $cb, $cc, $cd, $cd, $ce, $ce, $cf, $cf, $d0, $d0, $d1, $d1, $d2, $d2
+		.byte	$d3, $d3, $d4, $d4, $d5, $d5, $d6, $d6, $d6, $d7, $d7, $d8, $d8, $d9, $d9, $d9
+		.byte	$da, $da, $db, $db, $db, $dc, $dc, $dd, $dd, $dd, $de, $de, $df, $df, $df, $e0
+		.byte	$e0, $e0, $e1, $e1, $e1, $e2, $e2, $e2, $e3, $e3, $e3, $e4, $e4, $e4, $e5, $e5
+		.byte	$e5, $e6, $e6, $e6, $e7, $e7, $e7, $e8, $e8, $e8, $e9, $e9, $e9, $e9, $ea, $ea
+		.byte	$ea, $eb, $eb, $eb, $eb, $ec, $ec, $ec, $ed, $ed, $ed, $ed, $ee, $ee, $ee, $ee
+		.byte	$ef, $ef, $ef, $ef, $f0, $f0, $f0, $f1, $f1, $f1, $f1, $f2, $f2, $f2, $f2, $f2
+		.byte	$f3, $f3, $f3, $f3, $f4, $f4, $f4, $f4, $f5, $f5, $f5, $f5, $f6, $f6, $f6, $f6
+		.byte	$f6, $f7, $f7, $f7, $f7, $f8, $f8, $f8, $f8, $f8, $f9, $f9, $f9, $f9, $f9, $fa
+		.byte	$fa, $fa, $fa, $fa, $fb, $fb, $fb, $fb, $fb, $fc, $fc, $fc, $fc, $fc, $fd, $fd
+		.byte	$fd, $fd, $fd, $fe, $fe, $fe, $fe, $fe, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+exp_table:
+		.byte	$10, $10, $11, $11, $11, $12, $12, $13, $13, $13, $14, $14, $15, $15, $16, $16
+		.byte	$17, $17, $18, $18, $19, $19, $1a, $1a, $1b, $1b, $1c, $1d, $1d, $1e, $1f, $1f
+		.byte	$20, $21, $21, $22, $23, $24, $24, $25, $26, $27, $28, $29, $29, $2a, $2b, $2c
+		.byte	$2d, $2e, $2f, $30, $31, $32, $34, $35, $36, $37, $38, $39, $3b, $3c, $3d, $3f
+		.byte	$40, $41, $43, $44, $46, $47, $49, $4a, $4c, $4e, $4f, $51, $53, $55, $57, $59
+		.byte	$5b, $5c, $5f, $61, $63, $65, $67, $69, $6c, $6e, $70, $73, $75, $78, $7b, $7d
+		.byte	$80, $83, $86, $89, $8c, $8f, $92, $95, $98, $9c, $9f, $a2, $a6, $aa, $ad, $b1
+		.byte	$b5, $b9, $bd, $c1, $c5, $ca, $ce, $d3, $d7, $dc, $e1, $e6, $eb, $f0, $f5, $fb
 
 l0B06:
-		lda $2c5e
-		ldx $2c5d
-		jsr l0900
-		sta $0e
-		stx $0f
-		sta $0ba2
-		stx $0ba3
-		lda $0b9c
-		ldx $0b9d
+		lda v2c5e
+		ldx v2c5d
+		jsr multiply
+		sta v0e
+		stx v0e + $1
+		sta math_words + $c
+		stx math_words + $d
+		lda math_words + $6
+		ldx math_words + $7
 		jsr l0975
-		lda $0e
-		ldx $0f
+		lda v0e
+		ldx v0e + $1
 		jsr l091F
-		sta $1f27
-		stx $1f26
-		lda $2c5c
+		sta ball_sprite_y + $1
+		stx ball_sprite_y
+		lda v2c5c
 		php 
 		bpl l0B46
 		lda #$00
 		sec 
-		sbc $2c5b
-		sta $2c5b
+		sbc v2c5b
+		sta v2c5b
 		lda #$00
-		sbc $2c5c
-		sta $2c5c
+		sbc v2c5c
+		sta v2c5c
 
 l0B46:
-		ldx $2c5b
-		jsr l0900
-		sta $0e
-		stx $0f
-		lda $0b9a
-		ldx $0b9b
+		ldx v2c5b
+		jsr multiply
+		sta v0e
+		stx v0e + $1
+		lda math_words + $4
+		ldx math_words + $5
 		jsr l094F
-		lda $0ba2
-		ldx $0ba3
+		lda math_words + $c
+		ldx math_words + $d
 		jsr l094C
-		lda $0e
-		ldx $0f
+		lda v0e
+		ldx v0e + $1
 		jsr l091F
-		sta $1f25
-		stx $1f24
+		sta ball_sprite_x + $1
+		stx ball_sprite_x
 		lda #$80
 		plp 
 		bmi l0B85
 		clc 
-		adc $1f24
-		sta $1f24
-		lda $1f25
+		adc ball_sprite_x
+		sta ball_sprite_x
+		lda ball_sprite_x + $1
 		adc #$00
-		sta $1f25
+		sta ball_sprite_x + $1
 		bcc l0B94
 
 l0B85:
 		sec 
-		sbc $1f24
-		sta $1f24
+		sbc ball_sprite_x
+		sta ball_sprite_x
 		lda #$00
-		sbc $1f25
-		sta $1f25
+		sbc ball_sprite_x + $1
+		sta ball_sprite_x + $1
 
 l0B94:
 		rts 
 
 l0B95:
 		rts 
-*=$0ba4
+
+math_words:
+		.word	$0010, $00f0, $00d0, $00f0, $0065, $fd00, $0000
 
 l0BA4:
 		lda #$00
-		sta $22
-		lda $12
+		sta v22
+		lda v12
 		sec 
-		sbc $1d
-		sta $12
-		lda $13
-		sbc $1e
-		sta $13
+		sbc ball_y
+		sta v12
+		lda v12 + $1
+		sbc ball_y + $1
+		sta v12 + $1
 		asl 
-		rol $22
-		lda $12
-		ldx $13
+		rol v22
+		lda v12
+		ldx v12 + $1
 		bpl l0BC3
 		clc 
 		eor #$ff
 		adc #$01
 
 l0BC3:
-		sta $21
-		lda $10
+		sta v21
+		lda v10
 		sec 
-		sbc $1b
-		sta $10
-		lda $11
-		sbc $1c
-		sta $11
+		sbc ball_x
+		sta v10
+		lda v10 + $1
+		sbc ball_x + $1
+		sta v10 + $1
 		asl 
-		rol $22
-		lda $10
-		ldx $11
+		rol v22
+		lda v10
+		ldx v10 + $1
 		bpl l0BE0
 		clc 
 		eor #$ff
 		adc #$01
 
 l0BE0:
-		cmp $21
-		rol $22
-		ora $21
+		cmp v21
+		rol v22
+		ora v21
 		bmi l0BFC
-		ldx $22
-		lda $0c08, x
+		ldx v22
+		lda direction_order, x
 		sec 
-		sbc $0db8
+		sbc direction
 		beq l0BF9
 		and #$07
 		cmp #$07
 		bne l0BFC
 
 l0BF9:
-		jmp l0C2A
+		jmp rotate_1
 
 l0BFC:
 		lda #$ff
-		cmp $0c07
+		cmp direction_flag
 		beq l0BF9
-		sta $2c5e
+		sta v2c5e
 		rts 
-*=$0c2a
 
-l0C2A:
-		lda $10
-		sta $2c5b
-		lda $11
-		sta $2c5c
-		lda $12
-		sta $2c5d
-		lda $13
-		sta $2c5e
+direction_flag:
+		.byte	$00
+direction_order:
+		.byte	$00, $01, $07, $06, $03, $02, $04, $05
+
+rotate_0:
+		lda #$00
+		sec 
+		sbc v10
+		sta v10
+		lda #$00
+		sbc v10 + $1
+		sta v10 + $1
+		lda #$00
+		sec 
+		sbc v12
+		sta v12
+		lda #$00
+		sbc v12 + $1
+		sta v12 + $1
+
+rotate_1:
+		lda v10
+		sta v2c5b
+		lda v10 + $1
+		sta v2c5c
+		lda v12
+		sta v2c5d
+		lda v12 + $1
+		sta v2c5e
 		rts 
-*=$0d73
+
+rotate_2:
+		lda v12
+		sta v2c5b
+		lda v12 + $1
+		sta v2c5c
+		lda #$00
+		sec 
+		sbc v10
+		sta v2c5d
+		lda #$00
+		sbc v10 + $1
+		sta v2c5e
+		rts 
+
+rotate_3:
+		lda v10
+		sta v2c5d
+		lda v10 + $1
+		sta v2c5e
+		lda #$00
+		sec 
+		sbc v12
+		sta v2c5b
+		lda #$00
+		sbc v12 + $1
+		sta v2c5c
+		rts 
+
+; reached through the jsr at $0bf9, which $0d91 points here; it then jumps on to
+; the rotation $0d91 stores in the jmp at $0d01
+rotate_twice:
+		lda math_words
+		sta v0e
+		lda math_words + $1
+		sta v0e + $1
+		lda v10
+		clc 
+		adc v12
+		tax 
+		lda v10 + $1
+		adc v12 + $1
+		php 
+		bpl l0C97
+		pha 
+		txa 
+		clc 
+		eor #$ff
+		adc #$01
+		tax 
+		pla 
+		eor #$ff
+		adc #$00
+
+l0C97:
+		jsr multiply
+		jsr l0975
+		lda v0e
+		ldx v0e + $1
+		jsr l091F
+		plp 
+		bpl l0CB4
+		pha 
+		txa 
+		clc 
+		eor #$ff
+		adc #$01
+		tax 
+		pla 
+		eor #$ff
+		adc #$00
+
+l0CB4:
+		sta v2c5e
+		stx v2c5d
+		lda math_words
+		sta v0e
+		lda math_words + $1
+		sta v0e + $1
+		lda v10
+		sec 
+		sbc v12
+		tax 
+		lda v10 + $1
+		sbc v12 + $1
+		php 
+		bpl l0CDE
+		pha 
+		txa 
+		clc 
+		eor #$ff
+		adc #$01
+		tax 
+		pla 
+		eor #$ff
+		adc #$00
+
+l0CDE:
+		jsr multiply
+		jsr l0975
+		lda v0e
+		ldx v0e + $1
+		jsr l091F
+		plp 
+		bpl l0CFB
+		pha 
+		txa 
+		clc 
+		eor #$ff
+		adc #$01
+		tax 
+		pla 
+		eor #$ff
+		adc #$00
+
+l0CFB:
+		sta v2c5c
+		stx v2c5b
+		jmp rotate_7
+rotate_twice_next = $0d02
+
+rotate_4:
+		lda #$00
+		sec 
+		sbc v2c5b
+		sta v2c5b
+		lda #$00
+		sbc v2c5c
+		sta v2c5c
+		lda #$00
+		sec 
+		sbc v2c5d
+		sta v2c5d
+		lda #$00
+		sbc v2c5e
+		sta v2c5e
+
+rotate_5:
+		rts 
+
+rotate_6:
+		lda v2c5d
+		sta v12
+		lda v2c5e
+		sta v12 + $1
+		lda v2c5b
+		sta v2c5d
+		lda v2c5c
+		sta v2c5e
+		lda #$00
+		sec 
+		sbc v12
+		sta v2c5b
+		lda #$00
+		sbc v12 + $1
+		sta v2c5c
+		rts 
+
+rotate_7:
+		lda v2c5b
+		sta v12
+		lda v2c5c
+		sta v12 + $1
+		lda v2c5d
+		sta v2c5b
+		lda v2c5e
+		sta v2c5c
+		lda #$00
+		sec 
+		sbc v12
+		sta v2c5d
+		lda #$00
+		sbc v12 + $1
+		sta v2c5e
+		rts 
 
 l0D73:
-		lda $0db8
+		lda direction
 		sec 
 		sbc #$01
 
 l0D79:
 		and #$07
-		sta $0db8
+		sta direction
 		asl 
 		tax 
 		and #$02
 		bne l0D91
-		lda $0da8, x
+		lda rotations, x
 		sta l0BF9 + 1
-		lda $0da9, x
+		lda rotations + $1, x
 		sta l0BF9 + 2
 		rts 
 
@@ -296,15 +1020,20 @@ l0D91:
 		sta l0BF9 + 1
 		lda #$0c
 		sta l0BF9 + 2
-		lda $0da8, x
+		lda rotations, x
 		sta $0d02
-		lda $0da9, x
+		lda rotations + $1, x
 		sta $0d03
 		rts 
-*=$0db9
+
+rotations:
+		.addr	rotate_1, rotate_5, rotate_3, rotate_6, rotate_0, rotate_4, rotate_2, rotate_7
+
+direction:
+		.byte	$00
 
 l0DB9:
-		lda $0db8
+		lda direction
 		clc 
 		adc #$01
 		bpl l0D79
@@ -324,50 +1053,50 @@ l0DC7:
 l0DD0:
 		sec 
 		sbc #$20
-		sta $04
+		sta pointer_04
 		lda #$00
-		asl $04
+		asl pointer_04
 		rol 
-		asl $04
+		asl pointer_04
 		rol 
-		asl $04
+		asl pointer_04
 		rol 
-		sta $05
-		lda $04
+		sta pointer_04 + $1
+		lda pointer_04
 		clc 
-		adc $0eee
-		sta $04
-		lda $05
-		adc $0eef
-		sta $05
-		lda $1f
+		adc v0eee
+		sta pointer_04
+		lda pointer_04 + $1
+		adc v0eee + $1
+		sta pointer_04 + $1
+		lda text_x
 		cmp #$a0
 		bcc l0E08
-		lda $05
+		lda pointer_04 + $1
 		pha 
-		lda $04
+		lda pointer_04
 		pha 
 		jsr l0E4F
 		pla 
-		sta $04
+		sta pointer_04
 		pla 
-		sta $05
-		lda $1f
+		sta pointer_04 + $1
+		lda text_x
 
 l0E08:
-		ldx $20
+		ldx text_y
 		jsr l12F0
 		tya 
 		clc 
-		adc $0a
-		sta $0a
-		lda $0b
+		adc v0a
+		sta v0a
+		lda v0a + $1
 		adc #$00
-		sta $0b
+		sta v0a + $1
 		ldy #$00
 
 l0E1B:
-		lda ($04), y
+		lda (pointer_04), y
 		lsr 
 		lsr 
 		lsr 
@@ -378,24 +1107,24 @@ l0E1B:
 		bcc l0E1B
 		tya 
 		clc 
-		adc $0a
-		sta $0a
-		lda $0b
+		adc v0a
+		sta v0a
+		lda v0a + $1
 		adc #$00
-		sta $0b
+		sta v0a + $1
 		ldy #$00
 
 l0E37:
-		lda ($04), y
+		lda (pointer_04), y
 		and #$0f
 		jsr l0EC7
 		iny 
 		cpy #$08
 		bcc l0E37
-		lda $1f
+		lda text_x
 		clc 
 		adc #$08
-		sta $1f
+		sta text_x
 
 l0E4A:
 		rts 
@@ -406,10 +1135,10 @@ l0E4B:
 
 l0E4F:
 		lda #$00
-		sta $1f
+		sta text_x
 
 l0E53:
-		lda $20
+		lda text_y
 		sec 
 		sbc #$08
 		bcs l0E60
@@ -417,7 +1146,7 @@ l0E53:
 		jmp l0E4A
 
 l0E60:
-		sta $20
+		sta text_y
 		jmp l0E4A
 
 l0E65:
@@ -427,135 +1156,232 @@ l0E65:
 		bne l0E78
 		jsr l1010
 		lda #$00
-		sta $1f
+		sta text_x
 		lda #$c7
-		sta $20
+		sta text_y
 
 l0E78:
 		rts 
 
 l0E79:
 		lda #$ff
-		sta $04
+		sta pointer_04
 		lda #$5f
-		sta $05
+		sta pointer_04 + $1
 		lda #$3f
-		sta $0a
+		sta v0a
 		lda #$61
-		sta $0b
+		sta v0a + $1
 		ldx #$30
 
 l0E8B:
 		ldy #$a0
 
 l0E8D:
-		lda ($0a), y
-		sta ($04), y
+		lda (v0a), y
+		sta (pointer_04), y
 		dey 
 		bne l0E8D
 		lda #$a0
 		clc 
-		adc $0a
-		sta $0a
-		lda $0b
+		adc v0a
+		sta v0a
+		lda v0a + $1
 		adc #$00
-		sta $0b
+		sta v0a + $1
 		lda #$a0
 		clc 
-		adc $04
-		sta $04
-		lda $05
+		adc pointer_04
+		sta pointer_04
+		lda pointer_04 + $1
 		adc #$00
-		sta $05
+		sta pointer_04 + $1
 		dex 
 		bne l0E8B
 		lda #$00
 		ldy #$a0
 
 l0EB5:
-		sta $7dff, y
-		sta $7e9f, y
+		sta bitmap + $1dff, y
+		sta bitmap + $1e9f, y
 		dey 
 		bne l0EB5
 		lda #$00
-		sta $1f
+		sta text_x
 		lda #$07
-		sta $20
+		sta text_y
 		rts 
 
 l0EC7:
 		tax 
-		lda $0edd, x
+		lda double_bits, x
 		pha 
 		eor #$ff
-		and ($0a), y
-		sta $0eed
+		and (v0a), y
+		sta v0eed
 		pla 
-		and $1368
-		ora $0eed
-		sta ($0a), y
+		and v1368
+		ora v0eed
+		sta (v0a), y
 		rts 
-*=$0ffb
 
-l0FFB:
+double_bits:
+		.byte	$00, $03, $0c, $0f, $30, $33, $3c, $3f, $c0, $c3, $cc, $cf, $f0, $f3, $fc, $ff
+v0eed:		.byte	$aa
+
+v0eee:
+		.word	$7f4e
+
+list_0ef0:
+		.byte	$98, $98, $76, $01, $88, $8a, $87, $01, $84, $85, $88, $01, $7f, $81, $89, $01
+		.byte	$7d, $7e, $89, $01, $74, $76, $8b, $01, $70, $71, $8c, $01, $51, $52, $8d, $01
+		.byte	$4b, $4d, $8d, $01, $6c, $6d, $8e, $01, $68, $6a, $8f, $01, $66, $67, $8f, $01
+		.byte	$31, $32, $84, $01
+unused_z80_junk:
+		.byte	$41, $e1, $cd, $b2, $10, $20, $19, $3a, $de, $41, $b7, $20, $04, $78, $b1, $20
+		.byte	$0f, $2a, $e3, $41, $23, $23, $7e, $fe, $08, $23, $30, $fa, $2b, $c3, $f8, $36
+		.byte	$eb, $d5, $cd, $65, $3c, $b7, $28, $1d, $11, $28, $3f, $cd, $65, $3c, $b7, $fc
+		.byte	$4c, $34, $cd, $de, $3c, $cd, $17, $36, $fe, $0d, $20, $ef, $e5, $2a, $e3, $41
+		.byte	$e5, $c5, $c3, $22, $37, $0b, $62, $6b, $d1, $18, $bc, $cd, $03, $0f, $fe, $0d
+		.byte	$ca, $9c, $04, $4f, $cd, $93, $4c, $cd, $6b, $0e, $fe, $0d, $28, $06, $cd, $93
+		.byte	$4c, $b9, $20, $f3, $3e, $0d, $cd, $93, $4c, $3e, $0a, $cd, $93, $4c, $3a, $f1
+		.byte	$3f, $fe, $20, $c0, $c3, $82, $0e, $cd, $03, $0f, $fe, $0d, $ca, $9c, $04, $32
+		.byte	$e5, $41, $4f, $cd, $34, $0e, $fe, $0d, $28, $06, $b9, $ca, $82, $0e, $18, $f3
+		.byte	$e1, $d1, $c1, $01, $99, $39, $c3, $98, $36, $c1, $01, $9a, $36, $c5, $21, $28
+		.byte	$3f, $3a, $e5, $41, $4f, $7e, $b9, $28, $06, $fe, $0d, $c8, $23, $18, $f6, $c1
+		.byte	$d1, $e1, $21, $bb, $02, $e5, $d5, $c5, $c9, $b7, $cd, $f7, $10, $23, $22, $ce
+		.byte	$41, $7e, $f6, $28, $77, $cd, $86, $32, $22, $df, $41, $0e, $00, $c5, $cd
+
+l0FF3:
+		jsr scnkey
+		jsr getin
+		beq l0FF3
+
+print_char:
 		jmp l0DC1
-*=$1010
+
+screen_off:
+		lda #$ef
+		and vic_control1
+		sta vic_control1
+		rts 
+
+screen_on:
+		lda #$10
+		ora vic_control1
+		sta vic_control1
+		rts 
 
 l1010:
 		lda #$00
-		sta $06
+		sta pointer_06
 		lda #$60
-		sta $07
+		sta pointer_06 + $1
 		lda #$c0
-		sta $08
+		sta pointer_08
 		lda #$e0
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 l1022:
 		lda #$00
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne l102B
-		inc $07
+		inc pointer_06 + $1
 
 l102B:
-		inc $08
+		inc pointer_08
 		bne l1022
-		inc $09
+		inc pointer_08 + $1
 		bne l1022
 		rts 
 
 l1034:
 		lda #$c1
-		sta l0FFB + 1
+		sta print_char + 1
 		lda #$0d
-		sta l0FFB + 2
+		sta print_char + 2
 		lda #$08
-		ora $d018
-		sta $d018
+		ora vic_memory
+		sta vic_memory
 		lda #$20
-		ora $d011
-		sta $d011
+		ora vic_control1
+		sta vic_control1
 		lda #$10
-		ora $d016
-		sta $d016
+		ora vic_control2
+		sta vic_control2
 		rts 
-*=$127d
+
+; sets the char output vector to CHROUT and turns the bitmap off
+text_mode:
+		lda #$d2
+		sta print_char + 1
+		lda #$ff
+		sta print_char + 2
+		lda #$f7
+		and vic_memory
+		sta vic_memory
+		lda #$df
+		and vic_control1
+		sta vic_control1
+		lda #$ef
+		and vic_control2
+		sta vic_control2
+		rts 
+
+v107a:
+		.byte	$0a
+v107b:		.byte	$ff
+buffer_107c:
+		.byte	$41, $cd, $41, $86, $45, $88, $49, $8c, $4d, $8c, $51, $ff, $53, $8d, $5f, $8d
+		.byte	$62, $8d, $65, $8e, $6a, $8e, $74, $8a, $78, $89, $82, $87, $8b, $ff, $8c, $84
+		.byte	$90, $7e, $96, $77, $98, $75, $32, $99, $2d, $96, $30, $94, $2f, $93, $29, $99
+		.byte	$2a, $9b, $27, $9d, $26, $9f, $28, $a5, $2b, $a9, $28, $ad, $29, $af, $30, $b8
+		.byte	$33, $b8, $10, $cd, $86, $32, $36, $00, $2b, $36, $01, $22, $e3, $41, $2b, $0e
+		.byte	$00, $cd, $e0, $34, $47, $0c, $cd, $78, $0e, $cd, $03, $0f, $fe, $0d, $28, $14
+		.byte	$fe, $3b, $28, $10, $fe, $2c, $28, $e9, $78, $fe, $20, $28, $e4, $fe, $09, $c4
+		.byte	$c4, $04, $18, $dd, $e3, $23, $23, $5e, $23, $56, $eb, $cd, $7a, $3c, $e3, $b7
+		.byte	$28, $0b, $b9, $28, $08, $38, $06, $36, $00, $2b, $0c, $18, $f5, $36, $00, $2b
+		.byte	$cd, $b5, $32, $e1, $c1, $cd, $7a, $3c, $e5, $2a, $ee, $41, $e5, $c5, $4f, $06
+		.byte	$00, $09, $22, $ee, $41, $c1, $2a, $e3, $41, $e5, $21, $bb, $02, $e5, $11, $0c
+		.byte	$3b, $d5, $c5, $c9, $cd, $2e, $37, $e1, $22, $e3, $41, $e1, $22, $f0, $41, $e1
+		.byte	$af, $32, $e8, $41, $cd, $65, $3c, $b7, $28, $20, $11, $28, $3f, $cd, $65, $3c
+		.byte	$b7, $fc, $4c, $34, $cd, $de, $3c, $cd, $17, $36, $fe, $0d, $20, $ef, $e5, $2a
+		.byte	$f0, $41, $e5, $2a, $e3, $41, $e5, $c3, $22, $37, $2a, $e3, $41, $23, $af, $32
+		.byte	$de, $41, $c3, $fd, $36, $7d, $93, $5f, $7c, $9a, $57, $c9, $3a, $c4, $3f, $b7
+buffer_117c:
+		.byte	$c2, $bf, $41, $87, $45, $89, $49, $8d, $4d, $8d, $51, $8d, $53, $8e, $5f, $8e
+		.byte	$62, $8e, $65, $8f, $6a, $8f, $74, $8b, $78, $8a, $82, $88, $8b, $86, $8d, $84
+		.byte	$91, $7e, $96, $78, $98, $76, $33, $99, $2e, $96, $30, $95, $2f, $92, $28, $99
+		.byte	$29, $9b, $27, $9c, $25, $9f, $28, $a6, $2b, $a8, $27, $ad, $28, $af, $30, $b9
+		.byte	$33, $b9, $3b, $71, $23, $70, $c9, $2a, $f5, $41, $19, $5e, $23, $56, $2b, $c9
+		.byte	$2a, $f5, $41, $19, $23, $23, $5e, $23, $56, $2b, $c9, $2a, $f9, $41, $7d, $b4
+		.byte	$28, $0c, $eb, $d5, $cd, $a8, $3b, $eb, $22, $f9, $41, $d1, $18, $2c, $2a, $f7
+		.byte	$41, $11, $20, $00, $eb, $19, $22, $f7, $41, $d5, $eb, $2a, $01, $42, $cd, $b2
+		.byte	$10, $d1, $da, $36, $3d, $2a, $d0, $41, $25, $3a, $d2, $41, $b7, $cd, $b2, $10
+		.byte	$da, $36, $3d, $2a, $f5, $41, $eb, $cd, $4d, $3b, $d5, $cd, $9f, $3b, $eb, $2a
+		.byte	$fd, $41, $eb, $7b, $e6, $e0, $5f, $7b, $b2, $20, $02, $d1, $d5, $73, $23, $72
+		.byte	$23, $3e, $00, $77, $23, $77, $cd, $a8, $3b, $d1, $28, $05, $73, $23, $72, $18
+		.byte	$05, $eb, $22, $fb, $41, $eb, $2a, $fb, $41, $d5, $eb, $cd, $9f, $3b, $d1, $73
+		.byte	$23, $72, $7b, $f6, $04, $5f, $c9, $d5, $f5, $2a, $fd, $41, $eb, $7b, $e6, $1f
+		.byte	$cc, $b3, $3b, $2a, $f5, $41, $19, $f1, $f5, $77, $7b, $e6, $1f, $fe, $1f, $28
+		.byte	$01, $13, $cc, $54, $3c, $eb, $22, $fd, $41, $f1, $d1, $c9, $7b, $e6, $e0, $5f
+v127c:		.byte	$02
 
 l127D:
 		tsx 
-		lda $0103, x
+		lda d0103, x
 		tay 
-		ldx $18
-		lda $127c
+		ldx v18
+		lda v127c
 		beq l12AC
-		lda $17ad
+		lda v17ad
 		bne l12AC
-		stx $12ed
-		sty $12ec
-		lda $10
-		cmp $11
+		stx v12ed
+		sty v12ec
+		lda v10
+		cmp v10 + $1
 		bcs l129E
 
 d129A:
@@ -582,46 +1408,51 @@ l12AC:
 		rts 
 
 l12AD:
-		lda $12ef
+		lda v12ef
 		php 
 		ldx #$00
-		stx $12ef
+		stx v12ef
 		plp 
 		bne l12A8
 		dex 
-		stx $12ef
-		ldx $127c
+		stx v12ef
+		ldx v127c
 		pla 
-		sta $107c, x
-		lda $12ec
-		sta $117c, x
+		sta buffer_107c, x
+		lda v12ec
+		sta buffer_117c, x
 		inx 
 		pla 
-		sta $107c, x
-		lda $12ed
-		sta $117c, x
+		sta buffer_107c, x
+		lda v12ed
+		sta buffer_117c, x
 		inx 
-		stx $127c
-		lda $12ec
-		ldx $12ed
+		stx v127c
+		lda v12ec
+		ldx v12ed
 		jsr l12F0
-		lda ($0a), y
-		and $1369, x
-		sta ($0a), y
+		lda (v0a), y
+		and pixel_clear_masks, x
+		sta (v0a), y
 		lda #$00
 		rts 
-*=$12f0
+
+v12ec:
+		.byte	$98
+v12ed:		.byte	$76
+v12ee:		.byte	$ff
+v12ef:		.byte	$ff
 
 l12F0:
 		pha 
 		and #$fc
 		asl 
 		tay 
-		lda $1371, x
-		sta $0a
-		lda $1439, x
+		lda bitmap_row_lo, x
+		sta v0a
+		lda bitmap_row_hi, x
 		adc #$00
-		sta $0b
+		sta v0a + $1
 		pla 
 		and #$03
 		tax 
@@ -632,16 +1463,16 @@ l1306:
 		and #$fc
 		asl 
 		tay 
-		lda $1371, x
-		sta $0a
-		lda $1439, x
+		lda bitmap_row_lo, x
+		sta v0a
+		lda bitmap_row_hi, x
 		adc #$00
-		sta $0b
+		sta v0a + $1
 		pla 
 		and #$03
 		tax 
-		lda ($0a), y
-		and $136d, x
+		lda (v0a), y
+		and pixel_bits, x
 		rts 
 
 l1321:
@@ -649,81 +1480,117 @@ l1321:
 		and #$fc
 		asl 
 		tay 
-		lda $1371, x
-		sta $0a
-		lda $1439, x
+		lda bitmap_row_lo, x
+		sta v0a
+		lda bitmap_row_hi, x
 		adc #$00
-		sta $0b
+		sta v0a + $1
 		pla 
 		and #$03
 		tax 
-		lda ($0a), y
-		sta $06
-		and $136d, x
+		lda (v0a), y
+		sta pointer_06
+		and pixel_bits, x
 		bne l1354
-		lda $136d, x
-		and $1368
-		ora $06
-		sta ($0a), y
-		lda $107b
+		lda pixel_bits, x
+		and v1368
+		ora pointer_06
+		sta (v0a), y
+		lda v107b
 		beq l1357
 		jsr l127D
 		jmp l1357
 
 l1354:
-		sta $12ef
+		sta v12ef
 
 l1357:
-		sta $107b
-		dec $107a
+		sta v107b
+		dec v107a
 		bne l1367
-		inc $107b
+		inc v107b
 		lda #$0a
-		sta $107a
+		sta v107a
 
 l1367:
 		rts 
-*=$1501
+
+v1368:
+		.byte	$ff
+; masks that clear one multicolor pixel, and its bits
+pixel_clear_masks:
+		.byte	$3f, $cf, $f3, $fc
+pixel_bits:
+		.byte	$c0, $30, $0c, $03
+; bitmap row addresses, bottom row first
+bitmap_row_lo:
+		.byte	$07, $06, $05, $04, $03, $02, $01, $00, $c7, $c6, $c5, $c4, $c3, $c2, $c1, $c0
+		.byte	$87, $86, $85, $84, $83, $82, $81, $80, $47, $46, $45, $44, $43, $42, $41, $40
+		.byte	$07, $06, $05, $04, $03, $02, $01, $00, $c7, $c6, $c5, $c4, $c3, $c2, $c1, $c0
+		.byte	$87, $86, $85, $84, $83, $82, $81, $80, $47, $46, $45, $44, $43, $42, $41, $40
+		.byte	$07, $06, $05, $04, $03, $02, $01, $00, $c7, $c6, $c5, $c4, $c3, $c2, $c1, $c0
+		.byte	$87, $86, $85, $84, $83, $82, $81, $80, $47, $46, $45, $44, $43, $42, $41, $40
+		.byte	$07, $06, $05, $04, $03, $02, $01, $00, $c7, $c6, $c5, $c4, $c3, $c2, $c1, $c0
+		.byte	$87, $86, $85, $84, $83, $82, $81, $80, $47, $46, $45, $44, $43, $42, $41, $40
+		.byte	$07, $06, $05, $04, $03, $02, $01, $00, $c7, $c6, $c5, $c4, $c3, $c2, $c1, $c0
+		.byte	$87, $86, $85, $84, $83, $82, $81, $80, $47, $46, $45, $44, $43, $42, $41, $40
+		.byte	$07, $06, $05, $04, $03, $02, $01, $00, $c7, $c6, $c5, $c4, $c3, $c2, $c1, $c0
+		.byte	$87, $86, $85, $84, $83, $82, $81, $80, $47, $46, $45, $44, $43, $42, $41, $40
+		.byte	$07, $06, $05, $04, $03, $02, $01, $00
+bitmap_row_hi:
+		.byte	$7e, $7e, $7e, $7e, $7e, $7e, $7e, $7e, $7c, $7c, $7c, $7c, $7c, $7c, $7c, $7c
+		.byte	$7b, $7b, $7b, $7b, $7b, $7b, $7b, $7b, $7a, $7a, $7a, $7a, $7a, $7a, $7a, $7a
+		.byte	$79, $79, $79, $79, $79, $79, $79, $79, $77, $77, $77, $77, $77, $77, $77, $77
+		.byte	$76, $76, $76, $76, $76, $76, $76, $76, $75, $75, $75, $75, $75, $75, $75, $75
+		.byte	$74, $74, $74, $74, $74, $74, $74, $74, $72, $72, $72, $72, $72, $72, $72, $72
+		.byte	$71, $71, $71, $71, $71, $71, $71, $71, $70, $70, $70, $70, $70, $70, $70, $70
+		.byte	$6f, $6f, $6f, $6f, $6f, $6f, $6f, $6f, $6d, $6d, $6d, $6d, $6d, $6d, $6d, $6d
+		.byte	$6c, $6c, $6c, $6c, $6c, $6c, $6c, $6c, $6b, $6b, $6b, $6b, $6b, $6b, $6b, $6b
+		.byte	$6a, $6a, $6a, $6a, $6a, $6a, $6a, $6a, $68, $68, $68, $68, $68, $68, $68, $68
+		.byte	$67, $67, $67, $67, $67, $67, $67, $67, $66, $66, $66, $66, $66, $66, $66, $66
+		.byte	$65, $65, $65, $65, $65, $65, $65, $65, $63, $63, $63, $63, $63, $63, $63, $63
+		.byte	$62, $62, $62, $62, $62, $62, $62, $62, $61, $61, $61, $61, $61, $61, $61, $61
+		.byte	$60, $60, $60, $60, $60, $60, $60, $60
 
 l1501:
 		txa 
 		pha 
-		ldx $18
+		ldx v18
 		pha 
 		and #$fc
 		asl 
 		tay 
-		lda $1371, x
-		sta $0a
-		lda $1439, x
+		lda bitmap_row_lo, x
+		sta v0a
+		lda bitmap_row_hi, x
 		adc #$00
-		sta $0b
+		sta v0a + $1
 		pla 
 		and #$03
 		tax 
-		lda ($0a), y
-		sta $06
-		and $136d, x
+		lda (v0a), y
+		sta pointer_06
+		and pixel_bits, x
 		bne l1538
-		lda $136d, x
-		and $1368
-		ora $06
-		sta ($0a), y
-		lda $107b
+		lda pixel_bits, x
+		and v1368
+		ora pointer_06
+		sta (v0a), y
+		lda v107b
 		beq l153B
 		jsr l127D
 		jmp l153B
 
 l1538:
-		sta $12ef
+		sta v12ef
 
 l153B:
-		sta $107b
-		dec $107a
+		sta v107b
+		dec v107a
 		bne l154B
-		inc $107b
+		inc v107b
 		lda #$0a
-		sta $107a
+		sta v107a
 
 l154B:
 		pla 
@@ -733,9 +1600,9 @@ l154B:
 l154E:
 		lda #$ea
 		sta d129A
-		sty $18
-		ldx $14
-		cpx $13
+		sty v18
+		ldx v14
+		cpx v12 + $1
 		bcc l1562
 		lda #$ca
 		sta l1567
@@ -751,66 +1618,66 @@ l1567:
 		bcs l15C1
 		txa 
 		pha 
-		ldx $18
+		ldx v18
 		pha 
 		and #$fc
 		asl 
 		tay 
-		lda $1371, x
-		sta $0a
-		lda $1439, x
+		lda bitmap_row_lo, x
+		sta v0a
+		lda bitmap_row_hi, x
 		adc #$00
-		sta $0b
+		sta v0a + $1
 		pla 
 		and #$03
 		tax 
-		lda ($0a), y
-		sta $06
-		and $136d, x
+		lda (v0a), y
+		sta pointer_06
+		and pixel_bits, x
 		bne l15A3
-		lda $136d, x
-		and $1368
-		ora $06
-		sta ($0a), y
-		lda $107b
+		lda pixel_bits, x
+		and v1368
+		ora pointer_06
+		sta (v0a), y
+		lda v107b
 		beq l15A6
 		jsr l127D
 		jmp l15A6
 
 l15A3:
-		sta $12ef
+		sta v12ef
 
 l15A6:
-		sta $107b
-		dec $107a
+		sta v107b
+		dec v107a
 		bne l15B6
-		inc $107b
+		inc v107b
 		lda #$0a
-		sta $107a
+		sta v107a
 
 l15B6:
 		pla 
 		tax 
-		cpx $13
+		cpx v12 + $1
 		bne l1567
-		lda $17ac
+		lda v17ac
 		bne l1567
 
 l15C1:
 		lda #$00
-		sta $17ac
-		stx $14
+		sta v17ac
+		stx v14
 		rts 
 
 l15C9:
 		lda #$ea
 		sta l129E
-		cpy $16
+		cpy v16
 		bne l15DF
 		txa 
 		pha 
 		lda #$00
-		sta $17ac
+		sta v17ac
 		tya 
 		tax 
 		pla 
@@ -829,97 +1696,97 @@ l15EB:
 		sta l15F5
 
 l15F3:
-		ldy $16
+		ldy v16
 
 l15F5:
 		dey 
-		cpy $29
+		cpy v29
 		bcc l1657
-		cpy $67
+		cpy v67
 		bcs l1657
-		sty $18
+		sty v18
 		txa 
 		pha 
-		ldx $18
+		ldx v18
 		pha 
 		and #$fc
 		asl 
 		tay 
-		lda $1371, x
-		sta $0a
-		lda $1439, x
+		lda bitmap_row_lo, x
+		sta v0a
+		lda bitmap_row_hi, x
 		adc #$00
-		sta $0b
+		sta v0a + $1
 		pla 
 		and #$03
 		tax 
-		lda ($0a), y
-		sta $06
-		and $136d, x
+		lda (v0a), y
+		sta pointer_06
+		and pixel_bits, x
 		bne l1637
-		lda $136d, x
-		and $1368
-		ora $06
-		sta ($0a), y
-		lda $107b
+		lda pixel_bits, x
+		and v1368
+		ora pointer_06
+		sta (v0a), y
+		lda v107b
 		beq l163A
 		jsr l127D
 		jmp l163A
 
 l1637:
-		sta $12ef
+		sta v12ef
 
 l163A:
-		sta $107b
-		dec $107a
+		sta v107b
+		dec v107a
 		bne l164A
-		inc $107b
+		inc v107b
 		lda #$0a
-		sta $107a
+		sta v107a
 
 l164A:
 		pla 
 		tax 
-		ldy $18
-		cpy $12
+		ldy v18
+		cpy v12
 		bne l15F5
-		lda $17ac
+		lda v17ac
 		bne l15F5
 
 l1657:
 		lda #$00
-		sta $17ac
-		sty $16
+		sta v17ac
+		sty v16
 		rts 
 
 l165F:
-		stx $13
+		stx v12 + $1
 		lda #$ff
-		sta $1368
-		sty $12
+		sta v1368
+		sty v12
 		txa 
 		pha 
 		tya 
 		pha 
-		ldx $14
-		ldy $16
-		sty $18
-		lda $107b
+		ldx v14
+		ldy v16
+		sty v18
+		lda v107b
 		pha 
 		lda #$00
-		sta $107b
+		sta v107b
 		jsr l1501
 		pla 
-		sta $107b
+		sta v107b
 		pla 
 		tay 
 		pla 
 		tax 
 		lda #$ff
-		sta $0f
+		sta v0e + $1
 		txa 
 		sec 
-		sbc $14
+		sbc v14
 		bne l1693
 		jmp l15C9
 
@@ -934,10 +1801,10 @@ l1698:
 		stx l16EC
 
 l16A2:
-		sta $10
+		sta v10
 		tya 
 		sec 
-		sbc $16
+		sbc v16
 		bne l16AD
 		jmp l154E
 
@@ -951,27 +1818,27 @@ l16B2:
 		sty l16FA
 
 l16BA:
-		sta $11
-		ora $10
+		sta v10 + $1
+		ora v10
 		bmi l16CA
 
 l16C0:
-		asl $10
-		asl $11
-		lda $10
-		ora $11
+		asl v10
+		asl v10 + $1
+		lda v10
+		ora v10 + $1
 		bpl l16C0
 
 l16CA:
-		ldx $14
-		ldy $16
-		sty $18
-		lda $10
+		ldx v14
+		ldy v16
+		sty v18
+		lda v10
 		sta $16e5
-		ldy $11
+		ldy v10 + $1
 		sty $17a1
 		sty $16f5
-		ldy $18
+		ldy v18
 		lda #$80
 		pha 
 
@@ -987,84 +1854,84 @@ l16EC:
 		inx 
 		cpx #$a0
 		bcs l1760
-		lda $0f
+		lda v0e + $1
 		clc 
 		adc #$a0
-		sta $0f
+		sta v0e + $1
 		bcc l1703
 
 l16FA:
 		dey 
-		cpy $29
+		cpy v29
 		bcc l1760
-		cpy $67
+		cpy v67
 		bcs l1760
 
 l1703:
-		sty $18
+		sty v18
 		txa 
 		pha 
-		ldx $18
+		ldx v18
 		pha 
 		and #$fc
 		asl 
 		tay 
-		lda $1371, x
-		sta $0a
-		lda $1439, x
+		lda bitmap_row_lo, x
+		sta v0a
+		lda bitmap_row_hi, x
 		adc #$00
-		sta $0b
+		sta v0a + $1
 		pla 
 		and #$03
 		tax 
-		lda ($0a), y
-		sta $06
-		and $136d, x
+		lda (v0a), y
+		sta pointer_06
+		and pixel_bits, x
 		bne l173C
-		lda $136d, x
-		and $1368
-		ora $06
-		sta ($0a), y
-		lda $107b
+		lda pixel_bits, x
+		and v1368
+		ora pointer_06
+		sta (v0a), y
+		lda v107b
 		beq l173F
 		jsr l127D
 		jmp l173F
 
 l173C:
-		sta $12ef
+		sta v12ef
 
 l173F:
-		sta $107b
-		dec $107a
+		sta v107b
+		dec v107a
 		bne l174F
-		inc $107b
+		inc v107b
 		lda #$0a
-		sta $107a
+		sta v107a
 
 l174F:
 		pla 
 		tax 
-		ldy $18
-		cpx $13
+		ldy v18
+		cpx v12 + $1
 		bne l16E2
-		cpy $12
+		cpy v12
 		bne l16E2
-		lda $17ac
+		lda v17ac
 		bne l16E2
 
 l1760:
 		lda #$00
-		sta $17ac
-		stx $14
-		sty $16
+		sta v17ac
+		stx v14
+		sty v16
 		pla 
 		rts 
 
 l176B:
 		pha 
-		lda $0f
+		lda v0e + $1
 		eor #$ff
-		sta $0f
+		sta v0e + $1
 		pla 
 		ldx #$e8
 		stx l129E
@@ -1077,9 +1944,9 @@ l176B:
 
 l1785:
 		pha 
-		lda $0f
+		lda v0e + $1
 		eor #$ff
-		sta $0f
+		sta v0e + $1
 		pla 
 		clc 
 		eor #$ff
@@ -1090,55 +1957,67 @@ l1785:
 		jmp l16BA
 
 l179D:
-		lda $0f
+		lda v0e + $1
 		clc 
 		adc #$a0
-		sta $0f
+		sta v0e + $1
 		bcs l17A9
 		jmp l16E2
 
 l17A9:
 		jmp l16FA
-*=$17ae
+
+v17ac:
+		.byte	$00
+v17ad:		.byte	$00
 
 l17AE:
 		tya 
 		pha 
-		ldy $18
-		lda $28
-		cmp ($64), y
+		ldy v18
+		lda v28
+		cmp (pointer_64), y
 		bcs l17BA
-		sta ($64), y
+		sta (pointer_64), y
 
 l17BA:
-		lda ($08), y
+		lda (pointer_08), y
 		and #$0f
 		cmp #$0f
 		beq l17C9
-		cmp $1bb2
+		cmp v1bb2
 		beq l17CE
 		bne l17D6
 
 l17C9:
-		lda $1bb2
-		sta ($08), y
+		lda v1bb2
+		sta (pointer_08), y
 
 l17CE:
 		lda #$aa
-		sta $1368
+		sta v1368
 		pla 
 		tay 
 		rts 
 
 l17D6:
-		ora $1bb3
-		sta ($08), y
+		ora v1bb3
+		sta (pointer_08), y
 		lda #$55
-		sta $1368
+		sta v1368
 		pla 
 		tay 
 		rts 
-*=$18ab
+
+; screen row addresses, bottom row first, each repeated for 4 pixel rows
+screen_rows:
+		.word	$47c0, $47c0, $47c0, $47c0, $4798, $4798, $4798, $4798, $4770, $4770, $4770, $4770, $4748, $4748, $4748, $4748
+		.word	$4720, $4720, $4720, $4720, $46f8, $46f8, $46f8, $46f8, $46d0, $46d0, $46d0, $46d0, $46a8, $46a8, $46a8, $46a8
+		.word	$4680, $4680, $4680, $4680, $4658, $4658, $4658, $4658, $4630, $4630, $4630, $4630, $4608, $4608, $4608, $4608
+		.word	$45e0, $45e0, $45e0, $45e0, $45b8, $45b8, $45b8, $45b8, $4590, $4590, $4590, $4590, $4568, $4568, $4568, $4568
+		.word	$4540, $4540, $4540, $4540, $4518, $4518, $4518, $4518, $44f0, $44f0, $44f0, $44f0, $44c8, $44c8, $44c8, $44c8
+		.word	$44a0, $44a0, $44a0, $44a0, $4478, $4478, $4478, $4478, $4450, $4450, $4450, $4450, $4428, $4428, $4428, $4428
+		.word	$4400, $4400, $4400, $4400
 
 l18AB:
 		cpy #$c8
@@ -1146,41 +2025,41 @@ l18AB:
 		rts 
 
 l18B0:
-		sta $1bb2
+		sta v1bb2
 		asl 
 		asl 
 		asl 
 		asl 
-		sta $1bb3
-		stx $0e
-		stx $10
-		sty $0d
+		sta v1bb3
+		stx v0e
+		stx v10
+		sty v0d
 		txa 
-		ldx $0d
+		ldx v0d
 		jsr l18EF
 		beq l18C9
 		rts 
 
 l18C9:
-		ldx $10
-		ldy $0d
+		ldx v10
+		ldy v0d
 		lda #$ff
-		sta $12
+		sta v12
 		ldy #$00
 		txa 
-		sta $0ef0, y
+		sta list_0ef0, y
 		iny 
-		sta $0ef0, y
+		sta list_0ef0, y
 		iny 
-		lda $0d
+		lda v0d
 		clc 
 		adc #$01
-		sta $0ef0, y
+		sta list_0ef0, y
 		iny 
 		lda #$01
-		sta $0ef0, y
+		sta list_0ef0, y
 		iny 
-		sty $13
+		sty v12 + $1
 		bne l1929
 
 l18EF:
@@ -1188,94 +2067,94 @@ l18EF:
 		and #$fc
 		asl 
 		tay 
-		lda $1371, x
-		sta $0a
-		lda $1439, x
+		lda bitmap_row_lo, x
+		sta v0a
+		lda bitmap_row_hi, x
 		adc #$00
-		sta $0b
+		sta v0a + $1
 		pla 
 		and #$03
 		tax 
-		lda ($0a), y
-		and $136d, x
+		lda (v0a), y
+		and pixel_bits, x
 		rts 
 
 l190A:
-		ldy $13
+		ldy v12 + $1
 		bne l190F
 		rts 
 
 l190F:
 		dey 
-		lda $0ef0, y
-		sta $12
+		lda list_0ef0, y
+		sta v12
 		dey 
-		lda $0ef0, y
-		sta $0d
+		lda list_0ef0, y
+		sta v0d
 		dey 
-		lda $0ef0, y
-		sta $10
+		lda list_0ef0, y
+		sta v10
 		dey 
-		lda $0ef0, y
-		sta $0e
-		sty $13
+		lda list_0ef0, y
+		sta v0e
+		sty v12 + $1
 
 l1929:
-		lda $0e
+		lda v0e
 		clc 
-		adc $10
+		adc v10
 		ror 
 		cmp #$a0
 		bcs l190A
-		sta $0c
-		sta $06
-		ldx $0d
+		sta v0c
+		sta pointer_06
+		ldx v0d
 		pha 
 		and #$fc
 		asl 
 		tay 
-		lda $1371, x
-		sta $0a
-		lda $1439, x
+		lda bitmap_row_lo, x
+		sta v0a
+		lda bitmap_row_hi, x
 		adc #$00
-		sta $0b
+		sta v0a + $1
 		pla 
 		and #$03
 		tax 
-		lda ($0a), y
-		and $136d, x
+		lda (v0a), y
+		and pixel_bits, x
 		beq l19A7
-		lda $10
-		cmp $0c
+		lda v10
+		cmp v0c
 		beq l1994
 		sbc #$01
-		cmp $0c
+		cmp v0c
 		beq l1994
-		ldx $0c
-		ldy $13
+		ldx v0c
+		ldy v12 + $1
 		txa 
 		adc #$00
-		sta $0ef0, y
+		sta list_0ef0, y
 		iny 
-		lda $10
-		sta $0ef0, y
+		lda v10
+		sta list_0ef0, y
 		iny 
-		lda $0d
-		sta $0ef0, y
+		lda v0d
+		sta list_0ef0, y
 		iny 
-		lda $12
-		sta $0ef0, y
+		lda v12
+		sta list_0ef0, y
 		iny 
-		sty $13
+		sty v12 + $1
 		bne l1989
-		lda $13
+		lda v12 + $1
 		sec 
 		sbc #$04
-		sta $13
+		sta v12 + $1
 
 l1989:
-		stx $10
-		cpx $0e
+		stx v10
+		cpx v0e
 		bne l1992
 		jmp l190A
 
@@ -1283,9 +2162,9 @@ l1992:
 		bne l1929
 
 l1994:
-		lda $0e
-		sta $10
-		ldx $0d
+		lda v0e
+		sta v10
+		ldx v0d
 		jsr l18EF
 		bne l19A2
 		jmp l1929
@@ -1297,40 +2176,40 @@ l19A2:
 l19A7:
 		tya 
 		pha 
-		lda $0d
+		lda v0d
 		and #$fe
 		tay 
-		lda $17e3, y
-		sta $08
-		lda $17e4, y
-		sta $09
-		lda $08
-		sta $64
-		lda $09
+		lda screen_rows, y
+		sta pointer_08
+		lda screen_rows + $1, y
+		sta pointer_08 + $1
+		lda pointer_08
+		sta pointer_64
+		lda pointer_08 + $1
 		clc 
 		adc #$87
-		sta $65
-		lda $0c
+		sta pointer_64 + $1
+		lda v0c
 		lsr 
 		lsr 
-		sta $18
+		sta v18
 		pla 
 		tay 
 		jsr l17AE
 
 l19CE:
-		lda ($0a), y
+		lda (v0a), y
 
 l19D0:
-		and $136d, x
+		and pixel_bits, x
 		bne l1A1F
-		lda $136d, x
-		and $1368
-		ora ($0a), y
-		sta ($0a), y
+		lda pixel_bits, x
+		and v1368
+		ora (v0a), y
+		sta (v0a), y
 		dex 
-		dec $06
-		lda $06
+		dec pointer_06
+		lda pointer_06
 		cmp #$ff
 		beq l1A1F
 		cpx #$ff
@@ -1342,88 +2221,88 @@ l19EC:
 		eor #$ff
 		adc #$01
 		clc 
-		adc $0a
-		sta $0a
-		lda $0b
+		adc v0a
+		sta v0a
+		lda v0a + $1
 		sbc #$00
-		sta $0b
+		sta v0a + $1
 		ldx #$03
-		lda ($0a), y
+		lda (v0a), y
 		and #$03
 		bne l1A1F
-		dec $18
+		dec v18
 		jsr l17AE
-		lda ($0a), y
+		lda (v0a), y
 		bne l19D0
-		lda $1368
-		sta ($0a), y
-		lda $06
+		lda v1368
+		sta (v0a), y
+		lda pointer_06
 		sec 
 		sbc #$04
-		sta $06
+		sta pointer_06
 		bcs l19EC
 		bcc l1A1F
 
 l1A1F:
-		inc $06
-		lda $0e
-		sta $0f
-		ldx $06
-		stx $0e
+		inc pointer_06
+		lda v0e
+		sta v0e + $1
+		ldx pointer_06
+		stx v0e
 		tya 
 		pha 
-		lda $0d
+		lda v0d
 		and #$fe
 		tay 
-		lda $17e3, y
-		sta $08
-		lda $17e4, y
-		sta $09
-		lda $08
-		sta $64
-		lda $09
+		lda screen_rows, y
+		sta pointer_08
+		lda screen_rows + $1, y
+		sta pointer_08 + $1
+		lda pointer_08
+		sta pointer_64
+		lda pointer_08 + $1
 		clc 
 		adc #$87
-		sta $65
-		lda $0c
+		sta pointer_64 + $1
+		lda v0c
 		lsr 
 		lsr 
-		sta $18
+		sta v18
 		pla 
 		tay 
 		jsr l17AE
-		lda $0c
-		sta $06
-		ldx $0d
+		lda v0c
+		sta pointer_06
+		ldx v0d
 		pha 
 		and #$fc
 		asl 
 		tay 
-		lda $1371, x
-		sta $0a
-		lda $1439, x
+		lda bitmap_row_lo, x
+		sta v0a
+		lda bitmap_row_hi, x
 		adc #$00
-		sta $0b
+		sta v0a + $1
 		pla 
 		and #$03
 		tax 
 		bcc l1A7E
 
 l1A6D:
-		lda ($0a), y
+		lda (v0a), y
 
 l1A6F:
-		and $136d, x
+		and pixel_bits, x
 		bne l1AB9
-		lda $136d, x
-		and $1368
-		ora ($0a), y
-		sta ($0a), y
+		lda pixel_bits, x
+		and v1368
+		ora (v0a), y
+		sta (v0a), y
 
 l1A7E:
 		inx 
-		inc $06
-		lda $06
+		inc pointer_06
+		lda pointer_06
 		cmp #$a0
 		bcs l1AB9
 		cpx #$04
@@ -1432,199 +2311,202 @@ l1A7E:
 l1A8B:
 		lda #$08
 		clc 
-		adc $0a
-		sta $0a
-		lda $0b
+		adc v0a
+		sta v0a
+		lda v0a + $1
 		adc #$00
-		sta $0b
+		sta v0a + $1
 		ldx #$00
-		lda ($0a), y
+		lda (v0a), y
 		and #$c0
 		bne l1AB9
-		inc $18
+		inc v18
 		jsr l17AE
-		lda ($0a), y
+		lda (v0a), y
 		bne l1A6F
-		lda $1368
-		sta ($0a), y
-		lda $06
+		lda v1368
+		sta (v0a), y
+		lda pointer_06
 		clc 
 		adc #$04
-		sta $06
+		sta pointer_06
 		cmp #$a0
 		bcc l1A8B
 
 l1AB9:
-		dec $06
-		lda $10
-		sta $11
-		ldx $06
-		stx $10
-		cpx $0e
+		dec pointer_06
+		lda v10
+		sta v10 + $1
+		ldx pointer_06
+		stx v10
+		cpx v0e
 		bcs l1ACA
 		jmp l1BE3
 
 l1ACA:
-		lda $0e
+		lda v0e
 		sec 
-		sbc $0f
+		sbc v0e + $1
 		bcs l1B04
 		cmp #$fe
 		bcs l1B2D
-		ldy $13
-		lda $0e
-		sta $0ef0, y
+		ldy v12 + $1
+		lda v0e
+		sta list_0ef0, y
 		iny 
-		lda $0f
-		sta $0ef0, y
+		lda v0e + $1
+		sta list_0ef0, y
 		iny 
-		lda $0d
+		lda v0d
 		sec 
-		sbc $12
-		sta $0ef0, y
+		sbc v12
+		sta list_0ef0, y
 		iny 
-		lda $12
+		lda v12
 		clc 
 		eor #$ff
 		adc #$01
-		sta $0ef0, y
+		sta list_0ef0, y
 		iny 
-		sty $13
+		sty v12 + $1
 		bne l1B2D
-		lda $13
+		lda v12 + $1
 		sec 
 		sbc #$04
-		sta $13
+		sta v12 + $1
 		bne l1B2D
 
 l1B04:
 		cmp #$03
 		bcc l1B2D
-		ldy $13
-		lda $0f
-		sta $0ef0, y
+		ldy v12 + $1
+		lda v0e + $1
+		sta list_0ef0, y
 		iny 
-		lda $0e
-		sta $0ef0, y
+		lda v0e
+		sta list_0ef0, y
 		iny 
-		lda $0d
-		sta $0ef0, y
+		lda v0d
+		sta list_0ef0, y
 		iny 
-		lda $12
-		sta $0ef0, y
+		lda v12
+		sta list_0ef0, y
 		iny 
-		sty $13
+		sty v12 + $1
 		bne l1B2D
-		lda $13
+		lda v12 + $1
 		sec 
 		sbc #$04
-		sta $13
+		sta v12 + $1
 
 l1B2D:
-		lda $10
+		lda v10
 		sec 
-		sbc $11
+		sbc v10 + $1
 		bcs l1B5F
 		cmp #$fe
 		bcs l1B90
-		ldy $13
-		lda $10
-		sta $0ef0, y
+		ldy v12 + $1
+		lda v10
+		sta list_0ef0, y
 		iny 
-		lda $11
-		sta $0ef0, y
+		lda v10 + $1
+		sta list_0ef0, y
 		iny 
-		lda $0d
-		sta $0ef0, y
+		lda v0d
+		sta list_0ef0, y
 		iny 
-		lda $12
-		sta $0ef0, y
+		lda v12
+		sta list_0ef0, y
 		iny 
-		sty $13
+		sty v12 + $1
 		bne l1B90
-		lda $13
+		lda v12 + $1
 		sec 
 		sbc #$04
-		sta $13
+		sta v12 + $1
 		bne l1B90
 
 l1B5F:
 		cmp #$03
 		bcc l1B90
-		ldy $13
-		lda $11
-		sta $0ef0, y
+		ldy v12 + $1
+		lda v10 + $1
+		sta list_0ef0, y
 		iny 
-		lda $10
-		sta $0ef0, y
+		lda v10
+		sta list_0ef0, y
 		iny 
-		lda $0d
+		lda v0d
 		sec 
-		sbc $12
-		sta $0ef0, y
+		sbc v12
+		sta list_0ef0, y
 		iny 
-		lda $12
+		lda v12
 		clc 
 		eor #$ff
 		adc #$01
-		sta $0ef0, y
+		sta list_0ef0, y
 		iny 
-		sty $13
+		sty v12 + $1
 		bne l1B90
-		lda $13
+		lda v12 + $1
 		sec 
 		sbc #$04
-		sta $13
+		sta v12 + $1
 
 l1B90:
-		ldy $13
+		ldy v12 + $1
 		beq l1BA1
 		dey 
 		dey 
 		dey 
 		lda #$ff
-		sta $12ef
+		sta v12ef
 		lda #$0a
-		sta $107a
+		sta v107a
 
 l1BA1:
-		lda $0d
+		lda v0d
 		clc 
-		adc $12
-		sta $0d
-		cmp $67
+		adc v12
+		sta v0d
+		cmp v67
 		bcc l1BAF
 		jmp l190A
 
 l1BAF:
 		jmp l1929
-*=$1bb4
+
+v1bb2:
+		.byte	$0d
+v1bb3:		.byte	$d0
 
 l1BB4:
 		ldy #$02
 
 l1BB6:
-		cpy $127c
+		cpy v127c
 		beq l1BE2
-		lda $117c, y
+		lda buffer_117c, y
 		iny 
-		ldx $117c, y
-		sty $18
+		ldx buffer_117c, y
+		sty v18
 		jsr lA026
 		bne l1BD5
-		lda $136d, x
-		and $1368
-		ora ($0a), y
-		sta ($0a), y
+		lda pixel_bits, x
+		and v1368
+		ora (v0a), y
+		sta (v0a), y
 		bne l1BDC
 
 l1BD5:
 		lda #$ff
-		ldy $18
-		sta $107c, y
+		ldy v18
+		sta buffer_107c, y
 
 l1BDC:
-		ldy $18
+		ldy v18
 		iny 
 		jmp l1BB6
 
@@ -1635,127 +2517,129 @@ l1BE3:
 		jmp l1BE3
 
 l1BE6:
-		lda $1f26
-		sta $28
+		lda ball_sprite_y
+		sta v28
 		lda #$02
-		sta $127c
+		sta v127c
 		lda #$ff
-		sta $12ee
+		sta v12ee
 		jsr lA020
 		jmp l1D13
-*=$1bfc
+
+unused_1bfb:
+		.byte	$ea
 
 l1BFC:
 		ldy #$00
-		sty $107b
-		lda ($04), y
+		sty v107b
+		lda (pointer_04), y
 		iny 
 		jsr l1D59
-		lda $1f24
+		lda ball_sprite_x
 		clc 
-		adc $1f20
-		sta $1f20
-		lda $1f25
-		adc $1f21
-		sta $1f21
-		lda ($04), y
+		adc v1f20
+		sta v1f20
+		lda ball_sprite_x + $1
+		adc v1f21
+		sta v1f21
+		lda (pointer_04), y
 		iny 
 		jsr l1D75
-		lda $1f26
+		lda ball_sprite_y
 		clc 
-		adc $1f22
-		sta $1f22
-		lda $1f27
-		adc $1f23
-		sta $1f23
-		lda $1f20
-		sta $14
-		lda $1f21
-		sta $15
-		lda $1f20
-		sta $1f18
-		lda $1f21
-		sta $1f19
-		lda $1f22
-		sta $16
-		lda $1f23
-		sta $17
-		lda $1f22
-		sta $1f1e
-		lda $1f23
-		sta $1f1f
+		adc v1f22
+		sta v1f22
+		lda ball_sprite_y + $1
+		adc v1f23
+		sta v1f23
+		lda v1f20
+		sta v14
+		lda v1f21
+		sta v15
+		lda v1f20
+		sta v1f18
+		lda v1f21
+		sta v1f19
+		lda v1f22
+		sta v16
+		lda v1f23
+		sta v17
+		lda v1f22
+		sta v1f1e
+		lda v1f23
+		sta v1f1f
 
 l1C5F:
-		lda ($04), y
+		lda (pointer_04), y
 		iny 
 		cmp #$80
 		beq l1CA0
 		jsr l1D59
-		lda $1f24
+		lda ball_sprite_x
 		clc 
-		adc $1f20
-		sta $1f20
-		lda $1f25
-		adc $1f21
-		sta $1f21
-		lda ($04), y
+		adc v1f20
+		sta v1f20
+		lda ball_sprite_x + $1
+		adc v1f21
+		sta v1f21
+		lda (pointer_04), y
 		iny 
-		sty $1f16
+		sty v1f16
 		jsr l1D75
-		lda $1f26
+		lda ball_sprite_y
 		clc 
-		adc $1f22
-		sta $1f22
-		lda $1f27
-		adc $1f23
-		sta $1f23
+		adc v1f22
+		sta v1f22
+		lda ball_sprite_y + $1
+		adc v1f23
+		sta v1f23
 		jsr l1DFF
-		ldy $1f16
+		ldy v1f16
 		bne l1C5F
 
 l1CA0:
-		sty $1f16
-		lda $1f18
-		sta $1f20
-		lda $1f19
-		sta $1f21
-		lda $1f1e
-		sta $1f22
-		lda $1f1f
-		sta $1f23
+		sty v1f16
+		lda v1f18
+		sta v1f20
+		lda v1f19
+		sta v1f21
+		lda v1f1e
+		sta v1f22
+		lda v1f1f
+		sta v1f23
 		jsr l1DFF
-		ldy $1f16
-		lda ($04), y
+		ldy v1f16
+		lda (pointer_04), y
 		iny 
-		sty $1f16
+		sty v1f16
 		pha 
 		jsr l1BB4
-		lda $1f24
-		sta $1f20
-		lda $1f25
-		sta $1f21
-		lda $1f26
-		sta $1f22
-		lda $1f27
-		sta $1f23
+		lda ball_sprite_x
+		sta v1f20
+		lda ball_sprite_x + $1
+		sta v1f21
+		lda ball_sprite_y
+		sta v1f22
+		lda ball_sprite_y + $1
+		sta v1f23
 		jsr l1DE4
 		bcs l1CF3
-		ldx $1f24
-		ldy $1f26
+		ldx ball_sprite_x
+		ldy ball_sprite_y
 		pla 
 		pha 
 		jsr l18AB
 
 l1CF3:
-		ldx $127c
+		ldx v127c
 		dex 
 		cpx #$02
 		bcc l1D0F
-		lda $107c, x
+		lda buffer_107c, x
 		tay 
 		dex 
-		lda $107c, x
-		stx $127c
+		lda buffer_107c, x
+		stx v127c
 		tax 
 		pla 
 		pha 
@@ -1764,10 +2648,10 @@ l1CF3:
 
 l1D0F:
 		pla 
-		ldy $1f16
+		ldy v1f16
 
 l1D13:
-		lda ($04), y
+		lda (pointer_04), y
 		iny 
 		cmp #$80
 		bne l1D1B
@@ -1775,54 +2659,54 @@ l1D13:
 
 l1D1B:
 		jsr l1D59
-		lda $1f20
+		lda v1f20
 		clc 
-		adc $1f24
-		sta $1f24
-		lda $1f21
-		adc $1f25
-		sta $1f25
-		lda ($04), y
+		adc ball_sprite_x
+		sta ball_sprite_x
+		lda v1f21
+		adc ball_sprite_x + $1
+		sta ball_sprite_x + $1
+		lda (pointer_04), y
 		iny 
 		jsr l1D75
-		lda $1f22
+		lda v1f22
 		clc 
-		adc $1f26
-		sta $1f26
-		lda $1f23
-		adc $1f27
-		sta $1f27
+		adc ball_sprite_y
+		sta ball_sprite_y
+		lda v1f23
+		adc ball_sprite_y + $1
+		sta ball_sprite_y + $1
 		tya 
 		clc 
-		adc $04
-		sta $04
-		lda $05
+		adc pointer_04
+		sta pointer_04
+		lda pointer_04 + $1
 		adc #$00
-		sta $05
+		sta pointer_04 + $1
 		jmp lA023
 
 l1D59:
-		stx $1f17
-		sty $1f16
-		ldx $1f14
-		stx $1f15
+		stx v1f17
+		sty v1f16
+		ldx v1f14
+		stx v1f15
 		jsr l1D90
-		sta $1f21
-		stx $1f20
-		ldx $1f17
-		ldy $1f16
+		sta v1f21
+		stx v1f20
+		ldx v1f17
+		ldy v1f16
 		rts 
 
 l1D75:
-		stx $1f17
-		sty $1f16
+		stx v1f17
+		sty v1f16
 		ldy #$ff
-		sty $1f15
+		sty v1f15
 		jsr l1D90
-		stx $1f22
-		sta $1f23
-		ldx $1f17
-		ldy $1f16
+		stx v1f22
+		sta v1f23
+		ldx v1f17
+		ldy v1f16
 		rts 
 
 l1D90:
@@ -1836,19 +2720,19 @@ l1D90:
 l1D9A:
 		tax 
 		lda #$00
-		jsr l0900
-		sta $0e
-		lda $1f15
+		jsr multiply
+		sta v0e
+		lda v1f15
 		bne l1DA8
 		dex 
 
 l1DA8:
-		stx $0f
-		lda $0ba0
-		ldx $0ba1
+		stx v0e + $1
+		lda math_words + $a
+		ldx math_words + $b
 		jsr l094F
-		lda $0e
-		ldx $0f
+		lda v0e
+		ldx v0e + $1
 		jsr l091F
 		plp 
 		bcc l1DCA
@@ -1864,19 +2748,21 @@ l1DA8:
 
 l1DCA:
 		rts 
-*=$1dcd
+
+unused_1dcb:
+		.byte	$00, $00
 
 l1DCD:
-		lda $15
-		ora $17
+		lda v15
+		ora v17
 		bne l1DE2
-		lda $14
+		lda v14
 		cmp #$a0
 		bcs l1DE2
-		lda $16
-		cmp $29
+		lda v16
+		cmp v29
 		bcc l1DE2
-		cmp $67
+		cmp v67
 		rts 
 
 l1DE2:
@@ -1884,16 +2770,16 @@ l1DE2:
 		rts 
 
 l1DE4:
-		lda $1f21
-		ora $1f23
+		lda v1f21
+		ora v1f23
 		bne l1DFD
-		lda $1f20
+		lda v1f20
 		cmp #$a0
 		bcs l1DFD
-		lda $1f22
-		cmp $29
+		lda v1f22
+		cmp v29
 		bcc l1DFD
-		cmp $67
+		cmp v67
 		rts 
 
 l1DFD:
@@ -1901,16 +2787,16 @@ l1DFD:
 		rts 
 
 l1DFF:
-		lda $1f21
+		lda v1f21
 		pha 
-		lda $1f20
+		lda v1f20
 		pha 
-		lda $1f23
+		lda v1f23
 		pha 
-		lda $1f22
+		lda v1f22
 		pha 
 		lda #$00
-		sta $17ad
+		sta v17ad
 		jsr l1DCD
 		bcc l1E1C
 		jmp l1ED2
@@ -1920,84 +2806,84 @@ l1E1C:
 		bcs l1E41
 
 l1E21:
-		ldx $1f20
-		ldy $1f22
+		ldx v1f20
+		ldy v1f22
 		jsr l165F
 
 l1E2A:
 		lda #$ff
-		sta $107b
+		sta v107b
 		lda #$00
-		sta $17ad
+		sta v17ad
 		pla 
-		sta $16
+		sta v16
 		pla 
-		sta $17
+		sta v17
 		pla 
-		sta $14
+		sta v14
 		pla 
-		sta $15
+		sta v15
 		rts 
 
 l1E41:
-		lda $1f20
-		sta $1f1a
-		lda $1f21
-		sta $1f1b
-		lda $1f22
-		sta $1f1c
-		lda $1f23
-		sta $1f1d
-		lda $1f20
+		lda v1f20
+		sta v1f1a
+		lda v1f21
+		sta v1f1b
+		lda v1f22
+		sta v1f1c
+		lda v1f23
+		sta v1f1d
+		lda v1f20
 		clc 
-		adc $14
-		sta $1f20
-		lda $1f21
-		adc $15
+		adc v14
+		sta v1f20
+		lda v1f21
+		adc v15
 		asl 
 		php 
 		ror 
 		plp 
 		ror 
-		sta $1f21
-		ror $1f20
-		lda $1f22
+		sta v1f21
+		ror v1f20
+		lda v1f22
 		clc 
-		adc $16
-		sta $1f22
-		lda $1f23
-		adc $17
+		adc v16
+		sta v1f22
+		lda v1f23
+		adc v17
 		asl 
 		php 
 		ror 
 		plp 
 		ror 
-		sta $1f23
-		ror $1f22
-		lda $1f20
-		cmp $1f1a
+		sta v1f23
+		ror v1f22
+		lda v1f20
+		cmp v1f1a
 		bne l1E99
-		lda $1f21
-		cmp $1f1b
+		lda v1f21
+		cmp v1f1b
 
 l1E99:
 		bne l1EC2
-		lda $1f22
-		cmp $1f1c
+		lda v1f22
+		cmp v1f1c
 		bne l1EA9
-		lda $1f23
-		cmp $1f1d
+		lda v1f23
+		cmp v1f1d
 
 l1EA9:
 		bne l1EC2
-		lda $14
-		sta $1f20
-		lda $15
-		sta $1f21
-		lda $16
-		sta $1f22
-		lda $17
-		sta $1f23
+		lda v14
+		sta v1f20
+		lda v15
+		sta v1f21
+		lda v16
+		sta v1f22
+		lda v17
+		sta v1f23
 		jmp l1E21
 
 l1EC2:
@@ -2007,7 +2893,7 @@ l1EC2:
 
 l1ECA:
 		lda #$ff
-		sta $17ac
+		sta v17ac
 		jmp l1E21
 
 l1ED2:
@@ -2016,67 +2902,92 @@ l1ED2:
 		jmp l1E2A
 
 l1EDA:
-		lda $1f21
+		lda v1f21
 		pha 
-		lda $1f20
+		lda v1f20
 		pha 
-		lda $1f23
+		lda v1f23
 		pha 
-		lda $1f22
+		lda v1f22
 		pha 
-		lda $14
-		sta $1f20
-		lda $15
-		sta $1f21
-		lda $16
-		sta $1f22
-		lda $17
-		sta $1f23
+		lda v14
+		sta v1f20
+		lda v15
+		sta v1f21
+		lda v16
+		sta v1f22
+		lda v17
+		sta v1f23
 		pla 
-		sta $16
+		sta v16
 		pla 
-		sta $17
+		sta v17
 		pla 
-		sta $14
+		sta v14
 		pla 
-		sta $15
+		sta v15
 		lda #$ff
-		sta $17ad
+		sta v17ad
 		jmp l1E41
-*=$1f2a
+
+unused_1f12:
+		.byte	$af, $32
+v1f14:		.byte	$0a
+v1f15:		.byte	$ff
+v1f16:		.byte	$10
+v1f17:		.byte	$01
+v1f18:		.byte	$a9
+v1f19:		.byte	$00
+v1f1a:		.byte	$a0
+v1f1b:		.byte	$00
+v1f1c:		.byte	$6f
+v1f1d:		.byte	$00
+v1f1e:		.byte	$97
+v1f1f:		.byte	$00
+v1f20:		.byte	$9a
+v1f21:		.byte	$00
+v1f22:		.byte	$74
+v1f23:		.byte	$00
+
+ball_sprite_x:
+		.word	$0160
+ball_sprite_y:		.word	$ffdb
+
+unused_1f28:
+		.byte	$32, $63
 
 l1F2A:
 		ldy #$00
-		cpy $27
+		cpy v27
 		bne l1F33
 		jmp l1FC4
 
 l1F33:
-		lda $22db, y
+		lda table_22db, y
 		sec 
 		sbc #$30
-		sta $1f24
+		sta ball_sprite_x
 		lda #$00
 		sbc #$00
-		sta $1f25
-		lda $2c5f
+		sta ball_sprite_x + $1
+		lda v2c5f
 		sec 
-		sbc $23db, y
-		sta $1f26
+		sbc table_23db, y
+		sta ball_sprite_y
 		lda #$00
 		sbc #$00
-		sta $1f27
-		lda $23db, y
+		sta ball_sprite_y + $1
+		lda table_23db, y
 		cmp #$50
 		bcs l1FB3
 		and #$fe
 		cmp #$10
 		bcs l1F71
 		tax 
-		lda $1fc7, x
-		sta $0ba0
-		lda $1fc8, x
-		sta $0ba1
+		lda table_1fc7, x
+		sta math_words + $a
+		lda table_1fc7 + $1, x
+		sta math_words + $b
 		jmp l1F83
 
 l1F71:
@@ -2085,16 +2996,16 @@ l1F71:
 		lsr 
 		and #$fe
 		tax 
-		lda $1fe7, x
-		sta $0ba0
-		lda $1fe8, x
-		sta $0ba1
+		lda table_1fe7, x
+		sta math_words + $a
+		lda table_1fe7 + $1, x
+		sta math_words + $b
 
 l1F83:
-		lda $21db, y
-		sty $2007
+		lda table_21db, y
+		sty v2007
 		ldx #$00
-		stx $1f14
+		stx v1f14
 		cmp #$10
 		bcc l1F97
 		sec 
@@ -2104,26 +3015,25 @@ l1F83:
 l1F97:
 		cmp #$09
 		bcc l1FA1
-		sta $1f14
+		sta v1f14
 		sec 
 		sbc #$09
 
 l1FA1:
 		asl 
 		tax 
-		lda $e000, x
-d1FA5 = $1fa5
-		sta $04
-		lda $e001, x
-		sta $05
+		lda shapes, x
+		sta pointer_04
+		lda shapes + $1, x
+		sta pointer_04 + $1
 		jsr l1BE6
-		ldy $2007
+		ldy v2007
 
 l1FB3:
 		iny 
 		cpy #$30
 		beq l1FC4
-		cpy $27
+		cpy v27
 		bcs l1FBF
 		jmp l1F33
 
@@ -2133,45 +3043,48 @@ l1FBF:
 
 l1FC4:
 		jmp l2539
-*=$2008
+
+table_1fc7:
+		.word	$fc00, $fd00, $fe00, $fe00, $ff00, $ff00, $ff00, $ff00, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0100
+table_1fe7:
+		.word	$fc00, $0000, $0100, $0100, $0200, $0200, $0200, $0200, $0300, $0300, $0300, $0300, $0300, $0400, $0400, $0400
+
+v2007:
+		.byte	$25
 
 l2008:
 		lda #$00
-		sta $2c3e
+		sta v2c3e
 		ldx #$1d
 
 l200F:
-		sta $2bfc, x
+		sta v2bfc, x
 		dex 
 		bne l200F
-		sta $27
-		lda $1b
-		sta $10
-		lda $1c
-		sta $11
-		lda $1d
-l2020 = $2020
-		sta $12
-		lda $1e
-		sta $13
+		sta v27
+		lda ball_x
+		sta v10
+		lda ball_x + $1
+		sta v10 + $1
+		lda ball_y
+		sta v12
+		lda ball_y + $1
+		sta v12 + $1
 		jsr l24DB
 		jsr l2121
 		lda #$df
-		sta $211f
+		sta step_pointer
 		lda #$20
-		sta $2120
+		sta step_pointer + $1
 		ldy #$09
-		lda $0db8
+		lda direction
 		asl 
 		asl 
 		asl 
-
-l203F:
 		tax 
 		and #$08
 		beq l204B
 		ldy #$05
-l2045 = $2045
 		txa 
 		clc 
 		adc #$02
@@ -2180,34 +3093,34 @@ l2045 = $2045
 l204B:
 		txa 
 		clc 
-		adc $211f
-		sta $211f
-		lda $2120
+		adc step_pointer
+		sta step_pointer
+		lda step_pointer + $1
 		adc #$00
-		sta $2120
+		sta step_pointer + $1
 
 l205B:
-		sty $20de
-		lda $1b
-		sta $10
-		lda $1c
-		sta $11
-		lda $1d
-		sta $12
-		lda $1e
-		sta $13
-		lda $211f
-		sta $08
-		lda $2120
-		sta $09
-		lda ($08), y
+		sty v20de
+		lda ball_x
+		sta v10
+		lda ball_x + $1
+		sta v10 + $1
+		lda ball_y
+		sta v12
+		lda ball_y + $1
+		sta v12 + $1
+		lda step_pointer
+		sta pointer_08
+		lda step_pointer + $1
+		sta pointer_08 + $1
+		lda (pointer_08), y
 		bmi l2089
 		clc 
-		adc $10
-		sta $10
-		lda $11
+		adc v10
+		sta v10
+		lda v10 + $1
 		adc #$00
-		sta $11
+		sta v10 + $1
 		bcc l209E
 
 l2089:
@@ -2218,22 +3131,22 @@ l2089:
 		eor #$ff
 		adc #$01
 		clc 
-		adc $10
-		sta $10
-		lda $11
+		adc v10
+		sta v10
+		lda v10 + $1
 		sbc #$00
-		sta $11
+		sta v10 + $1
 
 l209E:
 		dey 
-		lda ($08), y
+		lda (pointer_08), y
 		bmi l20B0
 		clc 
-		adc $12
-		sta $12
-		lda $13
+		adc v12
+		sta v12
+		lda v12 + $1
 		adc #$00
-		sta $13
+		sta v12 + $1
 		bcc l20C5
 
 l20B0:
@@ -2244,18 +3157,18 @@ l20B0:
 		eor #$ff
 		adc #$01
 		clc 
-		adc $12
-		sta $12
-		lda $13
+		adc v12
+		sta v12
+		lda v12 + $1
 		sbc #$00
-		sta $13
+		sta v12 + $1
 
 l20C5:
 		dey 
-		sty $20de
+		sty v20de
 		jsr l24DB
 		jsr l2121
-		ldy $20de
+		ldy v20de
 		bmi l20D7
 		jmp l205B
 
@@ -2263,238 +3176,306 @@ l20D7:
 		jsr l2193
 		jsr l1F2A
 		rts 
-*=$2121
+
+v20de:
+		.byte	$ff
+
+; 8 steps of +-64 per direction, read through step_pointer
+direction_steps:
+		.char	64, 64, 64, -64, 64, 0, 0, 64, 0, -64, 64, 64, 0, 64, 64, 0
+		.char	-64, 64, 64, 64, 0, 64, -64, 0, 64, 0, -64, 64, -64, 0, 0, 64
+		.char	-64, -64, -64, 64, -64, 0, 0, -64, 0, 64, -64, -64, 0, -64, -64, 0
+		.char	64, -64, -64, -64, 0, -64, 64, 0, -64, 0, 64, -64, 64, 0, 0, -64
+
+step_pointer:
+		.word	$20df
 
 l2121:
 		lda #$10
-		sta $2538
-		inc $08
+		sta v2538
+		inc pointer_08
 		bne l212C
-		inc $09
+		inc pointer_08 + $1
 
 l212C:
 		ldy #$00
 
 l212E:
 		iny 
-		lda ($08), y
+		lda (pointer_08), y
 		cmp #$80
 		beq l2184
 		clc 
-		adc $23
-		sta $10
+		adc v23
+		sta v10
 		lda #$00
-		adc $24
-		sta $11
+		adc v24
+		sta v10 + $1
 		iny 
-		lda ($08), y
+		lda (pointer_08), y
 		clc 
-		adc $25
-		sta $12
+		adc v25
+		sta v12
 		lda #$00
-		adc $26
-		sta $13
+		adc v26
+		sta v12 + $1
 		iny 
 		tya 
 		clc 
-		adc $08
-		sta $08
-		lda $09
+		adc pointer_08
+		sta pointer_08
+		lda pointer_08 + $1
 		adc #$00
-		sta $09
+		sta pointer_08 + $1
 		jsr l0BA4
-		lda $2c5e
+		lda v2c5e
 		bmi l212C
 		jsr l0B06
 		ldy #$00
-		lda ($08), y
-		ora $2538
-		ldy $27
-		sta $21db, y
-		lda $1f24
-		sta $22db, y
-		lda $1f26
-		sta $23db, y
-		inc $27
+		lda (pointer_08), y
+		ora v2538
+		ldy v27
+		sta table_21db, y
+		lda ball_sprite_x
+		sta table_22db, y
+		lda ball_sprite_y
+		sta table_23db, y
+		inc v27
 		bne l212C
-		dec $27
+		dec v27
 
 l2184:
-		lda $2538
+		lda v2538
 		beq l2190
 		lda #$00
-		sta $2538
+		sta v2538
 		beq l212E
 
 l2190:
 		jmp l2B87
 
 l2193:
-		lda $27
-		dec $27
+		lda v27
+		dec v27
 
 l2197:
 		ldy #$00
-		sty $0e
+		sty v0e
 
 l219B:
-		lda $23db, y
-		cmp $23dc, y
+		lda table_23db, y
+		cmp table_23db + $1, y
 		bcs l21CF
-		lda $23db, y
+		lda table_23db, y
 		pha 
-		lda $22db, y
+		lda table_22db, y
 		pha 
-		lda $21db, y
+		lda table_21db, y
 		pha 
-		lda $22dc, y
-		sta $22db, y
-		lda $23dc, y
-		sta $23db, y
-		lda $21dc, y
-		sta $21db, y
+		lda table_22db + $1, y
+		sta table_22db, y
+		lda table_23db + $1, y
+		sta table_23db, y
+		lda table_21db + $1, y
+		sta table_21db, y
 		pla 
-		sta $21dc, y
+		sta table_21db + $1, y
 		pla 
-		sta $22dc, y
+		sta table_22db + $1, y
 		pla 
-		sta $23dc, y
-		inc $0e
+		sta table_23db + $1, y
+		inc v0e
 
 l21CF:
 		iny 
-		cpy $27
+		cpy v27
 		bcc l219B
-		lda $0e
+		lda v0e
 		bne l2197
-		inc $27
+		inc v27
 		rts 
-*=$24db
+
+table_21db:
+		.byte	$00, $07, $09, $01, $01, $0a, $0b, $0b, $04, $01, $0b, $05, $0c, $0a, $04, $09
+		.byte	$04, $03, $07, $0e, $00, $06, $01, $06, $00, $06, $00, $09, $05, $05, $05, $0c
+		.byte	$05, $0e, $05, $05, $0c, $0a, $ed, $4b, $fe, $41, $d2, $e9, $4b, $fe, $3a, $d2
+		.byte	$ed, $4b, $04, $c3, $d2, $4b, $4f, $d1, $c9, $c5, $d5, $21, $80, $00, $7e, $36
+		.byte	$00, $b7, $47, $ca, $1f, $4c, $23, $7e, $fe, $20, $c2, $08, $4c, $05, $c3, $fa
+		.byte	$4b, $11, $20, $48, $78, $2b, $04, $12, $13, $23, $05, $ca, $19, $4c, $7e, $c3
+		.byte	$0e, $4c, $32, $66, $42, $c3, $3f, $4c, $af, $32, $66, $42, $3a, $5d, $42, $b7
+		.byte	$c2, $32, $4c, $cd, $c0, $4c, $3e, $2a, $cd, $93, $4c, $0e, $0a, $11, $1f, $48
+		.byte	$cd, $05, $00, $3e, $0a, $cd, $93, $4c, $d1, $c1, $3a, $20, $48, $21, $21, $48
+		.byte	$e5, $22, $71, $48, $85, $6f, $3e, $00, $8c, $67, $36, $0d, $23, $3e, $0a, $77
+		.byte	$e1, $3a, $5d, $42, $b7, $c2, $7b, $4c, $e5, $21, $21, $48, $7e, $fe, $0d, $ca
+		.byte	$7a, $4c, $d6, $61, $da, $76, $4c, $fe, $1a, $d2, $76, $4c, $c6, $41, $77, $23
+		.byte	$c3, $63, $4c, $e1, $c9, $7e, $23, $fe, $20, $ca, $7c, $4c, $fe, $0a, $ca, $7c
+		.byte	$4c, $fe, $0d, $c2, $ba, $4c, $23, $22, $71, $48, $c9, $f1, $e5, $d5, $c5, $f5
+		.byte	$0e, $02, $e6, $7f, $5f, $cd, $05, $00, $f1, $c1, $d1, $e1, $b7, $c9, $e5, $2a
+		.byte	$71, $48, $2b, $7e, $e6, $7f, $fe, $0a, $23, $cc, $f0, $4b, $23, $22, $71, $48
+table_22db:
+		.byte	$2f, $d3, $67, $c4, $c7, $b0, $ad, $b7, $a7, $a4, $b0, $d9, $d5, $78, $a8, $a6
+		.byte	$aa, $ca, $c4, $ca, $76, $7c, $7f, $9f, $a9, $aa, $b2, $c0, $b9, $c4, $c0, $bc
+		.byte	$c3, $c7, $c1, $c0, $c9, $d9, $c3, $f3, $4c, $f5, $c5, $d5, $e5, $11, $1b, $43
+		.byte	$21, $00, $00, $22, $19, $43, $21, $6b, $42, $3a, $63, $42, $b7, $ca, $24, $4d
+		.byte	$e5, $0e, $1a, $cd, $05, $00, $e1, $7e, $b7, $fa, $24, $4d, $cd, $46, $4d, $d5
+		.byte	$0e, $13, $cd, $05, $00, $d1, $d5, $0e, $16, $cd, $05, $00, $3c, $ca, $bb, $48
+		.byte	$e1, $cd, $46, $4d, $0e, $0f, $cd, $05, $00, $3c, $ca, $b5, $48, $e1, $d1, $c1
+		.byte	$f1, $c9, $f5, $c5, $d5, $e5, $21, $00, $02, $22, $1d, $46, $11, $1f, $46, $0e
+		.byte	$1a, $cd, $05, $00, $21, $ad, $42, $7e, $b7, $fa, $24, $4d, $c3, $18, $4d, $e5
+		.byte	$d5, $11, $0c, $00, $19, $af, $16, $04, $77, $23, $15, $c2, $4f, $4d, $11, $10
+		.byte	$00, $19, $77, $e1, $d1, $c9, $f5, $d5, $11, $ad, $42, $1a, $b7, $fa, $7d, $4d
+		.byte	$c5, $e5, $d5, $11, $1f, $46, $0e, $1a, $cd, $05, $00, $d1, $01, $c5, $e5, $0e
+		.byte	$10, $cd, $05, $00, $e1, $c1, $d1, $f1, $c9, $f5, $3a, $61, $42, $b7, $ca, $55
+		.byte	$4a, $d5, $3a, $8c, $42, $3c, $ca, $7d, $4d, $fa, $09, $4e, $3e, $0d, $cd, $1b
+		.byte	$4e, $3e, $0a, $cd, $1b, $4e, $3e, $1a, $cd, $1b, $4e, $e5, $2a, $1b, $44, $11
+		.byte	$1d, $44, $c5, $01, $8c, $42, $cd, $f3, $4d, $11, $1d, $44, $0e, $1a, $cd, $05
+table_23db:
+		.byte	$12, $0f, $0a, $09, $07, $06, $05, $05, $04, $04, $04, $04, $04, $03, $03, $03
+		.byte	$03, $03, $03, $03, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02
+		.byte	$02, $02, $02, $02, $02, $02, $01, $6b, $42, $cd, $f3, $4d, $11, $1b, $43, $0e
+		.byte	$1a, $cd, $05, $00, $c1, $e1, $11, $6b, $42, $c3, $74, $4d, $7c, $b5, $c8, $7d
+		.byte	$e6, $7f, $ca, $fe, $4d, $c6, $80, $17, $17, $e6, $03, $29, $84, $60, $69, $c3
+		.byte	$52, $4e, $3e, $0d, $cd, $1b, $4e, $3e, $0a, $cd, $1b, $4e, $3e, $0c, $cd, $1b
+		.byte	$4e, $d1, $f1, $c9, $f5, $3a, $61, $42, $b7, $ca, $55, $4a, $3a, $8c, $42, $3c
+		.byte	$ca, $92, $4c, $fa, $fa, $4e, $e3, $e5, $d5, $2a, $1b, $44, $7c, $fe, $02, $cc
+		.byte	$4a, $4e, $23, $22, $1b, $44, $11, $1c, $44, $19, $d1, $f1, $f5, $e6, $7f, $77
+		.byte	$f1, $e1, $c9, $11, $1d, $44, $21, $8c, $42, $3e, $04, $f5, $c5, $d5, $e5, $0e
+		.byte	$1a, $cd, $05, $00, $d1, $d5, $0e, $15, $cd, $05, $00, $b7, $c2, $46, $4f, $d1
+		.byte	$e1, $01, $80, $00, $09, $eb, $c1, $f1, $3d, $c2, $52, $4e, $21, $00, $00, $c9
+		.byte	$11, $1b, $43, $3e, $02, $21, $6b, $42, $c3, $52, $4e, $f5, $3a, $63, $42, $b7
+		.byte	$ca, $55, $4a, $3a, $6b, $42, $b7, $fa, $92, $4c, $e3, $e5, $d5, $2a, $19, $43
+		.byte	$7c, $3d, $cc, $77, $4e, $23, $22, $19, $43, $11, $1a, $43, $19, $d1, $f1, $77
+		.byte	$e1, $c9, $3a, $ad, $42, $3c, $ca, $a5, $4c, $fa, $35, $4f, $e5, $d5, $2a, $1d
 
 l24DB:
-		lda $10
+		lda v10
 		and #$c0
-		sta $23
-		lda $11
-		sta $24
-		asl $10
+		sta v23
+		lda v10 + $1
+		sta v24
+		asl v10
 		rol 
-		asl $10
+		asl v10
 		rol 
 		cmp #$07
 		bcs l251D
-		sta $2536
-		lda $12
+		sta v2536
+		lda v12
 		and #$c0
-		sta $25
-		lda $13
-		sta $26
-		asl $12
+		sta v25
+		lda v12 + $1
+		sta v26
+		asl v12
 		rol 
-		asl $12
+		asl v12
 		rol 
 		cmp #$07
 		bcs l251D
-		sta $2537
+		sta v2537
 		asl 
 		asl 
 		asl 
 		clc 
-		adc $2536
+		adc v2536
 		asl 
 		tax 
-		lda $824e, x
-		sta $08
-		lda $824f, x
-		sta $09
+		lda terrain_pointers, x
+		sta pointer_08
+		lda terrain_pointers + $1, x
+		sta pointer_08 + $1
 		rts 
 
 l251D:
 		lda #$ff
-		sta $2536
-		sta $2537
+		sta v2536
+		sta v2537
 		lda #$2e
-		sta $08
+		sta pointer_08
 		lda #$25
-		sta $09
+		sta pointer_08 + $1
 		rts 
-*=$2539
+
+v252e:
+		.byte	$80, $80, $80, $80, $80, $80, $80, $80
+v2536:		.byte	$01
+v2537:		.byte	$05
+v2538:		.byte	$00
 
 l2539:
-		lda $2c5f
+		lda v2c5f
 		clc 
 		adc #$01
-		sta $67
+		sta v67
 		nop 
 		lda #$07
-		sta $2c4f
+		sta v2c4f
 
 l2547:
-		ldx $2c3e
+		ldx v2c3e
 		beq l25C1
 		dex 
 		dex 
-		stx $2c3e
-		lda $2c1a, x
-		sta $08
-		lda $2c1b, x
-		sta $09
-		lda $2c26, x
-		sta $23
-		lda $2c27, x
-		sta $24
-		lda $2c32, x
-		sta $25
-		lda $2c33, x
-		sta $26
+		stx v2c3e
+		lda v2c1a, x
+		sta pointer_08
+		lda v2c1a + $1, x
+		sta pointer_08 + $1
+		lda v2c26, x
+		sta v23
+		lda v2c26 + $1, x
+		sta v24
+		lda v2c32, x
+		sta v25
+		lda v2c32 + $1, x
+		sta v26
 		ldy #$00
 
 l2571:
-		lda ($08), y
+		lda (pointer_08), y
 		cmp #$80
 		beq l2547
-		lda $23
+		lda v23
 		and #$c0
-		ora ($08), y
-		sta $23
-		lda $25
+		ora (pointer_08), y
+		sta v23
+		lda v25
 		and #$c0
 		iny 
-		ora ($08), y
-		sta $25
+		ora (pointer_08), y
+		sta v25
 		iny 
-		lda ($08), y
+		lda (pointer_08), y
 		iny 
 		asl 
 		tax 
-		lda $09
+		lda pointer_08 + $1
 		pha 
-		lda $08
+		lda pointer_08
 		pha 
 		tya 
 		pha 
-		lda $eb35, x
-		sta $08
-		lda $eb36, x
-		sta $09
+		lda shape_eb26 + $f, x
+		sta pointer_08
+		lda shape_eb36, x
+		sta pointer_08 + $1
 		ldy #$06
 		tya 
 		clc 
 		eor #$ff
 		adc #$01
 		clc 
-		adc $08
-		sta $08
-		lda $09
+		adc pointer_08
+		sta pointer_08
+		lda pointer_08 + $1
 		sbc #$00
-		sta $09
+		sta pointer_08 + $1
 		jsr l2703
 		pla 
 		tay 
 		pla 
-		sta $08
+		sta pointer_08
 		pla 
-		sta $09
+		sta pointer_08 + $1
 		jmp l2571
 
 l25C1:
@@ -2506,16 +3487,16 @@ l25C3:
 		jmp l28C0
 
 l25C9:
-		lda $2bfc, x
+		lda v2bfc, x
 		beq l25C3
 		txa 
 		pha 
 		asl 
 		tax 
-		lda $93f3, x
-		sta $08
-		lda $93f4, x
-		sta $09
+		lda hole_shapes_base, x
+		sta pointer_08
+		lda terrain_93bd + $37, x
+		sta pointer_08 + $1
 		lda #$0d
 		cpx #$25
 		bcc l25EA
@@ -2525,7 +3506,7 @@ l25C9:
 		lda #$0c
 
 l25EA:
-		sta $2c4f
+		sta v2c4f
 		jsr l25F4
 		pla 
 		tax 
@@ -2533,23 +3514,23 @@ l25EA:
 
 l25F4:
 		ldy #$00
-		sty $23
-		sty $25
-		lda ($08), y
+		sty v23
+		sty v25
+		lda (pointer_08), y
 		lsr 
-		ror $23
+		ror v23
 		lsr 
-		ror $23
-		sta $24
+		ror v23
+		sta v24
 		iny 
-		lda ($08), y
+		lda (pointer_08), y
 		lsr 
-		ror $25
+		ror v25
 		lsr 
-		ror $25
-		sta $26
+		ror v25
+		sta v26
 		iny 
-		lda $2c4f
+		lda v2c4f
 		cmp #$0d
 		beq l262D
 		lda #$02
@@ -2557,216 +3538,216 @@ l25F4:
 		eor #$ff
 		adc #$01
 		clc 
-		adc $08
-		sta $08
-		lda $09
+		adc pointer_08
+		sta pointer_08
+		lda pointer_08 + $1
 		sbc #$00
-		sta $09
+		sta pointer_08 + $1
 		ldy #$04
 		bne l263B
 
 l262D:
-		lda ($08), y
-		ora $23
-		sta $23
+		lda (pointer_08), y
+		ora v23
+		sta v23
 		iny 
-		lda ($08), y
-		ora $25
-		sta $25
+		lda (pointer_08), y
+		ora v25
+		sta v25
 		iny 
 
 l263B:
-		lda ($08), y
+		lda (pointer_08), y
 		bmi l264C
 		clc 
-		adc $23
-		sta $23
+		adc v23
+		sta v23
 		lda #$00
-		adc $24
-		sta $24
+		adc v24
+		sta v24
 		bcc l2657
 
 l264C:
 		clc 
-		adc $23
-		sta $23
-		lda $24
+		adc v23
+		sta v23
+		lda v24
 		sbc #$00
-		sta $24
+		sta v24
 
 l2657:
 		iny 
-		lda ($08), y
+		lda (pointer_08), y
 		bmi l2669
 		clc 
-		adc $25
-		sta $25
+		adc v25
+		sta v25
 		lda #$00
-		adc $26
-		sta $26
+		adc v26
+		sta v26
 		bcc l2674
 
 l2669:
 		clc 
-		adc $25
-		sta $25
-		lda $26
+		adc v25
+		sta v25
+		lda v26
 		sbc #$00
-		sta $26
+		sta v26
 
 l2674:
 		iny 
-		lda $2c4f
+		lda v2c4f
 		cmp #$0d
 		beq l267F
 		jmp l2703
 
 l267F:
-		lda $09
+		lda pointer_08 + $1
 		pha 
-		lda $08
+		lda pointer_08
 		pha 
-		lda $26
+		lda v26
 		pha 
-		lda $25
+		lda v25
 		pha 
-		lda $24
+		lda v24
 		pha 
-		lda $23
+		lda v23
 		pha 
 
 l2691:
-		lda ($08), y
+		lda (pointer_08), y
 		iny 
 		cmp #$80
 		bne l2691
-		lda ($08), y
+		lda (pointer_08), y
 		bmi l26A9
 		clc 
-		adc $23
-		sta $23
+		adc v23
+		sta v23
 		lda #$00
-		adc $24
-		sta $24
+		adc v24
+		sta v24
 		bcc l26B4
 
 l26A9:
 		clc 
-		adc $23
-		sta $23
-		lda $24
+		adc v23
+		sta v23
+		lda v24
 		sbc #$00
-		sta $24
+		sta v24
 
 l26B4:
 		iny 
-		lda ($08), y
+		lda (pointer_08), y
 		bmi l26C6
 		clc 
-		adc $25
-		sta $25
+		adc v25
+		sta v25
 		lda #$00
-		adc $26
-		sta $26
+		adc v26
+		sta v26
 		bcc l26D1
 
 l26C6:
 		clc 
-		adc $25
-		sta $25
-		lda $26
+		adc v25
+		sta v25
+		lda v26
 		sbc #$00
-		sta $26
+		sta v26
 
 l26D1:
 		tya 
 		sec 
 		sbc #$05
 		clc 
-		adc $08
-		sta $08
-		lda $09
+		adc pointer_08
+		sta pointer_08
+		lda pointer_08 + $1
 		adc #$00
-		sta $09
+		sta pointer_08 + $1
 		ldy #$06
 		lda #$05
-		sta $2c4f
+		sta v2c4f
 		jsr l2703
 		pla 
-		sta $23
+		sta v23
 		pla 
-		sta $24
+		sta v24
 		pla 
-		sta $25
+		sta v25
 		pla 
-		sta $26
+		sta v26
 		lda #$0d
-		sta $2c4f
+		sta v2c4f
 		pla 
-		sta $08
+		sta pointer_08
 		pla 
-		sta $09
+		sta pointer_08 + $1
 		ldy #$06
 
 l2703:
 		lda #$00
-		sta $2c4d
-		sta $107b
+		sta v2c4d
+		sta v107b
 		lda #$02
-		sta $127c
+		sta v127c
 		jsr l2AC5
 		beq l2718
 		jmp l2775
 
 l2718:
-		lda $1f24
-		sta $14
-		lda $1f25
-		sta $15
-		lda $1f26
-		sta $16
-		lda $1f27
-		sta $17
+		lda ball_sprite_x
+		sta v14
+		lda ball_sprite_x + $1
+		sta v15
+		lda ball_sprite_y
+		sta v16
+		lda ball_sprite_y + $1
+		sta v17
 		jsr l1DCD
 		bcc l2734
 		jmp l2804
 
 l2734:
-		lda $2c44
+		lda v2c44
 		pha 
-		lda $2c43
+		lda v2c43
 		pha 
-		lda $2c48
+		lda v2c48
 		pha 
-		lda $2c47
+		lda v2c47
 		pha 
-		lda $2c43
-		sta $2c45
-		lda $2c44
-		sta $2c46
-		lda $2c47
-		sta $2c49
-		lda $2c48
-		sta $2c4a
+		lda v2c43
+		sta v2c45
+		lda v2c44
+		sta v2c46
+		lda v2c47
+		sta v2c49
+		lda v2c48
+		sta v2c4a
 		jsr l286B
 		jsr l28E9
 		pla 
-		sta $2c47
+		sta v2c47
 		pla 
-		sta $2c48
+		sta v2c48
 		pla 
-		sta $2c43
+		sta v2c43
 		pla 
-		sta $2c44
+		sta v2c44
 		jmp l2804
 
 l2775:
-		lda $2c4d
+		lda v2c4d
 		beq l277D
 		jmp l283E
 
 l277D:
-		lda ($08), y
+		lda (pointer_08), y
 		cmp #$80
 		bne l2786
 		jsr l2862
@@ -2774,64 +3755,64 @@ l277D:
 l2786:
 		jsr l2AC5
 		bne l2775
-		lda $1f24
-		sta $14
-		lda $1f25
-		sta $15
-		lda $1f26
-		sta $16
-		lda $1f27
-		sta $17
+		lda ball_sprite_x
+		sta v14
+		lda ball_sprite_x + $1
+		sta v15
+		lda ball_sprite_y
+		sta v16
+		lda ball_sprite_y + $1
+		sta v17
 		jsr l1DCD
 		bcs l2804
-		lda $2c44
+		lda v2c44
 		pha 
-		lda $2c43
+		lda v2c43
 		pha 
-		lda $2c48
+		lda v2c48
 		pha 
-		lda $2c47
+		lda v2c47
 		pha 
-		lda $2c44
+		lda v2c44
 		pha 
-		lda $2c43
+		lda v2c43
 		pha 
-		lda $2c45
-		sta $2c43
-		lda $2c46
-		sta $2c44
+		lda v2c45
+		sta v2c43
+		lda v2c46
+		sta v2c44
 		pla 
-		sta $2c45
+		sta v2c45
 		pla 
-		sta $2c46
-		lda $2c48
+		sta v2c46
+		lda v2c48
 		pha 
-		lda $2c47
+		lda v2c47
 		pha 
-		lda $2c49
-		sta $2c47
-		lda $2c4a
-		sta $2c48
+		lda v2c49
+		sta v2c47
+		lda v2c4a
+		sta v2c48
 		pla 
-		sta $2c49
+		sta v2c49
 		pla 
-		sta $2c4a
+		sta v2c4a
 		lda #$ff
-		sta $2c4e
+		sta v2c4e
 		jsr l2920
 		pla 
-		sta $2c47
+		sta v2c47
 		pla 
-		sta $2c48
+		sta v2c48
 		pla 
-		sta $2c43
+		sta v2c43
 		pla 
-		sta $2c44
+		sta v2c44
 
 l2804:
-		lda $2c4d
+		lda v2c4d
 		bne l283E
-		lda ($08), y
+		lda (pointer_08), y
 		cmp #$80
 		bne l2812
 		jsr l2862
@@ -2842,35 +3823,35 @@ l2812:
 		jmp l28C6
 
 l281A:
-		lda $1f24
-		sta $1f20
-		lda $1f25
-		sta $1f21
-		lda $1f26
-		sta $1f22
-		lda $1f27
-		sta $1f23
-		sty $2c4b
+		lda ball_sprite_x
+		sta v1f20
+		lda ball_sprite_x + $1
+		sta v1f21
+		lda ball_sprite_y
+		sta v1f22
+		lda ball_sprite_y + $1
+		sta v1f23
+		sty v2c4b
 		jsr l1DFF
-		ldy $2c4b
+		ldy v2c4b
 		jmp l2804
 
 l283E:
-		ldy $2c4c
+		ldy v2c4c
 		jsr l1BB4
 
 l2844:
-		ldx $127c
+		ldx v127c
 		dex 
 		cpx #$02
 		bcc l2861
-		lda $107c, x
+		lda buffer_107c, x
 		tay 
 		dex 
-		lda $107c, x
-		stx $127c
+		lda buffer_107c, x
+		stx v127c
 		tax 
-		lda $2c4f
+		lda v2c4f
 		jsr l18AB
 		jmp l2844
 
@@ -2878,16 +3859,16 @@ l2861:
 		rts 
 
 l2862:
-		sty $2c4c
+		sty v2c4c
 		ldy #$06
-		sty $2c4d
+		sty v2c4d
 		rts 
 
 l286B:
-		sty $2c4b
+		sty v2c4b
 
 l286E:
-		lda ($08), y
+		lda (pointer_08), y
 		iny 
 		iny 
 		cmp #$80
@@ -2896,53 +3877,55 @@ l286E:
 		sec 
 		sbc #$04
 		tay 
-		lda ($08), y
+		lda (pointer_08), y
 		bmi l288E
 		clc 
-		adc $23
-		sta $2c43
+		adc v23
+		sta v2c43
 		lda #$00
-		adc $24
-		sta $2c44
+		adc v24
+		sta v2c44
 		bcc l289B
 
 l288E:
 		clc 
-		adc $23
-		sta $2c43
-		lda $24
+		adc v23
+		sta v2c43
+		lda v24
 		sbc #$00
-		sta $2c44
+		sta v2c44
 
 l289B:
 		iny 
-		lda ($08), y
+		lda (pointer_08), y
 		bmi l28AF
 		clc 
-		adc $25
-		sta $2c47
+		adc v25
+		sta v2c47
 		lda #$00
-		adc $26
-		sta $2c48
+		adc v26
+		sta v2c48
 		bcc l28BC
 
 l28AF:
 		clc 
-		adc $25
-		sta $2c47
-		lda $26
+		adc v25
+		sta v2c47
+		lda v26
 		sbc #$00
-		sta $2c48
+		sta v2c48
 
 l28BC:
-		ldy $2c4b
+		ldy v2c4b
 		rts 
 
 l28C0:
 		lda #$c8
-		sta $67
+		sta v67
 		rts 
-*=$28c6
+
+unused_28c5:
+		.byte	$ea
 
 l28C6:
 		jsr l1DCD
@@ -2950,85 +3933,85 @@ l28C6:
 		jmp l2775
 
 l28CE:
-		lda $2c44
+		lda v2c44
 		pha 
-		lda $2c43
+		lda v2c43
 		pha 
 		lda #$00
-		sta $2c4e
+		sta v2c4e
 		jsr l2920
 		pla 
-		sta $2c43
+		sta v2c43
 		pla 
-		sta $2c44
+		sta v2c44
 		jmp l2775
 
 l28E9:
-		lda $2c43
-		sta $10
-		lda $2c44
-		sta $11
-		lda $2c47
-		sta $12
-		lda $2c48
-		sta $13
+		lda v2c43
+		sta v10
+		lda v2c44
+		sta v10 + $1
+		lda v2c47
+		sta v12
+		lda v2c48
+		sta v12 + $1
 		lda #$ff
-		sta $0c07
+		sta direction_flag
 		jsr l0BA4
 		lda #$00
-		sta $0c07
-		lda $2c5e
+		sta direction_flag
+		lda v2c5e
 		bne l2914
-		lda $2c5d
+		lda v2c5d
 		bne l291C
 
 l2914:
 		lda #$ff
-		sta $2c4e
+		sta v2c4e
 		jsr l2920
 
 l291C:
-		ldy $2c4b
+		ldy v2c4b
 		rts 
 
 l2920:
-		lda $2c43
+		lda v2c43
 		clc 
-		adc $2c45
-		sta $2c3f
-		lda $2c44
-		adc $2c46
+		adc v2c45
+		sta v2c3f
+		lda v2c44
+		adc v2c46
 		ror 
-		sta $2c40
-		ror $2c3f
-		lda $2c47
+		sta v2c40
+		ror v2c3f
+		lda v2c47
 		clc 
-		adc $2c49
-		sta $2c41
-		lda $2c48
-		adc $2c4a
+		adc v2c49
+		sta v2c41
+		lda v2c48
+		adc v2c4a
 		ror 
-		sta $2c42
-		ror $2c41
-		lda $2c3f
-		sta $10
-		lda $2c40
-		sta $11
-		lda $2c41
-		sta $12
-		lda $2c42
-		sta $13
+		sta v2c42
+		ror v2c41
+		lda v2c3f
+		sta v10
+		lda v2c40
+		sta v10 + $1
+		lda v2c41
+		sta v12
+		lda v2c42
+		sta v12 + $1
 		lda #$ff
-		sta $0c07
+		sta direction_flag
 		jsr l0BA4
 		lda #$00
-		sta $0c07
-		lda $2c5e
+		sta direction_flag
+		lda v2c5e
 		beq l2977
 		jmp l2A06
 
 l2977:
-		lda $2c5d
+		lda v2c5d
 		bne l297F
 		jmp l2A06
 
@@ -3039,223 +4022,223 @@ l297F:
 		eor #$ff
 		adc #$01
 		clc 
-		adc $1f24
-		sta $1f24
-		lda $1f25
+		adc ball_sprite_x
+		sta ball_sprite_x
+		lda ball_sprite_x + $1
 		sbc #$00
-		sta $1f25
-		lda $2c5f
+		sta ball_sprite_x + $1
+		lda v2c5f
 		sec 
-		sbc $1f26
-		sta $1f26
+		sbc ball_sprite_y
+		sta ball_sprite_y
 		lda #$00
-		sbc $1f27
-		sta $1f27
-		lda $1f24
-		sta $1f20
-		lda $1f25
-		sta $1f21
-		lda $1f26
-		sta $1f22
-		lda $1f27
-		sta $1f23
+		sbc ball_sprite_y + $1
+		sta ball_sprite_y + $1
+		lda ball_sprite_x
+		sta v1f20
+		lda ball_sprite_x + $1
+		sta v1f21
+		lda ball_sprite_y
+		sta v1f22
+		lda ball_sprite_y + $1
+		sta v1f23
 		jsr l1DE4
 		bcs l29CA
 		jmp l2A44
 
 l29CA:
-		lda $2c4e
+		lda v2c4e
 		beq l29FF
-		lda $15
+		lda v15
 		pha 
-		lda $14
+		lda v14
 		pha 
-		lda $1f20
-		sta $14
-		lda $1f21
-		sta $15
+		lda v1f20
+		sta v14
+		lda v1f21
+		sta v15
 		pla 
-		sta $1f20
+		sta v1f20
 		pla 
-		sta $1f21
-		lda $17
+		sta v1f21
+		lda v17
 		pha 
-		lda $16
+		lda v16
 		pha 
-		lda $1f22
-		sta $16
-		lda $1f23
-		sta $17
+		lda v1f22
+		sta v16
+		lda v1f23
+		sta v17
 		pla 
-		sta $1f22
+		sta v1f22
 		pla 
-		sta $1f23
+		sta v1f23
 
 l29FF:
 		jsr l1DFF
-		ldy $2c4b
+		ldy v2c4b
 		rts 
 
 l2A06:
-		lda $2c3f
-		cmp $2c43
+		lda v2c3f
+		cmp v2c43
 		bne l2A14
-		lda $2c40
-		cmp $2c44
+		lda v2c40
+		cmp v2c44
 
 l2A14:
 		bne l2A29
-		lda $2c41
-		cmp $2c47
+		lda v2c41
+		cmp v2c47
 		bne l2A24
-		lda $2c42
-		cmp $2c48
+		lda v2c42
+		cmp v2c48
 
 l2A24:
 		bne l2A29
 		jmp l2A7C
 
 l2A29:
-		lda $2c3f
-		sta $2c43
-		lda $2c40
-		sta $2c44
-		lda $2c41
-		sta $2c47
-		lda $2c42
-		sta $2c48
+		lda v2c3f
+		sta v2c43
+		lda v2c40
+		sta v2c44
+		lda v2c41
+		sta v2c47
+		lda v2c42
+		sta v2c48
 		jmp l2920
 
 l2A44:
-		lda $2c3f
-		cmp $2c45
+		lda v2c3f
+		cmp v2c45
 		bne l2A52
-		lda $2c40
-		cmp $2c46
+		lda v2c40
+		cmp v2c46
 
 l2A52:
 		bne l2AAA
-		lda $2c41
-		cmp $2c49
+		lda v2c41
+		cmp v2c49
 		bne l2A62
-		lda $2c42
-		cmp $2c4a
+		lda v2c42
+		cmp v2c4a
 
 l2A62:
 		bne l2AAA
-		lda $2c3f
-		sta $1f20
-		lda $2c40
-		sta $1f21
-		lda $2c41
-		sta $1f22
-		lda $2c42
-		sta $1f23
+		lda v2c3f
+		sta v1f20
+		lda v2c40
+		sta v1f21
+		lda v2c41
+		sta v1f22
+		lda v2c42
+		sta v1f23
 
 l2A7C:
-		lda $2c3f
-		sta $10
-		lda $2c40
-		sta $11
-		lda $2c41
-		sta $12
-		lda $2c42
-		sta $13
+		lda v2c3f
+		sta v10
+		lda v2c40
+		sta v10 + $1
+		lda v2c41
+		sta v12
+		lda v2c42
+		sta v12 + $1
 		lda #$ff
-		sta $0c07
+		sta direction_flag
 		jsr l0BA4
 		lda #$00
-		sta $0c07
+		sta direction_flag
 		lda #$01
-		sta $2c5d
+		sta v2c5d
 		lda #$00
-		sta $2c5e
+		sta v2c5e
 		jmp l297F
 
 l2AAA:
-		lda $2c41
-		sta $2c49
-		lda $2c42
-		sta $2c4a
-		lda $2c3f
-		sta $2c45
-		lda $2c40
-		sta $2c46
+		lda v2c41
+		sta v2c49
+		lda v2c42
+		sta v2c4a
+		lda v2c3f
+		sta v2c45
+		lda v2c40
+		sta v2c46
 		jmp l2920
 
 l2AC5:
-		lda ($08), y
+		lda (pointer_08), y
 		bmi l2AD6
 		clc 
-		adc $23
-		sta $10
+		adc v23
+		sta v10
 		lda #$00
-		adc $24
-		sta $11
+		adc v24
+		sta v10 + $1
 		bcc l2AE1
 
 l2AD6:
 		clc 
-		adc $23
-		sta $10
-		lda $24
+		adc v23
+		sta v10
+		lda v24
 		sbc #$00
-		sta $11
+		sta v10 + $1
 
 l2AE1:
 		iny 
-		lda ($08), y
+		lda (pointer_08), y
 		bmi l2AF3
 		clc 
-		adc $25
-		sta $12
+		adc v25
+		sta v12
 		lda #$00
-		adc $26
-		sta $13
+		adc v26
+		sta v12 + $1
 		bcc l2AFE
 
 l2AF3:
 		clc 
-		adc $25
-		sta $12
-		lda $26
+		adc v25
+		sta v12
+		lda v26
 		sbc #$00
-		sta $13
+		sta v12 + $1
 
 l2AFE:
-		lda $2c43
-		sta $2c45
-		lda $2c44
-		sta $2c46
-		lda $2c47
-		sta $2c49
-		lda $2c48
-		sta $2c4a
-		lda $10
-		sta $2c43
-		lda $11
-		sta $2c44
-		lda $12
-		sta $2c47
-		lda $13
-		sta $2c48
+		lda v2c43
+		sta v2c45
+		lda v2c44
+		sta v2c46
+		lda v2c47
+		sta v2c49
+		lda v2c48
+		sta v2c4a
+		lda v10
+		sta v2c43
+		lda v10 + $1
+		sta v2c44
+		lda v12
+		sta v2c47
+		lda v12 + $1
+		sta v2c48
 		iny 
-		sty $2c4b
+		sty v2c4b
 		lda #$ff
-		sta $0c07
+		sta direction_flag
 		jsr l0BA4
 		lda #$00
-		sta $0c07
-		lda $2c5e
+		sta direction_flag
+		lda v2c5e
 		bmi l2B81
 		beq l2B4B
 		ldy #$00
-		sty $2c5e
+		sty v2c5e
 		dey 
-		sty $2c5d
+		sty v2c5d
 
 l2B4B:
-		lda $2c5d
+		lda v2c5d
 		bne l2B54
 		lda #$ff
 		bne l2B81
@@ -3267,135 +4250,205 @@ l2B54:
 		eor #$ff
 		adc #$01
 		clc 
-		adc $1f24
-		sta $1f24
-		lda $1f25
+		adc ball_sprite_x
+		sta ball_sprite_x
+		lda ball_sprite_x + $1
 		sbc #$00
-		sta $1f25
-		lda $2c5f
+		sta ball_sprite_x + $1
+		lda v2c5f
 		sec 
-		sbc $1f26
-		sta $1f26
+		sbc ball_sprite_y
+		sta ball_sprite_y
 		lda #$00
-		sbc $1f27
-		sta $1f27
+		sbc ball_sprite_y + $1
+		sta ball_sprite_y + $1
 		lda #$00
 
 l2B81:
 		php 
-		ldy $2c4b
+		ldy v2c4b
 		plp 
 		rts 
 
 l2B87:
 		iny 
-		lda ($08), y
+		lda (pointer_08), y
 		cmp #$80
 		beq l2BC2
 		tya 
 		clc 
-		adc $08
-		sta $08
-		lda $09
+		adc pointer_08
+		sta pointer_08
+		lda pointer_08 + $1
 		adc #$00
-		sta $09
-		ldx $2c3e
-		lda $08
-		sta $2c1a, x
-		lda $09
-		sta $2c1b, x
-		lda $23
-		sta $2c26, x
-		lda $24
-		sta $2c27, x
-		lda $25
-		sta $2c32, x
-		lda $26
-		sta $2c33, x
+		sta pointer_08 + $1
+		ldx v2c3e
+		lda pointer_08
+		sta v2c1a, x
+		lda pointer_08 + $1
+		sta v2c1a + $1, x
+		lda v23
+		sta v2c26, x
+		lda v24
+		sta v2c26 + $1, x
+		lda v25
+		sta v2c32, x
+		lda v26
+		sta v2c32 + $1, x
 		inx 
 		inx 
-		stx $2c3e
+		stx v2c3e
 		ldy #$00
 
 l2BC2:
-		lda ($08), y
+		lda (pointer_08), y
 		iny 
 		cmp #$80
 		bne l2BC2
 		bne l2BC2
 		lda #$16
-		sta $2bfc
+		sta v2bfc
 
 l2BD0:
-		lda ($08), y
+		lda (pointer_08), y
 		iny 
 		cmp #$80
 		beq l2BE2
 		clc 
-		adc $2bfc
+		adc v2bfc
 		tax 
-		inc $2bfc, x
+		inc v2bfc, x
 		jmp l2BD0
 
 l2BE2:
-		lda $2bfc
+		lda v2bfc
 		beq l2BFB
 		cmp #$16
 		beq l2BF3
 		lda #$00
-		sta $2bfc
+		sta v2bfc
 		jmp l2BD0
 
 l2BF3:
 		lda #$12
-		sta $2bfc
+		sta v2bfc
 		jmp l2BD0
 
 l2BFB:
 		rts 
-*=$2c60
+
+v2bfc:
+		.byte	$00, $02, $02, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $01, $01, $00, $02, $00, $00, $00, $00, $00, $00
+
+v2c1a:
+		.word	$86ae, $8723, $ffff, $ffff, $ffff, $0000
+v2c26:
+		.word	$0000, $0040, $0000, $0000, $0000, $0000
+v2c32:
+		.word	$0140, $0140, $0000, $0000, $0000, $0000
+
+v2c3e:
+		.byte	$00
+v2c3f:		.byte	$00
+v2c40:		.byte	$00
+v2c41:		.byte	$00
+v2c42:		.byte	$00
+v2c43:		.byte	$0d
+v2c44:		.byte	$00
+v2c45:		.byte	$10
+v2c46:		.byte	$00
+v2c47:		.byte	$30
+v2c48:		.byte	$01
+v2c49:		.byte	$31
+v2c4a:		.byte	$01
+v2c4b:		.byte	$08
+v2c4c:		.byte	$3c
+v2c4d:		.byte	$06
+v2c4e:		.byte	$00
+v2c4f:
+		.byte	$0d, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+v2c5b:		.byte	$00
+v2c5c:		.byte	$00
+v2c5d:		.byte	$00
+v2c5e:		.byte	$00
+v2c5f:		.byte	$90
 
 l2C60:
 		ldy #$00
-		lda ($02), y
+		lda (text_pointer), y
 		cmp #$ff
 		bne l2C69
 		rts 
 
 l2C69:
-		jsr l0FFB
-		inc $02
+		jsr print_char
+		inc text_pointer
 		bne l2C72
-		inc $03
+		inc text_pointer + $1
 
 l2C72:
 		jmp l2C60
 
-l2C75:
+; prints the $ff-terminated text after the jsr
+print_inline:
 		pla 
-		sta $02
+		sta text_pointer
 		pla 
-		sta $03
-		inc $02
+		sta text_pointer + $1
+		inc text_pointer
 		bne l2C81
-		inc $03
+		inc text_pointer + $1
 
 l2C81:
 		jsr l2C60
-		lda $03
+		lda text_pointer + $1
 		pha 
-		lda $02
+		lda text_pointer
 		pha 
 		rts 
-*=$2c93
 
-l2C93:
+print_hex:
+		pha 
+		jsr l2CB4
+		jsr print_char
+		pla 
+
+print_nibble:
 		jsr l2CBB
-		jmp l0FFB
-*=$2cbb
+		jmp print_char
+
+store_hex:
+		pha 
+		jsr l2CB4
+		ldy #$00
+		sta (text_pointer), y
+		inc text_pointer
+		bne l2CA7
+		inc text_pointer + $1
+
+l2CA7:
+		pla 
+		jsr l2CBB
+		sta (text_pointer), y
+		inc text_pointer
+		bne l2CB3
+		inc text_pointer + $1
+
+l2CB3:
+		rts 
+
+l2CB4:
+		lsr 
+		lsr 
+		lsr 
+		lsr 
+		jmp l2CBD
 
 l2CBB:
 		and #$0f
+
+l2CBD:
 		cmp #$0a
 		bcc l2CC7
 		sbc #$0a
@@ -3406,58 +4459,74 @@ l2CBB:
 l2CC7:
 		adc #$30
 		rts 
-*=$2ce5
+
+unused_2cca:
+		.byte	$00, $00, $00, $00, $00, $00
+
+start:
+		jmp l2CDC
+
+start2:
+		lda cpu_port
+		and #$fe
+		sta cpu_port
+		jmp lA003
+
+l2CDC:
+		lda cpu_port
+		and #$fe
+		sta cpu_port
+		jmp lA000
 
 a2CE5:
-		.addr	l398B
-a2CE7:		.addr	l30AF
-a2CE9:		.addr	l4180
+		.addr	setup_hole
+a2CE7:		.addr	check_landing
+a2CE9:		.addr	color_text
 a2CEB:		.addr	l378C
-*=$2cef
+a2CED:		.addr	get_key
+a2CEF:		.addr	check_terrain
 
-a2CEF:		.addr	l3209
-
-l2CF1:
+draw_golfer:
 		pha 
-		lda $483f
-		sta $487f
+		lda sprites + $3f
+		sta sprites + $7f
 		bne l2D04
 		txa 
 		sec 
 		sbc #$33
 		tax 
 		lda #$05
-		sta $483f
+		sta sprites + $3f
 
 l2D04:
 		ldy #$91
-		stx $0464
-		sty $0466
+		stx golfer_x
+		sty golfer_y
 		lda #$e0
-		and $d010
-		sta $d010
-		lda $044f
+		and sprites_x_msb
+		sta sprites_x_msb
+		lda current_player
 		beq l2D1B
 		lda #$08
 
 l2D1B:
-		jsr l2D21
+		jsr set_golfer_colors
 		jmp l2D3E
 
-l2D21:
-		ldx $d012
+set_golfer_colors:
+		ldx raster
 		cpx #$14
-		bcc l2D21
+		bcc set_golfer_colors
 		cpx #$32
-		bcs l2D21
+		bcs set_golfer_colors
 		ldy #$ff
 		and #$08
 		tax 
 
 l2D31:
-		lda $2f11, x
+		lda golfer_colors, x
 		iny 
-		sta $d027, y
+		sta sprite0_color, y
 		inx 
 		cpy #$07
 		bcc l2D31
@@ -3465,104 +4534,482 @@ l2D31:
 
 l2D3E:
 		pla 
-		sta $046a
+		sta power_level
 		lda #$17
 		ldx #$34
-		jsr l32DD
+		jsr load_animation
 		lda #$00
 		ldx #$59
-		ldy $046a
+		ldy power_level
 		dey 
-		jsr l3375
-		lda $487f
+		jsr draw_animation_frame
+		lda sprites + $7f
 		bne l2D61
-		jsr l303C
+		jsr mirror_golfer
 		lda #$05
-		sta $483f
+		sta sprites + $3f
 
 l2D61:
 		rts 
-*=$2ef7
+
+; shifts A right one bit, keeping its sign
+shift_right_signed:
+		asl 
+		php 
+		asl 
+		plp 
+		ror 
+		rts 
+
+raise_meter:
+		ldy power_level
+		cpy #$10
+		bcs l2D76
+		iny 
+		sty power_level
+		jsr l2F60
+
+l2D76:
+		dey 
+		lda #$00
+		ldx #$59
+		jmp draw_animation_frame
+
+lower_meter:
+		ldy power_level
+		cpy #$02
+		bcc l2D89
+		dey 
+		sty power_level
+
+l2D89:
+		dey 
+		lda #$00
+		ldx #$59
+		jmp draw_animation_frame
+
+unused_2d91:
+		.byte	$60
+
+swing:
+		jsr get_key
+		ldx golfer_x
+		lda #$0a
+		jsr draw_golfer
+		jsr l32B3
+		jsr compute_shot
+		jsr message_line
+		jsr print_inline
+
+text_swing_club:
+		.text	"SWING CLUB", $ff
+
+l2DB4:
+		jsr get_key
+		cmp #$2a
+		bne l2DB4
+		lda #$00
+		sta v045e
+		lda #$04
+		sta frame_timer_reload
+		sta frame_timer
+
+l2DC8:
+		inc v045e
+		lda frame_timer
+		bne l2DE0
+		jsr lower_meter
+		lda frame_timer_reload
+		sta frame_timer
+		lda power_level
+		cmp #$01
+		beq l2DEE
+
+l2DE0:
+		jsr get_key
+		cmp #$2a
+		beq l2DC8
+		lda power_level
+		cmp #$0a
+		bcs l2DC8
+
+l2DEE:
+		lda #$00
+		sta v045f
+		lda #$00
+		sta v0460
+
+l2DF8:
+		inc v045f
+		bne l2E00
+		inc v0460
+
+l2E00:
+		jsr get_key
+		cmp #$29
+		bne l2DF8
+		lda #$00
+		sta v0463
+		lda #$03
+		sta frame_timer_reload
+		sta frame_timer
+		jsr swing_sound
+
+l2E17:
+		jsr get_key
+		cmp #$29
+		bne l2E21
+		inc v0463
+
+l2E21:
+		lda frame_timer
+		bne l2E49
+		jsr raise_meter
+		lda power_level
+		cmp #$0a
+		beq l2E4C
+		lda frame_timer_reload
+		cmp #$01
+		beq l2E43
+		lda v0463
+		lsr 
+		clc 
+		eor #$ff
+		adc #$01
+		clc 
+		adc #$05
+
+l2E43:
+		sta frame_timer
+		sta frame_timer_reload
+
+l2E49:
+		jmp l2E17
+
+l2E4C:
+		jsr click_sound
+		jsr message_line
+		jsr print_inline
+		.byte	$ff
+		lda #$ff
+		sta v3294
+		lda v045f
+		lsr 
+		sta v0461
+		jsr l3293
+		jsr l34C1
+		lda frame_timer_reload
+		sta frame_timer
+		asl 
+		sta frame_timer_reload
+
+l2E72:
+		jsr get_key
+		lda frame_timer
+		bne l2E72
+		jsr raise_meter
+		lda frame_timer_reload
+		sta frame_timer
+		lda v045f
+		sec 
+		sbc #$0e
+		sta v045f
+		bcs l2E72
+		jsr l2F5A
+
+l2E91:
+		jsr get_key
+		lda v3294
+		bne l2E91
+		lda #$0a
+		sta frame_delay
+		lda #$02
+		sta anim_frame_count
+		ldy #$10
+		jsr play_animation
+		lda hole_distance
+		beq l2EBC
+		lda green_view
+		bne l2EB3
+		beq l2ED2
+
+l2EB3:
+		jsr l32AD
+		beq l2ED2
+		lda #$00
+		sta hole_distance
+
+l2EBC:
+		jsr l434E
+		lda #$3f
+		sta sprite_enable
+		jsr message_line
+		jsr print_inline
+
+text_down:
+		.text	"DOWN !!", $ff
+
+l2ED2:
+		jsr get_key
+		cmp #$3c
+		bne l2ED2
+		jsr l434B
+		jmp silence_voices
+
+silence_voices:
+		lda #$00
+		sta voice1_control
+		sta voice2_control
+		sta voice3_control
+		jmp l2FB1
+
+; waits a frame and returns the key or joystick direction
+get_key:
+		txa 
+		pha 
+
+l2EEF:
+		lda raster
+		bmi l2EEF
+		jsr scnkey
 
 ; where the CPU was when the snapshot was taken
 snapshot_pc:
-		lda $d012
+		lda raster
 		cmp #$c8
 		bcc snapshot_pc
-		dec $045d
-		lda $3294
+		dec frame_timer
+		lda v3294
 		beq l2F09
 		jsr l3EF4
 
 l2F09:
 		pla 
 		tax 
-		lda $c5
+		lda kernal_lstx
 		jsr l32B0
 		rts 
-*=$2f6d
 
-l2F6D:
-		ldx #$81
-		stx $d40b
-		dex 
-		stx $d40b
+golfer_colors:
+		.byte	$09, $01, $02, $02, $00, $00, $01, $01, $00, $01, $01, $01, $09, $09, $01, $01
+
+swing_sound:
+		lda #$00
+		sta voice1_control
+		sta voice2_control
+		lda #$2f
+		sta volume_filter_mode
+		lda #$0b
+		sta voice1_attack_decay
+		lda #$07
+		sta voice1_sustain_release
+		lda #$03
+		sta voice2_attack_decay
+		sta voice2_sustain_release
+		lda #$1e
+		sta voice1_frequency + $1
+		lda #$46
+		sta voice2_frequency + $1
+		lda #$01
+		sta filter_control
+		lda #$00
+		sta swing_cutoff
+		lda #$81
+		sta voice1_control
 		rts 
-*=$303c
 
-l303C:
+l2F5A:
+		lda #$80
+		sta voice1_control
+		rts 
+
+l2F60:
+		lda swing_cutoff
+		clc 
+		adc #$0d
+		sta swing_cutoff
+		sta filter_cutoff + $1
+		rts 
+
+click_sound:
+		ldx #$81
+		stx voice2_control
+		dex 
+		stx voice2_control
+		rts 
+
+swing_cutoff:
+		.byte	$42
+
+l2F78:
+		rts 
+
+l2F79:
+		lda #$00
+		sta voice1_attack_decay
+		lda #$80
+		sta voice1_sustain_release
+		lda #$2f
+		sta volume_filter_mode
+		lda #$01
+		sta filter_control
+		lda #$50
+		sta voice1_frequency + $1
+		sta filter_cutoff + $1
+		lda #$81
+		sta voice1_control
+		rts 
+
+l2F9B:
+		lda #$80
+		sta voice1_control
+		rts 
+
+; unreferenced
+
+		ldy sprites + $3f
+		bne l2FAB
+		clc 
+		eor #$ff
+		adc #$01
+
+l2FAB:
+		jmp shift_right_signed
+
+unused_2fae:
+		.byte	$79, $fe, $3d
+
+l2FB1:
+		ldx #$00
+		lda game_mode
+		and #$01
+		php 
+		lda hole_distance
+		plp 
+		beq l2FCA
+		lda current_player
+		bne l2FC5
+		ldx #$0a
+
+l2FC5:
+		lda v0443, x
+		ora hole_distance
+
+l2FCA:
+		cmp #$40
+		bcs l2FD4
+		jsr l31FC
+		jmp l3011
+
+l2FD4:
+		lda sprites + $3f
+		bne l2FDC
+		jsr mirror_golfer
+
+l2FDC:
+		lda #$0a
+		sta frame_delay
+		lda #$02
+		sta anim_frame_count
+		ldy #$12
+		jsr play_animation
+		lda #$03
+		jsr l3027
+		jsr wait_16_frames
+		lda #$0a
+		sta frame_delay
+		lda #$02
+		sta anim_frame_count
+		ldy #$21
+		jsr play_animation
+		lda #$02
+		sta anim_frame_count
+		lda #$0a
+		sta frame_delay
+		ldy #$24
+		jsr play_animation
+
+l3011:
+		lda #$00
+		sta sprite6_y
+		sta sprite7_y
+		sta sprites_x_msb
+		rts 
+
+l301D:
+		lda sprites + $3f
+		beq l3025
+		jsr mirror_golfer
+
+l3025:
+		lda #$03
+
+l3027:
+		pha 
+		lda #$05
+		sta frame_delay
+		lda #$0c
+		sta anim_frame_count
+		ldy #$14
+		jsr play_animation
+		pla 
+		lsr 
+		bne l3027
+		rts 
+
+mirror_golfer:
 		ldx #$2f
 
 l303E:
-		jsr l305E
+		jsr mirror_sprite
 		inx 
 		cpx #$37
 		bcc l303E
 		ldx #$4d
 
 l3048:
-		jsr l305E
+		jsr mirror_sprite
 		inx 
 		cpx #$57
 		bcc l3048
 		ldx #$25
-		jsr l305E
-		lda $483f
+		jsr mirror_sprite
+		lda sprites + $3f
 		eor #$05
-		sta $483f
+		sta sprites + $3f
 		rts 
 
-l305E:
+mirror_sprite:
 		lda #$00
-		sta $61
+		sta pointer_61
 		txa 
 		pha 
 		lsr 
-		ror $61
+		ror pointer_61
 		lsr 
-		ror $61
+		ror pointer_61
 		ora #$40
-		sta $62
+		sta pointer_61 + $1
 		ldy #$3f
-		lda ($61), y
-		sta $30ae
+		lda (pointer_61), y
+		sta sprite_mode
 		ldy #$00
 
 l3077:
-		jsr l3096
+		jsr reverse_bits
 		pha 
 		iny 
-		jsr l3096
-		sta ($61), y
+		jsr reverse_bits
+		sta (pointer_61), y
 		iny 
-		jsr l3096
+		jsr reverse_bits
 		dey 
 		dey 
-		sta ($61), y
+		sta (pointer_61), y
 		iny 
 		iny 
 		pla 
-		sta ($61), y
+		sta (pointer_61), y
 		iny 
 		cpy #$3f
 		bcc l3077
@@ -3570,17 +5017,17 @@ l3077:
 		tax 
 		rts 
 
-l3096:
-		lda ($61), y
-		sta $63
+reverse_bits:
+		lda (pointer_61), y
+		sta v63
 		ldx #$08
 
 l309C:
-		lsr $63
+		lsr v63
 		php 
-		bit $30ae
+		bit sprite_mode
 		bpl l30A8
-		lsr $63
+		lsr v63
 		rol 
 		dex 
 
@@ -3590,131 +5037,229 @@ l30A8:
 		dex 
 		bne l309C
 		rts 
-*=$30af
 
-l30AF:
-		lda $483f
+sprite_mode:
+		.byte	$3a
+
+check_landing:
+		lda sprites + $3f
 		bne l30B7
-		jsr l303C
+		jsr mirror_golfer
 
 l30B7:
 		lda #$fd
-		sta $d00f
+		sta sprite7_y
 		lda #$00
-		sta $3294
-		lda $0404
+		sta v3294
+		lda green_view
 		bne l30CD
 		ldx #$32
 		lda #$26
-		jsr l2CF1
+		jsr draw_golfer
 
 l30CD:
 		lda #$ff
-		sta $d015
-		jsr l3209
-		bne l3113
-		jsr l3295
-		jsr l2C75
-		eor #$4e
-		jsr l4854
-		eor $20
-		sre $41, x
-		nop $45, x
-*=$30f9
+		sta sprite_enable
+		jsr check_terrain
+		bne check_out_of_bounds
+		jsr message_line
+		jsr print_inline
 
-l30F9:
+text_in_the_water:
+		.text	"IN THE WATER", $ff
+
+l30EA:
+		jsr l434B
+		jsr l434E
+		jsr l4345
+		lda current_player
+		and #$01
+		asl 
 		tax 
-		lda $0405, x
-		sta @w $001b
-		lda $0406, x
-		sta @w $001c
-		lda $0409, x
-		sta @w $001d
-		lda $040a, x
-		sta @w $001e
+		lda safe_ball_x, x
+		sta @w ball_x
+		lda safe_ball_x + $1, x
+		sta @w ball_x + $1
+		lda safe_ball_y, x
+		sta @w ball_y
+		lda safe_ball_y + $1, x
+		sta @w ball_y + $1
 		rts 
 
-l3113:
-		lda $0404
-		bne $314f
-		lda @w $001c
+check_out_of_bounds:
+		lda green_view
+		bne l314F
+		lda @w ball_x + $1
 		beq l3128
 		cmp #$02
 		bcs l3138
-		lda @w $001b
+		lda @w ball_x
 		cmp #$c0
 		bcs l3138
 
 l3128:
-		lda @w $001e
-		beq $314f
+		lda @w ball_y + $1
+		beq l314F
 		cmp #$02
 		bcs l3138
-		lda @w $001d
+		lda @w ball_y
 		cmp #$c0
-		bcc $314f
+		bcc l314F
 
 l3138:
-		jsr l3295
-		jsr l2C75
-		sre $5455
-		jsr l464F
-		jsr l4F42
-		eor $4e, x
-		nop $53
-		isc $ea4c, x
-		bmi l30F9
-l314F = $314f
-		brk 
-*=$3209
+		jsr message_line
+		jsr print_inline
 
-l3209:
-		lda $0404
+text_out_of_bounds:
+		.text	"OUT OF BOUNDS", $ff
+		jmp l30EA
+
+l314F:
+		lda #$00
+		sta v32bc
+		jsr l2F78
+		lda #$ff
+		sta sprite_enable
+		lda #$01
+		sta v32bc
+		jsr message_line
+		jsr print_inline
+
+text_select_club:
+		.text	"SELECT CLUB", $ff
+		lda terrain_type
+		ldx #$00
+		cmp #$09
+		bne l3181
+		jsr l32B9
+		ldx #$0c
+
+l3181:
+		cmp #$06
+		bne l3187
+		ldx #$0b
+
+l3187:
+		lda green_view
+		beq l3197
+		ldx #$0d
+		stx club
+		jsr select_club
+		jmp l31EB
+
+l3197:
+		stx club
+		jsr l3202
+		jsr select_club
+		jsr wait_16_frames
+		jsr message_line
+		jsr print_inline
+		.byte	$ff
+		lda #$04
+		sta anim_frame_count
+		lda #$0a
+		sta frame_delay
+		ldy #$25
+		jsr play_animation
+		lda #$0a
+		sta frame_delay
+		lda #$04
+		sta anim_frame_count
+		ldy #$29
+		jsr play_animation
+		lda sprites + $3f
+		beq l31D9
+		jsr mirror_golfer
+		lda golfer_x
+		clc 
+		adc #$2d
+		sta golfer_x
+
+l31D9:
+		lda #$02
+		sta anim_frame_count
+		lda #$0a
+		sta frame_delay
+		ldy #$12
+		jsr play_animation
+		jsr l301D
+
+l31EB:
+		jmp swing
+
+wait_16_frames:
+		ldx #$10
+
+l31F0:
+		jsr get_key
+		dex 
+		bne l31F0
+		rts 
+		rts 
+
+unused_31f8:
+		.byte	$60, $4c, $3c, $30
+
+l31FC:
+		lda #$00
+		sta v0477
+		rts 
+
+l3202:
+		lda #$ff
+		sta v0477
+		rts 
+
+unused_3208:
+		.byte	$00
+
+check_terrain:
+		lda green_view
 		bne l321D
 		lda #$21
-		sta $47fe
+		sta sprite_pointers + $6
 		lda #$bb
-		sta $d00c
+		sta sprite6_x
 		lda #$ad
-		sta $d00d
+		sta sprite6_y
 
 l321D:
-		lda $d015
+		lda sprite_enable
 		ora #$40
-		sta $d015
+		sta sprite_enable
 		ldx #$04
 
 l3227:
-		lda $74aa, x
-		sta $328e, x
+		lda bitmap + $14aa, x
+		sta buffer_328e, x
 		dex 
 		bne l3227
 		ldx #$a8
 		ldy #$15
-		lda $74ab, x
+		lda bitmap + $14ab, x
 		jsr l3253
-		sta $327d
+		sta v327d
 		ldy #$00
-		lda $3290
+		lda buffer_328e + $2
 		jsr l3253
 		beq l324F
-		lda $327d
+		lda v327d
 		bne l324F
 		jmp l32B6
 
 l324F:
-		lda $3598
+		lda terrain_type
 		rts 
 
 l3253:
 		and #$0c
 		lsr 
 		tax 
-		lda $3275, x
-		sta $61
-		lda $3276, x
-		sta $62
-		lda ($61), y
+		lda pointers_3275, x
+		sta pointer_61
+		lda pointers_3275 + $1, x
+		sta pointer_61 + $1
+		lda (pointer_61), y
 		cpx #$02
 		bne l326B
 		lsr 
@@ -3725,107 +5270,165 @@ l3253:
 l326B:
 		and #$0f
 		tax 
-		lda $327e, x
-		sta $3598
+		lda table_327e, x
+		sta terrain_type
 		rts 
-*=$3295
 
-l3295:
+pointers_3275:
+		.addr	buffer_328e, bitmap_colors + $295, bitmap_colors + $295, color_ram + $295
+
+v327d:
+		.byte	$0a
+table_327e:
+		.byte	$08, $08, $08, $08, $08, $09, $00, $06, $08, $08, $08, $08, $07, $0a, $00, $08
+buffer_328e:
+		.byte	$01, $aa, $aa, $aa, $aa
+
+l3293:
+		rts 
+
+v3294:
+		.byte	$00
+
+message_line:
 		lda #$00
-		sta @w $001f
+		sta @w text_x
 		lda #$07
-		sta @w $0020
-		lda @w $001f
+		sta @w text_y
+		lda @w text_x
 		clc 
 		adc #$04
-		sta @w $001f
+		sta @w text_x
 		lda #$0d
-		jmp l4180
-*=$32b0
+		jmp color_text
+
+l32AD:
+		jmp (aA010)
 
 l32B0:
 		jmp (aA012)
-*=$32b6
+
+l32B3:
+		jmp (aA018)
 
 l32B6:
 		jmp (aA01A)
-*=$32dd
 
-l32DD:
-		stx $fe
-		sta $fd
+l32B9:
+		jmp (aA01C)
+
+v32bc:
+		.byte	$01
+
+; unreferenced
+
+		lda #$00
+		sta anim_sprite_flags + $8
+
+l32C2:
+		jsr raise_meter
+		jsr wait_frames
+		jmp l32C2
+
+wait_frames:
+		ldx frame_delay
+
+l32CE:
+		lda raster
+		bpl l32CE
+
+l32D3:
+		lda raster
+		bmi l32D3
+		dex 
+		bne l32CE
+		rts 
+
+frame_delay:
+		.byte	$7e
+
+load_animation:
+		stx pointer_fd + $1
+		sta pointer_fd
 		ldy #$00
-		lda ($fd), y
+		lda (pointer_fd), y
 		iny 
-		sta $336b
-		lda ($fd), y
+		sta anim_sprite_count
+		lda (pointer_fd), y
 		iny 
-		sta $336a
+		sta anim_pointer_base
 		tya 
 		clc 
-		adc $fd
-		sta $fd
-		lda $fe
+		adc pointer_fd
+		sta pointer_fd
+		lda pointer_fd + $1
 		adc #$00
-		sta $fe
+		sta pointer_fd + $1
 		ldy #$00
 		jsr l33C0
 
 l3300:
-		lda ($fd), y
-		sta $336c, y
-		sta $3368
+		lda (pointer_fd), y
+		sta anim_sprite_flags, y
+		sta v3368
 		and #$07
 		tax 
-		lda $3360, x
-		sta $3369
-		lda $3369
-		asl $3368
+		lda bit_values, x
+		sta v3369
+		lda v3369
+		asl v3368
 		bcs l3323
 		eor #$ff
-		and $d01c
-		sta $d01c
+		and sprite_multicolor
+		sta sprite_multicolor
 		lda #$00
 
 l3323:
-		ora $d01c
-		sta $d01c
-		lda $3369
-		asl $3368
+		ora sprite_multicolor
+		sta sprite_multicolor
+		lda v3369
+		asl v3368
 		bcs l333B
 		eor #$ff
-		and $d017
-		sta $d017
+		and sprite_expand_y
+		sta sprite_expand_y
 		lda #$00
 
 l333B:
-		ora $d017
-		sta $d017
-		lda $3369
-*=$3346
-
-l3346:
-		rla ($b0), y
-		asl 
+		ora sprite_expand_y
+		sta sprite_expand_y
+		lda v3369
+		asl v3368
+		bcs l3353
 		eor #$ff
-		and $d01d
-		sta $d01d
+		and sprite_expand_x
+		sta sprite_expand_x
 		lda #$00
-		ora $d01d
-		sta $d01d
+
+l3353:
+		ora sprite_expand_x
+		sta sprite_expand_x
 		iny 
-		cpy $336b
+		cpy anim_sprite_count
 		bcc l3300
 		rts 
-*=$3375
 
-l3375:
-		stx $fe
-		sta $fd
-		lda $336b
+bit_values:
+		.byte	$01, $02, $04, $08, $10, $20, $40, $80
+v3368:		.byte	$28
+v3369:		.byte	$20
+anim_pointer_base:		.byte	$25
+anim_sprite_count:		.byte	$06
+anim_sprite_flags:
+		.byte	$41, $42, $43, $80, $44, $45, $04, $77, $23
+
+draw_animation_frame:
+		stx pointer_fd + $1
+		sta pointer_fd
+		lda anim_sprite_count
 		clc 
-		adc $336b
-		adc $336b
+		adc anim_sprite_count
+		adc anim_sprite_count
 		adc #$01
 
 l3385:
@@ -3834,17 +5437,17 @@ l3385:
 		dey 
 		pha 
 		clc 
-		adc $fd
-		sta $fd
-		lda $fe
+		adc pointer_fd
+		sta pointer_fd
+		lda pointer_fd + $1
 		adc #$00
-		sta $fe
+		sta pointer_fd + $1
 		pla 
 		bne l3385
 
 l3399:
 		ldx #$00
-		lda ($fd), y
+		lda (pointer_fd), y
 		iny 
 		cmp #$80
 		bne l33A5
@@ -3853,7 +5456,7 @@ l3399:
 
 l33A5:
 		pha 
-		lda $483f
+		lda sprites + $3f
 		bne l33B2
 		pla 
 		clc 
@@ -3864,13 +5467,13 @@ l33A5:
 l33B2:
 		pla 
 		clc 
-		adc $0464
-		sta $0464
+		adc golfer_x
+		sta golfer_x
 		jsr l33C0
 		jmp l33CC
 
 l33C0:
-		lda $d012
+		lda raster
 		cmp #$1e
 		bcc l33C0
 		cmp #$32
@@ -3880,14 +5483,14 @@ l33C0:
 l33CC:
 		txa 
 		pha 
-		lda $336c, x
+		lda anim_sprite_flags, x
 		and #$07
 		asl 
 		tax 
-		lda ($fd), y
+		lda (pointer_fd), y
 		iny 
 		pha 
-		lda $483f
+		lda sprites + $3f
 		bne l33E5
 		pla 
 		clc 
@@ -3898,35 +5501,259 @@ l33CC:
 l33E5:
 		pla 
 		clc 
-		adc $0464
-		sta $d000, x
-		lda ($fd), y
+		adc golfer_x
+		sta sprite0_x, x
+		lda (pointer_fd), y
 		iny 
 		clc 
 		eor #$ff
 		adc #$01
 		clc 
-		adc $0466
-		sta $d001, x
+		adc golfer_y
+		sta sprite0_y, x
 		txa 
 		lsr 
 		tax 
-		lda ($fd), y
+		lda (pointer_fd), y
 		iny 
 		clc 
-		adc $336a
-		sta d47F8, x
+		adc anim_pointer_base
+		sta sprite_pointers, x
 		pla 
 		tax 
 		inx 
-		cpx $336b
+		cpx anim_sprite_count
 		bcs l3414
 		jmp l33CC
 
 l3414:
 		lda #$00
 		rts 
-*=$35a1
+
+; an older copy of the start of buffer_336c
+unused_3417:
+		.byte	$06, $25, $41, $42, $43, $80, $44, $45
+
+play_animation:
+		tya 
+		pha 
+		lda #$00
+		ldx #$59
+		jsr draw_animation_frame
+		jsr wait_frames
+		pla 
+		tay 
+		cpy #$17
+		beq l3435
+		cpy #$1d
+		bne l3447
+
+l3435:
+		php 
+		pha 
+		txa 
+		pha 
+		tya 
+		pha 
+		jsr l2F79
+		pla 
+		tay 
+		pla 
+		tax 
+		pla 
+		plp 
+		jmp l3469
+
+l3447:
+		cpy #$22
+		bne l3466
+		jsr swing_sound
+		jsr click_sound
+		jsr get_key
+		jsr get_key
+		jsr get_key
+		jsr click_sound
+		jsr get_key
+		jsr get_key
+		jsr get_key
+
+l3466:
+		jsr l2F9B
+
+l3469:
+		iny 
+		dec anim_frame_count
+		bne play_animation
+		rts 
+
+anim_frame_count:
+		.byte	$44
+club_power:
+		.byte	$c0, $b0, $a0, $90, $80, $e8, $d8, $c8, $b8, $a8, $90, $87, $c8, $c8
+
+compute_shot:
+		ldx terrain_type
+		lda #$00
+		jsr multiply
+		sta v0e
+		stx v0e + $1
+		lda v0458
+		clc 
+		adc #$5b
+		tax 
+		lda #$00
+		jsr multiply
+		jsr l094F
+		lda #$bd
+		ldx #$74
+		jsr multiply
+		inx 
+		jsr l094C
+		ldx club
+		lda club_power, x
+		tax 
+		lda #$00
+		jsr multiply
+		jsr l094F
+		lda v0e
+		sta v377c
+		lda v0e + $1
+		sta v377d
+		jmp l36E6
+
+l34C1:
+		lda v377c
+		sta v0e
+		lda v377d
+		sta v0e + $1
+		lda v0463
+		asl 
+		asl 
+		clc 
+		adc v045e
+		tax 
+		lda #$00
+		jsr multiply
+		sta v3599
+		stx v359a
+		jsr l094F
+		lda v0e
+		ldx v0e + $1
+		jsr l091F
+		txa 
+		sta shot_speed
+		lda v3599
+		ldx v359a
+		jsr l094F
+		lda v045e
+		sec 
+		sbc v0461
+		clc 
+		adc v0457
+		clc 
+		adc v0457
+		beq l354B
+		php 
+		bpl l3510
+		clc 
+		eor #$ff
+		adc #$01
+
+l3510:
+		cmp #$26
+		bcc l3516
+		lda #$25
+
+l3516:
+		tax 
+		lda #$00
+		jsr multiply
+		jsr l094F
+		lda #$29
+		ldx #$ae
+		jsr multiply
+		jsr l094C
+		lda v0e
+		ldx v0e + $1
+		jsr l091F
+		txa 
+		clc 
+		eor #$ff
+		adc #$01
+		sta shot_sideways
+		clc 
+		adc shot_speed
+		sta shot_speed
+		lda shot_sideways
+		plp 
+		bmi l354B
+		clc 
+		eor #$ff
+		adc #$01
+
+l354B:
+		sta shot_sideways
+		ldx #$01
+		lda club
+		cmp #$05
+		bcc l3562
+		cmp #$0d
+		beq l3562
+		inx 
+		cmp #$0c
+		bne l3562
+		inx 
+		inx 
+
+l3562:
+		lda shot_speed
+		jsr l3589
+		sta shot_speed
+		lda shot_sideways
+		jsr l357A
+		sta shot_sideways
+		jsr l3711
+		jmp ball_flight
+
+l357A:
+		stx v3594
+
+l357D:
+		asl 
+		php 
+		ror 
+		plp 
+		ror 
+		dex 
+		bne l357D
+		ldx v3594
+		rts 
+
+l3589:
+		stx v3594
+
+l358C:
+		lsr 
+		dex 
+		bne l358C
+		ldx v3594
+		rts 
+
+v3594:
+		.byte	$4c
+shot_speed:		.byte	$00
+shot_sideways:		.byte	$00
+club:		.byte	$00
+terrain_type:		.byte	$0a
+v3599:		.byte	$41
+v359a:		.byte	$43
+; old text "ROS" under the variables
+unused_359b:
+		.byte	$52, $4f
+v359d:		.byte	$53
+v359e:		.byte	$20
+v359f:		.byte	$4d
+v35a0:		.byte	$41
 
 l35A1:
 		bpl l35A8
@@ -3937,84 +5764,84 @@ l35A1:
 l35A8:
 		tax 
 		lda #$00
-		jsr l0900
-		sta $0e
-		stx $0f
+		jsr multiply
+		sta v0e
+		stx v0e + $1
 		jsr l094F
-		lda $0e
-		ldx $0f
+		lda v0e
+		ldx v0e + $1
 		jmp l091F
 
 l35BC:
 		pha 
 		jsr l366E
-		stx $359d
-		sty $359f
-		stx $378a
-		sty $378b
+		stx v359d
+		sty v359f
+		stx v378a
+		sty v378b
 		pla 
 		jsr l35A1
-		sta $3785
-		stx $3784
+		sta v3785
+		stx v3784
 		lda #$00
-		sta $3788
-		sta $3789
+		sta v3788
+		sta v3789
 
 l35DE:
-		lda $359d
+		lda v359d
 		bmi l35F5
 		clc 
-		adc $378a
-		sta $378a
+		adc v378a
+		sta v378a
 		lda #$00
-		adc $3788
-		sta $3788
+		adc v3788
+		sta v3788
 		jmp l3604
 
 l35F5:
 		clc 
-		adc $378a
-		sta $378a
-		lda $3788
+		adc v378a
+		sta v378a
+		lda v3788
 		sbc #$00
-		sta $3788
+		sta v3788
 
 l3604:
-		lda $359f
+		lda v359f
 		bmi l361B
 		clc 
-		adc $378b
-		sta $378b
+		adc v378b
+		sta v378b
 		lda #$00
-		adc $3789
-		sta $3789
+		adc v3789
+		sta v3789
 		jmp l362A
 
 l361B:
 		clc 
-		adc $378b
-		sta $378b
-		lda $3789
+		adc v378b
+		sta v378b
+		lda v3789
 		sbc #$00
-		sta $3789
+		sta v3789
 
 l362A:
-		lda $3788
+		lda v3788
 		jsr l35A1
-		sta $3787
-		stx $3786
-		lda $3789
+		sta v3787
+		stx v3786
+		lda v3789
 		jsr l35A1
 		pha 
 		txa 
 		clc 
-		adc $3786
-		sta $3786
+		adc v3786
+		sta v3786
 		pla 
-		adc $3787
-		sta $3787
-		lda $3787
-		cmp $3785
+		adc v3787
+		sta v3787
+		lda v3787
+		cmp v3785
 		bcs l3657
 		jmp l35DE
 
@@ -4023,14 +5850,14 @@ l3657:
 		jmp l3667
 
 l365C:
-		lda $3786
-		cmp $3784
+		lda v3786
+		cmp v3784
 		bcs l3667
 		jmp l35DE
 
 l3667:
-		ldx $3788
-		ldy $3789
+		ldx v3788
+		ldy v3789
 		rts 
 
 l366E:
@@ -4078,19 +5905,19 @@ l3699:
 		rts 
 
 l369A:
-		lda $3780
-		ldx $377e
-		ldy $377f
+		lda v3780
+		ldx v377e
+		ldy v377f
 		jsr l35BC
-		stx $3782
-		sty $3783
-		ldx $377f
-		lda $377e
+		stx v3782
+		sty v3783
+		ldx v377f
+		lda v377e
 		clc 
 		eor #$ff
 		adc #$01
 		tay 
-		lda $3781
+		lda v3781
 		bpl l36D2
 		clc 
 		eor #$ff
@@ -4112,141 +5939,187 @@ l36D2:
 		jsr l35BC
 		txa 
 		clc 
-		adc $3782
-		sta $3782
+		adc v3782
+		sta v3782
 		tya 
 		clc 
-		adc $3783
-		sta $3783
+		adc v3783
+		sta v3783
 		rts 
 
 l36E6:
-		lda $0db8
+		lda direction
 		tax 
-		lda $3b35, x
-		sta $377e
-		lda $3b3d, x
-		sta $377f
+		lda steps_x, x
+		sta v377e
+		lda steps_y, x
+		sta v377f
 		lda #$58
-		sta $3780
-		lda $0476
-		sta $3781
+		sta v3780
+		lda aim_offset
+		sta v3781
 		jsr l369A
-		lda $3782
-		sta $377e
-		lda $3783
-		sta $377f
+		lda v3782
+		sta v377e
+		lda v3783
+		sta v377f
 		rts 
 
 l3711:
-		lda $3595
-		sta $3780
-		lda $3596
-		sta $3781
+		lda shot_speed
+		sta v3780
+		lda shot_sideways
+		sta v3781
 		jsr l369A
-		lda @w $001b
-		sta $10
-		lda @w $001c
-		sta $11
-		lda @w $001d
-		sta $12
-		lda @w $001e
-		sta $13
-		lda $3782
+		lda @w ball_x
+		sta v10
+		lda @w ball_x + $1
+		sta v10 + $1
+		lda @w ball_y
+		sta v12
+		lda @w ball_y + $1
+		sta v12 + $1
+		lda v3782
 		bmi l3747
 		clc 
-		adc $10
-		sta $10
+		adc v10
+		sta v10
 		lda #$00
-		adc $11
-		sta $11
+		adc v10 + $1
+		sta v10 + $1
 		jmp l3750
 
 l3747:
 		clc 
-		adc $10
-		sta $10
+		adc v10
+		sta v10
 		bcs l3750
-		dec $11
+		dec v10 + $1
 
 l3750:
-		lda $3783
+		lda v3783
 		bmi l3763
 		clc 
-		adc $12
-		sta $12
+		adc v12
+		sta v12
 		lda #$00
-		adc $13
-		sta $13
+		adc v12 + $1
+		sta v12 + $1
 		jmp l376C
 
 l3763:
 		clc 
-		adc $12
-		sta $12
+		adc v12
+		sta v12
 		bcs l376C
-		dec $13
+		dec v12 + $1
 
 l376C:
 		jsr l0BA4
-		lda $2c5b
-		sta $3596
-		lda $2c5d
-		sta $3595
+		lda v2c5b
+		sta shot_sideways
+		lda v2c5d
+		sta shot_speed
 		rts 
-*=$378c
+
+v377c:
+		.byte	$00
+v377d:		.byte	$01
+v377e:		.byte	$50
+v377f:		.byte	$20
+v3780:		.byte	$08
+v3781:		.byte	$00
+v3782:		.byte	$20
+v3783:		.byte	$8e
+v3784:		.byte	$49
+v3785:		.byte	$00
+v3786:		.byte	$00
+v3787:		.byte	$00
+v3788:		.byte	$00
+v3789:		.byte	$01
+v378a:		.byte	$50
+v378b:		.byte	$20
 
 l378C:
-		lda $044f
+		lda current_player
 		beq l3793
 		lda #$08
 
 l3793:
-		jsr l2D21
-		lda $66
+		jsr set_golfer_colors
+		lda hole_distance
 		bne l379D
 		jsr l382B
 
 l379D:
-		jsr l38B6
+		jsr face_hole
 		jsr l3AB8
 		jsr l3AC4
-		lda @w $001c
+		lda @w ball_x + $1
 		pha 
-		lda @w $001b
+		lda @w ball_x
 		pha 
-		lda @w $001e
+		lda @w ball_y + $1
 		pha 
-		lda @w $001d
+		lda @w ball_y
 		pha 
-		lda $0400
-		sta @w $001b
-		lda $0401
-		sta @w $001c
-		lda $0402
-		sta @w $001d
-		lda $0403
-		sta @w $001e
+		lda hole_x
+		sta @w ball_x
+		lda hole_x + $1
+		sta @w ball_x + $1
+		lda hole_y
+		sta @w ball_y
+		lda hole_y + $1
+		sta @w ball_y + $1
 		jsr l3AC4
 		jsr l3AC4
-		lda @w $001d
-		sta $046e
-		lda @w $001e
-		sta $046f
-		lda @w $001b
-		sta $046c
-		lda @w $001c
-		sta $046d
+		lda @w ball_y
+		sta v046e
+		lda @w ball_y + $1
+		sta v046f
+		lda @w ball_x
+		sta v046c
+		lda @w ball_x + $1
+		sta v046d
 		pla 
-		sta @w $001d
+		sta @w ball_y
 		pla 
-		sta @w $001e
+		sta @w ball_y + $1
 		pla 
-		sta @w $001b
+		sta @w ball_x
 		pla 
-		sta @w $001c
+		sta @w ball_x + $1
 		jmp l3AB8
-*=$382b
+
+select_club:
+		jsr print_club_name
+		lda club
+		beq l3808
+		rts 
+
+l3808:
+		jsr print_club_name
+
+l380B:
+		ldx #$0a
+
+l380D:
+		jsr get_key
+		cmp #$03
+		bne l3819
+		jsr l4351
+		ldx #$01
+
+l3819:
+		dex 
+		bne l380D
+		cmp #$29
+		beq l385B
+		cmp #$2a
+		beq l386A
+		cmp #$3c
+		bne l380B
+		jmp l434B
 
 l382B:
 		tax 
@@ -4254,12 +6127,12 @@ l382B:
 		pla 
 		cpx #$22
 		bne l3835
-		jmp l3A94
+		jmp turn_left
 
 l3835:
 		cpx #$25
 		bne l383C
-		jmp l3AA6
+		jmp turn_right
 
 l383C:
 		cpx #$01
@@ -4268,224 +6141,280 @@ l383C:
 
 l3843:
 		rts 
-*=$38b6
 
-l38B6:
+; unreferenced
+
+		lda par
+		jsr l4348
+		ldx hole_number
+		inx 
+		cpx #$13
+		bne l3854
+		ldx #$01
+
+l3854:
+		stx hole_number
+		txa 
+		jmp setup_hole
+
+l385B:
+		jsr l434E
+		inc club
+		lda club
+		cmp #$0d
+		beq l386A
+		bne l3808
+
+l386A:
+		jsr l434E
+		dec club
+		lda club
+		cmp #$ff
+		beq l385B
+		bne l3808
+
+print_club_name:
+		lda #$50
+		sta text_x
+		lda #$17
+		sta text_y
+		lda #$02
+		jsr color_text
+		lda club
+		asl 
+		pha 
+		tax 
+		lda club_names, x
+		jsr print_char
+		pla 
+		tax 
+		lda club_names + $1, x
+		jmp print_char
+
+; two letters per club: 1W 3W 1I 3I ... 9I PW SW PT
+club_names:
+		.text	"1W3W1I3I4I5I6I7I8I9IPWSWPTPT"
+
+face_hole:
 		lda #$00
-		sta $3982
-		lda $0402
+		sta v3982
+		lda hole_y
 		sec 
-		sbc @w $001d
-		sta $0454
-		lda $0403
-		sbc @w $001e
-		sta $0455
+		sbc @w ball_y
+		sta v0454
+		lda hole_y + $1
+		sbc @w ball_y + $1
+		sta v0455
 		asl 
 		php 
-		rol $3982
+		rol v3982
 		plp 
 		bpl l38E7
 		lda #$00
 		sec 
-		sbc $0454
-		sta $0454
+		sbc v0454
+		sta v0454
 		lda #$00
-		sbc $0455
-		sta $0455
+		sbc v0455
+		sta v0455
 
 l38E7:
-		lda $0400
+		lda hole_x
 		sec 
-		sbc @w $001b
-		sta $0452
-		lda $0401
-		sbc @w $001c
-		sta $0453
+		sbc @w ball_x
+		sta v0452
+		lda hole_x + $1
+		sbc @w ball_x + $1
+		sta v0453
 		asl 
 		php 
-		rol $3982
+		rol v3982
 		plp 
 		bpl l3913
 		lda #$00
 		sec 
-		sbc $0452
-		sta $0452
+		sbc v0452
+		sta v0452
 		lda #$00
-		sbc $0453
-		sta $0453
+		sbc v0453
+		sta v0453
 
 l3913:
 		jsr l3956
 		php 
-		rol $3982
-		ldx $3982
-		lda $3983, x
-		sta $3982
+		rol v3982
+		ldx v3982
+		lda octant_directions, x
+		sta v3982
 		plp 
 		bcc l3929
 		jsr l3965
 
 l3929:
-		asl $0452
-		rol $0453
+		asl v0452
+		rol v0453
 		jsr l3956
 		bcc l393E
-		lda $3982
+		lda v3982
 		ora #$01
-		sta $3982
+		sta v3982
 		bne l3950
 
 l393E:
-		lda $3982
+		lda v3982
 		and #$01
 		beq l3950
-		lda $3982
+		lda v3982
 		clc 
 		adc #$01
 		and #$07
-		sta $3982
+		sta v3982
 
 l3950:
-		lda $3982
+		lda v3982
 		jmp l0D79
 
 l3956:
-		lda $0453
-		cmp $0455
+		lda v0453
+		cmp v0455
 		bne l3964
-		lda $0452
-		cmp $0454
+		lda v0452
+		cmp v0454
 
 l3964:
 		rts 
 
 l3965:
-		lda $0452
+		lda v0452
 		pha 
-		lda $0454
-		sta $0452
+		lda v0454
+		sta v0452
 		pla 
-		sta $0454
-		lda $0453
+		sta v0454
+		lda v0453
 		pha 
-		lda $0455
-		sta $0453
+		lda v0455
+		sta v0453
 		pla 
-		sta $0455
+		sta v0455
 		rts 
-*=$398b
 
-l398B:
-		sta $0451
+v3982:
+		.byte	$00
+octant_directions:
+		.byte	$00, $01, $07, $06, $03, $02, $04, $05
+
+setup_hole:
+		sta hole_number
 		asl 
 		asl 
-		adc $0451
-		adc $0451
+		adc hole_number
+		adc hole_number
 		sec 
 		sbc #$06
-		sta $3a93
+		sta digit_text_index
 		lda #$30
-		sta $1f
+		sta text_x
 		lda #$1f
-		sta $20
+		sta text_y
 		lda #$02
-		jsr l4180
+		jsr color_text
 		ldy #$02
 		jsr l3A73
 		lda #$28
-		sta $1f
+		sta text_x
 		lda #$17
-		sta $20
+		sta text_y
 		lda #$03
-		jsr l4180
+		jsr color_text
 		ldy #$03
 		jsr l3A73
 		lda #$38
-		sta $1f
+		sta text_x
 		lda #$0f
-		sta $20
+		sta text_y
 		lda #$01
-		jsr l4180
+		jsr color_text
 		ldy #$01
 		jsr l3A73
 		sec 
 		sbc #$30
-		sta $0450
+		sta par
 		ldx #$ff
-		stx $66
+		stx hole_distance
 		inx 
-		stx $0404
-		lda $0451
+		stx green_view
+		lda hole_number
 		cmp #$13
 		bne l39EA
-		jmp l3A4A
+		jmp setup_practice_hole
 
 l39EA:
 		asl 
 		asl 
 		tax 
-		lda $942b, x
-		sta $0400
-		lda $942c, x
-		sta $0401
-		lda $942d, x
-		sta $0402
-		lda $942e, x
-		sta $0403
-		lda $0451
+		lda hole_positions_base, x
+		sta hole_x
+		lda pointers_9421 + $b, x
+		sta hole_x + $1
+		lda pointers_9421 + $c, x
+		sta hole_y
+		lda pointers_9421 + $d, x
+		sta hole_y + $1
+		lda hole_number
 		asl 
 		tax 
-		lda $93f3, x
-		sta $61
-		lda $93f4, x
-		sta $62
+		lda hole_shapes_base, x
+		sta pointer_61
+		lda terrain_93bd + $37, x
+		sta pointer_61 + $1
 		ldy #$00
-		sty @w $001b
-		sty @w $001d
-		lda ($61), y
+		sty @w ball_x
+		sty @w ball_y
+		lda (pointer_61), y
 		lsr 
-		ror @w $001b
+		ror @w ball_x
 		lsr 
-		ror @w $001b
-		sta @w $001c
+		ror @w ball_x
+		sta @w ball_x + $1
 		iny 
-		lda ($61), y
+		lda (pointer_61), y
 		lsr 
-		ror @w $001d
+		ror @w ball_y
 		lsr 
-		ror @w $001d
-		sta @w $001e
+		ror @w ball_y
+		sta @w ball_y + $1
 		iny 
-		lda ($61), y
-		ora @w $001b
-		sta @w $001b
+		lda (pointer_61), y
+		ora @w ball_x
+		sta @w ball_x
 		iny 
-		lda ($61), y
-		ora @w $001d
-		sta @w $001d
+		lda (pointer_61), y
+		ora @w ball_y
+		sta @w ball_y
 		rts 
 
-l3A4A:
+setup_practice_hole:
 		lda #$1a
-		sta @w $001b
+		sta @w ball_x
 		lda #$00
-		sta @w $001c
+		sta @w ball_x + $1
 		lda #$b0
-		sta @w $001d
+		sta @w ball_y
 		lda #$00
-		sta @w $001e
+		sta @w ball_y + $1
 		lda #$12
-		sta $0400
+		sta hole_x
 		lda #$00
-		sta $0401
+		sta hole_x + $1
 		lda #$b8
-		sta $0402
+		sta hole_y
 		lda #$00
-		sta $0403
+		sta hole_y + $1
 		rts 
 
 l3A73:
-		ldx $3a93
+		ldx digit_text_index
 
 l3A76:
 		php 
@@ -4494,23 +6423,25 @@ l3A76:
 		pha 
 		tya 
 		pha 
-		lda $a02b, x
-		jsr l0FFB
+		lda digit_text, x
+		jsr print_char
 		pla 
 		tay 
 		pla 
 		tax 
 		pla 
 		plp 
-		lda $a02b, x
+		lda digit_text, x
 		inx 
 		dey 
 		bne l3A76
-		stx $3a93
+		stx digit_text_index
 		rts 
-*=$3a94
 
-l3A94:
+digit_text_index:
+		.byte	$06
+
+turn_left:
 		jsr l3AC4
 		jsr l0DB9
 		jsr l0DB9
@@ -4518,7 +6449,7 @@ l3A94:
 		jsr l3AC4
 		jmp l3AB8
 
-l3AA6:
+turn_right:
 		jsr l3AC4
 		jsr l0D73
 		jsr l0D73
@@ -4536,18 +6467,18 @@ l3AC4:
 		jsr l3AC7
 
 l3AC7:
-		ldy $0db8
-		lda $3b35, y
+		ldy direction
+		lda steps_x, y
 		bmi l3AE4
 		lsr 
 		lsr 
 		lsr 
 		clc 
-		adc @w $001b
-		sta @w $001b
-		lda @w $001c
+		adc @w ball_x
+		sta @w ball_x
+		lda @w ball_x + $1
 		adc #$00
-		sta @w $001c
+		sta @w ball_x + $1
 		jmp l3B00
 
 l3AE4:
@@ -4561,24 +6492,24 @@ l3AE4:
 		eor #$ff
 		adc #$01
 		clc 
-		adc @w $001b
-		sta @w $001b
-		lda @w $001c
+		adc @w ball_x
+		sta @w ball_x
+		lda @w ball_x + $1
 		sbc #$00
-		sta @w $001c
+		sta @w ball_x + $1
 
 l3B00:
-		lda $3b3d, y
+		lda steps_y, y
 		bmi l3B18
 		lsr 
 		lsr 
 		lsr 
 		clc 
-		adc @w $001d
-		sta @w $001d
-		lda @w $001e
+		adc @w ball_y
+		sta @w ball_y
+		lda @w ball_y + $1
 		adc #$00
-		sta @w $001e
+		sta @w ball_y + $1
 		rts 
 
 l3B18:
@@ -4592,22 +6523,71 @@ l3B18:
 		eor #$ff
 		adc #$01
 		clc 
-		adc @w $001d
-		sta @w $001d
-		lda @w $001e
+		adc @w ball_y
+		sta @w ball_y
+		lda @w ball_y + $1
 		sbc #$00
-		sta @w $001e
+		sta @w ball_y + $1
 		rts 
-*=$3b45
 
+steps_x:
+		.char	0, 8, 8, 8, 0, -8, -8, -8
+steps_y:
+		.char	8, 8, 0, -8, -8, -8, 0, 8
+
+; unreferenced
 l3B45:
 		rts 
-*=$3b87
 
-l3B87:
+; unreferenced: reads a hex word from the keyboard into $06/$07
+read_hex_word:
+		jsr read_hex_byte
+		sta pointer_06 + $1
+		jsr read_hex_byte
+		sta pointer_06
+		rts 
+
+read_hex_byte:
+		jsr read_hex_digit
+		asl 
+		asl 
+		asl 
+		asl 
+		sta hex_high_nibble
+		jsr read_hex_digit
+		ora hex_high_nibble
+		rts 
+
+hex_high_nibble:
+		.byte	$81
+
+; waits for a key 0-9 or A-F, echoes it and returns its value
+read_hex_digit:
+		jsr scnkey
+		jsr getin
+		cmp #$30
+		bcc l3B78
+		cmp #$3a
+		bcs l3B78
+		jsr print_char
+		sec 
+		sbc #$30
+		rts 
+
+l3B78:
+		cmp #$41
+		bcc read_hex_digit
+		cmp #$47
+		bcs read_hex_digit
+		jsr print_char
+		sec 
+		sbc #$37
+		rts 
+
+position_ball_sprite:
 		lda #$00
-		sta $417e
-		lda $417f
+		sta v417e
+		lda flight_time
 		cmp #$fd
 		bcs l3B99
 		jsr l3BEE
@@ -4618,101 +6598,105 @@ l3B99:
 
 l3B9C:
 		jsr l3C3F
-		lda $d01d
+		lda sprite_expand_x
 		and #$40
 		bne l3BC0
 		lda #$0c
 		clc 
-		adc $1f24
-		sta $1f24
-		lda $1f25
+		adc ball_sprite_x
+		sta ball_sprite_x
+		lda ball_sprite_x + $1
 		adc #$00
-		sta $1f25
-		lda $1f26
+		sta ball_sprite_x + $1
+		lda ball_sprite_y
 		clc 
 		adc #$0a
-		sta $1f26
+		sta ball_sprite_y
 
 l3BC0:
-		lda $1f24
-		sta $d00c
-		sta $d00e
-		lda $1f25
+		lda ball_sprite_x
+		sta sprite6_x
+		sta sprite7_x
+		lda ball_sprite_x + $1
 		beq l3BD8
-		lda $d010
+		lda sprites_x_msb
 		ora #$c0
-		sta $d010
+		sta sprites_x_msb
 		bne l3BE0
 
 l3BD8:
-		lda $d010
+		lda sprites_x_msb
 		and #$3f
-		sta $d010
+		sta sprites_x_msb
 
 l3BE0:
-		lda $1f26
-		sta $d00d
+		lda ball_sprite_y
+		sta sprite6_y
 		clc 
-		adc $3cf8
-		sta $d00f
+		adc shadow_offset
+		sta sprite7_y
 		rts 
 
 l3BEE:
-		lda $4205
+		lda v4205
 		clc 
-		adc $4209
-		sta $4209
-		lda $4206
-		adc $420a
-		sta $420a
+		adc v4209
+		sta v4209
+		lda v4206
+		adc v420a
+		sta v420a
 		bcc l3C0E
-		lda $4206
+		lda v4206
 		bmi l3C16
-		inc $420b
+		inc v420b
 		jmp l3C16
 
 l3C0E:
-		lda $4206
+		lda v4206
 		bpl l3C16
-		dec $420b
+		dec v420b
 
 l3C16:
-		lda $4207
+		lda v4207
 		clc 
-		adc $420c
-		sta $420c
-		lda $4208
-		adc $420d
-		sta $420d
-		lda $420a
-		sta $1f24
-		lda $420b
-		sta $1f25
-		lda $420d
-		sta $1f26
+		adc v420c
+		sta v420c
+		lda v4208
+		adc v420d
+		sta v420d
+		lda v420a
+		sta ball_sprite_x
+		lda v420b
+		sta ball_sprite_x + $1
+		lda v420d
+		sta ball_sprite_y
 		rts 
-*=$3c3f
+
+v3c3c:
+		.byte	$29
+v3c3d:		.byte	$56
+ball_landed:		.byte	$00
 
 l3C3F:
-		lda $0404
+		lda green_view
 		beq l3C8E
-		lda $1f26
+		lda ball_sprite_y
 		pha 
-		lda $1f25
+		lda ball_sprite_x + $1
 		pha 
-		lda $1f24
+		lda ball_sprite_x
 		pha 
 		lda #$e6
 		sec 
-		sbc $1f26
+		sbc ball_sprite_y
 		cmp #$30
 		bcc l3C86
 		tax 
 		lda #$0c
-		lda $1f25
+		lda ball_sprite_x + $1
 		lsr 
 		php 
-		lda $1f24
+		lda ball_sprite_x
 		plp 
 		ror 
 		jsr l1306
@@ -4720,42 +6704,42 @@ l3C3F:
 		jmp l3D54
 
 l3C6F:
-		lda $d015
+		lda sprite_enable
 		ora #$40
 
 l3C74:
 		and #$7f
-		sta $d015
+		sta sprite_enable
 		pla 
-		sta $1f24
+		sta ball_sprite_x
 		pla 
-		sta $1f25
+		sta ball_sprite_x + $1
 		pla 
-		sta $1f26
+		sta ball_sprite_y
 		rts 
 
 l3C86:
-		lda $d015
+		lda sprite_enable
 		and #$bf
 		jmp l3C74
 
 l3C8E:
-		lda $1f26
+		lda ball_sprite_y
 		pha 
-		sta $1f26
-		lda $1f25
+		sta ball_sprite_y
+		lda ball_sprite_x + $1
 		pha 
-		lda $1f24
+		lda ball_sprite_x
 		pha 
-		lda $3c3c
-		sta $3c3d
-		lda $1f26
+		lda v3c3c
+		sta v3c3d
+		lda ball_sprite_y
 		sec 
 		sbc #$e5
 		clc 
 		eor #$ff
 		adc #$01
-		sta $3cf8
+		sta shadow_offset
 		jsr l3CB7
 		jmp l3CFA
 
@@ -4773,16 +6757,16 @@ l3CC1:
 
 l3CC7:
 		tay 
-		lda $17e3, y
+		lda screen_rows, y
 		sta $3cf5
-		lda $17e4, y
+		lda screen_rows + $1, y
 		clc 
 		adc #$87
 		sta $3cf6
-		lda $1f24
-		lsr $1f25
+		lda ball_sprite_x
+		lsr ball_sprite_x + $1
 		ror 
-		ldx $0404
+		ldx green_view
 		beq l3CF1
 		cmp #$9f
 		bcs l3CEB
@@ -4798,101 +6782,104 @@ l3CF1:
 		lsr 
 		lsr 
 		tax 
-		lda $ffff, x
+		lda irq_hw_vector + $1, x
 
 l3CF7:
 		rts 
-*=$3cfa
+
+shadow_offset:
+		.byte	$43
+v3cf9:		.byte	$41
 
 l3CFA:
-		sta $3c3c
+		sta v3c3c
 		tya 
-		ldx $0404
+		ldx green_view
 		bne l3D17
 		jsr l3D9F
-		lda $2c5f
+		lda v2c5f
 		sec 
-		sbc $1f26
-		ldx $417f
+		sbc ball_sprite_y
+		ldx flight_time
 		cpx #$40
 		bcs l3D17
 		sec 
 		sbc #$10
 
 l3D17:
-		sta $1f26
+		sta ball_sprite_y
 		pla 
-		sta $1f24
+		sta ball_sprite_x
 		pla 
-		sta $1f25
-		lda $1f25
+		sta ball_sprite_x + $1
+		lda ball_sprite_x + $1
 		pha 
-		lda $1f24
+		lda ball_sprite_x
 		pha 
-		lda $1f26
+		lda ball_sprite_y
 		jsr l3CB7
-		sta $3cf9
-		lda $3c3c
-		cmp $1f26
+		sta v3cf9
+		lda v3c3c
+		cmp ball_sprite_y
 		bcc l3D45
-		lda $d015
+		lda sprite_enable
 		ora #$40
-		sta $d015
+		sta sprite_enable
 		bne l3D61
 
 l3D45:
-		lda $d015
+		lda sprite_enable
 		and #$40
 		beq l3D59
-		lda $3c3d
-		cmp $3c3c
+		lda v3c3d
+		cmp v3c3c
 		bne l3D59
 
 l3D54:
 		lda #$ff
-		sta $3c3e
+		sta ball_landed
 
 l3D59:
-		lda $d015
+		lda sprite_enable
 		and #$bf
-		sta $d015
+		sta sprite_enable
 
 l3D61:
-		lda $3cf9
-		cmp $1f26
+		lda v3cf9
+		cmp ball_sprite_y
 		bcc l3D8A
-		lda $3597
+		lda club
 		cmp #$0c
 		bcs l3D8A
-		lda $d015
+		lda sprite_enable
 		ora #$80
-		sta $d015
-		lda $3cf8
+		sta sprite_enable
+		lda shadow_offset
 		sec 
-		sbc $1f26
+		sbc ball_sprite_y
 		bcc l3D8A
-		sta $3cf8
+		sta shadow_offset
 		cmp #$03
 		bcs l3D92
 		bcc l3D92
 
 l3D8A:
-		lda $d015
+		lda sprite_enable
 		and #$7f
-		sta $d015
+		sta sprite_enable
 
 l3D92:
 		pla 
-		sta $1f24
+		sta ball_sprite_x
 		pla 
-		sta $1f25
+		sta ball_sprite_x + $1
 		pla 
-		sta $1f26
+		sta ball_sprite_y
 		rts 
 
 l3D9F:
-		lda $359e
-		sta $2c5b
+		lda v359e
+		sta v2c5b
 		bmi l3DAB
 		lda #$00
 		beq l3DAD
@@ -4901,64 +6888,64 @@ l3DAB:
 		lda #$ff
 
 l3DAD:
-		sta $2c5c
-		lda $35a0
-		sta $2c5d
+		sta v2c5c
+		lda v35a0
+		sta v2c5d
 		lda #$00
-		sta $2c5e
-		lda $0404
+		sta v2c5e
+		lda green_view
 		bne l3DC3
 		jmp l0B06
 
 l3DC3:
-		lda $2c5b
+		lda v2c5b
 		jsr l4354
-		sta $2c5b
-		lda $2c5d
+		sta v2c5b
+		lda v2c5d
 		sec 
 		sbc #$02
 		jsr l4354
-		sta $2c5d
-		lda $0471
+		sta v2c5d
+		lda green_flag_y
 		clc 
-		adc $2c5d
-		sta $1f26
+		adc v2c5d
+		sta ball_sprite_y
 		lda #$00
-		sta $1f27
-		sta $1f25
-		lda $0470
+		sta ball_sprite_y + $1
+		sta ball_sprite_x + $1
+		lda green_flag_x
 		clc 
-		adc $2c5b
+		adc v2c5b
 		asl 
-		rol $1f25
-		sta $1f24
+		rol ball_sprite_x + $1
+		sta ball_sprite_x
 		lda #$e6
 		sec 
-		sbc $1f26
-		sta $1f26
+		sbc ball_sprite_y
+		sta ball_sprite_y
 		pla 
 		pla 
 		rts 
 
 l3E04:
 		jsr l3D9F
-		lda $1f24
+		lda ball_sprite_x
 		sec 
 		sbc #$30
 		asl 
-		sta $1f24
+		sta ball_sprite_x
 		lda #$00
 		rol 
-		sta $1f25
-		lda $1f26
+		sta ball_sprite_x + $1
+		lda ball_sprite_y
 		and #$fe
 		cmp #$10
 		bcs l3E30
 		tax 
-		lda $1fc7, x
-		sta $0ba0
-		lda $1fc8, x
-		sta $0ba1
+		lda table_1fc7, x
+		sta math_words + $a
+		lda table_1fc7 + $1, x
+		sta math_words + $b
 		jmp l3E42
 
 l3E30:
@@ -4967,35 +6954,35 @@ l3E30:
 		lsr 
 		and #$fe
 		tax 
-		lda $1fe7, x
-		sta $0ba0
-		lda $1fe8, x
-		sta $0ba1
+		lda table_1fe7, x
+		sta math_words + $a
+		lda table_1fe7 + $1, x
+		sta math_words + $b
 
 l3E42:
 		lda #$e5
 		sec 
-		sbc $2c5f
+		sbc v2c5f
 		clc 
-		adc $1f26
-		sta $1f26
-		lda $417e
+		adc ball_sprite_y
+		sta ball_sprite_y
+		lda v417e
 		ldy #$ff
-		sty $1f15
+		sty v1f15
 		jsr l1D90
-		jsr l0900
-		sta $0e
-		stx $0f
+		jsr multiply
+		sta v0e
+		stx v0e + $1
 		lda #$00
-		ldx $3595
-		jsr l0900
+		ldx shot_speed
+		jsr multiply
 		jsr l094F
 		lda #$00
 		ldx #$40
-		jsr l0900
+		jsr multiply
 		jsr l094C
-		lda $0e
-		ldx $0f
+		lda v0e
+		ldx v0e + $1
 		jsr l091F
 		txa 
 		asl 
@@ -5004,66 +6991,111 @@ l3E42:
 		eor #$ff
 		adc #$01
 		clc 
-		adc $1f26
-		sta $1f26
+		adc ball_sprite_y
+		sta ball_sprite_y
 		rts 
-*=$3ef4
+
+ball_flight:
+		jsr l4345
+		lda #$00
+		lda #$80
+		sta v359f
+		lda #$02
+		sta v35a0
+		lda #$00
+		sta v359d
+		lda #$00
+		sta v359e
+		lda shot_sideways
+		bpl l3EB0
+		lda #$ff
+		sta v359d
+
+l3EB0:
+		ldx #$00
+		stx ball_landed
+		stx v4209
+		stx v420b
+		stx v420c
+		lda v4203
+		sta v420a
+		lda v4204
+		sta v420d
+		lda green_view
+		beq l3EEC
+		lda green_flag_x
+		asl 
+		sta v420a
+		rol v420b
+		lda #$e6
+		sec 
+		sbc green_flag_y
+		sta v420d
+		lda #$00
+		sta v359f
+		lda #$02
+		sta v35a0
+
+l3EEC:
+		stx flight_time
+		lda #$21
+		sta sprite_pointers + $6
 
 l3EF4:
-		lda $417f
+		lda flight_time
 		and #$10
 		bne l3F01
 		jsr l423D
-		lda $417f
+		lda flight_time
 
 l3F01:
 		cmp #$80
 		bne l3F11
-		lda $3597
+		lda club
 		cmp #$0b
 		bcs l3F11
 		lda #$20
-		sta $47fe
+		sta sprite_pointers + $6
 
 l3F11:
-		lda $417f
+		lda flight_time
 		and #$01
 		bne l3F1B
-		jsr l3B87
+		jsr position_ball_sprite
 
 l3F1B:
-		lda $3595
+		lda shot_speed
 		clc 
-		adc $359f
-		sta $359f
-		lda $35a0
+		adc v359f
+		sta v359f
+		lda v35a0
 		adc #$00
-		sta $35a0
-		lda $3596
+		sta v35a0
+		lda shot_sideways
 		bmi l3F44
 		clc 
-		adc $359d
-		sta $359d
+		adc v359d
+		sta v359d
 		lda #$00
-		adc $359e
-		sta $359e
+		adc v359e
+		sta v359e
 		jmp l3F50
 
 l3F44:
 		clc 
-		adc $359d
-		sta $359d
+		adc v359d
+		sta v359d
 		bcs l3F50
-		dec $359e
+		dec v359e
 
 l3F50:
-		lda $417f
+		lda flight_time
 		tax 
-		lda $3c3e
+		lda ball_landed
 		bne l3F76
 		inx 
-		stx $417f
-		stx $3294
+		stx flight_time
+		stx v3294
 		beq l3FA4
 		txa 
 		and #$01
@@ -5071,8 +7103,8 @@ l3F50:
 		jmp l3EF4
 
 l3F6A:
-		lda $4205
-		ora $4207
+		lda v4205
+		ora v4207
 		bne l3F75
 		jmp l3EF4
 
@@ -5081,133 +7113,133 @@ l3F75:
 
 l3F76:
 		ldx #$00
-		stx $417e
-		stx $3294
+		stx v417e
+		stx v3294
 		dex 
-		stx $417f
-		lda $0404
+		stx flight_time
+		lda green_view
 		bne l3F8D
-		jsr l2F6D
-		jsr l3B87
+		jsr click_sound
+		jsr position_ball_sprite
 
 l3F8D:
 		lda #$00
-		sta $0476
+		sta aim_offset
 		jsr l36E6
-		lda $35a0
-		sta $3595
-		lda $359e
-		sta $3596
+		lda v35a0
+		sta shot_speed
+		lda v359e
+		sta shot_sideways
 		jsr l3711
 
 l3FA4:
 		jsr l3AC4
-		lda $044f
+		lda current_player
 		and #$01
 		asl 
 		tax 
-		lda @w $001b
-		sta $0405, x
-		lda @w $001c
-		sta $0406, x
-		lda @w $001d
-		sta $0409, x
-		lda @w $001e
-		sta $040a, x
-		lda $3782
+		lda @w ball_x
+		sta safe_ball_x, x
+		lda @w ball_x + $1
+		sta safe_ball_x + $1, x
+		lda @w ball_y
+		sta safe_ball_y, x
+		lda @w ball_y + $1
+		sta safe_ball_y + $1, x
+		lda v3782
 		bmi l3FDD
 		clc 
-		adc @w $001b
-		sta @w $001b
+		adc @w ball_x
+		sta @w ball_x
 		lda #$00
-		adc @w $001c
-		sta @w $001c
+		adc @w ball_x + $1
+		sta @w ball_x + $1
 		jmp l3FE9
 
 l3FDD:
 		clc 
-		adc @w $001b
-		sta @w $001b
+		adc @w ball_x
+		sta @w ball_x
 		bcs l3FE9
-		dec @w $001c
+		dec @w ball_x + $1
 
 l3FE9:
-		lda $3783
+		lda v3783
 		bmi l4000
 		clc 
-		adc @w $001d
-		sta @w $001d
+		adc @w ball_y
+		sta @w ball_y
 		lda #$00
-		adc @w $001e
-		sta @w $001e
+		adc @w ball_y + $1
+		sta @w ball_y + $1
 		jmp l400C
 
 l4000:
 		clc 
-		adc @w $001d
-		sta @w $001d
+		adc @w ball_y
+		sta @w ball_y
 		bcs l400C
-		dec @w $001e
+		dec @w ball_y + $1
 
 l400C:
-		lda @w $001b
+		lda @w ball_x
 		sec 
-		sbc $0400
-		sta $0452
-		lda @w $001c
-		sbc $0401
-		sta $0453
-		lda @w $001d
+		sbc hole_x
+		sta v0452
+		lda @w ball_x + $1
+		sbc hole_x + $1
+		sta v0453
+		lda @w ball_y
 		sec 
-		sbc $0402
-		sta $0454
-		lda @w $001e
-		sbc $0403
-		sta $0455
-		lda $66
+		sbc hole_y
+		sta v0454
+		lda @w ball_y + $1
+		sbc hole_y + $1
+		sta v0455
+		lda hole_distance
 		cmp #$40
 		bcc l404E
 		ldx #$04
 
 l403A:
-		asl $0452
-		rol $0453
+		asl v0452
+		rol v0453
 		dex 
 		bne l403A
 		ldx #$04
 
 l4045:
-		asl $0454
-		rol $0455
+		asl v0454
+		rol v0455
 		dex 
 		bne l4045
 
 l404E:
-		lda $0400
-		sta @w $001b
-		lda $0401
-		sta @w $001c
-		lda $0402
-		sta @w $001d
-		lda $0403
-		sta @w $001e
-		lda $0452
+		lda hole_x
+		sta @w ball_x
+		lda hole_x + $1
+		sta @w ball_x + $1
+		lda hole_y
+		sta @w ball_y
+		lda hole_y + $1
+		sta @w ball_y + $1
+		lda v0452
 		clc 
-		adc @w $001b
-		sta @w $001b
-		lda $0453
-		adc @w $001c
-		sta @w $001c
-		lda $0454
+		adc @w ball_x
+		sta @w ball_x
+		lda v0453
+		adc @w ball_x + $1
+		sta @w ball_x + $1
+		lda v0454
 		clc 
-		adc @w $001d
-		sta @w $001d
-		lda $0455
-		adc @w $001e
-		sta @w $001e
+		adc @w ball_y
+		sta @w ball_y
+		lda v0455
+		adc @w ball_y + $1
+		sta @w ball_y + $1
 		lda #$00
-		sta $66
-		lda $0453
+		sta hole_distance
+		lda v0453
 		php 
 		bpl l4098
 		eor #$ff
@@ -5220,7 +7252,7 @@ l4098:
 		bne l40AC
 
 l40A1:
-		lda $0452
+		lda v0452
 		plp 
 		bpl l40AC
 		clc 
@@ -5229,12 +7261,12 @@ l40A1:
 
 l40AC:
 		pha 
-		ora $66
-		sta $66
+		ora hole_distance
+		sta hole_distance
 		pla 
 		cmp #$40
 		bcs l40E0
-		lda $0455
+		lda v0455
 		php 
 		bpl l40BE
 		eor #$ff
@@ -5247,7 +7279,7 @@ l40BE:
 		bne l40D2
 
 l40C7:
-		lda $0454
+		lda v0454
 		plp 
 		bpl l40D2
 		clc 
@@ -5256,8 +7288,8 @@ l40C7:
 
 l40D2:
 		pha 
-		ora $66
-		sta $66
+		ora hole_distance
+		sta hole_distance
 		pla 
 		cmp #$40
 		bcs l40E0
@@ -5268,249 +7300,270 @@ l40E0:
 		lda #$01
 
 l40E2:
-		sta $0456
-		asl $0453
+		sta v0456
+		asl v0453
 		php 
-		ror $0453
+		ror v0453
 		ldx #$04
 
 l40EE:
 		plp 
 		php 
-		ror $0453
-		ror $0452
+		ror v0453
+		ror v0452
 		dex 
 		bne l40EE
 		plp 
-		asl $0455
+		asl v0455
 		php 
-		ror $0455
+		ror v0455
 		ldx #$04
 
 l4103:
 		plp 
 		php 
-		ror $0455
-		ror $0454
+		ror v0455
+		ror v0454
 		dex 
 		bne l4103
 		plp 
-		lda $0400
-		sta $046c
-		lda $0401
-		sta $046d
-		lda $0402
-		sta $046e
-		lda $0403
-		sta $046f
-		lda $0452
+		lda hole_x
+		sta v046c
+		lda hole_x + $1
+		sta v046d
+		lda hole_y
+		sta v046e
+		lda hole_y + $1
+		sta v046f
+		lda v0452
 		clc 
-		adc $046c
-		sta $046c
-		lda $0453
-		adc $046d
-		sta $046d
-		lda $0454
+		adc v046c
+		sta v046c
+		lda v0453
+		adc v046d
+		sta v046d
+		lda v0454
 		clc 
-		adc $046e
-		sta $046e
-		lda $0455
-		adc $046f
-		sta $046f
-		lda $0456
+		adc v046e
+		sta v046e
+		lda v0455
+		adc v046f
+		sta v046f
+		lda v0456
 		beq l416A
-		lda $046c
-		sta @w $001b
-		lda $046d
-		sta @w $001c
-		lda $046e
-		sta @w $001d
-		lda $046f
-		sta @w $001e
+		lda v046c
+		sta @w ball_x
+		lda v046d
+		sta @w ball_x + $1
+		lda v046e
+		sta @w ball_y
+		lda v046f
+		sta @w ball_y + $1
 
 l416A:
-		lda $0404
+		lda green_view
 		beq l417C
-		lda $3c3e
+		lda ball_landed
 		beq l417C
-		lda $66
+		lda hole_distance
 		and #$f0
 		bne l417C
-		sta $66
+		sta hole_distance
 
 l417C:
 		rts 
-*=$4180
 
-l4180:
+; old text "CAL" under the variables
+unused_417d:
+		.byte	$43
+v417e:		.byte	$41
+flight_time:		.byte	$4c
+
+; colors A characters at text_x/text_y with text_color
+color_text:
 		pha 
-		lda $20
+		lda text_y
 		pha 
-		lda $1f
+		lda text_x
 		pha 
 		lda #$20
-		jsr l0FFB
+		jsr print_char
 		pla 
-		sta $1f
+		sta text_x
 		pla 
-		sta $20
+		sta text_y
 		lda #$09
 		clc 
 		eor #$ff
 		adc #$01
 		clc 
-		adc $0a
-		sta $0a
-		lda $0b
+		adc v0a
+		sta v0a
+		lda v0a + $1
 		sbc #$00
-		sta $0b
+		sta v0a + $1
 		pla 
 		asl 
 		tay 
-		lda $05
+		lda pointer_04 + $1
 		pha 
-		lda $04
+		lda pointer_04
 		pha 
 		tya 
 		asl 
 		asl 
 		asl 
 		pha 
-		lda $0a
+		lda v0a
 		sec 
 		sbc #$00
-		sta $04
-		lda $0b
+		sta pointer_04
+		lda v0a + $1
 		sbc #$60
-		sta $05
-		inc $04
+		sta pointer_04 + $1
+		inc pointer_04
 		bne l41C5
-		inc $05
+		inc pointer_04 + $1
 
 l41C5:
 		ldx #$03
 
 l41C7:
-		lsr $05
-		ror $04
+		lsr pointer_04 + $1
+		ror pointer_04
 		dex 
 		bne l41C7
-		lda $04
+		lda pointer_04
 		clc 
 		adc #$00
-		sta $04
-		lda $05
+		sta pointer_04
+		lda pointer_04 + $1
 		adc #$d8
-		sta $05
-		lda $04
+		sta pointer_04 + $1
+		lda pointer_04
 		bne l41E1
-		dec $05
+		dec pointer_04 + $1
 
 l41E1:
-		dec $04
-		lda $0478
+		dec pointer_04
+		lda text_color
 
 l41E6:
-		sta ($04), y
+		sta (pointer_04), y
 		dey 
 		bne l41E6
 		pla 
 		tay 
-		lda ($0a), y
+		lda (v0a), y
 
 l41EF:
-		sta ($0a), y
+		sta (v0a), y
 		dey 
 		bne l41EF
 		lda #$ff
-		sta $1368
+		sta v1368
 		pla 
-		sta $04
+		sta pointer_04
 		pla 
-		sta $05
+		sta pointer_04 + $1
 		rts 
-*=$4210
+
+unused_4200:
+		.byte	$00, $00, $00
+v4203:		.byte	$ad
+v4204:		.byte	$a3
+v4205:		.byte	$21
+v4206:		.byte	$7d
+v4207:		.byte	$10
+v4208:		.byte	$00
+v4209:		.byte	$00
+v420a:		.byte	$43
+v420b:		.byte	$41
+v420c:		.byte	$4c
+v420d:		.byte	$43
+unused_420e:
+		.byte	$44, $45
 
 l4210:
 		lda #$00
-		jsr l0900
-		sta $0e
-		stx $0f
+		jsr multiply
+		sta v0e
+		stx v0e + $1
 		lda #$00
-		ldx $3597
+		ldx club
 		inx 
 		cpx #$0d
 		bcc l4225
 		ldx #$00
 
 l4225:
-		jsr l0900
+		jsr multiply
 		jsr l094F
 		lda #$00
 		ldx #$10
-		jsr l0900
+		jsr multiply
 		jsr l094C
-		lda $0e
-		ldx $0f
+		lda v0e
+		ldx v0e + $1
 		jsr l091F
 		rts 
 
 l423D:
-		lda $359e
+		lda v359e
 		pha 
-		lda $359d
+		lda v359d
 		pha 
-		lda $35a0
+		lda v35a0
 		pha 
-		lda $359f
+		lda v359f
 		pha 
-		lda $417f
+		lda flight_time
 		bne l428D
 		lda #$00
-		sta $4342
-		lda $3595
+		sta v4342
+		lda shot_speed
 		asl 
-		rol $4342
+		rol v4342
 		asl 
-		rol $4342
+		rol v4342
 		asl 
-		rol $4342
+		rol v4342
 		asl 
-		rol $4342
-		sta $4341
+		rol v4342
+		sta v4341
 		lda #$00
-		sta $4344
-		lda $3596
+		sta v4344
+		lda shot_sideways
 		bpl l427A
-		dec $4344
+		dec v4344
 
 l427A:
 		asl 
-		rol $4344
+		rol v4344
 		asl 
-		rol $4344
+		rol v4344
 		asl 
-		rol $4344
+		rol v4344
 		asl 
-		rol $4344
-		sta $4343
+		rol v4344
+		sta v4343
 
 l428D:
-		lda $4341
+		lda v4341
 		clc 
-		adc $359f
-		sta $359f
-		lda $4342
-		adc $35a0
-		sta $35a0
-		lda $4343
+		adc v359f
+		sta v359f
+		lda v4342
+		adc v35a0
+		sta v35a0
+		lda v4343
 		clc 
-		adc $359d
-		sta $359d
-		lda $4344
-		adc $359e
-		sta $359e
-		lda $417f
+		adc v359d
+		sta v359d
+		lda v4344
+		adc v359e
+		sta v359e
+		lda flight_time
 		clc 
 		adc #$10
 		bpl l42C0
@@ -5521,260 +7574,1199 @@ l428D:
 l42C0:
 		tax 
 		jsr l4210
-		stx $417e
+		stx v417e
 		jsr l3E04
-		lda $1f25
+		lda ball_sprite_x + $1
 		sec 
-		sbc $420b
-		lda $1f24
-		sbc $420a
-		sta $4205
-		lda $1f26
+		sbc v420b
+		lda ball_sprite_x
+		sbc v420a
+		sta v4205
+		lda ball_sprite_y
 		sec 
-		sbc $420d
+		sbc v420d
 		bmi l42ED
-		ldx $417f
+		ldx flight_time
 		bmi l42ED
 		lda #$00
-		sta $4205
+		sta v4205
 
 l42ED:
-		sta $4207
+		sta v4207
 		lda #$00
-		sta $4208
-		lda $4207
+		sta v4208
+		lda v4207
 		bpl l42FD
-		dec $4208
+		dec v4208
 
 l42FD:
 		asl 
-		rol $4208
+		rol v4208
 		asl 
-		rol $4208
+		rol v4208
 		asl 
-		rol $4208
+		rol v4208
 		asl 
-		rol $4208
-		sta $4207
+		rol v4208
+		sta v4207
 		lda #$00
-		sta $4206
-		lda $4205
+		sta v4206
+		lda v4205
 		bpl l431D
-		dec $4206
+		dec v4206
 
 l431D:
 		asl 
-		rol $4206
+		rol v4206
 		asl 
-		rol $4206
+		rol v4206
 		asl 
-		rol $4206
+		rol v4206
 		asl 
-		rol $4206
-		sta $4205
+		rol v4206
+		sta v4205
 		pla 
-		sta $359f
+		sta v359f
 		pla 
-		sta $35a0
+		sta v35a0
 		pla 
-		sta $359d
+		sta v359d
 		pla 
-		sta $359e
+		sta v359e
 		rts 
-*=$4354
+
+v4341:
+		.byte	$53
+v4342:		.byte	$51
+v4343:		.byte	$55
+v4344:		.byte	$41
+
+l4345:
+		jmp (vectors)
+
+l4348:
+		jmp (aA00E)
+
+l434B:
+		jmp (aA014)
+
+l434E:
+		jmp (aA016)
+
+l4351:
+		jmp (aA01E)
 
 l4354:
 		jmp (aA029)
-*=$464f
 
-l464F:
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		slo $0d0f
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $0d0d
-		ora $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		las $bbbb, y
-		las $bbbb, y
-		las $bbbb, y
-		las $bbbb, y
-		las $bbbb, y
-		las $ccbb, y
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		las $bbbb, y
-		las $bbbb, y
-		las $bbbb, y
-		las $bbbb, y
-		las $bbbb, y
-		las $bbbb, y
-		las $bbbb, y
-		las $bbbb, y
-		las $bbbb, y
-		las $bbbb, y
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $bbbb
-		las $bbbb, y
-		las $bbbb, y
-		las $bbbb, y
-		las $bbbb, y
-		las $bbbb, y
-		las $bbbb, y
-		las $bbbb, y
-		las $bbbb, y
-		las $bbbb, y
-		las $cccc, y
-		cpy $cccc
-		cpy $cccc
-		cpy $bbcc
-		las $bbbb, y
-		las $bbbb, y
-		las $bbbb, y
-		las $bbbb, y
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		cpy $cccc
-		las $bbbb, y
-		las $bbbb, y
-		las $bbbb, y
-		las $bbbb, y
-		las $eaea, y
-		nop 
-		nop 
-		nop 
-		nop 
-		nop 
-		nop 
-		nop 
-		nop 
-		nop 
-		nop 
-		nop 
-		nop 
-		nop 
-		nop 
+; ---- video bank 1 ($4000-$7fff) ----
+; never written: still the RAM's power-on pattern
+unused_4357:
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $ff, $ff, $fd, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00
 
-d47F8:
-		rol $2e
-		rol $2e4b
-d47FB = $47fb
-		and $ea21
-		brk 
-*=$4854
+.virtual $4400
+; the bitmap's colors, drawn at run time
+bitmap_colors:
+		.fill	1000
+.endv
 
-l4854:
-		brk 
-*=$4f42
+*=$47e8
 
-l4F42:
-		brk 
-*=$4f48
+unused_47e8:
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
 
-l4F48:
-		brk 
-*=$5645
+.virtual $47f8
+sprite_pointers:
+		.fill	8
+.endv
 
-l5645:
-		brk 
-*=$5928
+*=$4800
 
-l5928:
-		bit @w $0034
-		brk 
-*=$a012
+sprites:
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $18, $00, $00, $18
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $05
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $18, $00, $00, $3c, $00, $00, $3c
+		.byte	$00, $00, $18, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $05
+		.byte	$00, $00, $00, $00, $00, $00, $00, $18, $00, $00, $18, $00, $00, $18, $00, $00
+		.byte	$18, $00, $00, $18, $00, $00, $18, $00, $00, $18, $00, $00, $18, $00, $00, $18
+		.byte	$00, $00, $18, $00, $00, $18, $00, $06, $18, $60, $07, $18, $e0, $03, $99, $c0
+		.byte	$01, $db, $80, $00, $ff, $00, $00, $7e, $00, $00, $3c, $00, $00, $18, $00, $00
+		.byte	$00, $02, $00, $02, $08, $00, $0a, $28, $00, $02, $08, $00, $02, $8a, $00, $0a
+		.byte	$a8, $00, $02, $a8, $00, $02, $a8, $00, $01, $54, $00, $05, $55, $00, $05, $55
+		.byte	$00, $05, $55, $00, $05, $55, $00, $05, $55, $00, $05, $a5, $00, $05, $a5, $00
+		.byte	$05, $a5, $00, $05, $a5, $00, $05, $a5, $00, $05, $a5, $00, $05, $a5, $00, $00
+		.byte	$05, $a5, $00, $05, $a5, $00, $05, $a5, $00, $05, $a5, $00, $05, $a5, $00, $05
+		.byte	$a5, $00, $05, $a5, $00, $05, $55, $00, $05, $55, $00, $05, $55, $00, $05, $55
+		.byte	$00, $01, $54, $00, $f1, $54, $f0, $f1, $54, $f0, $f1, $54, $f0, $f1, $54, $f0
+		.byte	$fd, $57, $f0, $f1, $54, $f0, $f1, $54, $f0, $f0, $50, $f0, $f0, $00, $f0, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $28, $00, $00, $a8, $00, $00, $aa, $00, $00, $fa
+		.byte	$00, $00, $fa, $00, $00, $ba, $00, $00, $fe, $00, $03, $fe, $00, $00, $fe, $00
+		.byte	$00, $7e, $00, $00, $fe, $00, $00, $fe, $00, $00, $3f, $00, $00, $3f, $00, $ff
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $08, $00, $00, $2a, $00, $00, $2a, $00, $00, $aa
+		.byte	$80, $00, $aa, $80, $00, $aa, $80, $00, $aa, $80, $00, $aa, $80, $00, $aa, $80
+		.byte	$00, $aa, $80, $00, $2a, $00, $00, $2a, $00, $00, $3f, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $a0, $00, $02, $a8, $00, $02, $aa, $00, $0a
+		.byte	$aa, $00, $0a, $bc, $00, $0a, $f4, $00, $0b, $fc, $00, $2b, $fc, $00, $2f, $f0
+		.byte	$00, $2f, $d0, $00, $3f, $f0, $00, $3f, $00, $00, $03, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $0a, $00, $00, $2a, $80, $00, $2a, $80, $00, $2a, $80, $00, $aa
+		.byte	$c0, $00, $aa, $c0, $00, $ab, $c0, $00, $ab, $c0, $00, $af, $00, $00, $af, $00
+		.byte	$00, $bf, $00, $00, $fc, $00, $00, $fc, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $3e, $00, $00, $3f, $fe, $00, $1f, $ff, $00, $0f, $ff, $80, $07
+		.byte	$ff, $c0, $03, $ff, $e0, $00, $ff, $f0, $00, $3f, $f8, $00, $1f, $fc, $00, $0f
+		.byte	$fe, $00, $07, $fe, $00, $07, $fc, $00, $07, $f8, $00, $0f, $f8, $00, $0f, $f0
+		.byte	$00, $1f, $f0, $00, $1f, $f0, $00, $3f, $f0, $00, $3f, $f8, $00, $03, $ff, $00
+		.byte	$00, $00, $00, $3e, $00, $00, $3f, $ff, $00, $3f, $ff, $80, $1f, $ff, $80, $0f
+		.byte	$ff, $c0, $07, $ff, $e0, $03, $ff, $e0, $01, $ff, $f0, $00, $ff, $f8, $00, $7f
+		.byte	$f8, $00, $7f, $f8, $00, $3f, $f8, $00, $3f, $f0, $00, $3f, $f0, $00, $3f, $f0
+		.byte	$00, $3f, $f0, $00, $3f, $f0, $00, $3f, $f0, $00, $3f, $f0, $00, $03, $fc, $00
+		.byte	$00, $00, $00, $3e, $00, $00, $3f, $ff, $80, $3f, $ff, $80, $1f, $ff, $80, $1f
+		.byte	$ff, $c0, $0f, $ff, $c0, $0f, $ff, $c0, $07, $ff, $c0, $07, $ff, $c0, $07, $ef
+		.byte	$c0, $03, $ef, $c0, $03, $e7, $c0, $03, $e7, $c0, $03, $e7, $c0, $03, $e7, $c0
+		.byte	$01, $e7, $c0, $01, $e3, $c0, $01, $f3, $c0, $01, $c3, $e0, $00, $01, $c0, $00
+		.byte	$00, $00, $00, $3f, $ff, $c0, $3f, $ff, $c0, $3f, $ff, $c0, $3f, $ff, $c0, $3f
+		.byte	$ff, $c0, $1f, $ff, $c0, $1f, $ef, $c0, $1f, $cf, $c0, $1f, $cf, $c0, $0f, $cf
+		.byte	$c0, $0f, $cf, $c0, $0f, $8f, $c0, $0f, $87, $c0, $0f, $87, $c0, $0f, $07, $c0
+		.byte	$0f, $03, $c0, $0f, $03, $c0, $0f, $03, $c0, $0f, $01, $c0, $06, $00, $c0, $00
+		.byte	$3f, $ff, $c0, $3f, $ff, $c0, $3f, $ff, $c0, $3f, $ff, $c0, $3f, $ff, $c0, $3f
+		.byte	$df, $c0, $3f, $9f, $c0, $3f, $0f, $c0, $3f, $0f, $c0, $3f, $0f, $c0, $3f, $0f
+		.byte	$c0, $3f, $0f, $c0, $3f, $0f, $c0, $3e, $07, $c0, $3e, $07, $c0, $3e, $07, $c0
+		.byte	$3e, $07, $c0, $3e, $07, $c0, $3e, $03, $c0, $3c, $03, $c0, $18, $01, $80, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $0f, $ff, $00, $0f, $ff, $00, $0f, $ff, $00, $07, $fe, $00, $07, $fe, $00
+		.byte	$07, $fe, $00, $03, $fe, $00, $03, $fc, $00, $03, $fc, $00, $01, $fc, $00, $01
+		.byte	$fc, $00, $01, $fc, $00, $01, $fc, $00, $01, $fc, $00, $01, $fc, $00, $01, $fc
+		.byte	$00, $01, $fc, $00, $01, $fc, $00, $01, $fc, $00, $01, $fc, $00, $07, $fc, $00
+		.byte	$00, $7f, $f8, $00, $7f, $f8, $00, $7f, $f8, $00, $ff, $f0, $00, $ff, $f0, $00
+		.byte	$ff, $f0, $00, $fd, $f0, $01, $f9, $f0, $01, $f9, $f0, $01, $f1, $f0, $01, $f1
+		.byte	$f8, $01, $f9, $f8, $00, $f8, $f8, $00, $f8, $f8, $00, $f8, $f8, $00, $7c, $f8
+		.byte	$00, $7c, $fc, $00, $3e, $fc, $00, $3e, $7c, $00, $fe, $fc, $00, $03, $fc, $00
+		.byte	$01, $ff, $e0, $01, $ff, $e0, $01, $ff, $e0, $03, $ff, $e0, $03, $ff, $e0, $03
+		.byte	$f7, $e0, $07, $f7, $f0, $07, $e3, $f0, $07, $c3, $f0, $0f, $c1, $f0, $0f, $81
+		.byte	$f8, $0f, $80, $f8, $0f, $80, $f8, $1f, $00, $7c, $1f, $00, $7c, $1f, $00, $7c
+		.byte	$3f, $00, $7c, $3e, $00, $3e, $fe, $00, $3e, $3c, $00, $3c, $00, $00, $70, $00
+		.byte	$00, $00, $3f, $00, $00, $3f, $00, $00, $3f, $00, $00, $7f, $00, $00, $7f, $00
+		.byte	$00, $7f, $00, $00, $7f, $00, $00, $7e, $00, $00, $fc, $00, $00, $fc, $00, $00
+		.byte	$f8, $00, $01, $f8, $00, $01, $f0, $00, $01, $f0, $00, $01, $f0, $00, $03, $e0
+		.byte	$00, $03, $e0, $00, $07, $e0, $00, $1f, $c0, $00, $01, $c0, $00, $00, $00, $00
+		.byte	$fc, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc
+		.byte	$00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00, $00, $fe, $00, $00, $3f, $00
+		.byte	$00, $1f, $80, $00, $0f, $c0, $00, $07, $e0, $00, $03, $f0, $00, $01, $f8, $00
+		.byte	$00, $fc, $00, $00, $7e, $00, $00, $3e, $00, $00, $38, $00, $00, $60, $00, $00
+		.byte	$00, $00, $7f, $00, $00, $7f, $00, $00, $7f, $00, $00, $7f, $00, $00, $ff, $00
+		.byte	$00, $ff, $00, $00, $fe, $00, $00, $fc, $00, $00, $fc, $00, $01, $f8, $00, $01
+		.byte	$f8, $00, $01, $f8, $00, $01, $f8, $00, $01, $f0, $00, $03, $f0, $00, $03, $f0
+		.byte	$00, $03, $f0, $00, $03, $e0, $00, $03, $e0, $00, $03, $e0, $00, $1f, $e0, $00
+		.byte	$07, $c0, $00, $07, $c0, $00, $07, $c0, $00, $07, $c0, $00, $07, $c0, $00, $07
+		.byte	$e0, $00, $07, $e0, $00, $03, $e0, $00, $03, $e0, $00, $01, $f0, $00, $01, $f0
+		.byte	$00, $00, $f8, $00, $00, $fc, $00, $00, $7e, $00, $00, $3f, $00, $00, $0f, $c0
+		.byte	$00, $07, $f0, $00, $01, $fe, $00, $00, $7e, $00, $00, $1c, $00, $00, $18, $00
+		.byte	$03, $ff, $80, $03, $ff, $80, $03, $ff, $80, $03, $ff, $00, $03, $ff, $00, $03
+		.byte	$ff, $00, $03, $fe, $00, $03, $fe, $00, $03, $fe, $00, $03, $fe, $00, $03, $ff
+		.byte	$00, $03, $ff, $80, $03, $ef, $c0, $03, $e7, $e0, $03, $e3, $f0, $03, $e1, $f8
+		.byte	$03, $e0, $fc, $03, $e0, $7e, $03, $e0, $3f, $03, $e0, $70, $1f, $e0, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $07, $f0, $00
+		.byte	$0f, $f8, $00, $1f, $fc, $00, $1f, $fe, $00, $1f, $fe, $00, $1f, $fe, $00, $3f
+		.byte	$fc, $00, $7f, $fc, $01, $ff, $fc, $07, $ff, $fc, $1f, $1f, $fc, $70, $1f, $fe
+		.byte	$00, $1f, $fe, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $07, $f0, $00
+		.byte	$0f, $f8, $00, $1f, $fc, $40, $1f, $fe, $30, $1f, $fe, $1c, $3f, $fe, $0f, $ff
+		.byte	$fc, $07, $ff, $fc, $03, $ff, $fc, $00, $1f, $fc, $00, $1f, $fc, $00, $1f, $fe
+		.byte	$00, $1f, $fe, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $60, $00, $00, $f8, $00, $01
+		.byte	$fe, $00, $00, $ff, $c0, $00, $7f, $fc, $00, $3f, $ff, $00, $1f, $ff, $00, $3f
+		.byte	$fe, $00, $7f, $fc, $00, $ff, $fc, $01, $ff, $f8, $03, $ff, $f8, $03, $ff, $f0
+		.byte	$07, $ff, $f0, $07, $ff, $e0, $00, $3f, $c0, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $06, $00, $00, $07
+		.byte	$e0, $00, $07, $fe, $00, $07, $ff, $fc, $07, $ff, $ff, $00, $ff, $ff, $00, $3f
+		.byte	$fe, $00, $7f, $fc, $00, $ff, $fc, $01, $ff, $f8, $03, $ff, $f8, $03, $ff, $f0
+		.byte	$07, $ff, $f0, $07, $ff, $e0, $00, $3f, $c0, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $3f, $ff, $fc, $1f, $ff, $ff, $0f, $ff, $ff, $01, $ff
+		.byte	$fe, $00, $7f, $fe, $00, $ff, $fc, $01, $ff, $f8, $03, $ff, $f8, $03, $ff, $f0
+		.byte	$07, $ff, $f0, $07, $ff, $e0, $00, $3f, $c0, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $fc, $00, $1f, $ff, $03, $ff, $ff, $1f, $ff
+		.byte	$ff, $7f, $ff, $fe, $01, $ff, $fc, $01, $ff, $f8, $03, $ff, $f8, $03, $ff, $f0
+		.byte	$07, $ff, $f0, $07, $ff, $e0, $00, $3f, $c0, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $fc, $00, $07, $ff, $00, $1f, $ff, $00, $7f
+		.byte	$ff, $01, $ff, $fe, $03, $ff, $fe, $07, $ff, $fc, $0f, $ff, $f8, $1f, $ff, $f0
+		.byte	$3f, $ff, $f0, $07, $ff, $e0, $00, $3f, $c0, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $fc, $00, $07, $ff, $00, $1f, $ff, $00, $3f
+		.byte	$ff, $00, $7f, $ff, $00, $ff, $fe, $01, $ff, $fe, $03, $ff, $fc, $03, $ff, $f8
+		.byte	$07, $ff, $f0, $07, $ff, $e0, $01, $ff, $c0, $01, $80, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $fc, $00, $07, $ff, $00, $1f, $ff, $00, $3f
+		.byte	$ff, $00, $7f, $ff, $00, $ff, $ff, $01, $ff, $ff, $03, $ff, $fe, $03, $ff, $fc
+		.byte	$07, $ff, $f8, $07, $ff, $f0, $00, $3f, $c0, $00, $07, $00, $00, $06, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$1f, $80, $00, $ff, $e0, $03, $ff, $e0, $07, $ff, $e0, $0f, $ff, $e0, $1f, $ff
+		.byte	$e0, $3f, $ff, $e0, $7f, $ff, $e0, $7f, $ff, $c0, $ff, $ff, $c0, $ff, $fd, $c0
+		.byte	$07, $f9, $c0, $00, $01, $c0, $00, $01, $c0, $00, $00, $c0, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$1f, $80, $00, $ff, $e0, $03, $ff, $e0, $07, $ff, $e0, $0f, $ff, $e0, $1f, $ff
+		.byte	$e0, $3f, $ff, $f0, $7f, $ff, $f0, $7f, $ff, $f0, $ff, $ff, $f8, $ff, $fd, $f8
+		.byte	$07, $f8, $7c, $00, $00, $3e, $00, $00, $1e, $00, $00, $0f, $00, $00, $03, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $0f, $00, $00, $7f, $00, $01, $ff, $00, $03, $ff, $00, $07, $ff, $00, $0f
+		.byte	$ff, $00, $1f, $ff, $00, $3f, $ff, $00, $3f, $ff, $00, $7f, $ff, $00, $7f, $fe
+		.byte	$00, $03, $fc, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $c0
+		.byte	$00, $00, $f0, $00, $00, $f0, $00, $00, $f0, $00, $00, $f8, $00, $00, $f8, $00
+		.byte	$00, $fc, $00, $00, $7c, $00, $00, $7e, $00, $00, $3e, $00, $00, $1f, $00, $00
+		.byte	$0f, $00, $00, $07, $80, $00, $03, $c0, $00, $01, $e0, $00, $00, $60, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $c0
+		.byte	$00, $00, $f0, $00, $00, $f0, $00, $00, $f8, $00, $00, $fc, $00, $00, $fe, $00
+		.byte	$00, $ff, $00, $00, $ff, $80, $00, $3f, $c0, $00, $07, $e0, $00, $00, $f0, $00
+		.byte	$00, $18, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $c0
+		.byte	$00, $00, $f0, $00, $00, $fc, $00, $00, $ff, $80, $00, $ff, $f0, $00, $ff, $fc
+		.byte	$00, $c0, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $c0, $00, $03, $c0, $00, $ff
+		.byte	$80, $00, $ff, $80, $00, $ff, $00, $00, $fe, $00, $00, $f8, $00, $00, $e0, $00
+		.byte	$00, $c0, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $04, $00
+		.byte	$0e, $06, $00, $1f, $fe, $00, $3f, $ff, $00, $3f, $ff, $00, $7f, $fe, $00, $7f
+		.byte	$fe, $00, $ff, $fe, $01, $ff, $fc, $03, $ff, $f8, $07, $ff, $f8, $07, $ff, $f0
+		.byte	$0f, $ff, $e0, $0f, $ff, $e0, $00, $7f, $c0, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $e0, $00, $01, $f8, $00, $01
+		.byte	$fe, $00, $01, $ff, $fc, $01, $ff, $fe, $00, $ff, $fe, $00, $7f, $fc, $00, $7f
+		.byte	$fc, $00, $ff, $f8, $01, $ff, $f0, $03, $ff, $f0, $07, $ff, $f0, $07, $ff, $e0
+		.byte	$0f, $ff, $e0, $0f, $ff, $e0, $00, $7f, $e0, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $03, $80, $00, $07, $f0, $00, $0f
+		.byte	$ff, $f0, $0f, $ff, $f8, $07, $ff, $fc, $03, $ff, $fc, $01, $ff, $fc, $01, $ff
+		.byte	$fc, $01, $ff, $f8, $03, $ff, $f8, $03, $ff, $f8, $07, $ff, $f8, $07, $ff, $f8
+		.byte	$07, $ff, $f8, $07, $ff, $f8, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $01, $ff, $80, $07
+		.byte	$ff, $e0, $0f, $ff, $f0, $1f, $ff, $f8, $3f, $ff, $f8, $3f, $ff, $fc, $3f, $ff
+		.byte	$fc, $3f, $ff, $fc, $1f, $ff, $fc, $1f, $ff, $f8, $1f, $ff, $f8, $0f, $ff, $f0
+		.byte	$0f, $ff, $f0, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $03, $ff, $80, $0f
+		.byte	$ff, $e0, $1f, $ff, $f8, $3f, $ff, $fc, $7f, $ff, $fe, $7f, $ff, $ef, $ff, $ff
+		.byte	$e7, $ef, $ff, $e7, $ef, $ff, $ef, $ef, $ff, $fe, $ff, $ff, $fc, $7f, $ff, $f8
+		.byte	$7f, $ff, $f0, $60, $00, $00, $40, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $7f, $f8, $00, $7f, $f8, $00, $7f, $f8, $00, $3f, $f0, $00, $3f, $f0, $00
+		.byte	$3f, $f0, $00, $3f, $e0, $00, $1f, $e0, $00, $1f, $e0, $00, $1f, $c0, $00, $1f
+		.byte	$c0, $00, $1f, $c0, $00, $1f, $c0, $00, $1f, $c0, $00, $1f, $c0, $00, $1f, $c0
+		.byte	$00, $1f, $c0, $00, $1f, $c0, $00, $1f, $c0, $00, $1f, $c0, $00, $1f, $f0, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $7f, $00, $00
+		.byte	$ff, $80, $01, $ff, $c0, $01, $ff, $e0, $01, $ff, $e0, $01, $ff, $e0, $01, $ff
+		.byte	$c0, $01, $ff, $c0, $01, $ff, $c0, $01, $ff, $c0, $01, $ff, $c0, $01, $ff, $e0
+		.byte	$01, $ff, $e0, $00, $1c, $00, $00, $0c, $00, $00, $04, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $7f, $00, $00
+		.byte	$ff, $80, $01, $ff, $c0, $01, $ff, $e0, $01, $ff, $e0, $01, $ff, $e0, $01, $ff
+		.byte	$e0, $01, $ff, $e0, $01, $ff, $f0, $01, $ff, $f0, $01, $ff, $f0, $03, $ff, $f0
+		.byte	$03, $ff, $f0, $03, $00, $10, $02, $00, $10, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $7f, $00, $00
+		.byte	$ff, $80, $01, $ff, $c0, $01, $ff, $e0, $01, $ff, $f0, $01, $ff, $f0, $01, $ff
+		.byte	$f8, $01, $ff, $f8, $03, $ff, $fc, $03, $ff, $fc, $07, $ff, $fc, $0f, $ff, $ee
+		.byte	$1f, $ff, $ee, $38, $00, $06, $60, $00, $06, $00, $00, $02, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $7f, $00, $00
+		.byte	$ff, $c0, $01, $ff, $e0, $01, $ff, $f0, $01, $ff, $f8, $01, $ff, $fc, $01, $ff
+		.byte	$fe, $03, $ff, $fe, $07, $ff, $fe, $0f, $ff, $ef, $1d, $ff, $e7, $39, $ff, $e7
+		.byte	$71, $ff, $e7, $c0, $00, $03, $00, $00, $03, $00, $00, $01, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $7f, $00, $00
+		.byte	$ff, $80, $01, $ff, $c0, $01, $ff, $e0, $01, $ff, $e0, $01, $ff, $e0, $01, $ff
+		.byte	$e0, $01, $ff, $e0, $01, $ff, $e0, $01, $ff, $e0, $01, $ff, $e0, $03, $ff, $e0
+		.byte	$03, $ff, $e0, $06, $00, $60, $04, $00, $20, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $ff, $ff, $ff, $80, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $40
+		.byte	$00, $00, $70, $00, $00, $0e, $00, $00, $01, $c0, $00, $00, $78, $00, $00, $0f
+		.byte	$00, $00, $01, $e0, $00, $00, $38, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $08
+		.byte	$00, $00, $0c, $00, $00, $03, $00, $00, $00, $c0, $00, $00, $38, $00, $00, $0e
+		.byte	$00, $00, $03, $80, $00, $00, $e0, $00, $00, $38, $00, $00, $08, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $18, $00, $00, $e0, $00, $07, $00, $00, $38, $00, $01, $e0, $00, $0f, $00
+		.byte	$00, $78, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $40, $00, $01, $80, $00, $06, $00, $00, $18, $00, $00, $60, $00, $01, $c0
+		.byte	$00, $07, $00, $00, $1c, $00, $00, $70, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $01, $00, $00, $02, $00, $00, $04, $00
+		.byte	$00, $08, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $20, $00, $00, $20, $00, $00, $20, $00, $00, $20, $00
+		.byte	$00, $20, $00, $00, $20, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $08, $00, $00, $04, $00, $00, $02, $00, $00, $01
+		.byte	$00, $00, $00, $80, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $80, $00, $00
+		.byte	$60, $00, $00, $18, $00, $00, $06, $00, $00, $01, $80, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $07, $00, $00, $00
+		.byte	$e0, $00, $00, $1c, $00, $00, $03, $80, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $07, $ff, $f0, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $1c, $00, $00, $e0, $00, $07, $00, $00, $38, $00, $01
+		.byte	$c0, $00, $0e, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $04, $00, $00, $0c, $00, $00, $18, $00, $00, $30, $00, $00, $60, $00
+		.byte	$00, $c0, $00, $01, $00, $00, $02, $00, $00, $04, $00, $00, $08, $00, $00, $10
+		.byte	$00, $00, $60, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $40, $00, $00, $40, $00, $00, $40, $00, $00, $20, $00, $00, $20, $00, $00
+		.byte	$20, $00, $00, $10, $00, $00, $10, $00, $00, $10, $00, $00, $08, $00, $00, $08
+		.byte	$00, $00, $08, $00, $00, $04, $00, $00, $04, $00, $00, $06, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$80, $00, $00, $40, $00, $00, $20, $00, $00, $10, $00, $00, $08, $00, $00, $04
+		.byte	$00, $00, $02, $00, $00, $01, $00, $00, $00, $80, $00, $00, $40, $00, $00, $20
+		.byte	$00, $00, $10, $00, $00, $08, $00, $00, $06, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $10, $00, $00, $0c, $00, $00, $03
+		.byte	$00, $00, $00, $c0, $00, $00, $30, $00, $00, $0c, $00, $00, $03, $00, $00, $00
+		.byte	$c0, $00, $00, $30, $00, $00, $0c, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$20, $00, $00, $40, $00, $00, $80, $00, $01, $00, $00, $02, $00, $00, $04, $00
+		.byte	$00, $08, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $18, $00, $00, $10, $00, $00, $10, $00, $00, $10, $00, $00, $10, $00, $00
+		.byte	$10, $00, $00, $10, $00, $00, $10, $00, $00, $10, $00, $00, $10, $00, $00, $10
+		.byte	$00, $00, $10, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; unreferenced records
+unknown_5900:
+		.byte	$00, $0c, $28, $32, $00, $00, $09, $15, $22, $14, $1d, $26, $02, $00, $00, $09
+		.byte	$18, $00, $04, $00, $08, $28, $33, $00, $00, $09, $15, $22, $15, $1d, $26, $02
+		.byte	$00, $00, $09, $18, $00, $04, $00, $06, $2c, $34, $00, $00, $09, $15, $22, $16
+		.byte	$1d, $26, $02, $00, $00, $09, $18, $00, $04, $00, $05, $1e, $35, $00, $00, $09
+		.byte	$15, $22, $17, $1d, $26, $02, $00, $00, $09, $18, $00, $04, $00, $05, $11, $36
+		.byte	$00, $00, $09, $15, $22, $18, $1d, $26, $02, $00, $00, $09, $18, $00, $04, $00
+		.byte	$08, $07, $37, $00, $00, $09, $15, $22, $19, $1d, $26, $02, $00, $00, $09, $18
+		.byte	$00, $04, $00, $0d, $fa, $38, $00, $00, $09, $15, $22, $1a, $1d, $26, $02, $00
+		.byte	$00, $09, $18, $00, $04, $00, $16, $f6, $39, $00, $00, $09, $1a, $1e, $1b, $1d
+		.byte	$26, $02, $00, $00, $09, $18, $00, $04, $00, $28, $f4, $3a, $00, $00, $09, $1a
+		.byte	$1e, $1c, $1d, $26, $02, $00, $00, $09, $18, $00, $04, $00, $34, $f4, $3b, $11
+		.byte	$1e, $1d, $29, $1e, $1e, $1d, $26, $02, $00, $00, $09, $18, $00, $04, $00, $33
+		.byte	$02, $3c, $11, $1e, $1d, $29, $1e, $1f, $1d, $26, $02, $00, $00, $09, $18, $00
+		.byte	$04, $00, $33, $18, $37, $11, $1e, $1d, $29, $1e, $20, $1d, $26, $02, $00, $00
+		.byte	$09, $18, $00, $04, $00, $2e, $2f, $3d, $11, $1e, $1d, $29, $1e, $21, $1e, $26
+		.byte	$03, $00, $00, $09, $18, $00, $04, $00, $18, $38, $34, $00, $00, $09, $16, $22
+		.byte	$22, $1c, $2a, $01, $00, $00, $09, $18, $00, $05, $00, $0f, $34, $34, $00, $00
+		.byte	$09, $16, $22, $23, $1c, $2a, $01, $00, $00, $09, $18, $00, $06, $00, $1d, $21
+		.byte	$2f, $00, $00, $09, $15, $22, $24, $18, $2c, $01, $00, $00, $09, $18, $00, $07
+		.byte	$00, $00, $00, $09, $00, $00, $09, $16, $22, $25, $16, $2e, $01, $00, $00, $09
+		.byte	$18, $00, $08, $00, $09, $12, $34, $00, $00, $09, $16, $22, $26, $15, $2e, $01
+		.byte	$00, $00, $09, $18, $00, $08, $fc, $12, $0e, $2e, $00, $00, $09, $16, $22, $29
+		.byte	$16, $2e, $00, $00, $00, $09, $18, $00, $11, $00, $15, $0c, $2d, $00, $00, $09
+		.byte	$14, $22, $28, $14, $2e, $00, $00, $00, $09, $0f, $00, $0a, $fe, $19, $0e, $30
+		.byte	$00, $00, $09, $12, $22, $2c, $12, $2e, $00, $00, $00, $09, $11, $00, $0b, $ff
+		.byte	$1d, $0e, $30, $00, $00, $09, $11, $22, $2a, $11, $2e, $00, $00, $00, $09, $11
+		.byte	$00, $0c, $fa, $1e, $0c, $30, $00, $00, $09, $12, $22, $2b, $12, $2e, $00, $07
+		.byte	$00, $0d, $1f, $00, $0e, $fb, $1d, $0c, $30, $00, $00, $09, $12, $22, $2a, $12
+		.byte	$2e, $00, $09, $00, $0f, $1b, $00, $10, $fd, $18, $0d, $30, $00, $00, $09, $12
+		.byte	$22, $2c, $12, $2e, $00, $00, $00, $09, $14, $00, $11, $fa, $17, $0b, $2d, $00
+		.byte	$00, $09, $16, $22, $28, $16, $2e, $00, $00, $00, $09, $11, $00, $0a, $00, $0d
+		.byte	$0c, $2d, $00, $00, $09, $12, $22, $29, $12, $2e, $00, $00, $00, $09, $11, $00
+		.byte	$0b, $ff, $09, $0e, $2e, $00, $00, $09, $11, $22, $2a, $11, $2e, $00, $00, $00
+		.byte	$09, $11, $00, $0c, $fb, $07, $12, $2f, $00, $00, $09, $12, $22, $2b, $12, $2e
+		.byte	$00, $07, $00, $0d, $1f, $00, $0e, $fb, $09, $0e, $2e, $00, $00, $09, $12, $22
+		.byte	$2a, $12, $2e, $00, $09, $00, $0f, $1b, $00, $10, $fd, $0d, $0d, $2e, $00, $00
+		.byte	$09, $12, $22, $29, $12, $2e, $00, $00, $00, $09, $14, $00, $11, $fa, $17, $0c
+		.byte	$2d, $00, $00, $09, $16, $22, $28, $16, $2e, $00, $00, $00, $09, $11, $00, $0a
+		.byte	$00, $09, $15, $2f, $00, $00, $09, $12, $22, $12, $16, $2e, $00, $00, $00, $09
+		.byte	$11, $00, $0a, $00, $08, $19, $3e, $00, $00, $09, $12, $22, $13, $16, $2e, $00
+		.byte	$00, $00, $09, $11, $00, $0a, $00, $01, $0e, $33, $00, $00, $09, $12, $22, $12
+		.byte	$16, $2e, $00, $00, $00, $09, $11, $00, $0a, $00, $00, $00, $09, $00, $00, $09
+		.byte	$16, $22, $28, $16, $2e, $00, $00, $00, $09, $11, $00, $0a, $06, $00, $00, $09
+		.byte	$00, $00, $09, $12, $22, $29, $12, $2e, $00, $00, $00, $09, $14, $00, $11, $00
+		.byte	$00, $00, $09, $00, $00, $09, $16, $22, $26, $15, $2e, $01, $00, $00, $09, $18
+		.byte	$00, $08, $00, $00, $00, $09, $00, $00, $09, $12, $22, $29, $12, $2e, $00, $00
+		.byte	$00, $09, $14, $00, $11, $fa, $00, $00, $09, $00, $00, $09, $16, $22, $28, $16
+		.byte	$2e, $00, $00, $00, $09, $11, $00, $0a, $00, $01, $0e, $33, $00, $00, $09, $12
+		.byte	$22, $12, $16, $2e, $00, $00, $00, $09, $11, $00, $0a, $00, $08, $19, $3e, $00
+		.byte	$00, $09, $12, $22, $13, $16, $2e, $00, $00, $00, $09, $11, $00, $0a, $00, $09
+		.byte	$15, $2f, $00, $00, $09, $12, $22, $12, $16, $2e, $00, $00, $00, $09, $11, $00
+		.byte	$0a, $06, $00, $00, $09, $00, $00, $09, $12, $22, $29, $12, $2e, $00, $00, $00
+		.byte	$09, $14, $00, $11, $00, $00, $00, $09, $00, $00, $09, $16, $22, $26, $15, $2e
+		.byte	$01, $00, $00, $09, $18, $00, $08, $00
+unused_5c58:
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $ff, $ff, $7d, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $ff, $ff, $7d, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $ff, $ff, $fd, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $ff, $ff, $fd, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $ff, $ff, $7d, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $ff, $ff, $7d, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $ff, $ff, $7d, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00
 
-aA012:
-		.addr	lB41D
-*=$a01a
+.virtual $6000
+; the multicolor bitmap, drawn at run time
+bitmap:
+		.fill	8000
+.endv
 
+*=$7f40
+
+; the tamper check at $aa0b compares this table
+data_pointers:
+		.addr	font, shapes, terrain_pointers, hole_shapes, pointers_9421, pointers_9419, shapes2
+
+font:
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $38, $38, $38, $38, $00, $38, $38, $00
+		.byte	$6c, $6c, $24, $6c, $00, $00, $00, $00, $48, $fc, $fc, $48, $fc, $fc, $48, $00
+		.byte	$30, $fc, $c0, $fc, $0c, $fc, $30, $00, $00, $e4, $e8, $f0, $3c, $5c, $9c, $00
+		.byte	$60, $90, $40, $20, $54, $88, $74, $00, $30, $30, $10, $30, $00, $00, $00, $00
+		.byte	$1c, $38, $70, $70, $70, $38, $1c, $00, $70, $38, $1c, $1c, $1c, $38, $70, $00
+		.byte	$10, $54, $38, $7c, $38, $54, $10, $00, $30, $30, $fc, $fc, $30, $30, $00, $00
+		.byte	$00, $00, $00, $00, $00, $38, $18, $30, $00, $00, $7c, $7c, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $38, $38, $00, $06, $0e, $1c, $38, $70, $e0, $c0, $00
+		.byte	$78, $cc, $cc, $cc, $cc, $cc, $78, $00, $3c, $6c, $cc, $0c, $0c, $0c, $0c, $00
+		.byte	$78, $fc, $cc, $1c, $70, $fc, $fc, $00, $78, $fc, $0c, $7c, $0c, $fc, $78, $00
+		.byte	$1c, $3c, $6c, $cc, $fc, $0c, $0c, $00, $fc, $fc, $c0, $f8, $0c, $fc, $78, $00
+		.byte	$38, $60, $c0, $f8, $cc, $cc, $78, $00, $fc, $fc, $0c, $18, $30, $30, $30, $00
+		.byte	$78, $fc, $cc, $78, $cc, $fc, $78, $00, $78, $fc, $cc, $7c, $0c, $7c, $78, $00
+		.byte	$00, $38, $38, $00, $00, $38, $38, $00, $00, $38, $38, $00, $00, $38, $18, $30
+		.byte	$0e, $1c, $38, $70, $38, $1c, $0e, $00, $00, $7c, $7c, $00, $7c, $7c, $00, $00
+		.byte	$e0, $70, $38, $1c, $38, $70, $e0, $00, $78, $fc, $cc, $18, $30, $00, $30, $00
+		.byte	$fe, $fe, $fe, $fe, $fe, $fe, $fe, $fe, $78, $fc, $cc, $fc, $fc, $cc, $cc, $00
+		.byte	$f8, $fc, $cc, $f8, $cc, $fc, $f8, $00, $78, $fc, $cc, $c0, $cc, $fc, $78, $00
+		.byte	$f8, $fc, $cc, $cc, $cc, $fc, $f8, $00, $fc, $fc, $c0, $f8, $c0, $fc, $fc, $00
+		.byte	$fc, $fc, $c0, $f8, $f8, $c0, $c0, $00, $78, $fc, $c0, $dc, $cc, $fc, $78, $00
+		.byte	$cc, $cc, $cc, $fc, $fc, $cc, $cc, $00, $fc, $fc, $30, $30, $30, $fc, $fc, $00
+		.byte	$0c, $0c, $0c, $0c, $cc, $fc, $78, $00, $cc, $dc, $f8, $f0, $f8, $dc, $cc, $00
+		.byte	$c0, $c0, $c0, $c0, $c0, $fc, $fc, $00, $c6, $ee, $d6, $c6, $c6, $c6, $c6, $00
+		.byte	$cc, $cc, $ec, $fc, $dc, $cc, $cc, $00, $78, $fc, $cc, $cc, $cc, $fc, $78, $00
+		.byte	$f8, $fc, $cc, $fc, $f8, $c0, $c0, $00, $78, $fc, $c4, $c4, $d4, $c8, $74, $00
+		.byte	$f8, $fc, $cc, $fc, $f8, $dc, $cc, $00, $78, $fc, $c0, $78, $0c, $fc, $78, $00
+		.byte	$fc, $fc, $30, $30, $30, $30, $30, $00, $cc, $cc, $cc, $cc, $cc, $fc, $78, $00
+		.byte	$cc, $cc, $cc, $cc, $cc, $78, $30, $00, $c6, $c6, $c6, $d6, $d6, $ee, $c6, $00
+		.byte	$cc, $cc, $78, $30, $78, $cc, $cc, $00, $cc, $cc, $cc, $78, $30, $30, $30, $00
+		.byte	$fc, $fc, $18, $30, $60, $fc, $fc, $00, $f8, $f8, $c0, $c0, $c0, $f8, $f8, $00
+		.byte	$c0, $e0, $70, $38, $1c, $0e, $06, $00, $f8, $f8, $18, $18, $18, $f8, $f8, $00
+		.byte	$30, $78, $fc, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $fe, $fe
+		.byte	$60, $30, $18, $0c, $00, $00, $00, $00, $00, $00, $78, $0c, $7c, $cc, $7c, $00
+		.byte	$c0, $c0, $f8, $cc, $cc, $cc, $f8, $00, $00, $00, $78, $cc, $c0, $cc, $78, $00
+		.byte	$0c, $0c, $7c, $cc, $cc, $cc, $7c, $00, $00, $00, $78, $cc, $f8, $c0, $78, $00
+		.byte	$38, $6c, $60, $f8, $60, $60, $60, $00, $00, $00, $78, $cc, $cc, $7c, $0c, $78
+		.byte	$c0, $c0, $f8, $cc, $cc, $cc, $cc, $00, $00, $30, $00, $30, $30, $30, $30, $00
+		.byte	$0c, $00, $0c, $0c, $0c, $cc, $cc, $78, $c0, $c0, $cc, $d8, $f0, $d8, $cc, $00
+		.byte	$70, $30, $30, $30, $30, $30, $78, $00, $00, $00, $fc, $da, $da, $da, $da, $00
+		.byte	$00, $00, $f8, $cc, $cc, $cc, $cc, $00, $00, $00, $78, $cc, $cc, $cc, $78, $00
+		.byte	$00, $00, $f8, $cc, $cc, $f8, $c0, $c0, $00, $00, $7c, $cc, $cc, $7c, $0c, $0c
+		.byte	$00, $00, $f8, $cc, $c0, $c0, $c0, $00, $00, $00, $78, $c0, $78, $0c, $78, $00
+		.byte	$60, $60, $f8, $60, $60, $6c, $38, $00, $00, $00, $cc, $cc, $cc, $cc, $7c, $00
+		.byte	$00, $00, $cc, $cc, $cc, $78, $30, $00, $00, $00, $b6, $b6, $b6, $b6, $7e, $00
+		.byte	$00, $00, $cc, $78, $30, $78, $cc, $00, $00, $00, $cc, $cc, $cc, $7c, $0c, $78
+		.byte	$00, $00, $fc, $18, $30, $60, $fc, $00, $38, $78, $60, $e0, $60, $78, $38, $00
+		.byte	$30, $30, $30, $30, $30, $30, $30, $30, $70, $78, $18, $1c, $18, $78, $70, $00
+		.byte	$00, $00, $14, $28, $00, $00, $00, $00, $fe, $fe, $fe, $fe, $fe, $fe, $fe, $fe
+
+; 7 rows of 7 pointers; the 8th word of each row is unused
+terrain_pointers:
+		.word	$931b, $9327, $9340, $934d, $9359, $9382, $93bd, $b3cc, $90bb, $9113, $9171, $919f, $91b8, $91ff, $9272, $1301
+		.word	$8e06, $8e4f, $8e7d, $8f02, $8f4b, $8fc5, $9021, $a8cd, $8b3c, $8b9f, $8c75, $8cd9, $8d29, $8d5d, $8db2, $41f5
+		.word	$88ba, $8904, $896c, $89d6, $8a01, $8a68, $8af0, $c9d1, $863b, $86b6, $8731, $876e, $87a1, $87ff, $8860, $54cc
+		.word	$82bc, $8379, $8413, $8460, $84cd, $852a, $8562
+
+terrain_82bc:
+		.byte	$00, $06, $38, $24, $06, $80, $03, $16, $0b, $03, $1c, $0b, $03, $22, $0b, $03
+		.byte	$28, $05, $03, $30, $05, $03, $37, $0b, $08, $20, $01, $0e, $01, $09, $0d, $0f
+		.byte	$0f, $0e, $27, $0a, $0c, $3e, $08, $10, $30, $03, $14, $1c, $07, $18, $34, $05
+		.byte	$1b, $0e, $0b, $1c, $07, $04, $1c, $27, $05, $1c, $3c, $05, $1d, $0a, $00, $1e
+		.byte	$0d, $02, $1f, $23, $03, $20, $0e, $02, $20, $30, $05, $21, $27, $03, $24, $2c
+		.byte	$00, $26, $1c, $0a, $27, $37, $05, $2a, $35, $05, $2c, $2e, $03, $2e, $02, $07
+		.byte	$2e, $3a, $05, $32, $30, $03, $32, $35, $05, $33, $37, $05, $35, $39, $03, $36
+		.byte	$35, $03, $37, $0e, $00, $37, $16, $09, $37, $3d, $05, $38, $0a, $06, $38, $35
+		.byte	$03, $38, $38, $05, $39, $06, $00, $3a, $36, $03, $3b, $39, $05, $3c, $34, $03
+		.byte	$3c, $3f, $05, $3d, $01, $03, $3d, $07, $01, $3d, $37, $05, $3e, $04, $03, $3e
+		.byte	$11, $01, $3e, $39, $05, $3e, $3f, $05, $3f, $14, $01, $3f, $35, $03, $80, $31
+		.byte	$27, $07, $3d, $1f, $02, $37, $1b, $05, $80, $80, $80, $01, $80
+terrain_8379:
+		.byte	$01, $06, $80, $01, $32, $03, $02, $01, $03, $02, $0b, $0c, $02, $2f, $0c, $03
+		.byte	$10, $03, $03, $18, $05, $03, $25, $03, $03, $2b, $05, $03, $3d, $0e, $05, $15
+		.byte	$0a, $05, $1c, $03, $05, $20, $0c, $05, $27, $01, $06, $0e, $01, $06, $3c, $0c
+		.byte	$07, $19, $05, $0a, $01, $01, $0f, $38, $05, $10, $08, $09, $14, $30, $01, $14
+		.byte	$37, $0e, $18, $28, $0a, $1a, $2e, $03, $1c, $18, $08, $1c, $36, $03, $1c, $3f
+		.byte	$04, $20, $39, $0b, $20, $3b, $0b, $20, $3d, $02, $23, $12, $0d, $25, $11, $02
+		.byte	$25, $22, $02, $26, $0f, $02, $26, $20, $02, $27, $1e, $02, $29, $0e, $04, $2a
+		.byte	$04, $01, $2a, $20, $05, $2a, $27, $05, $2b, $0b, $0b, $2c, $3d, $05, $32, $3d
+		.byte	$05, $38, $08, $0f, $38, $38, $07, $3c, $20, $07, $3d, $3d, $0e, $3f, $2c, $02
+		.byte	$80, $13, $01, $01, $80, $80, $80, $01, $02, $80
+terrain_8413:
+		.byte	$02, $06, $0c, $04, $06, $80, $02, $18, $08, $04, $10, $07, $08, $29, $0d, $08
+		.byte	$3c, $03, $0c, $3a, $0c, $10, $3d, $03, $11, $0c, $08, $12, $19, $0d, $14, $30
+		.byte	$08, $1b, $15, $07, $1b, $3e, $0b, $1f, $3e, $0d, $22, $3f, $02, $23, $32, $0b
+		.byte	$24, $3f, $02, $26, $31, $0b, $28, $34, $0a, $30, $3f, $0f, $38, $3f, $06, $3f
+		.byte	$3f, $0b, $80, $06, $0a, $07, $80, $02, $80, $80, $03, $04, $80
+terrain_8460:
+		.byte	$03, $06, $3d, $37, $06, $80, $04, $3b, $0d, $05, $3f, $02, $07, $3f, $02, $09
+		.byte	$3f, $02, $0f, $3e, $08, $10, $20, $06, $10, $2a, $00, $16, $3f, $09, $17, $3b
+		.byte	$07, $18, $0e, $05, $1a, $0f, $03, $1b, $0d, $0e, $1c, $0a, $0c, $1c, $27, $08
+		.byte	$1d, $0f, $03, $1e, $0d, $03, $1e, $3f, $0f, $20, $0a, $05, $22, $3c, $04, $24
+		.byte	$3f, $09, $25, $3d, $04, $29, $3f, $06, $2c, $3e, $0f, $2d, $27, $0d, $32, $26
+		.byte	$02, $32, $3f, $03, $39, $2a, $0d, $3d, $3f, $02, $3f, $3e, $02, $80, $07, $24
+		.byte	$0f, $35, $30, $05, $35, $3c, $14, $80, $02, $80, $80, $04, $80
+terrain_84cd:
+		.byte	$04, $06, $80, $02, $25, $0a, $03, $07, $03, $03, $31, $01, $04, $02, $05, $04
+		.byte	$3e, $0b, $05, $32, $01, $07, $3f, $0f, $08, $18, $08, $08, $28, $07, $0b, $3f
+		.byte	$09, $18, $38, $09, $1b, $26, $0d, $1c, $20, $02, $1d, $0f, $01, $1e, $06, $0a
+		.byte	$20, $18, $09, $21, $3e, $0e, $25, $0b, $06, $27, $34, $02, $28, $10, $00, $28
+		.byte	$3c, $0c, $2b, $34, $0b, $30, $18, $09, $30, $3e, $03, $33, $10, $07, $37, $22
+		.byte	$0f, $3c, $2b, $08, $80, $80, $02, $03, $80, $80, $04, $05, $80
+terrain_852a:
+		.byte	$05, $06, $80, $10, $08, $07, $14, $2e, $01, $15, $31, $01, $20, $38, $03, $28
+		.byte	$3e, $0c, $2b, $06, $08, $32, $37, $0a, $36, $33, $05, $38, $3e, $05, $3a, $31
+		.byte	$03, $3a, $35, $01, $3c, $2f, $03, $3d, $32, $0c, $3f, $2e, $03, $3f, $31, $05
+		.byte	$80, $80, $03, $04, $80, $80, $07, $80
+terrain_8562:
+		.byte	$06, $06, $24, $30, $06, $80, $01, $29, $0c, $01, $33, $03, $02, $2b, $0a, $02
+		.byte	$2e, $01, $03, $28, $03, $03, $30, $0e, $05, $2d, $05, $07, $32, $01, $08, $2c
+		.byte	$0a, $08, $38, $0e, $0c, $30, $05, $0d, $3a, $0a, $0f, $2e, $03, $10, $04, $06
+		.byte	$10, $36, $0a, $11, $32, $05, $11, $3a, $03, $11, $3e, $05, $13, $33, $01, $14
+		.byte	$39, $05, $16, $1a, $03, $16, $35, $03, $18, $1d, $01, $18, $38, $03, $18, $3c
+		.byte	$05, $1a, $1a, $05, $1a, $39, $01, $1b, $1d, $0a, $1c, $3d, $05, $1d, $3a, $03
+		.byte	$1f, $0a, $06, $20, $16, $06, $20, $20, $03, $21, $0f, $06, $22, $08, $09, $22
+		.byte	$0c, $00, $22, $14, $06, $24, $13, $00, $24, $1d, $05, $25, $11, $06, $25, $3e
+		.byte	$05, $26, $16, $06, $28, $3e, $03, $29, $1e, $03, $2b, $22, $01, $2c, $28, $0a
+		.byte	$2c, $3c, $01, $2e, $2d, $03, $2f, $3e, $0a, $32, $3b, $03, $35, $3e, $0e, $3a
+		.byte	$3e, $01, $3c, $08, $0b, $3c, $10, $0b, $3c, $18, $02, $3c, $20, $02, $3c, $28
+		.byte	$02, $3e, $02, $06, $3e, $30, $04, $3e, $39, $0a, $3e, $3e, $05, $3f, $0d, $04
+		.byte	$3f, $14, $0d, $80, $10, $1a, $07, $1d, $35, $07, $1f, $25, $07, $29, $0b, $06
+		.byte	$29, $38, $04, $80, $80, $80, $07, $08, $80
+terrain_863b:
+		.byte	$00, $05, $80, $04, $3d, $00, $08, $02, $09, $08, $24, $0a, $09, $3f, $06, $0c
+		.byte	$2e, $01, $1c, $04, $01, $1c, $0c, $0a, $1e, $18, $04, $1f, $14, $0b, $1f, $1c
+		.byte	$01, $20, $08, $01, $20, $0f, $0b, $21, $15, $0b, $22, $2e, $06, $24, $25, $04
+		.byte	$25, $2a, $09, $27, $27, $04, $2a, $30, $00, $30, $11, $03, $31, $3c, $06, $33
+		.byte	$17, $05, $33, $35, $00, $34, $0f, $0c, $35, $20, $03, $36, $1b, $0c, $38, $13
+		.byte	$0e, $38, $29, $07, $3b, $32, $09, $3c, $0e, $03, $3c, $11, $05, $3c, $1b, $07
+		.byte	$3c, $3a, $05, $3d, $04, $0a, $3d, $2b, $0e, $3e, $31, $05, $3e, $36, $05, $3f
+		.byte	$1d, $05, $80, $15, $38, $01, $80, $80, $80, $01, $80
+terrain_86b6:
+		.byte	$01, $05, $3a, $08, $06, $80, $01, $3e, $0c, $02, $19, $00, $02, $38, $05, $03
+		.byte	$16, $03, $03, $34, $0e, $03, $3b, $05, $04, $22, $05, $04, $3e, $05, $05, $14
+		.byte	$03, $07, $11, $0c, $07, $1d, $09, $08, $16, $03, $08, $39, $0c, $0f, $1a, $00
+		.byte	$10, $34, $0a, $11, $2c, $08, $13, $1d, $0a, $14, $16, $06, $18, $27, $06, $19
+		.byte	$1c, $00, $1b, $12, $07, $1c, $19, $09, $1d, $20, $07, $20, $14, $0f, $24, $0c
+		.byte	$01, $28, $32, $0a, $2d, $05, $00, $2d, $2e, $01, $37, $1c, $04, $39, $1e, $0d
+		.byte	$3c, $38, $06, $3d, $20, $02, $3e, $1e, $02, $3f, $1b, $02, $80, $2e, $0e, $05
+		.byte	$39, $02, $05, $3d, $0f, $01, $80, $80, $80, $02, $80
+terrain_8731:
+		.byte	$02, $05, $80, $01, $02, $01, $02, $12, $0b, $03, $0e, $01, $03, $17, $07, $04
+		.byte	$04, $07, $05, $11, $0b, $06, $03, $0d, $08, $0c, $0a, $0a, $02, $01, $0e, $03
+		.byte	$0a, $14, $05, $01, $1d, $1f, $04, $3d, $0b, $03, $3e, $04, $03, $3e, $15, $05
+		.byte	$80, $09, $35, $07, $12, $3e, $0b, $80, $02, $80, $80, $03, $80
+terrain_876e:
+		.byte	$03, $05, $80, $03, $12, $0e, $03, $1a, $03, $04, $04, $0a, $04, $0a, $05, $05
+		.byte	$18, $0c, $06, $0f, $0c, $06, $1b, $05, $07, $16, $03, $08, $08, $01, $08, $19
+		.byte	$0e, $0a, $0c, $03, $33, $2e, $07, $3c, $3c, $05, $3e, $3f, $0e, $80, $80, $02
+		.byte	$80, $80, $80
+terrain_87a1:
+		.byte	$04, $05, $80, $03, $3e, $0c, $04, $34, $07, $06, $29, $05, $18, $3c, $00, $1c
+		.byte	$0c, $03, $1e, $11, $05, $23, $38, $06, $2a, $33, $00, $2e, $32, $06, $2f, $3a
+		.byte	$05, $30, $34, $09, $31, $2f, $00, $35, $20, $01, $38, $2c, $01, $38, $3c, $01
+		.byte	$3a, $14, $0a, $3c, $18, $01, $3c, $28, $0a, $3c, $34, $0e, $3d, $0c, $03, $3d
+		.byte	$0f, $03, $3f, $09, $05, $3f, $14, $05, $3f, $1c, $03, $3f, $22, $03, $80, $0b
+		.byte	$36, $0a, $33, $29, $12, $36, $17, $06, $80, $02, $80, $80, $05, $80
+terrain_87ff:
+		.byte	$05, $05, $0c, $1f, $06, $80, $03, $3e, $0a, $04, $13, $01, $08, $08, $06, $0a
+		.byte	$29, $01, $0e, $2a, $0a, $0e, $2d, $03, $10, $28, $03, $11, $31, $03, $12, $34
+		.byte	$01, $13, $2e, $05, $15, $25, $0c, $15, $29, $05, $16, $22, $01, $16, $32, $05
+		.byte	$16, $38, $0a, $1b, $1e, $00, $25, $08, $06, $2c, $14, $0f, $2e, $06, $00, $32
+		.byte	$08, $06, $37, $35, $0d, $3c, $2d, $02, $3c, $2f, $0b, $3d, $32, $02, $3e, $34
+		.byte	$02, $80, $06, $1b, $02, $0c, $25, $05, $14, $1a, $16, $80, $80, $80, $06, $07
+		.byte	$80
+terrain_8860:
+		.byte	$06, $05, $80, $03, $2f, $0d, $08, $34, $07, $14, $09, $01, $20, $3c, $06, $24
+		.byte	$38, $06, $26, $06, $0f, $26, $2b, $00, $26, $35, $06, $26, $3c, $09, $28, $32
+		.byte	$09, $29, $38, $0f, $30, $14, $0f, $32, $21, $04, $34, $1b, $00, $36, $17, $00
+		.byte	$38, $20, $09, $3a, $3e, $01, $3c, $12, $0f, $3c, $1d, $01, $3c, $24, $06, $3c
+		.byte	$28, $08, $3c, $31, $04, $3c, $38, $0b, $3d, $2f, $02, $3e, $17, $0f, $80, $2a
+		.byte	$27, $06, $37, $29, $12, $80, $80, $80, $08, $80
+terrain_88ba:
+		.byte	$00, $04, $80, $01, $2f, $02, $04, $2b, $02, $04, $3a, $00, $07, $27, $0b, $08
+		.byte	$20, $07, $0a, $23, $0d, $0d, $17, $0e, $10, $28, $00, $11, $24, $00, $13, $32
+		.byte	$0f, $15, $26, $09, $18, $1c, $07, $18, $27, $0a, $18, $3c, $07, $1d, $1c, $0b
+		.byte	$1d, $2a, $08, $20, $08, $0f, $20, $20, $07, $26, $20, $0b, $28, $25, $08, $3c
+		.byte	$39, $07, $80, $80, $01, $80, $02, $80, $01, $80
+terrain_8904:
+		.byte	$01, $04, $80, $02, $31, $0e, $04, $34, $03, $06, $2e, $05, $08, $18, $0f, $08
+		.byte	$30, $03, $0a, $2b, $03, $0d, $29, $03, $0d, $2c, $02, $0d, $31, $08, $0e, $03
+		.byte	$09, $10, $2c, $0b, $14, $04, $01, $18, $0c, $06, $19, $02, $06, $1b, $05, $00
+		.byte	$1d, $30, $08, $20, $04, $09, $24, $08, $00, $24, $10, $0f, $28, $2b, $07, $28
+		.byte	$30, $0f, $2f, $3f, $06, $34, $30, $08, $34, $38, $03, $34, $3c, $05, $38, $3c
+		.byte	$03, $3a, $3a, $0c, $3c, $3d, $03, $3d, $36, $03, $3e, $32, $05, $3f, $3e, $05
+		.byte	$80, $80, $01, $80, $03, $80, $02, $80
+terrain_896c:
+		.byte	$02, $04, $80, $02, $3a, $03, $04, $3e, $0e, $10, $0c, $06, $10, $14, $09, $12
+		.byte	$18, $06, $14, $01, $09, $14, $10, $00, $16, $04, $06, $17, $0a, $06, $18, $01
+		.byte	$06, $18, $0f, $06, $19, $03, $00, $1a, $05, $00, $1b, $03, $06, $1c, $0d, $06
+		.byte	$1c, $10, $00, $1c, $14, $06, $1e, $04, $00, $1f, $0b, $00, $1f, $12, $06, $22
+		.byte	$24, $08, $23, $0d, $09, $24, $02, $09, $29, $0b, $05, $2c, $18, $07, $30, $04
+		.byte	$0b, $35, $0a, $0b, $3b, $0a, $0d, $3b, $30, $05, $3c, $32, $0a, $3d, $37, $01
+		.byte	$3e, $04, $04, $80, $80, $01, $80, $03, $80, $80
+terrain_89d6:
+		.byte	$03, $04, $18, $08, $02, $80, $01, $3e, $01, $02, $10, $08, $02, $33, $03, $04
+		.byte	$3a, $0a, $06, $36, $0c, $07, $3a, $03, $09, $3e, $05, $0c, $14, $09, $13, $16
+		.byte	$06, $17, $12, $00, $80, $80, $02, $80, $04, $80, $80
+terrain_8a01:
+		.byte	$04, $04, $1c, $0c, $00, $80, $10, $30, $05, $10, $38, $05, $11, $35, $03, $14
+		.byte	$2c, $03, $14, $2e, $0c, $15, $35, $0c, $18, $24, $03, $18, $30, $05, $1a, $2f
+		.byte	$01, $1c, $28, $0e, $1c, $2c, $03, $1e, $32, $05, $1e, $36, $0a, $20, $28, $03
+		.byte	$21, $2f, $03, $22, $35, $0c, $23, $2d, $05, $24, $32, $03, $26, $2a, $03, $26
+		.byte	$2e, $0a, $27, $22, $01, $27, $26, $0a, $2a, $2a, $01, $2b, $22, $0b, $2c, $11
+		.byte	$07, $2c, $27, $07, $2e, $20, $0d, $2f, $23, $04, $80, $2f, $19, $0e, $39, $08
+		.byte	$08, $80, $02, $80, $80, $05, $80
+terrain_8a68:
+		.byte	$05, $04, $01, $0c, $06, $80, $05, $27, $00, $09, $02, $0a, $0c, $01, $05, $0c
+		.byte	$38, $0b, $0d, $09, $06, $0e, $26, $0b, $0f, $03, $00, $10, $18, $06, $10, $20
+		.byte	$0b, $10, $3c, $0d, $12, $10, $00, $14, $34, $04, $15, $38, $08, $16, $01, $01
+		.byte	$18, $05, $00, $1a, $07, $09, $1b, $01, $06, $24, $0c, $03, $24, $14, $05, $26
+		.byte	$06, $03, $27, $3c, $00, $28, $12, $03, $29, $01, $06, $29, $3d, $03, $2a, $0b
+		.byte	$05, $2a, $14, $0c, $2b, $04, $0c, $2c, $1e, $03, $2d, $12, $05, $2f, $03, $03
+		.byte	$2f, $1a, $0e, $30, $09, $06, $32, $0f, $06, $33, $1b, $0c, $34, $0a, $06, $3a
+		.byte	$1a, $05, $3b, $20, $03, $3e, $18, $0e, $80, $02, $33, $12, $06, $15, $10, $08
+		.byte	$0c, $02, $80, $80, $80, $05, $06, $80
+terrain_8af0:
+		.byte	$06, $04, $08, $28, $06, $80, $01, $1b, $0c, $04, $18, $05, $07, $1c, $03, $08
+		.byte	$04, $0f, $0a, $1e, $04, $0c, $1e, $03, $12, $2b, $0b, $14, $29, $07, $2e, $21
+		.byte	$06, $36, $01, $09, $38, $1c, $00, $3b, $35, $04, $3c, $38, $04, $3e, $27, $0d
+		.byte	$3e, $33, $04, $3f, $06, $06, $3f, $0e, $06, $3f, $15, $06, $80, $08, $37, $05
+		.byte	$09, $3e, $08, $16, $33, $0f, $80, $80, $80, $08, $09, $80
+terrain_8b3c:
+		.byte	$00, $03, $12, $01, $01, $80, $01, $06, $03, $02, $14, $03, $03, $09, $05, $03
+		.byte	$28, $05, $04, $3a, $03, $06, $0e, $05, $06, $15, $01, $08, $18, $0a, $0a, $0b
+		.byte	$03, $0b, $11, $0c, $0b, $16, $05, $0c, $1f, $01, $0c, $38, $05, $0e, $2c, $0d
+		.byte	$10, $29, $07, $19, $02, $08, $1a, $35, $0a, $20, $10, $0f, $21, $35, $00, $2c
+		.byte	$36, $07, $2e, $3a, $0b, $33, $36, $0b, $34, $0c, $06, $36, $0f, $00, $38, $0c
+		.byte	$08, $38, $30, $0b, $3b, $0e, $01, $3c, $2c, $08, $3f, $37, $0b, $80, $80, $80
+		.byte	$01, $80, $80
+terrain_8b9f:
+		.byte	$01, $03, $80, $02, $31, $0b, $06, $2f, $00, $06, $37, $0b, $09, $33, $0b, $0a
+		.byte	$3f, $01, $0b, $31, $06, $0c, $2c, $06, $0e, $39, $0b, $0f, $3e, $06, $10, $34
+		.byte	$0b, $12, $30, $00, $13, $21, $06, $13, $3f, $08, $14, $29, $09, $15, $3a, $0b
+		.byte	$16, $26, $00, $17, $22, $09, $17, $2e, $00, $17, $35, $0b, $1a, $27, $06, $1a
+		.byte	$32, $06, $1c, $1d, $06, $1c, $22, $00, $1c, $2b, $09, $1c, $3c, $0b, $1d, $36
+		.byte	$0b, $1e, $26, $06, $1e, $32, $06, $1f, $21, $00, $1f, $2e, $06, $20, $2a, $06
+		.byte	$22, $1c, $09, $22, $25, $09, $22, $2e, $00, $22, $34, $00, $23, $29, $0a, $24
+		.byte	$22, $06, $24, $31, $09, $24, $39, $07, $25, $26, $00, $26, $2d, $00, $27, $24
+		.byte	$09, $27, $29, $00, $27, $35, $06, $28, $3c, $0b, $29, $1b, $06, $29, $2c, $06
+		.byte	$2b, $0f, $00, $2b, $21, $09, $2c, $07, $08, $2e, $25, $06, $2f, $16, $00, $30
+		.byte	$1d, $09, $31, $22, $00, $33, $14, $06, $33, $26, $09, $34, $1d, $06, $35, $0f
+		.byte	$07, $35, $22, $06, $36, $07, $00, $36, $18, $06, $38, $1c, $01, $39, $15, $00
+		.byte	$3a, $19, $00, $3b, $21, $00, $3c, $14, $06, $3e, $19, $09, $3e, $1e, $06, $80
+		.byte	$80, $80, $03, $80, $11, $80
+terrain_8c75:
+		.byte	$02, $03, $80, $02, $1c, $06, $06, $1e, $00, $0c, $22, $0b, $0c, $28, $04, $0d
+		.byte	$08, $08, $0e, $02, $01, $12, $0c, $06, $13, $2d, $01, $14, $04, $00, $14, $34
+		.byte	$03, $18, $03, $01, $18, $14, $00, $19, $32, $07, $1a, $39, $03, $1b, $1c, $05
+		.byte	$1b, $22, $0c, $1b, $35, $05, $1b, $3f, $06, $1d, $18, $03, $1e, $2e, $03, $1e
+		.byte	$3f, $00, $1f, $38, $09, $1f, $3d, $06, $23, $3c, $00, $2c, $22, $09, $2c, $30
+		.byte	$0f, $38, $10, $0f, $3f, $34, $06, $80, $04, $03, $12, $3c, $26, $16, $80, $80
+		.byte	$80, $10, $11, $80
+terrain_8cd9:
+		.byte	$03, $03, $0b, $28, $06, $10, $3e, $03, $80, $01, $36, $06, $04, $3b, $00, $08
+		.byte	$34, $08, $08, $38, $0b, $0c, $38, $0b, $0e, $36, $04, $10, $30, $06, $10, $38
+		.byte	$0b, $13, $23, $09, $14, $2c, $00, $1a, $0c, $00, $1c, $21, $06, $20, $0b, $08
+		.byte	$28, $1b, $00, $2c, $18, $06, $33, $19, $09, $38, $10, $06, $3e, $02, $0d, $3e
+		.byte	$0a, $07, $80, $04, $2f, $07, $07, $1e, $03, $80, $02, $80, $04, $80, $10, $80
+terrain_8d29:
+		.byte	$04, $03, $18, $0c, $00, $80, $22, $02, $0b, $29, $15, $07, $30, $2c, $08, $32
+		.byte	$32, $06, $34, $3a, $0a, $36, $31, $06, $36, $36, $01, $39, $3e, $07, $3a, $3a
+		.byte	$00, $3d, $36, $05, $3e, $30, $03, $3f, $02, $06, $3f, $3b, $01, $80, $80, $02
+		.byte	$80, $80, $0e, $80
+terrain_8d5d:
+		.byte	$05, $03, $1c, $34, $06, $80, $03, $39, $06, $03, $3d, $06, $04, $0d, $00, $05
+		.byte	$36, $09, $05, $3f, $0c, $06, $3c, $01, $0a, $3e, $03, $0b, $21, $01, $0d, $36
+		.byte	$01, $0e, $27, $00, $0e, $3d, $06, $10, $1c, $06, $13, $22, $09, $1b, $21, $06
+		.byte	$1c, $0c, $08, $1e, $28, $07, $22, $03, $01, $2c, $0f, $06, $37, $2e, $08, $80
+		.byte	$23, $2b, $15, $28, $3a, $04, $2d, $35, $0e, $3c, $10, $0a, $3c, $1c, $12, $80
+		.byte	$80, $80, $0d, $0e, $80
+terrain_8db2:
+		.byte	$06, $03, $80, $05, $04, $0b, $08, $18, $06, $0e, $23, $0f, $14, $1b, $09, $19
+		.byte	$30, $08, $1c, $36, $07, $22, $01, $09, $24, $2d, $00, $28, $10, $08, $29, $33
+		.byte	$0d, $2e, $13, $00, $30, $17, $06, $30, $28, $09, $34, $15, $02, $36, $1c, $07
+		.byte	$3a, $05, $0d, $3c, $14, $0b, $3d, $01, $0b, $3d, $08, $0b, $3d, $2f, $0b, $3e
+		.byte	$22, $0b, $3e, $2c, $0b, $80, $10, $03, $05, $2c, $1a, $01, $36, $2b, $0a, $80
+		.byte	$80, $80, $09, $80
+terrain_8e06:
+		.byte	$00, $02, $14, $30, $06, $80, $01, $18, $07, $01, $24, $0b, $01, $3b, $0b, $02
+		.byte	$37, $0b, $04, $0c, $08, $0a, $20, $08, $0b, $33, $0d, $10, $15, $02, $12, $11
+		.byte	$0b, $14, $23, $0d, $18, $01, $0d, $18, $03, $0d, $2d, $2d, $07, $2f, $3b, $00
+		.byte	$34, $32, $06, $3e, $0b, $0a, $80, $0e, $29, $0c, $1b, $1d, $0c, $23, $30, $16
+		.byte	$25, $21, $05, $80, $80, $01, $80, $12, $80
+terrain_8e4f:
+		.byte	$01, $02, $80, $05, $02, $00, $06, $1d, $06, $16, $0b, $03, $19, $01, $0a, $1c
+		.byte	$10, $03, $21, $04, $0e, $24, $0f, $0c, $24, $15, $05, $2c, $02, $05, $3f, $2c
+		.byte	$0b, $80, $0c, $15, $16, $2f, $3c, $16, $80, $80, $80, $11, $12, $80
+terrain_8e7d:
+		.byte	$02, $02, $38, $38, $04, $80, $02, $2f, $0d, $03, $06, $0f, $03, $28, $07, $03
+		.byte	$34, $0d, $04, $20, $01, $07, $32, $09, $08, $3c, $0b, $09, $26, $09, $0a, $2f
+		.byte	$0a, $0c, $39, $0a, $0d, $34, $00, $10, $2c, $00, $11, $25, $06, $11, $30, $01
+		.byte	$11, $38, $00, $13, $35, $01, $13, $3f, $09, $14, $2a, $06, $14, $32, $00, $16
+		.byte	$36, $01, $17, $30, $06, $17, $33, $01, $17, $39, $0a, $18, $36, $01, $1a, $2a
+		.byte	$00, $1a, $38, $00, $1a, $3c, $0b, $1b, $32, $00, $1b, $35, $00, $1c, $3b, $0b
+		.byte	$1d, $25, $01, $1d, $34, $00, $1f, $2d, $01, $23, $26, $09, $24, $30, $06, $28
+		.byte	$22, $01, $2a, $35, $06, $2c, $29, $06, $2e, $20, $08, $38, $27, $07, $80, $80
+		.byte	$06, $80, $80, $11, $80
+terrain_8f02:
+		.byte	$03, $02, $38, $30, $06, $80, $0c, $38, $0d, $0e, $3a, $0b, $10, $39, $07, $13
+		.byte	$37, $0b, $14, $34, $07, $15, $37, $0b, $28, $20, $0b, $28, $24, $0b, $29, $22
+		.byte	$03, $2e, $0c, $06, $2e, $11, $06, $30, $20, $08, $31, $0a, $08, $31, $13, $06
+		.byte	$32, $0f, $07, $3f, $25, $06, $80, $32, $37, $09, $33, $02, $01, $37, $27, $15
+		.byte	$3d, $3c, $05, $80, $06, $80, $80, $0f, $80
+terrain_8f4b:
+		.byte	$04, $02, $80, $03, $20, $0a, $04, $34, $0b, $09, $11, $08, $0b, $28, $0a, $0c
+		.byte	$02, $07, $0c, $35, $0c, $0d, $2b, $01, $0f, $29, $03, $0f, $31, $03, $10, $2e
+		.byte	$05, $10, $34, $03, $12, $36, $05, $13, $2b, $03, $13, $31, $0a, $14, $0e, $06
+		.byte	$14, $18, $07, $15, $12, $06, $16, $02, $0a, $17, $32, $05, $17, $36, $01, $18
+		.byte	$10, $06, $1a, $2e, $05, $1c, $31, $03, $1d, $35, $0a, $1d, $39, $00, $34, $2e
+		.byte	$09, $37, $37, $01, $38, $28, $06, $3b, $39, $0a, $3c, $25, $00, $3d, $2b, $07
+		.byte	$3e, $10, $07, $3e, $27, $06, $80, $07, $2e, $0a, $20, $2d, $02, $27, $0e, $05
+		.byte	$36, $17, $06, $80, $05, $80, $80, $0e, $0f, $80
+terrain_8fc5:
+		.byte	$05, $02, $30, $04, $06, $80, $02, $22, $08, $03, $2e, $00, $06, $25, $09, $07
+		.byte	$09, $0b, $0a, $18, $07, $0b, $16, $06, $18, $3c, $0d, $1c, $0e, $0f, $1f, $04
+		.byte	$00, $21, $2f, $09, $24, $20, $0a, $25, $06, $06, $29, $0d, $06, $36, $19, $06
+		.byte	$37, $1c, $00, $38, $21, $09, $39, $07, $07, $39, $1d, $06, $3a, $04, $08, $3a
+		.byte	$1e, $06, $3a, $25, $0d, $3a, $2a, $06, $3c, $3f, $01, $3e, $08, $03, $3f, $02
+		.byte	$05, $80, $36, $04, $02, $80, $05, $80, $80, $0c, $0d, $80
+terrain_9021:
+		.byte	$06, $02, $10, $04, $06, $80, $01, $06, $03, $02, $24, $06, $02, $2c, $09, $02
+		.byte	$35, $0d, $02, $3b, $0b, $05, $0b, $0b, $05, $10, $0b, $06, $0d, $0d, $06, $18
+		.byte	$0d, $07, $09, $0d, $07, $3d, $0d, $08, $38, $06, $09, $16, $07, $09, $1a, $0d
+		.byte	$19, $26, $0f, $1c, $0b, $0a, $1d, $3f, $0f, $1f, $01, $01, $1f, $12, $0d, $20
+		.byte	$0e, $08, $20, $16, $0d, $20, $2c, $00, $21, $13, $0b, $24, $19, $0b, $27, $1b
+		.byte	$07, $2c, $07, $06, $2c, $34, $0c, $2e, $01, $06, $2e, $0e, $01, $2e, $31, $03
+		.byte	$30, $36, $0e, $35, $06, $0a, $3a, $20, $03, $3a, $39, $0d, $3b, $25, $05, $3c
+		.byte	$3b, $0b, $3c, $3e, $0d, $3d, $28, $0c, $3d, $35, $07, $3d, $38, $0b, $3e, $03
+		.byte	$0c, $3e, $1f, $05, $3e, $22, $05, $80, $0a, $02, $02, $0e, $16, $01, $1a, $05
+		.byte	$0b, $1a, $12, $13, $80, $80, $80, $09, $0a, $80
+terrain_90bb:
+		.byte	$00, $01, $80, $04, $38, $0b, $08, $04, $07, $08, $32, $08, $0a, $1e, $08, $16
+		.byte	$2c, $06, $17, $26, $06, $18, $1c, $06, $19, $14, $06, $1a, $2a, $06, $1c, $1f
+		.byte	$09, $1c, $24, $06, $1c, $27, $06, $1c, $2d, $06, $1c, $34, $06, $1f, $12, $06
+		.byte	$1f, $25, $06, $1f, $29, $06, $20, $1e, $06, $20, $2d, $06, $21, $29, $06, $23
+		.byte	$27, $06, $23, $2b, $06, $23, $33, $06, $24, $20, $06, $30, $3c, $0f, $3c, $08
+		.byte	$08, $80, $80, $80, $01, $80, $12, $80
+terrain_9113:
+		.byte	$01, $01, $80, $06, $2c, $07, $08, $22, $0a, $0a, $26, $0b, $0d, $3d, $06, $16
+		.byte	$12, $01, $18, $08, $0a, $1b, $0b, $01, $1e, $38, $01, $24, $34, $05, $25, $2c
+		.byte	$03, $25, $3e, $03, $26, $2f, $05, $27, $25, $05, $28, $38, $0c, $29, $2f, $0c
+		.byte	$2a, $29, $03, $2a, $33, $03, $2c, $2e, $0e, $2c, $38, $03, $2f, $2d, $05, $2f
+		.byte	$31, $05, $31, $2d, $03, $31, $34, $0b, $33, $24, $0e, $34, $2c, $0c, $38, $20
+		.byte	$03, $80, $3a, $38, $15, $3d, $05, $0e, $80, $80, $80, $11, $12, $80
+terrain_9171:
+		.byte	$02, $01, $80, $18, $04, $08, $18, $1c, $0f, $2c, $0b, $03, $2c, $16, $03, $32
+		.byte	$11, $05, $34, $0f, $03, $34, $12, $03, $36, $0c, $05, $36, $14, $05, $37, $11
+		.byte	$03, $80, $0a, $3a, $16, $0c, $0c, $12, $80, $06, $80, $80, $11, $80
+terrain_919f:
+		.byte	$03, $01, $80, $27, $34, $0b, $28, $38, $0b, $2a, $1e, $07, $2a, $31, $08, $80
+		.byte	$37, $1d, $05, $80, $06, $80, $80, $0f, $80
+terrain_91b8:
+		.byte	$04, $01, $80, $07, $1e, $08, $09, $1f, $0f, $0a, $26, $00, $16, $33, $0c, $17
+		.byte	$3e, $05, $18, $04, $0f, $18, $3a, $0e, $19, $31, $05, $19, $33, $03, $1e, $1a
+		.byte	$09, $23, $1c, $08, $32, $01, $07, $37, $18, $06, $3b, $1a, $06, $3c, $28, $00
+		.byte	$3c, $38, $0b, $3e, $35, $0b, $3f, $12, $00, $80, $06, $2e, $01, $28, $18, $05
+		.byte	$80, $05, $80, $80, $0e, $0f, $80
+terrain_91ff:
+		.byte	$05, $01, $80, $02, $38, $0d, $04, $0a, $0f, $08, $3e, $04, $0e, $33, $06, $10
+		.byte	$10, $0d, $10, $38, $06, $21, $3d, $07, $27, $07, $06, $2c, $24, $01, $30, $10
+		.byte	$0a, $31, $1c, $01, $31, $24, $03, $33, $27, $0c, $34, $2e, $01, $35, $18, $05
+		.byte	$35, $2b, $05, $36, $1a, $03, $36, $25, $05, $37, $37, $05, $38, $18, $03, $38
+		.byte	$2a, $0e, $38, $2e, $03, $38, $31, $0a, $38, $3b, $0c, $3a, $38, $03, $3a, $3e
+		.byte	$03, $3c, $27, $0a, $3c, $2c, $03, $3c, $39, $0c, $3d, $31, $05, $3d, $36, $05
+		.byte	$3d, $3d, $0e, $80, $28, $1c, $05, $28, $3c, $15, $34, $3c, $07, $80, $05, $80
+		.byte	$80, $0c, $80
+terrain_9272:
+		.byte	$06, $01, $80, $01, $22, $03, $01, $3b, $0c, $02, $20, $05, $02, $36, $03, $02
+		.byte	$3f, $05, $04, $23, $0c, $04, $31, $01, $04, $34, $05, $04, $3d, $03, $06, $2d
+		.byte	$0a, $07, $34, $0e, $09, $33, $0c, $09, $35, $03, $0b, $2e, $05, $0c, $34, $03
+		.byte	$0c, $39, $00, $0d, $2a, $01, $0e, $31, $01, $11, $36, $03, $12, $2c, $05, $14
+		.byte	$20, $05, $14, $31, $0a, $14, $34, $03, $17, $2d, $03, $18, $34, $05, $19, $2a
+		.byte	$03, $1b, $2d, $03, $1b, $31, $0e, $1c, $35, $0c, $1d, $3c, $06, $1e, $2c, $05
+		.byte	$1f, $1b, $0a, $1f, $24, $0c, $1f, $34, $03, $20, $31, $05, $20, $38, $0c, $21
+		.byte	$04, $0d, $22, $36, $0b, $30, $34, $01, $33, $0b, $0d, $33, $31, $0a, $34, $34
+		.byte	$07, $34, $37, $0b, $37, $36, $01, $38, $31, $03, $3c, $34, $05, $3d, $3d, $05
+		.byte	$3e, $05, $0f, $3e, $0c, $06, $3e, $38, $0e, $80, $15, $3a, $09, $22, $0d, $03
+		.byte	$2f, $18, $01, $80, $80, $80, $09, $0a, $80
+terrain_931b:
+		.byte	$00, $00, $80, $28, $30, $0f, $80, $80, $07, $80, $80, $80
+terrain_9327:
+		.byte	$01, $00, $80, $23, $3e, $0d, $25, $3b, $04, $25, $3d, $0d, $27, $3b, $0b, $80
+		.byte	$3c, $3c, $13, $80, $07, $80, $80, $11, $80
+terrain_9340:
+		.byte	$02, $00, $04, $3e, $06, $80, $80, $80, $06, $80, $80, $11, $80
+terrain_934d:
+		.byte	$03, $00, $10, $28, $00, $80, $80, $80, $06, $80, $80, $80
+terrain_9359:
+		.byte	$04, $00, $24, $34, $06, $30, $08, $05, $80, $14, $3a, $06, $1b, $3e, $06, $1c
+		.byte	$2a, $0d, $28, $28, $08, $3f, $0b, $07, $80, $22, $3c, $05, $2c, $3c, $12, $2d
+		.byte	$2e, $0f, $80, $05, $80, $80, $0e, $0f, $80
+terrain_9382:
+		.byte	$05, $00, $10, $20, $06, $3c, $04, $00, $80, $04, $1a, $06, $05, $26, $06, $10
+		.byte	$10, $08, $10, $2c, $07, $12, $2e, $06, $1c, $34, $0f, $22, $32, $09, $24, $3c
+		.byte	$00, $28, $2f, $06, $32, $24, $0a, $80, $0a, $1e, $03, $10, $1a, $01, $16, $1c
+		.byte	$0a, $16, $25, $11, $80, $05, $80, $80, $0b, $0c, $80
+terrain_93bd:
+		.byte	$06, $00, $28, $14, $06, $80, $34, $0e, $0d, $36, $06, $08, $37, $1a, $0b, $38
+		.byte	$28, $09, $39, $13, $0b, $3a, $3e, $07, $3d, $3c, $06, $3e, $30, $06, $3e, $3e
+		.byte	$06, $3f, $2a, $00, $80, $24, $21, $15, $2c, $10, $07, $2f, $1d, $05, $34, $3c
+		.byte	$12, $80, $05, $80, $80, $0a, $0b, $80
+; indexed from 1 by hole number, through hole_shapes_base
+hole_shapes_base = $93f3
+
+hole_shapes:
+		.addr	shape_9477, shape_94c5, shape_9507, shape_9541, shape_9587, shape_9607, shape_9659, shape_969f, shape_970f, shape_9775, shape_97cb, shape_980b, shape_984d, shape_989d, shape_9907, shape_9963
+		.addr	shape_99a9, shape_9a0f
+pointers_9419:
+		.addr	shape_9c36, shape_9c7b, shape_9c90, shape_9cb1
+pointers_9421:
+		.addr	shape_9a63, shape_9abc, shape_9b6d, shape_9b8e, shape_9ba9, shape_9bd0, shape_9c19
+; per hole: two words, indexed from 1 by hole number through hole_positions_base
+hole_positions_base = $942b
+
+hole_positions:
+		.word	$0038, $01a4, $007a, $0148, $008c, $0184, $00fd, $01b7, $0141, $010c, $014c, $015f, $01a4, $01b0, $0188, $0128
+		.word	$0190, $0084, $01a8, $0014, $0150, $0020, $0170, $0084, $015c, $00f4, $0124, $0034, $00f8, $00b0, $00cb, $00e8
+		.word	$0084, $003e, $0014, $00b0
+
+shape_9477:
+		.byte	$00, $04, $0d, $32, $00, $00, $00, $fe, $fe, $00, $fd, $0e, $fd, $1e, $fc, $26
+		.byte	$fd, $2e, $01, $38, $05, $46, $0c, $4e, $13, $56, $1f, $76, $29, $7f, $32, $7f
+		.byte	$33, $7c, $35, $77, $33, $6f, $31, $69, $26, $5c, $1f, $4e, $1c, $49, $13, $3c
+		.byte	$11, $32, $0e, $28, $0c, $1e, $0b, $0f, $06, $06, $03, $ff, $80, $2b, $72, $03
+		.byte	$05, $06, $01, $03, $fd, $fc, $fc, $fa, $fe, $fb, $01, $fe, $04, $80
+shape_94c5:
+		.byte	$01, $06, $05, $36, $00, $00, $02, $03, $05, $00, $0b, $f6, $15, $e2, $23, $ca
+		.byte	$2b, $be, $2f, $a6, $3b, $98, $3f, $93, $3b, $8d, $39, $8a, $33, $88, $30, $8a
+		.byte	$21, $9a, $1b, $aa, $0a, $ca, $07, $de, $03, $ee, $fd, $fe, $fd, $02, $80, $35
+		.byte	$92, $03, $05, $06, $02, $05, $ff, $01, $fd, $fb, $fd, $f6, $00, $f9, $05, $ff
+		.byte	$06, $80
+shape_9507:
+		.byte	$02, $05, $12, $0a, $00, $00, $ff, $fe, $f7, $06, $f2, $13, $f2, $23, $f4, $36
+		.byte	$f2, $3c, $f4, $43, $f7, $44, $fc, $42, $01, $3d, $03, $36, $03, $2e, $05, $1e
+		.byte	$0a, $06, $08, $02, $04, $fe, $80, $fa, $3a, $00, $06, $03, $02, $04, $fe, $03
+		.byte	$fb, $ff, $fb, $fc, $fe, $fc, $02, $fd, $06, $80
+shape_9541:
+		.byte	$02, $06, $04, $1e, $00, $00, $ff, $02, $04, $06, $10, $0a, $1c, $0e, $34, $17
+		.byte	$3c, $1a, $48, $1a, $5c, $1c, $6c, $1f, $7c, $1e, $7f, $1c, $7f, $16, $7c, $12
+		.byte	$74, $10, $67, $0d, $4c, $0d, $3c, $06, $32, $06, $1c, $01, $10, $fd, $ff, $fd
+		.byte	$80, $79, $19, $00, $03, $03, $02, $04, $00, $03, $fd, $ff, $fc, $fb, $fc, $f8
+		.byte	$fd, $f9, $00, $fc, $02, $80
+shape_9587:
+		.byte	$04, $06, $10, $38, $00, $c8, $00, $3b, $04, $39, $08, $2e, $0a, $1e, $0b, $06
+		.byte	$10, $00, $12, $f6, $1d, $f0, $25, $ec, $28, $e3, $29, $d8, $28, $d0, $29, $cd
+		.byte	$2a, $c8, $2c, $c0, $30, $bc, $36, $b2, $3a, $a7, $39, $a1, $39, $9b, $3c, $93
+		.byte	$3c, $8c, $39, $86, $34, $83, $30, $82, $2b, $82, $29, $84, $26, $88, $24, $8d
+		.byte	$24, $94, $25, $9d, $25, $a3, $22, $a9, $1d, $b5, $1a, $c0, $18, $c8, $16, $d0
+		.byte	$10, $d8, $04, $e2, $fe, $ea, $f8, $f5, $f6, $00, $f6, $04, $f8, $10, $fb, $28
+		.byte	$fd, $39, $80, $31, $8c, $02, $07, $05, $02, $06, $fd, $05, $fa, $02, $f9, $ff
+		.byte	$f9, $fc, $fa, $f9, $fe, $f7, $03, $f7, $06, $f9, $0a, $fd, $0b, $ff, $0a, $80
+shape_9607:
+		.byte	$05, $04, $18, $14, $00, $00, $00, $1c, $00, $22, $fe, $2c, $f4, $3c, $f0, $40
+		.byte	$ec, $45, $eb, $4a, $ec, $50, $f0, $54, $f6, $54, $f9, $52, $fd, $4e, $00, $4c
+		.byte	$06, $3c, $10, $34, $15, $2c, $16, $24, $13, $18, $08, $04, $04, $ff, $00, $fd
+		.byte	$fc, $fe, $fc, $02, $fd, $0c, $80, $f4, $4b, $01, $04, $04, $03, $06, $00, $05
+		.byte	$fd, $04, $f7, $02, $f6, $ff, $f7, $fd, $f9, $fc, $fc, $fb, $00, $fc, $03, $fe
+		.byte	$04, $80
+shape_9659:
+		.byte	$05, $05, $04, $34, $00, $00, $05, $0c, $28, $28, $35, $2c, $3c, $32, $4c, $38
+		.byte	$57, $43, $60, $48, $64, $48, $68, $45, $69, $3f, $64, $30, $52, $2a, $4c, $23
+		.byte	$3c, $1c, $25, $13, $1c, $0c, $05, $fe, $fe, $fd, $fd, $00, $80, $60, $3c, $00
+		.byte	$08, $02, $08, $04, $05, $05, $02, $05, $fd, $03, $f8, $00, $f6, $fd, $f8, $fb
+		.byte	$fd, $fb, $02, $fd, $06, $80
+shape_969f:
+		.byte	$06, $06, $36, $32, $fa, $be, $02, $40, $05, $45, $07, $45, $0a, $43, $0a, $3c
+		.byte	$09, $31, $08, $20, $08, $10, $0a, $02, $0b, $fc, $09, $f5, $02, $ea, $fe, $e4
+		.byte	$fd, $e0, $fa, $d0, $ee, $c4, $e7, $c0, $e2, $bd, $df, $b8, $de, $b2, $dc, $b0
+		.byte	$d7, $af, $d2, $b0, $d1, $b4, $d0, $ba, $d1, $c0, $d3, $c7, $d6, $d0, $dd, $d6
+		.byte	$e6, $e0, $f2, $f0, $fb, $01, $fc, $08, $fa, $10, $f4, $18, $f4, $1c, $f8, $24
+		.byte	$fa, $2b, $80, $d8, $b8, $00, $0c, $03, $0b, $05, $07, $06, $02, $05, $fd, $02
+		.byte	$fa, $00, $f9, $fd, $f9, $fb, $fb, $fa, $ff, $fb, $06, $fc, $0a, $fe, $0c, $80
+shape_970f:
+		.byte	$06, $04, $20, $24, $f8, $9c, $08, $66, $0b, $65, $12, $60, $19, $51, $1d, $40
+		.byte	$21, $35, $21, $2c, $20, $25, $1f, $20, $0f, $11, $03, $00, $04, $f0, $07, $e4
+		.byte	$06, $dc, $06, $cf, $07, $c7, $04, $c0, $00, $be, $f8, $bc, $f2, $bd, $f0, $c0
+		.byte	$f0, $c8, $ef, $d0, $ef, $d3, $f3, $d6, $f4, $e4, $f4, $00, $f6, $08, $08, $20
+		.byte	$0c, $2c, $0c, $34, $08, $40, $04, $57, $04, $63, $06, $66, $80, $f8, $c4, $01
+		.byte	$10, $05, $0d, $07, $08, $07, $01, $06, $fc, $02, $fa, $fe, $fa, $fc, $fc, $fa
+		.byte	$05, $f9, $0b, $fa, $0f, $80
+shape_9775:
+		.byte	$06, $02, $28, $04, $00, $bc, $00, $47, $04, $44, $04, $40, $08, $30, $0a, $21
+		.byte	$0a, $18, $06, $0f, $04, $06, $04, $00, $08, $fb, $0c, $f5, $0d, $ed, $0c, $e5
+		.byte	$0a, $da, $09, $d0, $06, $cc, $01, $cb, $f9, $cf, $f7, $d5, $f6, $e2, $fa, $eb
+		.byte	$f9, $f6, $f6, $00, $f6, $0c, $f9, $1c, $fb, $30, $fc, $3b, $fc, $40, $fd, $45
+		.byte	$80, $00, $d4, $02, $08, $05, $06, $06, $02, $04, $fe, $00, $fc, $fc, $fd, $fa
+		.byte	$01, $fa, $05, $fd, $07, $80
+shape_97cb:
+		.byte	$06, $00, $16, $14, $da, $0c, $00, $08, $10, $02, $20, $fb, $28, $f7, $29, $f4
+		.byte	$28, $f2, $21, $f0, $10, $f2, $08, $f5, $f6, $f8, $f2, $f8, $e8, $f5, $dc, $f8
+		.byte	$d8, $fd, $d8, $02, $da, $06, $de, $08, $e4, $07, $f0, $08, $80, $e0, $00, $03
+		.byte	$05, $05, $01, $03, $fd, $00, $fc, $fc, $fd, $fb, $00, $fb, $04, $fe, $06, $80
+shape_980b:
+		.byte	$05, $00, $04, $30, $1c, $28, $00, $18, $04, $28, $08, $2f, $0d, $31, $13, $32
+		.byte	$17, $2f, $18, $2b, $18, $28, $11, $18, $0d, $00, $fd, $f3, $f3, $e8, $e8, $d8
+		.byte	$e5, $d5, $e2, $d6, $e2, $da, $e6, $e8, $f0, $fc, $fa, $05, $80, $10, $2c, $00
+		.byte	$03, $03, $02, $04, $fe, $04, $fc, $02, $fa, $fe, $f9, $fb, $fc, $fa, $00, $fc
+		.byte	$02, $80
+shape_984d:
+		.byte	$05, $02, $30, $14, $00, $2c, $02, $36, $04, $2f, $08, $28, $10, $20, $10, $16
+		.byte	$0e, $0e, $0a, $00, $08, $ec, $05, $da, $03, $d3, $00, $d2, $fc, $d4, $fa, $e8
+		.byte	$fc, $00, $fe, $10, $f4, $20, $f1, $28, $e8, $30, $e4, $34, $e3, $39, $e4, $3c
+		.byte	$e8, $3f, $ed, $3f, $f5, $3d, $fe, $3a, $80, $ec, $34, $04, $08, $0a, $05, $0d
+		.byte	$ff, $09, $fb, $02, $fa, $fd, $fd, $fb, $00, $fa, $04, $fb, $07, $fe, $09, $80
+shape_989d:
+		.byte	$05, $03, $08, $30, $e8, $90, $07, $60, $10, $6d, $14, $71, $18, $72, $1b, $71
+		.byte	$1c, $6c, $1c, $66, $18, $60, $10, $53, $07, $40, $02, $32, $02, $26, $0a, $18
+		.byte	$0c, $0d, $0b, $00, $08, $f0, $04, $d6, $03, $c8, $00, $c0, $00, $bc, $fe, $b3
+		.byte	$f9, $ae, $f3, $ac, $ee, $ae, $ec, $b1, $ec, $b5, $ed, $bb, $f0, $c0, $f0, $c8
+		.byte	$f1, $d3, $f6, $db, $fa, $f0, $f8, $00, $f2, $0e, $f0, $22, $ed, $2c, $f0, $38
+		.byte	$f4, $40, $f8, $4a, $80, $f4, $b4, $00, $06, $05, $06, $08, $04, $07, $ff, $04
+		.byte	$fb, $ff, $fa, $fc, $fc, $fb, $00, $fc, $04, $80
+shape_9907:
+		.byte	$04, $00, $10, $2c, $e8, $3c, $08, $50, $10, $4c, $13, $48, $12, $42, $0d, $3f
+		.byte	$09, $38, $08, $28, $0b, $18, $0c, $0f, $0e, $0a, $11, $08, $12, $04, $10, $ff
+		.byte	$0e, $f5, $18, $d8, $1d, $c4, $1b, $c0, $18, $c0, $13, $c3, $08, $da, $f9, $f4
+		.byte	$f8, $08, $f8, $18, $fc, $28, $f9, $3a, $f3, $48, $f3, $4c, $f5, $50, $fc, $52
+		.byte	$80, $00, $48, $05, $06, $0a, $03, $0c, $ff, $0c, $fb, $08, $f8, $04, $f8, $00
+		.byte	$fb, $fa, $fa, $f8, $fc, $f7, $00, $f9, $04, $ff, $06, $80
+shape_9963:
+		.byte	$03, $03, $38, $08, $00, $00, $02, $02, $02, $fe, $fa, $fe, $ec, $04, $dc, $08
+		.byte	$c8, $10, $c1, $18, $c0, $1e, $c3, $26, $c8, $2a, $cc, $2b, $d0, $2a, $d4, $27
+		.byte	$d8, $24, $da, $22, $da, $1e, $d9, $1b, $da, $18, $f4, $0c, $80, $d3, $20, $00
+		.byte	$05, $03, $03, $04, $00, $04, $fd, $01, $fa, $fd, $fa, $fa, $fb, $f8, $fd, $f7
+		.byte	$01, $f9, $04, $fc, $06, $80
+shape_99a9:
+		.byte	$02, $03, $18, $2d, $e8, $93, $00, $54, $0d, $60, $11, $6a, $18, $70, $1d, $6f
+		.byte	$1c, $68, $19, $60, $12, $50, $05, $40, $00, $38, $fd, $29, $00, $18, $0c, $00
+		.byte	$0d, $f9, $0d, $f0, $0f, $d2, $10, $cc, $10, $c6, $0f, $c0, $08, $b7, $00, $b6
+		.byte	$fc, $b6, $f7, $ba, $f7, $c0, $fa, $c8, $fc, $d7, $fc, $dc, $f6, $f0, $f3, $00
+		.byte	$ed, $10, $ec, $20, $ea, $32, $ec, $40, $f0, $47, $80, $04, $be, $00, $0c, $04
+		.byte	$0c, $08, $0a, $09, $07, $08, $02, $07, $ff, $04, $fc, $01, $fb, $fe, $fd, $fd
+		.byte	$02, $fc, $06, $fd, $0a, $80
+shape_9a0f:
+		.byte	$01, $01, $24, $10, $dc, $30, $00, $24, $0f, $1c, $12, $17, $17, $00, $20, $f0
+		.byte	$26, $dc, $27, $d1, $26, $cd, $23, $cc, $20, $cf, $18, $dc, $07, $f0, $00, $f8
+		.byte	$fc, $00, $e7, $15, $dd, $20, $d0, $2a, $cd, $30, $cf, $36, $d6, $3b, $df, $3e
+		.byte	$e2, $3c, $e6, $34, $e9, $2c, $f0, $28, $80, $d4, $30, $08, $0b, $0b, $0b, $0d
+		.byte	$08, $0c, $04, $0a, $00, $0a, $fb, $09, $f8, $06, $f7, $01, $f9, $fd, $fd, $fc
+		.byte	$00, $fe, $05, $80
+shape_9a63:
+		.byte	$01, $04, $18, $30, $00, $04, $04, $fc, $0c, $f8, $12, $f8, $1a, $f9, $24, $f7
+		.byte	$2e, $f3, $38, $f1, $40, $f0, $48, $f0, $52, $f1, $5b, $f4, $68, $fa, $68, $ef
+		.byte	$5c, $ee, $53, $ec, $48, $eb, $38, $ec, $28, $f0, $20, $f3, $0c, $f3, $01, $f8
+		.byte	$f8, $05, $e6, $0b, $de, $09, $d5, $00, $c8, $f5, $b5, $ee, $b1, $e8, $a8, $d7
+		.byte	$a8, $dc, $aa, $e1, $af, $eb, $b4, $f1, $bc, $f4, $c6, $f8, $d0, $00, $dc, $0c
+		.byte	$e3, $0f, $e8, $0f, $f0, $0c, $f9, $0a, $80
+shape_9abc:
+		.byte	$03, $05, $20, $00, $00, $44, $07, $40, $0c, $3c, $0e, $37, $0e, $31, $10, $2c
+		.byte	$1a, $24, $20, $24, $24, $23, $2f, $21, $34, $24, $39, $2a, $3c, $34, $42, $40
+		.byte	$43, $3d, $3f, $35, $3c, $2a, $34, $20, $33, $1d, $38, $18, $37, $10, $34, $09
+		.byte	$30, $05, $2c, $00, $2a, $f8, $2a, $f0, $2b, $e7, $2f, $df, $35, $dc, $3d, $db
+		.byte	$42, $da, $45, $d8, $47, $d4, $48, $ce, $48, $c8, $46, $c0, $43, $b9, $43, $b3
+		.byte	$45, $ad, $48, $a8, $49, $a0, $48, $98, $45, $8e, $40, $84, $40, $81, $26, $81
+		.byte	$20, $8c, $14, $a0, $10, $a8, $09, $ae, $06, $b4, $04, $c0, $ff, $cc, $f8, $d5
+		.byte	$f4, $d8, $e8, $db, $e0, $df, $e0, $ea, $e6, $ef, $ea, $f9, $ec, $00, $ed, $07
+		.byte	$ec, $10, $ea, $18, $e8, $1c, $e5, $1d, $e0, $1c, $dc, $1a, $d3, $1c, $cc, $20
+		.byte	$c0, $24, $b9, $28, $b7, $32, $b7, $38, $b8, $40, $ba, $4c, $c0, $58, $c4, $5c
+		.byte	$ca, $5f, $d6, $62, $e0, $60, $e7, $59, $f0, $54, $f2, $51, $f4, $4b, $f8, $47
+		.byte	$80
+shape_9b6d:
+		.byte	$04, $06, $28, $08, $04, $08, $0f, $13, $14, $19, $18, $24, $20, $2e, $2b, $38
+		.byte	$2e, $38, $20, $2b, $18, $20, $15, $17, $0d, $0e, $06, $07, $fd, $f8, $fc, $fb
+		.byte	$80
+shape_9b8e:
+		.byte	$05, $06, $30, $24, $05, $0a, $0c, $0a, $10, $08, $0e, $03, $08, $fe, $fe, $fb
+		.byte	$f9, $fc, $f5, $ff, $f5, $02, $f8, $06, $fe, $09, $80
+shape_9ba9:
+		.byte	$05, $01, $00, $10, $fc, $b4, $00, $b2, $0d, $b2, $17, $b4, $24, $b8, $30, $ba
+		.byte	$40, $b9, $50, $b5, $60, $b2, $70, $b0, $c0, $b0, $c0, $cc, $c8, $c0, $d8, $b8
+		.byte	$ee, $b3, $f2, $b3, $f5, $b6, $80
+shape_9bd0:
+		.byte	$03, $01, $00, $00, $00, $68, $04, $68, $10, $60, $18, $58, $1c, $50, $20, $40
+		.byte	$20, $30, $23, $24, $28, $14, $30, $08, $38, $00, $3a, $f8, $3c, $ec, $40, $dc
+		.byte	$40, $c0, $c0, $c0, $c0, $e0, $cc, $e3, $e0, $ea, $ea, $f0, $ec, $f4, $ec, $00
+		.byte	$f0, $04, $f8, $08, $fc, $10, $fc, $13, $fa, $16, $ec, $20, $e4, $30, $e2, $40
+		.byte	$e2, $48, $e4, $50, $e8, $58, $f4, $64, $80
+shape_9c19:
+		.byte	$01, $00, $00, $08, $00, $11, $08, $15, $18, $18, $24, $19, $2c, $19, $40, $18
+		.byte	$40, $f8, $c0, $f8, $d0, $00, $de, $02, $f0, $06, $f8, $0a, $80
+shape_9c36:
+		.byte	$00, $02, $0c, $0c, $04, $f4, $04, $d0, $f4, $b5, $f4, $ba, $01, $d1, $01, $f4
+		.byte	$fa, $13, $fa, $23, $fe, $2e, $06, $34, $08, $3c, $06, $44, $04, $4c, $04, $54
+		.byte	$09, $66, $0a, $6c, $0a, $74, $0c, $74, $0c, $6c, $0b, $66, $14, $66, $34, $69
+		.byte	$34, $67, $15, $64, $0a, $64, $06, $54, $06, $4c, $0a, $3c, $08, $34, $ff, $2d
+		.byte	$fc, $24, $fc, $14, $80
+shape_9c7b:
+		.byte	$00, $04, $14, $14, $01, $00, $04, $ec, $02, $ec, $ff, $00, $f8, $10, $ec, $21
+		.byte	$ec, $24, $fa, $10, $80
+shape_9c90:
+		.byte	$01, $03, $18, $38, $00, $01, $08, $03, $10, $08, $20, $0f, $28, $10, $68, $10
+		.byte	$68, $0e, $28, $0e, $20, $0d, $14, $08, $09, $01, $00, $ff, $e8, $fb, $e8, $fd
+		.byte	$80
+shape_9cb1:
+		.byte	$03, $04, $08, $08, $00, $08, $0c, $08, $14, $00, $18, $f8, $10, $f4, $00, $f4
+		.byte	$f8, $fe, $f8, $00, $80
+unused_9cc6:
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $ff, $ff, $fd, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $ff, $ff, $fd, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $ff, $ff, $fd, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $ff, $ff, $fd, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $ff, $ff, $fd, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $ff, $ff, $fd, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; leftover text
+leftover_9ff1:
+		.byte	$81, $50, $4e, $45, $57, $20, $30, $3a, $47, $4f, $4c, $47, $4f, $4c, $46
+
+lA000:
+		jmp main
+
+lA003:
+		lda cpu_port
+		and #$fe
+		sta cpu_port
+		jsr lB5E8
+
+vectors:
+		.addr	add_stroke
+aA00E:		.addr	update_scores
+aA010:		.addr	read_aim_cursor
+aA012:		.addr	read_joystick
+aA014:		.addr	lB49B
+aA016:		.addr	lB496
+aA018:		.addr	aim
 aA01A:		.addr	lB5FC
-*=$a020
+aA01C:		.addr	lB08B
+aA01E:		.addr	lB6F8
 
 lA020:
 		jmp lB79F
@@ -5787,224 +8779,256 @@ lA026:
 
 aA029:
 		.addr	lAE18
-*=$a09d
 
-lA09D:
-		jsr lA5AF
+; printed piece by piece through print_char, from digit_text_index on
+digit_text:
+		.text	" 13694 23664 31743 43694 55585 6"
+		.text	"2353 73424 84504 949251033641121"
+		.text	"33122854133064145955154204161803"
+		.text	"175465183784      "
+
+main:
+		jsr install_interrupts
 		lda #$ff
-		sta $044e
+		sta game_mode
 		tax 
 		txs 
 		lda #$01
-		sta $0478
+		sta text_color
 		lda #$00
-		sta $1f
+		sta text_x
 		lda #$c7
-		sta $20
+		sta text_y
 		lda #$30
-		sta $29
+		sta v29
 		lda #$c8
-		sta $67
+		sta v67
 		lda #$0f
-		sta $d020
-		lda $dd02
+		sta border_color
+		lda cia2_direction_a
 		ora #$03
-		sta $dd02
-		lda $dd00
+		sta cia2_direction_a
+		lda cia2_port_a
 		and #$fc
 		ora #$02
-		sta $dd00
+		sta cia2_port_a
 		lda #$02
-		sta $d025
+		sta sprite_multicolor0
 		lda #$0f
-		sta $d026
-		jsr lB5BC
+		sta sprite_multicolor1
+		jsr bank_out_io
 		jsr lA927
-		jsr lB5C3
+		jsr bank_in_io
 		lda #$20
-		sta $abf4
+		sta vabf4
 		lda #$90
-		sta $2c5f
+		sta v2c5f
 		jsr l0B95
-		jsr lB061
-		jsr lA6AA
-		lda $d026
-		jsr lA688
+		jsr random_wind
+		jsr fill_colors
+		lda sprite_multicolor1
+		jsr enable_raster_irq
 
-lA0FF:
+new_game:
 		lda #$00
-		sta $af2e
-		sta $d015
-		jsr lA2E9
+		sta leader
+		sta sprite_enable
+		jsr clear_screen
 		jsr l1034
 		lda #$13
 		jsr lA95B
-		jsr lB00D
+		jsr change_wind
 		jsr lA964
-		jsr lA688
+		jsr enable_raster_irq
 		jsr lB5B0
-		jsr lB24D
-		jsr lA6AA
-		jsr lA2E9
+		jsr title_screen
+		jsr fill_colors
+		jsr clear_screen
 		ldx #$0a
 		lda #$00
 
 lA12B:
-		sta $ad47, x
+		sta vad47, x
 		dex 
 		bne lA12B
 		lda #$00
-		sta $0450
+		sta par
 		jsr lAC2B
-		jsr lB061
+		jsr random_wind
 		lda #$0c
-		sta $1b
+		sta ball_x
 		lda #$00
-		sta $1c
+		sta ball_x + $1
 		lda #$30
-		sta $1d
+		sta ball_y
 		lda #$01
-		sta $1e
+		sta ball_y + $1
 
-lA14C:
-		lda $0451
+hole_loop:
+		lda hole_number
 		jsr lA95B
-		jsr lB00D
+		jsr change_wind
 		lda #$ff
-		sta $0452
+		sta v0452
 		lda #$7f
-		sta $0453
+		sta v0453
 		lda #$00
-		sta $044f
-		jsr lAF65
+		sta current_player
+		jsr save_player
 		lda #$01
-		sta $044f
-		jsr lAF65
+		sta current_player
+		jsr save_player
 		jsr lAE92
-		jsr lAF2F
+		jsr select_player
 
 lA175:
-		jmp lA212
+		jmp shot_loop
 
-lA178:
+print_score_labels:
 		lda #$ff
-		sta $1368
+		sta v1368
 		lda #$00
-		sta $1f
+		sta text_x
 		lda #$2f
-		sta $20
-		lda $1f
+		sta text_y
+		lda text_x
 		clc 
 		adc #$04
-		sta $1f
-		jsr l2C75
-		bvc lA1DD
-		eor ($59, x)
-		eor $52
-		isc $1fa5, x
-		clc 
-		adc #$04
-		sta $1f
-		jsr l2C75
-		and ($ff), y
-		jsr l2C75
-		ora dA5FF
-		slo $6918, x
-		nop $85
-		slo $7520, x
-		bit $4c50
-		eor ($59, x)
-		eor $52
-		isc $1fa5, x
-		clc 
-		adc #$04
-		sta $1f
-		jsr l2C75
-*=$a1dd
+		sta text_x
+		jsr print_inline
 
-lA1DD:
-		slo $6918, x
-		nop $85
-		slo $7520, x
-		bit $4c43
-		eor $42, x
-		isc $7520, x
-		bit $ff0d
-		lda $1f
+text_player:
+		.text	"PLAYER", $ff
+		lda text_x
 		clc 
 		adc #$04
-		sta $1f
-		jsr l2C75
-		eor $5344, y
-		isc $7520, x
-		bit $ff0d
-		lda $1f
-		clc 
-		adc #$04
-		sta $1f
-		jsr l2C75
-		bvc lA250
-*=$a212
+		sta text_x
+		jsr print_inline
 
-lA212:
-		jsr lA178
-		jsr lA688
+text_1:
+		.text	"1", $ff
+		jsr print_inline
+
+newline:
+		.byte	$0d, $ff
+		lda text_x
+		clc 
+		adc #$04
+		sta text_x
+		jsr print_inline
+
+text_player2:
+		.text	"PLAYER", $ff
+		lda text_x
+		clc 
+		adc #$04
+		sta text_x
+		jsr print_inline
+
+text_2:
+		.text	"2", $ff
+		jsr print_inline
+
+newline2:
+		.byte	$0d, $ff
+		lda text_x
+		clc 
+		adc #$04
+		sta text_x
+		jsr print_inline
+
+text_hole:
+		.text	"HOLE    ", $ff
+		lda text_x
+		clc 
+		adc #$04
+		sta text_x
+		jsr print_inline
+
+text_club:
+		.text	"CLUB", $ff
+		jsr print_inline
+
+newline3:
+		.byte	$0d, $ff
+		lda text_x
+		clc 
+		adc #$04
+		sta text_x
+		jsr print_inline
+
+text_yds:
+		.text	"YDS", $ff
+		jsr print_inline
+
+newline4:
+		.byte	$0d, $ff
+		lda text_x
+		clc 
+		adc #$04
+		sta text_x
+		jsr print_inline
+
+text_par:
+		.text	"PAR", $ff
+		rts 
+
+shot_loop:
+		jsr print_score_labels
+		jsr enable_raster_irq
 		jsr lAE92
-		jsr lAF2F
+		jsr select_player
 		jsr lA964
-		jsr lB075
-		lda $66
+		jsr compute_drift
+		lda hole_distance
 		pha 
 		lda #$00
-		sta $0404
+		sta green_view
 		lda #$00
-		sta $0470
-		sta $0471
+		sta green_flag_x
+		sta green_flag_y
 		pla 
 		cmp #$40
 		bcs lA299
-		lda $1c
+		lda ball_x + $1
 		pha 
-		lda $1b
+		lda ball_x
 		pha 
-		lda $1e
+		lda ball_y + $1
 		pha 
-		lda $1d
+		lda ball_y
 		pha 
-		lda $046c
-		sta $1b
-		lda $046d
-		sta $1c
-*=$a250
-
-lA250:
-		ror $8504
-		ora $6fad, x
-		nop $85
-		asl $bc20, x
-		lda $ad, x
-		bit $e0
-		sta $e01e
-		lda $e025
-		sta $e01f
+		lda v046c
+		sta ball_x
+		lda v046d
+		sta ball_x + $1
+		lda v046e
+		sta ball_y
+		lda v046f
+		sta ball_y + $1
+		jsr bank_out_io
+		lda shapes + $24
+		sta shapes + $1e
+		lda shapes + $25
+		sta shapes + $1f
 		jsr lB5B0
-		jsr lB5BC
-		lda $e024
-		sta $e01e
-		lda $e025
-		sta $e01f
-		jsr lB5C3
+		jsr bank_out_io
+		lda shapes + $24
+		sta shapes + $1e
+		lda shapes + $25
+		sta shapes + $1f
+		jsr bank_in_io
 		pla 
-		sta $1d
+		sta ball_y
 		pla 
-		sta $1e
+		sta ball_y + $1
 		pla 
-		sta $1b
+		sta ball_x
 		pla 
-		sta $1c
-		jsr lAD54
+		sta ball_x + $1
+		jsr draw_flag
 		lda #$01
-		sta $0404
+		sta green_view
 		ldx #$04
 		jsr lB458
 		jmp lA2A1
@@ -6016,18 +9040,18 @@ lA299:
 
 lA2A1:
 		jsr lA95E
-		lda $d026
-		jsr lAF65
-		jsr lA2E9
-		lda $0443
+		lda sprite_multicolor1
+		jsr save_player
+		jsr clear_screen
+		lda v0443
 		pha 
-		lda $044e
+		lda game_mode
 		and #$01
 		tax 
 		pla 
 		cpx #$00
 		beq lA2BF
-		ora $044d
+		ora v044d
 
 lA2BF:
 		ora #$00
@@ -6037,338 +9061,347 @@ lA2BF:
 lA2C6:
 		jsr lAC2B
 		lda #$00
-		sta $d015
-		ldx $0451
+		sta sprite_enable
+		ldx hole_number
 		inx 
 		cpx #$13
 		bne lA2D9
-		jmp lA0FF
+		jmp new_game
 
 lA2D9:
-		stx $0451
-		lda $044e
+		stx hole_number
+		lda game_mode
 		and #$02
 		bne lA2E6
-		jmp lA14C
+		jmp hole_loop
 
 lA2E6:
-		jmp lA0FF
+		jmp new_game
 
-lA2E9:
+clear_screen:
 		lda #$00
-		sta $06
+		sta pointer_06
 		lda #$60
-		sta $07
+		sta pointer_06 + $1
 		lda #$40
-		sta $08
+		sta pointer_08
 		lda #$e8
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 lA2FB:
 		lda #$00
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne lA304
-		inc $07
+		inc pointer_06 + $1
 
 lA304:
-		inc $08
+		inc pointer_08
 		bne lA2FB
-		inc $09
+		inc pointer_08 + $1
 		bne lA2FB
 		lda #$00
-		sta $06
+		sta pointer_06
 		lda #$44
-		sta $07
+		sta pointer_06 + $1
 		lda #$08
-		sta $08
+		sta pointer_08
 		lda #$fd
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 lA31E:
 		lda #$0f
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne lA327
-		inc $07
+		inc pointer_06 + $1
 
 lA327:
-		inc $08
+		inc pointer_08
 		bne lA31E
-		inc $09
+		inc pointer_08 + $1
 		bne lA31E
 		lda #$00
-		sta $06
+		sta pointer_06
 		lda #$d8
-		sta $07
+		sta pointer_06 + $1
 		lda #$08
-		sta $08
+		sta pointer_08
 		lda #$fd
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 lA341:
 		lda #$00
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne lA34A
-		inc $07
+		inc pointer_06 + $1
 
 lA34A:
-		inc $08
+		inc pointer_08
 		bne lA341
-		inc $09
+		inc pointer_08 + $1
 		bne lA341
 		lda #$00
-		sta $06
+		sta pointer_06
 		lda #$cb
-		sta $07
+		sta pointer_06 + $1
 		lda #$08
-		sta $08
+		sta pointer_08
 		lda #$fd
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 lA364:
 		lda #$ff
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne lA36D
-		inc $07
+		inc pointer_06 + $1
 
 lA36D:
-		inc $08
+		inc pointer_08
 		bne lA364
-		inc $09
+		inc pointer_08 + $1
 		bne lA364
 		jsr lA901
 		rts 
 
 lA379:
 		lda #$01
-		sta $d021
-		lda $a42c
+		sta background_color
+		lda menu_sprite_flag
 		beq lA3F7
 		ldx #$08
-		lda $a533, x
-		sta $47fb
+		lda saved_sprite_registers, x
+		sta sprite_pointers + $3
 		inx 
-		lda $a533, x
-		sta $d006
+		lda saved_sprite_registers, x
+		sta sprite3_x
 		inx 
-		lda $a533, x
-		sta $d007
+		lda saved_sprite_registers, x
+		sta sprite3_y
 		inx 
-		lda $a533, x
-		sta $d01c
+		lda saved_sprite_registers, x
+		sta sprite_multicolor
 		inx 
-		lda $a533, x
-		sta $d017
+		lda saved_sprite_registers, x
+		sta sprite_expand_y
 		inx 
-		lda $a533, x
-		sta $d02a
+		lda saved_sprite_registers, x
+		sta sprite3_color
 		inx 
-		lda $a533, x
-		sta $d025
+		lda saved_sprite_registers, x
+		sta sprite_multicolor0
 		inx 
-		lda $a533, x
-		sta $d026
+		lda saved_sprite_registers, x
+		sta sprite_multicolor1
 		inx 
 		ldx #$00
-		lda $a533, x
-		sta d47F8
+		lda saved_sprite_registers, x
+		sta sprite_pointers
 		inx 
-		lda $a533, x
-		sta $d000
+		lda saved_sprite_registers, x
+		sta sprite0_x
 		inx 
-		lda $a533, x
-		sta $d001
+		lda saved_sprite_registers, x
+		sta sprite0_y
 		inx 
-		lda $a533, x
-		sta $d01c
+		lda saved_sprite_registers, x
+		sta sprite_multicolor
 		inx 
-		lda $a533, x
-		sta $d017
+		lda saved_sprite_registers, x
+		sta sprite_expand_y
 		inx 
-		lda $a533, x
-		sta $d027
+		lda saved_sprite_registers, x
+		sta sprite0_color
 		inx 
-		lda $a533, x
-		sta $d025
+		lda saved_sprite_registers, x
+		sta sprite_multicolor0
 		inx 
-		lda $a533, x
-		sta $d026
+		lda saved_sprite_registers, x
+		sta sprite_multicolor1
 		inx 
 
 lA3F7:
 		lda #$00
-		sta $d02d
+		sta sprite6_color
 		lda #$5f
-		sta $d012
+		sta raster
 		jmp lA57B
 
 lA404:
 		ldy #$05
-		lda $d012
+		lda raster
 		lda #$69
 
 lA40B:
-		cmp $d012
+		cmp raster
 		bcs lA40B
-		sty $d021
+		sty background_color
 		lda #$01
-		sta $d02d
+		sta sprite6_color
 		lda #$82
 		ldx #$00
-		stx $a42c
-		ldx $0477
+		stx menu_sprite_flag
+		ldx v0477
 		bne lA426
 		lda #$cb
 
 lA426:
-		sta $d012
+		sta raster
 		jmp lA57B
-*=$a42d
+
+menu_sprite_flag:
+		.byte	$08
 
 lA42D:
 		ldx #$00
-		lda d47F8
-		sta $a533, x
-		lda $a55b, x
-		sta d47F8
+		lda sprite_pointers
+		sta saved_sprite_registers, x
+		lda menu_sprite_registers, x
+		sta sprite_pointers
 		inx 
-		lda $d000
-		sta $a533, x
-		lda $a55b, x
-		sta $d000
+		lda sprite0_x
+		sta saved_sprite_registers, x
+		lda menu_sprite_registers, x
+		sta sprite0_x
 		inx 
-		lda $d001
-		sta $a533, x
-		lda $a55b, x
-		sta $d001
+		lda sprite0_y
+		sta saved_sprite_registers, x
+		lda menu_sprite_registers, x
+		sta sprite0_y
 		inx 
-		lda $d01c
-		sta $a533, x
-		lda $a55b, x
-		sta $d01c
+		lda sprite_multicolor
+		sta saved_sprite_registers, x
+		lda menu_sprite_registers, x
+		sta sprite_multicolor
 		inx 
-		lda $d017
-		sta $a533, x
-		lda $a55b, x
-		and $d017
-		sta $d017
+		lda sprite_expand_y
+		sta saved_sprite_registers, x
+		lda menu_sprite_registers, x
+		and sprite_expand_y
+		sta sprite_expand_y
 		inx 
-		lda $d027
-		sta $a533, x
-		lda $a55b, x
-		sta $d027
+		lda sprite0_color
+		sta saved_sprite_registers, x
+		lda menu_sprite_registers, x
+		sta sprite0_color
 		inx 
-		lda $d025
-		sta $a533, x
+		lda sprite_multicolor0
+		sta saved_sprite_registers, x
 		lda #$02
-		ldy $044f
+		ldy current_player
 		beq lA48F
 		lda #$0b
 
 lA48F:
-		sta $d025
+		sta sprite_multicolor0
 		inx 
-		lda $d026
-		sta $a533, x
-		lda $a55b, x
-		sta $d026
+		lda sprite_multicolor1
+		sta saved_sprite_registers, x
+		lda menu_sprite_registers, x
+		sta sprite_multicolor1
 		inx 
 		lda #$9b
-		sta $d012
+		sta raster
 		jmp lA57B
 
 lA4A8:
 		lda #$cb
-		sta $d012
+		sta raster
 		ldx #$08
-		stx $a42c
-		lda $47fb
-		sta $a533, x
-		lda $a55b, x
-		sta $47fb
+		stx menu_sprite_flag
+		lda sprite_pointers + $3
+		sta saved_sprite_registers, x
+		lda menu_sprite_registers, x
+		sta sprite_pointers + $3
 		inx 
-		lda $d006
-		sta $a533, x
-		lda $a55b, x
-		sta $d006
+		lda sprite3_x
+		sta saved_sprite_registers, x
+		lda menu_sprite_registers, x
+		sta sprite3_x
 		inx 
-		lda $d007
-		sta $a533, x
-		lda $a55b, x
-		sta $d007
+		lda sprite3_y
+		sta saved_sprite_registers, x
+		lda menu_sprite_registers, x
+		sta sprite3_y
 		inx 
-		lda $d01c
-		sta $a533, x
-		lda $a55b, x
-		sta $d01c
+		lda sprite_multicolor
+		sta saved_sprite_registers, x
+		lda menu_sprite_registers, x
+		sta sprite_multicolor
 		inx 
-		lda $d017
-		sta $a533, x
-		lda $a55b, x
-		and $d017
-		sta $d017
+		lda sprite_expand_y
+		sta saved_sprite_registers, x
+		lda menu_sprite_registers, x
+		and sprite_expand_y
+		sta sprite_expand_y
 		inx 
-		lda $d02a
-		sta $a533, x
-		lda $a55b, x
-		sta $d02a
+		lda sprite3_color
+		sta saved_sprite_registers, x
+		lda menu_sprite_registers, x
+		sta sprite3_color
 		inx 
-		lda $d025
-		sta $a533, x
+		lda sprite_multicolor0
+		sta saved_sprite_registers, x
 		lda #$02
-		ldy $044f
+		ldy current_player
 		beq lA512
 		lda #$0b
 
 lA512:
-		sta $d025
+		sta sprite_multicolor0
 		inx 
-		lda $d026
-		sta $a533, x
-		lda $a55b, x
-		sta $d026
+		lda sprite_multicolor1
+		sta saved_sprite_registers, x
+		lda menu_sprite_registers, x
+		sta sprite_multicolor1
 		inx 
 		jmp lA57B
 
 lA526:
 		lda #$fc
-		sta $d012
+		sta raster
 		lda #$0b
-		sta $d021
+		sta background_color
 		jmp lA57B
-*=$a56b
+
+; sprite registers saved while a menu sprite is shown, and the values it sets
+saved_sprite_registers:
+		.byte	$26, $47, $63, $01, $3e, $f9, $f2, $ff, $4b, $48, $6f, $01, $3e, $f2, $f2, $f0
+		.byte	$cd, $51, $7d, $75, $00, $00, $45, $32, $3f, $09, $09, $09, $09, $09, $09, $45
+		.byte	$4e, $44, $0d, $0d, $20, $31, $0d, $0d
+menu_sprite_registers:
+		.byte	$23, $32, $91, $01, $fe, $01, $00, $00, $24, $32, $a6, $09, $f6, $01, $00, $00
 
 irq:
-		lda $01
+		lda cpu_port
 		pha 
-		jsr lB5C3
-		lda $d019
+		jsr bank_in_io
+		lda vic_irq_status
 		and #$01
-		and $d01a
+		and vic_irq_enable
 		bne lA58A
 
 lA57B:
-		lda $dc0d
+		lda cia1_interrupt_control
 		pla 
-		sta $01
+		sta cpu_port
 		pla 
 		tay 
 		pla 
 		tax 
 		pla 
 		rti 
-		jmp lEA31
+		jmp kernal_irq
 
 lA58A:
-		sta $d019
-		lda $d012
+		sta vic_irq_status
+		lda raster
 		cmp #$82
 		bcs lA597
 		jmp lA404
@@ -6391,14 +9424,14 @@ lA5A5:
 lA5AC:
 		jmp lA379
 
-lA5AF:
+install_interrupts:
 		ldx #$00
 
 lA5B1:
-		lda $ff00, x
-		sta $ff00, x
-		lda $fe00, x
-		sta $fe00, x
+		lda kernal_copy + $100, x
+		sta kernal_copy + $100, x
+		lda kernal_copy, x
+		sta kernal_copy, x
 		inx 
 		bne lA5B1
 		php 
@@ -6435,48 +9468,45 @@ nmi:
 
 lA5FA:
 		sta dA687
-		lda $01
-
-dA5FF:
+		lda cpu_port
 		pha 
-		jsr lB5C3
-		lda $d418
+		jsr bank_in_io
+		lda volume_filter_mode
 		pha 
 		lda #$00
-		sta $d418
-		lda $03
+		sta volume_filter_mode
+		lda text_pointer + $1
 		pha 
-		lda $02
+		lda text_pointer
 		pha 
-		lda $05
+		lda pointer_04 + $1
 		pha 
-		lda $04
+		lda pointer_04
 		pha 
-		lda $07
+		lda pointer_06 + $1
 		pha 
-		lda $06
+		lda pointer_06
 		pha 
-		lda $20
+		lda text_y
 		pha 
-		lda $1f
+		lda text_x
 		pha 
-		lda $0b
+		lda v0a + $1
 		pha 
-		lda $0a
+		lda v0a
 		pha 
 		jsr lB5EE
-		jsr l2C75
-		eor ($55), y
-		eor #$54
-		jsr l5928
-		rla $294e
-		jsr l203F
-		isc $9f20, x
-lA63E = $a63e
-		isc $c5a5, x
+		jsr print_inline
+
+text_quit_y_n:
+		.text	"QUIT (Y/N) ? ", $ff
+
+lA63E:
+		jsr scnkey
+		lda kernal_lstx
 		cmp #$19
 		bne lA64A
-		jmp lA09D
+		jmp main
 
 lA64A:
 		cmp #$17
@@ -6485,32 +9515,32 @@ lA64A:
 
 lA64F:
 		cmp #$27
-		bne $a63e
+		bne lA63E
 		jsr lB5EE
 		pla 
-		sta $0a
+		sta v0a
 		pla 
-		sta $0b
+		sta v0a + $1
 		pla 
-		sta $1f
+		sta text_x
 		pla 
-		sta $20
+		sta text_y
 		pla 
-		sta $06
+		sta pointer_06
 		pla 
-		sta $07
+		sta pointer_06 + $1
 		pla 
-		sta $04
+		sta pointer_04
 		pla 
-		sta $05
+		sta pointer_04 + $1
 		pla 
-		sta $02
+		sta text_pointer
 		pla 
-		sta $03
+		sta text_pointer + $1
 		pla 
-		sta $d418
+		sta volume_filter_mode
 		pla 
-		sta $01
+		sta cpu_port
 		lda #$00
 		sta dA687
 
@@ -6526,362 +9556,362 @@ lA680:
 dA687:
 		brk 
 
-lA688:
-		lda $d012
+enable_raster_irq:
+		lda raster
 		cmp #$14
-		bcc lA688
+		bcc enable_raster_irq
 		cmp #$32
-		bcs lA688
+		bcs enable_raster_irq
 		lda #$5f
-		sta $d012
+		sta raster
 		lda #$7f
-		and $d011
-		sta $d011
+		and vic_control1
+		sta vic_control1
 		lda #$01
-		ora $d01a
-		sta $d01a
+		ora vic_irq_enable
+		sta vic_irq_enable
 		cli 
 		rts 
 
-lA6AA:
+fill_colors:
 		lda #$c0
-		sta $06
+		sta pointer_06
 		lda #$77
-		sta $07
+		sta pointer_06 + $1
 		lda #$80
-		sta $08
+		sta pointer_08
 		lda #$f8
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 lA6BC:
 		lda #$aa
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne lA6C5
-		inc $07
+		inc pointer_06 + $1
 
 lA6C5:
-		inc $08
+		inc pointer_08
 		bne lA6BC
-		inc $09
+		inc pointer_08 + $1
 		bne lA6BC
 		lda #$f8
-		sta $06
+		sta pointer_06
 		lda #$da
-		sta $07
+		sta pointer_06 + $1
 		lda #$10
-		sta $08
+		sta pointer_08
 		lda #$ff
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 lA6DF:
 		lda #$0f
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne lA6E8
-		inc $07
+		inc pointer_06 + $1
 
 lA6E8:
-		inc $08
+		inc pointer_08
 		bne lA6DF
-		inc $09
+		inc pointer_08 + $1
 		bne lA6DF
 		lda #$f8
-		sta $06
+		sta pointer_06
 		lda #$46
-		sta $07
+		sta pointer_06 + $1
 		lda #$10
-		sta $08
+		sta pointer_08
 		lda #$ff
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 lA702:
 		lda #$cc
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne lA70B
-		inc $07
+		inc pointer_06 + $1
 
 lA70B:
-		inc $08
+		inc pointer_08
 		bne lA702
-		inc $09
+		inc pointer_08 + $1
 		bne lA702
-		lda $044e
+		lda game_mode
 		cmp #$ff
 		bne lA71D
 		jmp lA8C8
 
 lA71D:
 		lda #$48
-		sta $06
+		sta pointer_06
 		lda #$47
-		sta $07
+		sta pointer_06 + $1
 		lda #$ef
-		sta $08
+		sta pointer_08
 		lda #$ff
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 lA72F:
 		lda #$bb
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne lA738
-		inc $07
+		inc pointer_06 + $1
 
 lA738:
-		inc $08
+		inc pointer_08
 		bne lA72F
-		inc $09
+		inc pointer_08 + $1
 		bne lA72F
 		lda #$70
-		sta $06
+		sta pointer_06
 		lda #$47
-		sta $07
+		sta pointer_06 + $1
 		lda #$ef
-		sta $08
+		sta pointer_08
 		lda #$ff
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 lA752:
 		lda #$bb
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne lA75B
-		inc $07
+		inc pointer_06 + $1
 
 lA75B:
-		inc $08
+		inc pointer_08
 		bne lA752
-		inc $09
+		inc pointer_08 + $1
 		bne lA752
 		lda #$98
-		sta $06
+		sta pointer_06
 		lda #$47
-		sta $07
+		sta pointer_06 + $1
 		lda #$ef
-		sta $08
+		sta pointer_08
 		lda #$ff
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 lA775:
 		lda #$bb
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne lA77E
-		inc $07
+		inc pointer_06 + $1
 
 lA77E:
-		inc $08
+		inc pointer_08
 		bne lA775
-		inc $09
+		inc pointer_08 + $1
 		bne lA775
 		lda #$63
-		sta $06
+		sta pointer_06
 		lda #$47
-		sta $07
+		sta pointer_06 + $1
 		lda #$f3
-		sta $08
+		sta pointer_08
 		lda #$ff
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 lA798:
 		lda #$bb
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne lA7A1
-		inc $07
+		inc pointer_06 + $1
 
 lA7A1:
-		inc $08
+		inc pointer_08
 		bne lA798
-		inc $09
+		inc pointer_08 + $1
 		bne lA798
 		lda #$8b
-		sta $06
+		sta pointer_06
 		lda #$47
-		sta $07
+		sta pointer_06 + $1
 		lda #$f3
-		sta $08
+		sta pointer_08
 		lda #$ff
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 lA7BB:
 		lda #$bb
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne lA7C4
-		inc $07
+		inc pointer_06 + $1
 
 lA7C4:
-		inc $08
+		inc pointer_08
 		bne lA7BB
-		inc $09
+		inc pointer_08 + $1
 		bne lA7BB
 		lda #$b3
-		sta $06
+		sta pointer_06
 		lda #$47
-		sta $07
+		sta pointer_06 + $1
 		lda #$f3
-		sta $08
+		sta pointer_08
 		lda #$ff
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 lA7DE:
 		lda #$bb
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne lA7E7
-		inc $07
+		inc pointer_06 + $1
 
 lA7E7:
-		inc $08
+		inc pointer_08
 		bne lA7DE
-		inc $09
+		inc pointer_08 + $1
 		bne lA7DE
 		lda #$db
-		sta $06
+		sta pointer_06
 		lda #$47
-		sta $07
+		sta pointer_06 + $1
 		lda #$f3
-		sta $08
+		sta pointer_08
 		lda #$ff
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 lA801:
 		lda #$bb
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne lA80A
-		inc $07
+		inc pointer_06 + $1
 
 lA80A:
-		inc $08
+		inc pointer_08
 		bne lA801
-		inc $09
+		inc pointer_08 + $1
 		bne lA801
 		lda #$66
-		sta $06
+		sta pointer_06
 		lda #$db
-		sta $07
+		sta pointer_06 + $1
 		lda #$f6
-		sta $08
+		sta pointer_08
 		lda #$ff
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 lA824:
 		lda #$01
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne lA82D
-		inc $07
+		inc pointer_06 + $1
 
 lA82D:
-		inc $08
+		inc pointer_08
 		bne lA824
-		inc $09
+		inc pointer_08 + $1
 		bne lA824
 		lda #$8e
-		sta $06
+		sta pointer_06
 		lda #$db
-		sta $07
+		sta pointer_06 + $1
 		lda #$f6
-		sta $08
+		sta pointer_08
 		lda #$ff
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 lA847:
 		lda #$01
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne lA850
-		inc $07
+		inc pointer_06 + $1
 
 lA850:
-		inc $08
+		inc pointer_08
 		bne lA847
-		inc $09
+		inc pointer_08 + $1
 		bne lA847
 		lda #$b6
-		sta $06
+		sta pointer_06
 		lda #$db
-		sta $07
+		sta pointer_06 + $1
 		lda #$f6
-		sta $08
+		sta pointer_08
 		lda #$ff
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 lA86A:
 		lda #$01
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne lA873
-		inc $07
+		inc pointer_06 + $1
 
 lA873:
-		inc $08
+		inc pointer_08
 		bne lA86A
-		inc $09
+		inc pointer_08 + $1
 		bne lA86A
 		lda #$de
-		sta $06
+		sta pointer_06
 		lda #$db
-		sta $07
+		sta pointer_06 + $1
 		lda #$f6
-		sta $08
+		sta pointer_08
 		lda #$ff
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 lA88D:
 		lda #$01
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne lA896
-		inc $07
+		inc pointer_06 + $1
 
 lA896:
-		inc $08
+		inc pointer_08
 		bne lA88D
-		inc $09
+		inc pointer_08 + $1
 		bne lA88D
-		lda $044e
+		lda game_mode
 		and #$01
 		bne lA8C8
 		lda #$20
-		sta $06
+		sta pointer_06
 		lda #$db
-		sta $07
+		sta pointer_06 + $1
 		lda #$d8
-		sta $08
+		sta pointer_08
 		lda #$ff
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 lA8B7:
 		lda #$0c
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne lA8C0
-		inc $07
+		inc pointer_06 + $1
 
 lA8C0:
-		inc $08
+		inc pointer_08
 		bne lA8B7
-		inc $09
+		inc pointer_08 + $1
 		bne lA8B7
 
 lA8C8:
@@ -6889,21 +9919,21 @@ lA8C8:
 
 lA8CB:
 		lda #$1f
-		sta $04
+		sta pointer_04
 		lda #$7b
-		sta $05
+		sta pointer_04 + $1
 		ldx #$04
 
 lA8D5:
-		lda $05
+		lda pointer_04 + $1
 		pha 
-		lda $04
+		lda pointer_04
 		pha 
 		ldy #$50
 		lda #$00
 
 lA8DF:
-		sta ($04), y
+		sta (pointer_04), y
 		cpy #$12
 		bcs lA8E7
 		lda #$aa
@@ -6912,26 +9942,26 @@ lA8E7:
 		dey 
 		bne lA8DF
 		pla 
-		sta $04
+		sta pointer_04
 		pla 
-		sta $05
+		sta pointer_04 + $1
 		lda #$40
 		clc 
-		adc $04
-		sta $04
+		adc pointer_04
+		sta pointer_04
 		lda #$01
-		adc $05
-		sta $05
+		adc pointer_04 + $1
+		sta pointer_04 + $1
 		dex 
 		bne lA8D5
 		rts 
 
 lA901:
 		ldx #$00
-		stx $127c
-		stx $14
+		stx v127c
+		stx v14
 		ldy #$30
-		sty $16
+		sty v16
 		ldx #$9f
 		jsr l165F
 		ldx #$9f
@@ -6947,19 +9977,19 @@ lA901:
 
 lA927:
 		ldx #$2c
-		lda $eb37, x
+		lda shapes2, x
 		cmp #$02
 		bne lA95A
 
 lA930:
-		lda $eb35, x
-		sta $08
-		lda $eb36, x
-		sta $09
+		lda shape_eb26 + $f, x
+		sta pointer_08
+		lda shape_eb36, x
+		sta pointer_08 + $1
 		ldy #$00
 
 lA93C:
-		lda ($08), y
+		lda (pointer_08), y
 		cmp #$80
 		beq lA956
 		asl 
@@ -6967,15 +9997,15 @@ lA93C:
 		ror 
 		plp 
 		ror 
-		sta ($08), y
+		sta (pointer_08), y
 		iny 
-		lda ($08), y
+		lda (pointer_08), y
 		asl 
 		php 
 		ror 
 		plp 
 		ror 
-		sta ($08), y
+		sta (pointer_08), y
 		iny 
 		bne lA93C
 
@@ -6998,97 +10028,549 @@ lA961:
 
 lA964:
 		jmp (a2CEB)
-*=$ac2b
+
+lA967:
+		jmp (a2CED)
+		jsr lA99A
+		jsr l0DB9
+		jsr l0DB9
+		jsr l0DB9
+		jsr lA99A
+		jmp lA98E
+
+; unreferenced
+
+		jsr lA99A
+		jsr l0D73
+		jsr l0D73
+		jsr l0D73
+		jsr lA99A
+		jmp lA98E
+
+lA98E:
+		jsr l0DB9
+		jsr l0DB9
+		jsr l0DB9
+		jmp l0DB9
+
+lA99A:
+		jsr lA99D
+
+lA99D:
+		ldy direction
+		lda steps_x2, y
+		bmi lA9B6
+		lsr 
+		lsr 
+		lsr 
+		clc 
+		adc ball_x
+		sta ball_x
+		lda ball_x + $1
+		adc #$00
+		sta ball_x + $1
+		jmp lA9CE
+
+lA9B6:
+		clc 
+		eor #$ff
+		adc #$01
+		lsr 
+		lsr 
+		lsr 
+		clc 
+		eor #$ff
+		adc #$01
+		clc 
+		adc ball_x
+		sta ball_x
+		lda ball_x + $1
+		sbc #$00
+		sta ball_x + $1
+
+lA9CE:
+		lda steps_y2, y
+		bmi lA9E2
+		lsr 
+		lsr 
+		lsr 
+		clc 
+		adc ball_y
+		sta ball_y
+		lda ball_y + $1
+		adc #$00
+		sta ball_y + $1
+		rts 
+
+lA9E2:
+		clc 
+		eor #$ff
+		adc #$01
+		lsr 
+		lsr 
+		lsr 
+		clc 
+		eor #$ff
+		adc #$01
+		clc 
+		adc ball_y
+		sta ball_y
+		lda ball_y + $1
+		sbc #$00
+		sta ball_y + $1
+		rts 
+
+steps_x2:
+		.char	0, 8, 8, 8, 0, -8, -8, -8
+steps_y2:
+		.char	8, 8, 0, -8, -8, -8, 0, 8
+
+tamper_check:
+		lda data_pointers
+		cmp #$4e
+		bne lAA17
+		lda data_pointers + $1
+		cmp #$7f
+
+lAA17:
+		beq lAA1C
+		jmp tamper_crash
+
+lAA1C:
+		lda data_pointers + $2
+		cmp #$00
+		bne lAA28
+		lda data_pointers + $3
+		cmp #$e0
+
+lAA28:
+		beq lAA2D
+		jmp tamper_crash
+
+lAA2D:
+		lda data_pointers + $4
+		cmp #$4e
+		bne lAA39
+		lda data_pointers + $5
+		cmp #$82
+
+lAA39:
+		beq lAA3E
+		jmp tamper_crash
+
+lAA3E:
+		lda data_pointers + $6
+		cmp #$f5
+		bne lAA4A
+		lda data_pointers + $7
+		cmp #$93
+
+lAA4A:
+		beq lAA4F
+		jmp tamper_crash
+
+lAA4F:
+		lda data_pointers + $8
+		cmp #$21
+		bne lAA5B
+		lda data_pointers + $9
+		cmp #$94
+
+lAA5B:
+		beq lAA60
+		jmp tamper_crash
+
+lAA60:
+		lda data_pointers + $a
+		cmp #$19
+		bne lAA6C
+		lda data_pointers + $b
+		cmp #$94
+
+lAA6C:
+		beq lAA71
+		jmp tamper_crash
+
+lAA71:
+		lda data_pointers + $c
+		cmp #$37
+		bne lAA7D
+		lda data_pointers + $d
+		cmp #$eb
+
+lAA7D:
+		beq lAA82
+		jmp tamper_crash
+
+lAA82:
+		lda $08c0
+		cmp #$b8
+		bne lAA8E
+		lda $08c1
+		cmp #$0d
+
+lAA8E:
+		beq lAA93
+		jmp tamper_crash2
+
+lAA93:
+		lda $08c2
+		cmp #$10
+		bne lAA9F
+		lda $08c3
+		cmp #$10
+
+lAA9F:
+		beq lAAA4
+		jmp tamper_crash2
+
+lAAA4:
+		lda $08c4
+		cmp #$73
+		bne lAAB0
+		lda $08c5
+		cmp #$0d
+
+lAAB0:
+		beq lAAB5
+		jmp tamper_crash2
+
+lAAB5:
+		lda $08c6
+		cmp #$ab
+		bne lAAC1
+		lda $08c7
+		cmp #$18
+
+lAAC1:
+		beq lAAC6
+		jmp tamper_crash2
+
+lAAC6:
+		lda $08c8
+		cmp #$34
+		bne lAAD2
+		lda $08c9
+		cmp #$10
+
+lAAD2:
+		beq lAAD7
+		jmp tamper_crash2
+
+lAAD7:
+		lda $08ca
+		cmp #$36
+		bne lAAE3
+		lda $08cb
+		cmp #$25
+
+lAAE3:
+		beq lAAE8
+		jmp tamper_crash2
+
+lAAE8:
+		lda $08cc
+		cmp #$37
+		bne lAAF4
+		lda $08cd
+		cmp #$25
+
+lAAF4:
+		beq lAAF9
+		jmp tamper_crash2
+
+lAAF9:
+		lda $08ce
+		cmp #$5f
+		bne lAB05
+		lda $08cf
+		cmp #$2c
+
+lAB05:
+		beq lAB0A
+		jmp tamper_crash2
+
+lAB0A:
+		lda l08D0
+		cmp #$7c
+		bne lAB16
+		lda l08D0 + 1
+		cmp #$12
+
+lAB16:
+		beq lAB1B
+		jmp tamper_crash2
+
+lAB1B:
+		lda l08D0 + 2
+		cmp #$b9
+		bne lAB27
+		lda $08d3
+		cmp #$0d
+
+lAB27:
+		beq lAB2C
+		jmp tamper_crash2
+
+lAB2C:
+		lda $08d4
+		cmp #$75
+		bne lAB38
+		lda $08d5
+		cmp #$2c
+
+lAB38:
+		beq lAB3D
+		jmp tamper_crash2
+
+lAB3D:
+		lda $08d6
+		cmp #$5f
+		bne lAB49
+		lda $08d7
+		cmp #$16
+
+lAB49:
+		beq lAB4E
+		jmp tamper_crash2
+
+lAB4E:
+		lda $08d8
+		cmp #$6d
+		bne lAB5A
+		lda $08d9
+		cmp #$13
+
+lAB5A:
+		beq lAB5F
+		jmp tamper_crash2
+
+lAB5F:
+		lda loader_part
+		cmp #$f3
+		bne lAB6B
+		lda loader_part + $1
+		cmp #$0f
+
+lAB6B:
+		beq lAB70
+		jmp tamper_crash2
+
+lAB70:
+		lda $08dc
+		cmp #$fb
+		bne lAB7C
+		lda $08dd
+		cmp #$0f
+
+lAB7C:
+		beq lAB81
+		jmp tamper_crash2
+
+lAB81:
+		lda $08de
+		cmp #$8b
+		bne lAB8D
+		lda $08df
+		cmp #$2c
+
+lAB8D:
+		beq lAB92
+		jmp tamper_crash2
+
+lAB92:
+		lda $08e0
+		cmp #$79
+		bne lAB9E
+		lda $08e1
+		cmp #$0d
+
+lAB9E:
+		beq lABA3
+		jmp tamper_crash2
+
+lABA3:
+		lda $08e2
+		cmp #$95
+		bne lABAF
+		lda $08e3
+		cmp #$0b
+
+lABAF:
+		beq lABB4
+		jmp tamper_crash2
+
+lABB4:
+		lda $08e4
+		cmp #$db
+		bne lABC0
+		lda $08e5
+		cmp #$24
+
+lABC0:
+		beq lABC5
+		jmp tamper_crash2
+
+lABC5:
+		lda $08e6
+		cmp #$57
+		bne lABD1
+		lda $08e7
+		cmp #$10
+
+lABD1:
+		beq lABD6
+		jmp tamper_crash2
+
+lABD6:
+		lda $08e8
+		cmp #$08
+		bne lABE2
+		lda $08e9
+		cmp #$20
+
+lABE2:
+		beq lABE7
+		jmp tamper_crash2
+
+lABE7:
+		rts 
+
+; the tamper check at $aa0b ends here when the $7f40 table or the loader at
+; $08c0 was changed: the jsr runs the old screen as code, so the jmp after it
+; never runs
+tamper_crash:
+		jsr l07C6
+
+never_reached_abeb:
+		.byte	$4c, $00, $0c
+
+tamper_crash2:
+		jsr l07C3
+
+never_reached_abf1:
+		.byte	$4c, $00, $0c
+; start-up sets this to $20
+vabf4:		.byte	$20
+
+add_stroke:
+		ldx current_player
+		sed 
+		lda #$01
+		clc 
+		adc strokes, x
+		sta strokes, x
+		cld 
+		lda #$90
+		sta text_x
+		lda #$2f
+		sta text_y
+		cpx #$00
+		beq lAC17
+		lda #$90
+		sta text_x
+		lda #$27
+		sta text_y
+
+lAC17:
+		lda #$02
+		jsr lA961
+		ldx current_player
+		lda strokes, x
+		ldy #$00
+		sty bcd_leading_zero
+		jsr lAD27
+		rts 
 
 lAC2B:
 		lda #$00
-		sta $044f
+		sta current_player
 		ldx #$00
-		lda $ad48
-		cmp $ad49
+		lda strokes
+		cmp strokes + $1
 		beq lAC41
 		bcc lAC3E
 		ldx #$01
 
 lAC3E:
-		stx $af2e
+		stx leader
 
 lAC41:
-		lda $044e
+		lda game_mode
 		and #$01
-		beq lAC4E
-		jsr lAC4E
-		inc $044f
+		beq update_scores
+		jsr update_scores
+		inc current_player
 
-lAC4E:
-		ldx $044f
+update_scores:
+		ldx current_player
 		txa 
 		asl 
 		tay 
 		sed 
-		lda $ad48, x
+		lda strokes, x
 		clc 
-		adc $ad4e, y
-		sta $ad4e, y
-		lda $ad4f, y
+		adc total_strokes, y
+		sta total_strokes, y
+		lda total_strokes + $1, y
 		adc #$00
-		sta $ad4f, y
-		lda $ad48, x
+		sta total_strokes + $1, y
+		lda strokes, x
 		sec 
-		sbc $0450
+		sbc par
 		bcc lAC82
 		clc 
-		adc $ad4a, y
-		sta $ad4a, y
-		lda $ad4b, y
+		adc score_vs_par, y
+		sta score_vs_par, y
+		lda score_vs_par + $1, y
 		adc #$00
-		sta $ad4b, y
+		sta score_vs_par + $1, y
 		jmp lAC91
 
 lAC82:
 		clc 
-		adc $ad4a
-		sta $ad4a, y
-		lda $ad4b, y
+		adc score_vs_par
+		sta score_vs_par, y
+		lda score_vs_par + $1, y
 		adc #$99
-		sta $ad4b, y
+		sta score_vs_par + $1, y
 
 lAC91:
 		lda #$00
-		sta $ad48, x
+		sta strokes, x
 		cld 
-		stx $ad46
-		sty $ad47
+		stx vad46
+		sty vad47
 		lda #$48
-		sta $1f
+		sta text_x
 		lda #$2f
-		sta $20
-		lda $044f
+		sta text_y
+		lda current_player
 		beq lACB2
 		lda #$48
-		sta $1f
+		sta text_x
 		lda #$27
-		sta $20
+		sta text_y
 
 lACB2:
 		lda #$0b
 		jsr lA961
-		ldy $ad47
-		ldx $ad4f, y
-		lda $ad4e, y
+		ldy vad47
+		ldx total_strokes + $1, y
+		lda total_strokes, y
 		ldy #$00
-		sty $ad45
+		sty bcd_leading_zero
 		jsr lAD21
 		lda #$68
-		sta $1f
-		ldy $ad47
-		lda $ad4a, y
-		sta $ad52
-		lda $ad4b, y
-		sta $ad53
+		sta text_x
+		ldy vad47
+		lda score_vs_par, y
+		sta vad52
+		lda score_vs_par + $1, y
+		sta vad53
 		lda #$2b
 		pha 
-		lda $ad53
+		lda vad53
 		cmp #$50
 		bcc lACFC
 		pla 
@@ -7097,27 +10579,27 @@ lACB2:
 		lda #$00
 		sed 
 		sec 
-		sbc $ad52
-		sta $ad52
+		sbc vad52
+		sta vad52
 		lda #$00
-		sbc $ad53
-		sta $ad53
+		sbc vad53
+		sta vad53
 		cld 
 
 lACFC:
 		pla 
-		jsr l0FFB
-		lda $ad52
-		ldx $ad53
+		jsr print_char
+		lda vad52
+		ldx vad53
 		ldy #$00
-		sty $ad45
+		sty bcd_leading_zero
 		jsr lAD21
 		lda #$90
-		sta $1f
-		ldx $ad46
-		lda $ad48, x
+		sta text_x
+		ldx vad46
+		lda strokes, x
 		ldy #$00
-		sty $ad45
+		sty bcd_leading_zero
 		jsr lAD27
 		rts 
 
@@ -7135,116 +10617,131 @@ lAD27:
 		lsr 
 		jsr lAD35
 		ldx #$01
-		stx $ad45
+		stx bcd_leading_zero
 		pla 
 
 lAD35:
 		and #$0f
 		bne lAD3F
-		ldx $ad45
+		ldx bcd_leading_zero
 		bne lAD3F
 		rts 
 
 lAD3F:
-		sta $ad45
-		jmp l2C93
-*=$ad54
+		sta bcd_leading_zero
+		jmp print_nibble
 
-lAD54:
+bcd_leading_zero:
+		.byte	$02
+vad46:		.byte	$00
+vad47:		.byte	$00
+strokes:
+		.byte	$00, $00
+
+score_vs_par:
+		.word	$0000, $0000
+total_strokes:
+		.word	$0000, $0000
+
+vad52:
+		.byte	$00
+vad53:		.byte	$00
+
+draw_flag:
 		lda #$82
-		sta $0470
+		sta green_flag_x
 		lda #$6c
-		sta $0471
+		sta green_flag_y
 		jsr lB396
-		lda $0400
-		sta $10
-		lda $0401
-		sta $11
-		lda $0402
-		sta $12
-		lda $0403
-		sta $13
+		lda hole_x
+		sta v10
+		lda hole_x + $1
+		sta v10 + $1
+		lda hole_y
+		sta v12
+		lda hole_y + $1
+		sta v12 + $1
 		jsr l0BA4
-		lda $2c5b
+		lda v2c5b
 		jsr lAE18
-		sta $2c5b
-		lda $2c5d
+		sta v2c5b
+		lda v2c5d
 		sec 
 		sbc #$02
 		jsr lAE18
-		sta $2c5d
+		sta v2c5d
 		lda #$ff
-		sta $1368
-		lda $2c5b
+		sta v1368
+		lda v2c5b
 		clc 
-		adc $0470
+		adc green_flag_x
 		tax 
-		ldy $0471
+		ldy green_flag_y
 		dex 
 		dex 
-		stx $14
+		stx v14
 		dey 
 		dey 
-		sty $16
-		ldy $16
+		sty v16
+		ldy v16
 		tya 
 		clc 
 		adc #$04
-		sta $16
-		ldx $14
+		sta v16
+		ldx v14
 		jsr l165F
-		inc $14
-		dec $16
-		ldy $16
+		inc v14
+		dec v16
+		ldy v16
 		tya 
 		clc 
 		adc #$06
-		sta $16
-		ldx $14
+		sta v16
+		ldx v14
 		jsr l165F
-		inc $14
-		ldy $16
+		inc v14
+		ldy v16
 		tya 
 		clc 
 		adc #$06
-		sta $16
-		ldx $14
+		sta v16
+		ldx v14
 		jsr l165F
-		inc $14
-		inc $16
-		ldy $16
+		inc v14
+		inc v16
+		ldy v16
 		tya 
 		clc 
 		adc #$04
-		sta $16
-		ldx $14
+		sta v16
+		ldx v14
 		jsr l165F
-		inc $14
-		lda $0471
+		inc v14
+		lda green_flag_y
 		sec 
-		sbc $2c5d
+		sbc v2c5d
 		tay 
-		sta $0471
-		ldx $0470
-		stx $14
-		sty $16
-		lda $14
+		sta green_flag_y
+		ldx green_flag_x
+		stx v14
+		sty v16
+		lda v14
 		clc 
 		adc #$06
 		asl 
-		sta $d00c
+		sta sprite6_x
 		bcc lAE0A
-		lda $d010
+		lda sprites_x_msb
 		ora #$40
-		sta $d010
+		sta sprites_x_msb
 
 lAE0A:
 		lda #$f0
 		sec 
-		sbc $16
-		sta $d00d
+		sbc v16
+		sta sprite6_y
 		lda #$21
-		sta $47fe
+		sta sprite_pointers + $6
 		rts 
 
 lAE18:
@@ -7258,16 +10755,16 @@ lAE18:
 lAE22:
 		tax 
 		lda #$00
-		jsr l0900
-		sta $0e
-		stx $0f
+		jsr multiply
+		sta v0e
+		stx v0e + $1
 		lda #$00
 		ldx #$03
-		jsr l0900
+		jsr multiply
 		dex 
 		jsr l094C
-		lda $0e
-		ldx $0f
+		lda v0e
+		ldx v0e + $1
 		jsr l091F
 		txa 
 		plp 
@@ -7278,18 +10775,55 @@ lAE22:
 
 lAE47:
 		rts 
-*=$ae92
+
+read_aim_cursor:
+		lda sprite5_x
+		sta ball_sprite_x
+		ldx #$00
+		lda sprites_x_msb
+		and #$20
+		beq lAE58
+		inx 
+
+lAE58:
+		stx ball_sprite_x + $1
+		lda sprite5_y
+		sta ball_sprite_y
+		lda ball_sprite_x
+		lsr ball_sprite_x + $1
+		ror 
+		sec 
+		sbc #$06
+		sta ball_sprite_x
+		lda #$ef
+		sec 
+		sbc ball_sprite_y
+		sta ball_sprite_y
+		lda ball_sprite_x
+		cmp #$65
+		bcc lAE8F
+		lda #$9e
+		cmp ball_sprite_x
+		bcc lAE8F
+		lda ball_sprite_x
+		ldx ball_sprite_y
+		jsr l1306
+		rts 
+
+lAE8F:
+		lda #$00
+		rts 
 
 lAE92:
-		lda $044e
+		lda game_mode
 		and #$01
 		bne lAE9C
 		jmp lAF26
 
 lAE9C:
-		lda $043f
+		lda v043f
 		bpl lAEB7
-		ldx $043e
+		ldx v043e
 		pha 
 		txa 
 		clc 
@@ -7299,13 +10833,13 @@ lAE9C:
 		pla 
 		eor #$ff
 		adc #$00
-		sta $043f
-		stx $043e
+		sta v043f
+		stx v043e
 
 lAEB7:
-		lda $0441
+		lda v0441
 		bpl lAED2
-		ldx $0440
+		ldx v0440
 		pha 
 		txa 
 		clc 
@@ -7315,13 +10849,13 @@ lAEB7:
 		pla 
 		eor #$ff
 		adc #$00
-		sta $0441
-		stx $0440
+		sta v0441
+		stx v0440
 
 lAED2:
-		lda $0449
+		lda v0449
 		bpl lAEED
-		ldx $0448
+		ldx v0448
 		pha 
 		txa 
 		clc 
@@ -7331,13 +10865,13 @@ lAED2:
 		pla 
 		eor #$ff
 		adc #$00
-		sta $0449
-		stx $0448
+		sta v0449
+		stx v0448
 
 lAEED:
-		lda $044b
+		lda v044b
 		bpl lAF08
-		ldx $044a
+		ldx v044a
 		pha 
 		txa 
 		clc 
@@ -7347,19 +10881,19 @@ lAEED:
 		pla 
 		eor #$ff
 		adc #$00
-		sta $044b
-		stx $044a
+		sta v044b
+		stx v044a
 
 lAF08:
 		ldx #$01
 
 lAF0A:
-		lda $043e, x
-		ora $0440, x
-		sta $0439
-		lda $0448, x
-		ora $044a, x
-		cmp $0439
+		lda v043e, x
+		ora v0440, x
+		sta v0439
+		lda v0448, x
+		ora v044a, x
+		cmp v0439
 		beq lAF27
 		bcs lAF24
 		lda #$00
@@ -7374,12 +10908,14 @@ lAF26:
 lAF27:
 		dex 
 		beq lAF0A
-		lda $af2e
+		lda leader
 		rts 
-*=$af2f
 
-lAF2F:
-		sta $044f
+leader:
+		.byte	$00
+
+select_player:
+		sta current_player
 		ora #$00
 		bne lAF39
 		tax 
@@ -7389,128 +10925,137 @@ lAF39:
 		ldx #$0a
 
 lAF3B:
-		lda $0442, x
-		sta $0456
-		lda $0443, x
+		lda v0442, x
+		sta v0456
+		lda v0443, x
 		beq lAF5D
-		sta $66
-		lda $043a, x
-		sta $1b
-		lda $043b, x
-		sta $1c
-		lda $043c, x
-		sta $1d
-		lda $043d, x
-		sta $1e
+		sta hole_distance
+		lda v043a, x
+		sta ball_x
+		lda v043b, x
+		sta ball_x + $1
+		lda v043c, x
+		sta ball_y
+		lda v043d, x
+		sta ball_y + $1
 		rts 
 
 lAF5D:
-		lda $044f
+		lda current_player
 		eor #$01
-		jmp lAF2F
+		jmp select_player
 
-lAF65:
-		lda $66
+save_player:
+		lda hole_distance
 		bne lAF75
-		sta $0452
-		sta $0453
-		sta $0454
-		sta $0455
+		sta v0452
+		sta v0453
+		sta v0454
+		sta v0455
 
 lAF75:
-		ldx $044f
+		ldx current_player
 		beq lAF7C
 		ldx #$0a
 
 lAF7C:
-		lda $1b
-		sta $043a, x
-		lda $1c
-		sta $043b, x
-		lda $1d
-		sta $043c, x
-		lda $1e
-		sta $043d, x
-		lda $0452
-		sta $043e, x
-		lda $0453
-		sta $043f, x
-		lda $0454
-		sta $0440, x
-		lda $0455
-		sta $0441, x
-		lda $0456
-		sta $0442, x
-		lda $66
-		sta $0443, x
-		beq lAFB6
+		lda ball_x
+		sta v043a, x
+		lda ball_x + $1
+		sta v043b, x
+		lda ball_y
+		sta v043c, x
+		lda ball_y + $1
+		sta v043d, x
+		lda v0452
+		sta v043e, x
+		lda v0453
+		sta v043f, x
+		lda v0454
+		sta v0440, x
+		lda v0455
+		sta v0441, x
+		lda v0456
+		sta v0442, x
+		lda hole_distance
+		sta v0443, x
+		beq print_par_result
 		rts 
 
-lAFB6:
+print_par_result:
 		lda #$00
-		sta $1f
+		sta text_x
 		lda #$07
-		sta $20
-		lda $1f
+		sta text_y
+		lda text_x
 		clc 
 		adc #$04
-		sta $1f
+		sta text_x
 		lda #$0c
 		jsr lA961
-		ldx $044f
-		lda $ad48, x
+		ldx current_player
+		lda strokes, x
 		sec 
-		sbc $0450
+		sbc par
 		bcc lAFE9
 		beq lAFFB
-		jsr l2C75
-		sre $4556
-*=$afe9
+		jsr print_inline
+
+text_over_par:
+		.text	"OVER PAR", $ff
+		lda #$03
+		jmp play_tune
 
 lAFE9:
-		jsr l2C75
-		eor $4e, x
-		nop $45
-*=$affb
+		jsr print_inline
+
+text_under_par:
+		.text	"UNDER PAR", $ff
+		lda #$01
+		jmp play_tune
 
 lAFFB:
-		jsr l2C75
-		jmp l5645
-*=$b00d
+		jsr print_inline
 
-lB00D:
-		ldx $0451
-		lda $b103, x
+text_level_par:
+		.text	"LEVEL PAR", $ff
+		lda #$02
+		jmp play_tune
+
+; changes the wind a little at random
+change_wind:
+		ldx hole_number
+		lda text_wind_tilt + $7, x
 		pha 
 		and #$0f
-		sta $b0fa
+		sta tilt_direction
 		pla 
 		lsr 
 		lsr 
 		lsr 
 		lsr 
-		sta $b0f9
-		jsr lB116
+		sta tilt_strength
+		jsr random
 		and #$03
 		cmp #$02
 		bcs lB044
 		cmp #$01
 		beq lB03B
-		ldx $045b
+		ldx wind_strength
 		inx 
 		cpx #$0a
 		bcs lB044
-		stx $045b
+		stx wind_strength
 		bcc lB044
 
 lB03B:
-		ldx $045b
+		ldx wind_strength
 		dex 
 		beq lB044
-		stx $045b
+		stx wind_strength
 
 lB044:
-		jsr lB116
+		jsr random
 		and #$03
 		cmp #$02
 		bcs lB060
@@ -7524,67 +11069,68 @@ lB055:
 
 lB057:
 		clc 
-		adc $045a
+		adc wind_direction
 		and #$07
-		sta $045a
+		sta wind_direction
 
 lB060:
 		rts 
 
-lB061:
-		jsr lB116
+random_wind:
+		jsr random
 		and #$07
-		sta $045a
-		jsr lB116
+		sta wind_direction
+		jsr random
 		and #$07
 		clc 
 		adc #$01
-		sta $045b
+		sta wind_strength
 		rts 
 
-lB075:
-		lda $66
+; the wind's push when far from the hole, the green's tilt when near
+compute_drift:
+		lda hole_distance
 		cmp #$40
 		bcc lB08B
-		lda $045a
-		sta $b0f8
-		lda $045b
-		sta $b0f7
+		lda wind_direction
+		sta drift_direction
+		lda wind_strength
+		sta drift_strength
 		lda #$01
 		bne lB099
 
 lB08B:
-		lda $b0fa
-		sta $b0f8
-		lda $b0f9
-		sta $b0f7
+		lda tilt_direction
+		sta drift_direction
+		lda tilt_strength
+		sta drift_strength
 		lda #$05
 
 lB099:
-		sta $b0fb
-		lda $b0f8
+		sta wind_or_tilt
+		lda drift_direction
 		sec 
-		sbc $0db8
+		sbc direction
 		and #$07
-		sta $0459
+		sta v0459
 		tax 
-		lda $b0dd, x
+		lda table_b0dd, x
 		jsr lB0BE
-		sta $0458
-		lda $b0e5, x
+		sta v0458
+		lda table_b0e5, x
 		jsr lB0BE
-		sta $0457
-		jmp lB135
+		sta v0457
+		jmp draw_wind
 
 lB0BE:
 		tay 
 		beq lB0CE
 		bmi lB0CF
-		lda $b0f7
+		lda drift_strength
 		cpy #$0a
 		beq lB0CE
 		tay 
-		lda $b0ed, y
+		lda strength_scale, y
 
 lB0CE:
 		rts 
@@ -7598,56 +11144,78 @@ lB0CF:
 		eor #$ff
 		adc #$01
 		rts 
-*=$b116
 
-lB116:
-		lda $a00c
+table_b0dd:
+		.char	10, 7, 0, -7, -10, -7, 0, 7
+table_b0e5:
+		.char	0, 7, 10, 7, 0, -7, -10, -7
+
+strength_scale:
+		.byte	$00, $01, $01, $02, $03, $04, $04, $05, $06, $06
+drift_strength:		.byte	$02
+drift_direction:		.byte	$00
+tilt_strength:		.byte	$01
+tilt_direction:		.byte	$07
+; 1 to print "WIND", 5 to print "TILT"
+wind_or_tilt:		.byte	$01
+
+text_wind_tilt:
+		.text	"WINDTILT"
+
+; the green's tilt per hole, indexed from 1: strength in the high nibble, direction in the low
+green_tilt:
+		.byte	$17, $30, $25, $72, $41, $94, $33, $56, $62, $15, $82, $43, $74, $92, $24, $15
+		.byte	$63, $52
+
+; returns the next byte of $a000-$b0ff
+random:
+		lda vectors
 		pha 
-		inc lB116 + 1
+		inc random + 1
 		bne lB122
-		inc lB116 + 2
+		inc random + 2
 
 lB122:
-		lda lB116 + 2
+		lda random + 2
 		cmp #$b1
 		bcc lB133
 		lda #$00
-		sta lB116 + 1
+		sta random + 1
 		lda #$a0
-		sta lB116 + 2
+		sta random + 2
 
 lB133:
 		pla 
 		rts 
 
-lB135:
+draw_wind:
 		jsr lA8CB
 		lda #$ff
-		sta $1368
+		sta v1368
 		lda #$78
-		sta $1f
+		sta text_x
 		lda #$27
-		sta $20
+		sta text_y
 		ldx #$04
-		ldy $b0fb
+		ldy wind_or_tilt
 
 lB14A:
-		lda $1f
+		lda text_x
 		sec 
 		sbc #$08
-		sta $1f
-		lda $20
+		sta text_x
+		lda text_y
 		sec 
 		sbc #$08
-		sta $20
+		sta text_y
 		php 
 		pha 
 		txa 
 		pha 
 		tya 
 		pha 
-		lda $b0fb, y
-		jsr l0FFB
+		lda wind_or_tilt, y
+		jsr print_char
 		pla 
 		tay 
 		pla 
@@ -7658,213 +11226,301 @@ lB14A:
 		dex 
 		bne lB14A
 		lda #$90
-		sta $1f
+		sta text_x
 		lda #$17
-		sta $20
+		sta text_y
 		lda #$01
-		sta $ad45
-		lda $b0f7
+		sta bcd_leading_zero
+		lda drift_strength
 		jsr lAD35
-		lda $29
+		lda v29
 		pha 
 		lda #$00
-		sta $127c
-		sta $29
-		lda $0459
+		sta v127c
+		sta v29
+		lda v0459
 		asl 
 		asl 
 		tax 
 		pha 
-		lda $b203, x
+		lda arrow_lines + $1, x
 		jsr lB23A
-		stx $14
-		sty $16
+		stx v14
+		sty v16
 		pla 
 		pha 
 		tax 
-		lda $b202, x
+		lda arrow_lines, x
 		jsr lB23A
 		jsr l165F
 		pla 
 		pha 
 		tax 
-		lda $15
+		lda v15
 		pha 
-		lda $14
+		lda v14
 		pha 
-		lda $17
+		lda v17
 		pha 
-		lda $16
+		lda v16
 		pha 
-		lda $b204, x
+		lda arrow_lines + $2, x
 		jsr lB23A
 		jsr l165F
 		pla 
-		sta $16
+		sta v16
 		pla 
-		sta $17
+		sta v17
 		pla 
-		sta $14
+		sta v14
 		pla 
-		sta $15
+		sta v15
 		pla 
 		tax 
-		lda $b205, x
+		lda arrow_lines + $3, x
 		jsr lB23A
 		jsr l165F
 		pla 
-		sta $29
+		sta v29
 		lda #$2f
-		sta $04
+		sta pointer_04
 		lda #$7b
-		sta $05
+		sta pointer_04 + $1
 		ldx #$04
 
 lB1E4:
 		ldy #$40
 
 lB1E6:
-		lda ($04), y
+		lda (pointer_04), y
 		ora #$aa
-		sta ($04), y
+		sta (pointer_04), y
 		dey 
 		bne lB1E6
 		lda #$40
 		clc 
-		adc $04
-		sta $04
+		adc pointer_04
+		sta pointer_04
 		lda #$01
-		adc $05
-		sta $05
+		adc pointer_04 + $1
+		sta pointer_04 + $1
 		dex 
 		bne lB1E4
 		rts 
-*=$b23a
+
+arrow_x:
+		.byte	$84
+arrow_y:		.byte	$10
+arrow_lines:
+		.byte	$00, $04, $0b, $08, $01, $05, $00, $02, $02, $06, $08, $09, $03, $07, $02, $04
+		.byte	$04, $00, $09, $0a, $05, $01, $04, $06, $06, $02, $0a, $0b, $07, $03, $06, $00
+
+arrow_points:
+		.char	0, 12, 8, 12, 8, 0, 8, -12, 0, -12, -8, -12, -8, 0, -8, 12
+		.char	4, 6, 4, -6, -4, -6, -4, 6
 
 lB23A:
 		asl 
 		tax 
-		lda $b223, x
+		lda arrow_points + $1, x
 		clc 
-		adc $b201
+		adc arrow_y
 		tay 
-		lda $b222, x
+		lda arrow_points, x
 		clc 
-		adc $b200
+		adc arrow_x
 		tax 
 		rts 
 
-lB24D:
+title_screen:
 		lda #$48
-		sta $06
+		sta pointer_06
 		lda #$47
-		sta $07
+		sta pointer_06 + $1
 		lda #$60
-		sta $08
+		sta pointer_08
 		lda #$ff
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 lB25F:
 		lda #$cc
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne lB268
-		inc $07
+		inc pointer_06 + $1
 
 lB268:
-		inc $08
+		inc pointer_08
 		bne lB25F
-		inc $09
+		inc pointer_08 + $1
 		bne lB25F
 		lda #$48
-		sta $06
+		sta pointer_06
 		lda #$db
-		sta $07
+		sta pointer_06 + $1
 		lda #$60
-		sta $08
+		sta pointer_08
 		lda #$ff
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 lB282:
 		lda #$01
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne lB28B
-		inc $07
+		inc pointer_06 + $1
 
 lB28B:
-		inc $08
+		inc pointer_08
 		bne lB282
-		inc $09
+		inc pointer_08 + $1
 		bne lB282
 		lda #$40
-		sta $06
+		sta pointer_06
 		lda #$7a
-		sta $07
+		sta pointer_06 + $1
 		lda #$00
-		sta $08
+		sta pointer_08
 		lda #$fb
-		sta $09
+		sta pointer_08 + $1
 		ldy #$00
 
 lB2A5:
 		lda #$aa
-		sta ($06), y
+		sta (pointer_06), y
 		iny 
 		bne lB2AE
-		inc $07
+		inc pointer_06 + $1
 
 lB2AE:
-		inc $08
+		inc pointer_08
 		bne lB2A5
-		inc $09
+		inc pointer_08 + $1
 		bne lB2A5
 		lda #$ff
-		sta $1368
+		sta v1368
 		lda #$20
-		sta $1f
+		sta text_x
 		lda #$1f
-		sta $20
-		jsr l2C75
-		lsr $31
-		and #$20
-		and ($20), y
-		bvc lB31A
-		eor ($59, x)
-		eor $52
-		isc $7520, x
-		bit $ff0d
-		jsr l2C75
-		jsr $2020
-		jsr l3346
-		and #$20
-*=$b31a
+		sta text_y
+		jsr print_inline
 
-lB31A:
-		stx $044e
-		jsr l2C75
-		ora $20ff
-		adc $2c, x
-		jsr $2020
-		jsr l4F48
-		jmp $2045
-*=$b396
+text_f1_1_player:
+		.text	"F1) 1 PLAYER", $ff
+		jsr print_inline
+
+newline5:
+		.byte	$0d, $ff
+		jsr print_inline
+
+text_f3_2_player:
+		.text	"    F3) 2 PLAYER", $ff
+		jsr print_inline
+
+newline6:
+		.byte	$0d, $ff
+		jsr print_inline
+
+text_f5_practice:
+		.text	"    F5) PRACTICE", $ff
+
+lB305:
+		lda #$00
+		jsr play_tune
+		ldx #$00
+		cmp #$85
+		beq lB34B
+		inx 
+		cmp #$86
+		beq lB34B
+		inx 
+		cmp #$87
+		bne lB305
+		stx game_mode
+		jsr print_inline
+
+newline7:
+		.byte	$0d, $ff
+		jsr print_inline
+
+text_hole_1_18:
+		.text	"    HOLE (1-18) ", $ff
+
+lB336:
+		lda #$80
+		sta text_x
+		lda #$07
+		sta text_y
+		lda #$02
+		jsr lA961
+		jsr read_hole_number
+		beq lB336
+		jmp lA95B
+
+lB34B:
+		stx game_mode
+		lda #$01
+		jmp lA95B
+
+read_hole_number:
+		lda #$00
+
+lB355:
+		sta hole_number
+
+lB358:
+		jsr scnkey
+		jsr getin
+		bne lB358
+
+lB360:
+		jsr scnkey
+		jsr getin
+		cmp #$0d
+		beq lB389
+		cmp #$30
+		bcc lB360
+		cmp #$3a
+		bcs lB360
+		pha 
+		jsr print_char
+		pla 
+		sec 
+		sbc #$30
+		ldx hole_number
+		beq lB355
+		cpx #$02
+		bcs lB393
+		clc 
+		adc #$0a
+		sta hole_number
+
+lB389:
+		lda hole_number
+		cmp #$13
+		bcs lB393
+		ora #$00
+		rts 
+
+lB393:
+		lda #$00
+		rts 
 
 lB396:
 		lda #$c7
-		sta $04
+		sta pointer_04
 		lda #$6a
-		sta $05
+		sta pointer_04 + $1
 		lda #$58
-		sta $06
+		sta pointer_06
 		lda #$45
-		sta $07
+		sta pointer_06 + $1
 		lda #$58
-		sta $08
+		sta pointer_08
 		lda #$cc
-		sta $09
+		sta pointer_08 + $1
 		ldx #$78
 		ldy #$0b
 
@@ -7876,50 +11532,50 @@ lB3B2:
 		lda #$00
 
 lB3B8:
-		sta ($04), y
+		sta (pointer_04), y
 		dey 
 		bne lB3B8
 		ldy #$0f
 
 lB3BF:
 		lda #$0f
-		sta ($06), y
+		sta (pointer_06), y
 		lda #$ff
-		sta ($08), y
+		sta (pointer_08), y
 		dey 
 		bne lB3BF
 		lda #$40
 		clc 
-		adc $04
-		sta $04
+		adc pointer_04
+		sta pointer_04
 		lda #$01
-		adc $05
-		sta $05
+		adc pointer_04 + $1
+		sta pointer_04 + $1
 		lda #$28
 		clc 
-		adc $06
-		sta $06
-		lda $07
+		adc pointer_06
+		sta pointer_06
+		lda pointer_06 + $1
 		adc #$00
-		sta $07
+		sta pointer_06 + $1
 		lda #$28
 		clc 
-		adc $08
-		sta $08
-		lda $09
+		adc pointer_08
+		sta pointer_08
+		lda pointer_08 + $1
 		adc #$00
-		sta $09
+		sta pointer_08 + $1
 		pla 
 		tay 
 		dey 
 		bne lB3B2
 		ldx #$9f
-		stx $14
+		stx v14
 		ldy #$30
-		sty $16
+		sty v16
 		ldy #$87
 		lda #$00
-		sta $127c
+		sta v127c
 		jsr l165F
 		ldx #$64
 		ldy #$87
@@ -7931,20 +11587,20 @@ lB3BF:
 		ldy #$30
 		jmp l165F
 
-lB41D:
+read_joystick:
 		pha 
 		txa 
 		pha 
-		lda $044e
+		lda game_mode
 		and #$01
 		beq lB430
-		ldx $044f
-		lda $dc00, x
+		ldx current_player
+		lda cia1_port_a, x
 		jmp lB436
 
 lB430:
-		lda $dc00
-		and $dc01
+		lda cia1_port_a
+		and cia1_port_b
 
 lB436:
 		tax 
@@ -7977,77 +11633,289 @@ lB458:
 		ldy #$00
 
 lB45A:
-		lda $b467, x
-		sta $0472, y
+		lda aim_limits, x
+		sta aim_x, y
 		inx 
 		iny 
 		cpy #$04
 		bcc lB45A
 		rts 
-*=$b5b0
+
+aim_limits:
+		.byte	$56, $3c, $92, $0f, $88, $73, $64, $3c
+
+beep:
+		ldx #$19
+
+lB471:
+		lda #$00
+		sta vic_mirrors + $3ce, x
+		dex 
+		bne lB471
+		lda #$09
+		sta voice1_attack_decay
+		lda #$0f
+		sta volume_filter_mode
+		sty voice1_frequency + $1
+		lda #$11
+		sta voice1_control
+		jsr delay
+		lda #$10
+		sta voice1_control
+		jmp silence_sid
+
+lB496:
+		ldy #$1e
+		jmp beep
+
+lB49B:
+		ldy #$3c
+		jmp beep
+
+delay:
+		ldx #$46
+
+lB4A2:
+		pha 
+		txa 
+		pha 
+		ldx #$00
+
+lB4A7:
+		dex 
+		bne lB4A7
+		pla 
+		tax 
+		pla 
+		dex 
+		bne lB4A2
+		rts 
+
+aim:
+		lda #$00
+		sta text_x
+		lda #$07
+		sta text_y
+		lda text_x
+		clc 
+		adc #$04
+		sta text_x
+		lda #$0d
+		jsr lA961
+		jsr print_inline
+
+text_aim:
+		.text	"AIM", $ff
+		lda sprite_enable
+		ora #$80
+		sta sprite_enable
+		lda #$22
+		sta sprite_pointers + $7
+		lda #$00
+		sta sprite7_color
+		lda aim_y
+		sta sprite7_y
+		lda aim_x
+		asl 
+		sta sprite7_x
+		bcc lB4F5
+		lda sprites_x_msb
+		ora #$80
+		sta sprites_x_msb
+
+lB4F5:
+		lda #$50
+		sta aim_offset
+
+lB4FA:
+		jsr lA967
+		cmp #$29
+		beq lB568
+		cmp #$2a
+		bne lB508
+		jmp lB58C
+
+lB508:
+		cmp #$3c
+		bne lB4FA
+		lda aim_offset
+		sec 
+		sbc #$50
+		sta aim_offset
+		lda green_view
+		beq lB55B
+		lda aim_offset
+		php 
+		bpl lB525
+		clc 
+		eor #$ff
+		adc #$01
+
+lB525:
+		tax 
+		lda #$00
+		jsr multiply
+		sta v0e
+		stx v0e + $1
+		lda #$6c
+		sec 
+		sbc green_flag_y
+		tax 
+		lda #$00
+		jsr multiply
+		jsr l094C
+		lda #$00
+		ldx #$28
+		jsr multiply
+		jsr l094F
+		lda v0e
+		ldx v0e + $1
+		jsr l091F
+		txa 
+		plp 
+		bpl lB558
+		clc 
+		eor #$ff
+		adc #$01
+
+lB558:
+		sta aim_offset
+
+lB55B:
+		lda #$fe
+		sta sprite7_y
+		lda #$20
+		sta sprite_pointers + $7
+		jmp lB496
+
+lB568:
+		lda aim_offset
+		cmp aim_max
+		bcc lB573
+		jmp lB4FA
+
+lB573:
+		inc aim_offset
+		inc sprite7_x
+		inc sprite7_x
+		beq lB581
+		jmp lB4FA
+
+lB581:
+		lda sprites_x_msb
+		ora #$80
+		sta sprites_x_msb
+		jmp lB4FA
+
+lB58C:
+		lda aim_offset
+		cmp aim_min
+		bcs lB597
+		jmp lB4FA
+
+lB597:
+		dec aim_offset
+		lda sprite7_x
+		bne lB5A7
+		lda sprites_x_msb
+		and #$7f
+		sta sprites_x_msb
+
+lB5A7:
+		dec sprite7_x
+		dec sprite7_x
+		jmp lB4FA
 
 lB5B0:
-		jsr lBC01
-		jsr lB5BC
+		jsr silence_sid
+		jsr bank_out_io
 		jsr l2008
-		jmp lB5C3
+		jmp bank_in_io
 
-lB5BC:
-		lda $01
+bank_out_io:
+		lda cpu_port
 		and #$fd
-		sta $01
+		sta cpu_port
 		rts 
 
-lB5C3:
-		lda $01
+bank_in_io:
+		lda cpu_port
 		ora #$02
-		sta $01
+		sta cpu_port
 		rts 
-*=$b5ee
+
+; unreferenced debugging code: copies $e000 to $cd00, and prints it in hex
+
+		ldx #$00
+
+lB5CC:
+		lda shapes, x
+		sta unused_cb00 + $200, x
+		inx 
+		bne lB5CC
+		rts 
+		ldx #$00
+
+lB5D8:
+		txa 
+		pha 
+		lda unused_cb00 + $200, x
+		jsr print_hex
+		pla 
+		tax 
+		inx 
+		bne lB5D8
+		jmp l0FF3
+
+lB5E8:
+		jsr install_interrupts
+		jmp lC01A
 
 lB5EE:
 		lda #$00
-		sta $1f
+		sta text_x
 		lda #$07
-		sta $20
+		sta text_y
 		lda #$0d
 		jmp lA961
-*=$b5fc
+
+unused_b5fb:
+		.byte	$0d
 
 lB5FC:
 		ldx #$06
 		lda #$ff
-		sta $04
+		sta pointer_04
 		lda #$73
-		sta $05
+		sta pointer_04 + $1
 
 lB606:
 		lda #$00
 		ldy #$a0
 
 lB60A:
-		sta ($04), y
+		sta (pointer_04), y
 		dey 
 		bne lB60A
 		lda #$a0
 		clc 
-		adc $04
-		sta $04
-		lda $05
+		adc pointer_04
+		sta pointer_04
+		lda pointer_04 + $1
 		adc #$00
-		sta $05
+		sta pointer_04 + $1
 		dex 
 		bne lB606
 		ldy #$20
 		ldx #$00
 
 lB623:
-		lda $b660, y
-		and $72c0, x
-		sta $72c0, x
-		lda $b678, y
-		and $7360, x
-		sta $7360, x
+		lda table_b660, y
+		and bitmap + $12c0, x
+		sta bitmap + $12c0, x
+		lda table_b678, y
+		and bitmap + $1360, x
+		sta bitmap + $1360, x
 		iny 
 		tya 
 		and #$7f
@@ -8056,66 +11924,175 @@ lB623:
 		cpx #$a0
 		bcc lB623
 		lda #$ff
-		sta $1368
+		sta v1368
 		ldx #$00
-		stx $127c
-		stx $14
+		stx v127c
+		stx v14
 		ldy #$30
-		sty $16
+		sty v16
 		ldy #$50
 		jsr l165F
 		ldx #$9f
-		stx $14
+		stx v14
 		ldy #$30
 		jsr l165F
 		jmp (a2CEF)
-*=$b79f
+
+table_b660:
+		.byte	$ff, $ff, $ff, $ff, $00, $00, $00, $00, $ff, $ff, $ff, $ff, $ff, $00, $00, $00
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $00, $00
+table_b678:
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $00, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $00
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $00, $ff, $ff, $ff, $ff, $ff, $ff, $00, $00
+		.byte	$ff, $ff, $ff, $ff, $ff, $00, $00, $00, $ff, $ff, $ff, $ff, $00, $00, $00, $00
+		.byte	$ff, $ff, $ff, $00, $00, $00, $00, $00, $ff, $ff, $00, $00, $00, $00, $00, $00
+		.byte	$ff, $00, $00, $00, $00, $00, $00, $00, $ff, $00, $00, $00, $00, $00, $00, $00
+		.byte	$ff, $00, $00, $00, $00, $00, $00, $00, $ff, $ff, $00, $00, $00, $00, $00, $00
+		.byte	$ff, $ff, $ff, $00, $00, $00, $00, $00, $ff, $ff, $ff, $ff, $00, $00, $00, $00
+		.byte	$ff, $ff, $ff, $ff, $ff, $00, $00, $00, $ff, $ff, $ff, $ff, $ff, $ff, $00, $00
+
+lB6F8:
+		lda green_view
+		beq lB700
+		jmp lB785
+
+lB700:
+		lda hole_x
+		sta v10
+		lda hole_x + $1
+		sta v10 + $1
+		lda hole_y
+		sta v12
+		lda hole_y + $1
+		sta v12 + $1
+		lda direction_flag
+		pha 
+		lda #$ff
+		sta direction_flag
+		jsr l0BA4
+		pla 
+		sta direction_flag
+		jsr l0B06
+		lda #$2a
+		clc 
+		eor #$ff
+		adc #$01
+		clc 
+		adc ball_sprite_x
+		sta ball_sprite_x
+		lda ball_sprite_x + $1
+		sbc #$00
+		sta ball_sprite_x + $1
+		lda v2c5f
+		sec 
+		sbc ball_sprite_y
+		sta ball_sprite_y
+		lda ball_sprite_x
+		asl 
+		sta sprite7_x
+		bcc lB757
+		lda sprites_x_msb
+		ora #$80
+		bne lB75C
+
+lB757:
+		lda sprites_x_msb
+		and #$7f
+
+lB75C:
+		sta sprites_x_msb
+		lda #$ee
+		sec 
+		sbc ball_sprite_y
+		sta sprite7_y
+		lda #$21
+		sta sprite_pointers + $7
+		lda sprite_enable
+		ora #$80
+		sta sprite_enable
+		lda #$00
+		sta sprite7_color
+		jsr lB78E
+		lda #$01
+		sta sprite7_color
+		jsr lB78E
+
+lB785:
+		lda sprite_enable
+		and #$7f
+		sta sprite_enable
+		rts 
+
+lB78E:
+		ldx #$80
+
+lB790:
+		pha 
+		txa 
+		pha 
+		ldx #$00
+
+lB795:
+		dex 
+		bne lB795
+		pla 
+		tax 
+		pla 
+		dex 
+		bne lB790
+		rts 
 
 lB79F:
 		ldx #$14
-		stx $b800
-		lda $e000, x
-		cmp $04
+		stx vb800
+		lda shapes, x
+		cmp pointer_04
 		bne lB7CF
-		lda $e001, x
-		cmp $05
+		lda shapes + $1, x
+		cmp pointer_04 + $1
 		bne lB7CF
 		lda #$00
-		sta $b800
-		lda $1f24
-		sta $b801
-		lda $1f25
-		sta $b802
-		lda $1f26
-		sta $b803
-		lda $1f27
-		sta $b804
+		sta vb800
+		lda ball_sprite_x
+		sta vb801
+		lda ball_sprite_x + $1
+		sta vb802
+		lda ball_sprite_y
+		sta vb803
+		lda ball_sprite_y + $1
+		sta vb804
 
 lB7CF:
 		ldy #$00
 		rts 
 
 lB7D2:
-		lda $b800
+		lda vb800
 		bne lB7FD
-		lda $1f20
+		lda v1f20
 		clc 
-		adc $b801
-		sta $1f24
-		lda $1f21
-		adc $b802
-		sta $1f25
-		lda $1f22
+		adc vb801
+		sta ball_sprite_x
+		lda v1f21
+		adc vb802
+		sta ball_sprite_x + $1
+		lda v1f22
 		clc 
-		adc $b803
-		sta $1f26
-		lda $1f23
-		adc $b804
-		sta $1f27
+		adc vb803
+		sta ball_sprite_y
+		lda v1f23
+		adc vb804
+		sta ball_sprite_y + $1
 
 lB7FD:
 		jmp l1BFC
-*=$b805
+
+vb800:
+		.byte	$14
+vb801:		.byte	$6b
+vb802:		.byte	$00
+vb803:		.byte	$87
+vb804:		.byte	$00
 
 lB805:
 		jsr l1306
@@ -8127,25 +12104,25 @@ lB805:
 		tya 
 		pha 
 		lda #$ff
-		sta $b853
-		ldy $18
-		lda $117c, y
-		sta $b854
-		ldx $117b, y
+		sta vb853
+		ldy v18
+		lda buffer_117c, y
+		sta vb854
+		ldx buffer_107c + $ff, y
 		ldy #$00
 
 lB822:
 		iny 
 		iny 
-		cpy $127c
+		cpy v127c
 		bcs lB83D
 		txa 
-		cmp $117c, y
+		cmp buffer_117c, y
 		bne lB822
-		lda $b854
-		cmp $117d, y
+		lda vb854
+		cmp buffer_117c + $1, y
 		bne lB822
-		inc $b853
+		inc vb853
 		jmp lB822
 
 lB83D:
@@ -8155,27 +12132,1569 @@ lB83D:
 		tax 
 		pla 
 		plp 
-		lda $b853
+		lda vb853
 		beq lB852
-		lda $136d, x
-		and $1368
-		ora ($0a), y
-		sta ($0a), y
+		lda pixel_bits, x
+		and v1368
+		ora (v0a), y
+		sta (v0a), y
 
 lB852:
 		rts 
-*=$bc01
 
-lBC01:
+vb853:
+		.byte	$00
+vb854:		.byte	$76
+
+music_push:
+		ldx music_voice
+		lda v0479, x
+		tax 
+		lda v0439
+		sta v047d, x
+		inx 
+		lda v043a
+		sta v047d, x
+		inx 
+		txa 
+		ldx music_voice
+		sta v0479, x
+		rts 
+
+music_pop:
+		ldx music_voice
+		lda v0479, x
+		tax 
+		dex 
+		lda v047d, x
+		sta v043a
+		dex 
+		lda v047d, x
+		sta v0439
+		txa 
+		ldx music_voice
+		sta v0479, x
+		rts 
+
+next_music_byte:
+		inc pointer_06
+		bne lB895
+		inc pointer_06 + $1
+
+lB895:
+		lda pointer_06 + $1
+		cmp v0410
+		bne lB8A1
+		lda pointer_06
+		cmp v040f
+
+lB8A1:
+		beq lB8A7
+		ldy #$00
+		lda (pointer_06), y
+
+lB8A7:
+		rts 
+
+lB8A8:
+		jsr next_music_byte
+		sta v0429
+		lda pointer_06
+		sta v0439
+		lda pointer_06 + $1
+		sta v043a
+		jsr music_push
+		lda #$18
+		sta pointer_06
+		lda #$bd
+		sta pointer_06 + $1
+		lda v040f
+		sta v0439
+		lda v0410
+		sta v043a
+		jsr music_push
+		lda #$00
+		sta v0410
+
+lB8D7:
+		jsr next_music_byte
+		cmp #$82
+		bne lB8D7
+		jsr next_music_byte
+		cmp v0429
+		bne lB8D7
+		lda pointer_06
+		sta v0429
+		lda pointer_06 + $1
+		sta v042a
+		jsr music_pop
+		lda v0439
+		sta v040f
+		lda v043a
+		sta v0410
+		jsr music_pop
+		lda v0439
+		sta pointer_06
+		lda v043a
+		sta pointer_06 + $1
+		rts 
+
+; plays tune A until it ends or F1/F3/F5 is pressed
+play_tune:
+		jsr music_start
+		pha 
+		jsr silence_sid
+		pla 
+		rts 
+
+music_start:
+		tsx 
+		stx music_saved_stack
+		pha 
+		lda #$7c
+		sta v0416
+		lda #$be
+		sta v0417
+		lda #$18
+		sta v0419
+		lda #$bd
+		sta v041a
+		lda #$8b
+		sta v0420
+		lda #$bd
+		sta v0421
+		lda #$dd
+		sta v0427
+		lda #$bd
+		sta v0428
+		lda v0416
+		sta v041d
+		lda v0417
+		sta v041e
+		lda v0416
+		sta v0424
+		lda v0417
+		sta v0425
+		pla 
+		jsr select_tune
+		jsr init_sid
+		lda #$01
+		sta v0435
+		sta v0436
+		sta v0437
+		lda #$00
+		sta v047a
+		lda #$40
+		sta v047b
+		lda #$80
+		sta v047c
+		jmp lBB2F
+
+music_step:
+		jsr next_music_byte
+		sta music_note
+		bne lB988
+
+lB987:
+		rts 
+
+lB988:
+		lda music_note
+		bmi lB99B
+		jsr next_music_byte
+		sta music_duration
+		beq lB9C1
+		jmp lBBDF
+
+; unreferenced
+
+		jmp music_step
+
+lB99B:
+		cmp #$80
+		beq lB9CD
+		cmp #$81
+		bne lB9A6
+		jmp lBA7A
+
+lB9A6:
+		cmp #$8c
+		bne lB9AD
+		jmp lBAD8
+
+lB9AD:
+		cmp #$8d
+		bne lB9B4
+		jmp lBAE8
+
+lB9B4:
+		cmp #$82
+		bne lB9C1
+		inc pointer_06
+		bne lB9BE
+		inc pointer_06 + $1
+
+lB9BE:
+		jmp music_step
+
+lB9C1:
+		jsr print_inline
+
+text_error:
+		.text	"ERROR", $ff
+		jmp lB987
+
+lB9CD:
+		lda v040d
+		sta v0439
+		lda v040e
+		sta v043a
+		jsr music_push
+		lda v040f
+		sta v0439
+		lda v0410
+		sta v043a
+		jsr music_push
+		lda v0411
+		sta v0439
+		lda v0412
+		sta v043a
+		jsr music_push
+		lda pointer_06
+		sta v040f
+		lda pointer_06 + $1
+		sta v0410
+		jsr lB8A8
+		lda v0429
+		sta v040d
+		lda v042a
+		sta v040e
+		jsr next_music_byte
+		sta v0411
+
+lBA19:
+		lda pointer_06
+		sta v0439
+		lda pointer_06 + $1
+		sta v043a
+		jsr music_push
+
+lBA26:
+		lda v040d
+		sta pointer_06
+		lda v040e
+		sta pointer_06 + $1
+		jsr music_step
+		lda v0411
+		beq lBA26
+		dec v0411
+		bne lBA26
+		jsr music_pop
+		lda v0439
+		sta pointer_06
+		lda v043a
+		sta pointer_06 + $1
+		jsr music_pop
+		lda v0439
+		sta v0411
+		lda v043a
+		sta v0412
+		jsr music_pop
+		lda v0439
+		sta v040f
+		lda v043a
+		sta v0410
+		jsr music_pop
+		lda v0439
+		sta v040d
+		lda v043a
+		sta v040e
+		jmp music_step
+
+lBA7A:
+		lda v040d
+		sta v0439
+		lda v040e
+		sta v043a
+		jsr music_push
+		lda v040f
+		sta v0439
+		lda v0410
+		sta v043a
+		jsr music_push
+		lda v0411
+		sta v0439
+		lda v0412
+		sta v043a
+		jsr music_push
+		jsr lB8A8
+		lda v0429
+		sta v040d
+		lda v042a
+		sta v040e
+		jsr lB8A8
+		lda v0429
+		sta v040f
+		lda v042a
+		sta v0410
+		lda v040f
+		bne lBACD
+		dec v0410
+
+lBACD:
+		dec v040f
+		lda #$01
+		sta v0411
+		jmp lBA19
+
+lBAD8:
+		lda #$09
+		sta voice2_attack_decay
+		sta voice2_sustain_release
+		lda #$40
+		sta v0432
+		jmp music_step
+
+lBAE8:
+		lda #$59
+		sta voice2_attack_decay
+		lda #$54
+		sta voice2_sustain_release
+		lda #$20
+		sta v0432
+		jmp music_step
+
+; unreferenced: a sound effect
+
+		lda music_note
+		asl 
+		tax 
+		lda note_frequencies, x
+		sta voice2_frequency
+		lda note_frequencies + $1, x
+		sta voice2_frequency + $1
+		lda #$61
+		sta voice2_control
+		pha 
+		ldx music_duration
+
+lBB14:
+		ldy music_tempo
+
+lBB17:
+		pha 
+		txa 
+		pha 
+		ldx #$00
+
+lBB1C:
+		dex 
+		bne lBB1C
+		pla 
+		tax 
+		pla 
+		dey 
+		bne lBB17
+		dex 
+		bne lBB14
+		pla 
+		and #$fe
+		sta voice2_control
+		rts 
+
+lBB2F:
+		lda #$01
+		sta music_voice
+
+lBB34:
+		ldx music_voice
+		dec v0434, x
+		bne lBB77
+		lda voice_offsets, x
+		sta v042f
+		tax 
+		ldy music_voice
+		lda v0430, y
+		sta voice1_control, x
+		jmp lBBBD
+
+lBB4F:
+		lda music_note
+		asl 
+		tay 
+		ldx v042f
+		lda note_frequencies, y
+		sta voice1_frequency, x
+		lda note_frequencies + $1, y
+		sta voice1_frequency + $1, x
+		ldy music_voice
+		lda v0430, y
+		ora #$01
+		sta voice1_control, x
+		lda music_duration
+		ldx music_voice
+		sta v0434, x
+
+lBB77:
+		inc music_voice
+		lda music_voice
+		cmp #$04
+		bcc lBB34
+		jsr scnkey
+		jsr getin
+		bne lBBA2
+
+lBB89:
+		ldx #$01
+
+lBB8B:
+		ldy music_tempo
+
+lBB8E:
+		pha 
+		txa 
+		pha 
+		ldx #$00
+
+lBB93:
+		dex 
+		bne lBB93
+		pla 
+		tax 
+		pla 
+		dey 
+		bne lBB8E
+		dex 
+		bne lBB8B
+		jmp lBB2F
+
+lBBA2:
+		cmp #$85
+		beq lBBAE
+		cmp #$86
+		beq lBBAE
+		cmp #$87
+		bne lBB89
+
+lBBAE:
+		pha 
+		jsr silence_sid
+		pla 
+		ldx music_saved_stack
+		txs 
+		rts 
+
+voice_offsets:
+		.byte	$00, $00, $07, $0e, $15
+
+lBBBD:
+		ldx music_voice
+		lda voice_offsets + $1, x
+		tax 
+		ldy #$00
+
+lBBC6:
+		lda v040d, x
+		sta v040d, y
+		inx 
+		iny 
+		cpy #$07
+		bcc lBBC6
+		lda v0412
+		sta pointer_06
+		lda v0413
+		sta pointer_06 + $1
+		jmp music_step
+
+lBBDF:
+		ldx music_voice
+		lda voice_offsets + $1, x
+		tax 
+		ldy #$00
+		lda pointer_06
+		sta v0412
+		lda pointer_06 + $1
+		sta v0413
+
+lBBF2:
+		lda v040d, y
+		sta v040d, x
+		inx 
+		iny 
+		cpy #$07
+		bcc lBBF2
+		jmp lBB4F
+
+silence_sid:
 		ldx #$19
 		lda #$00
 
 lBC05:
-		sta $d400, x
+		sta voice1_frequency, x
 		dex 
 		bne lBC05
 		rts 
-*=$ea31
 
-lEA31:
-		brk 
+init_sid:
+		jsr silence_sid
+		lda #$09
+		sta voice1_attack_decay
+		lda #$04
+		sta voice1_sustain_release
+		lda #$01
+		sta voice1_pulse_width + $1
+		lda #$b4
+		sta voice1_pulse_width
+		lda #$40
+		sta v0431
+		lda #$09
+		sta voice2_attack_decay
+		sta voice3_attack_decay
+		sta voice2_sustain_release
+		sta voice3_sustain_release
+		lda #$03
+		sta voice2_pulse_width + $1
+		sta voice3_pulse_width + $1
+		lda #$40
+		sta v0432
+		sta v0433
+		lda #$0f
+		sta volume_filter_mode
+		lda #$9b
+		sta music_tempo
+		rts 
+
+select_tune:
+		cmp #$00
+		beq lBC61
+		cmp #$01
+		beq lBC62
+		cmp #$02
+		beq lBC9F
+		cmp #$03
+		beq lBCDC
+
+lBC61:
+		rts 
+
+lBC62:
+		lda #$92
+		sta v0424
+		lda #$be
+		sta v0425
+		lda #$7b
+		sta v0427
+		lda #$be
+		sta v0428
+		lda #$a8
+		sta v041d
+		lda #$be
+		sta v041e
+		lda #$91
+		sta v0420
+		lda #$be
+		sta v0421
+		lda #$b0
+		sta v0416
+		lda #$be
+		sta v0417
+		lda #$a7
+		sta v0419
+		lda #$be
+		sta v041a
+		rts 
+
+lBC9F:
+		lda #$be
+		sta v0424
+		lda #$be
+		sta v0425
+		lda #$af
+		sta v0427
+		lda #$be
+		sta v0428
+		lda #$cc
+		sta v041d
+		lda #$be
+		sta v041e
+		lda #$bd
+		sta v0420
+		lda #$be
+		sta v0421
+		lda #$e6
+		sta v0416
+		lda #$be
+		sta v0417
+		lda #$cb
+		sta v0419
+		lda #$be
+		sta v041a
+		rts 
+
+lBCDC:
+		lda #$00
+		sta v0424
+		lda #$bf
+		sta v0425
+		lda #$e5
+		sta v0427
+		lda #$be
+		sta v0428
+		lda #$0e
+		sta v041d
+		lda #$bf
+		sta v041e
+		lda #$ff
+		sta v0420
+		lda #$be
+		sta v0421
+		lda #$16
+		sta v0416
+		lda #$bf
+		sta v0417
+		lda #$0d
+		sta v0419
+		lda #$bf
+		sta v041a
+		rts 
+
+; ---- music ----
+; notes and durations; $8x bytes are commands
+music_data:
+		.byte	$82, $01, $30, $01, $30, $01, $27, $01, $2a, $01, $80, $01, $07, $82, $02, $33
+		.byte	$01, $33, $01, $2a, $01, $31, $01, $80, $02, $03, $82, $03, $80, $01, $01, $82
+		.byte	$04, $27, $01, $27, $01, $22, $01, $25, $01, $80, $04, $07, $80, $01, $01, $82
+		.byte	$05, $28, $02, $28, $02, $28, $02, $28, $02, $82, $06, $2a, $02, $2a, $02, $2a
+		.byte	$02, $2a, $02, $82, $07, $2b, $02, $2b, $02, $2b, $02, $2b, $02, $30, $02, $30
+		.byte	$02, $30, $02, $30, $02, $81, $06, $07, $25, $02, $25, $02, $25, $02, $25, $02
+		.byte	$22, $02, $22, $02, $22, $02, $22, $02, $27, $02, $27, $02, $27, $02, $27, $02
+		.byte	$80, $01, $00, $82, $0a, $8c, $57, $06, $55, $02, $54, $08, $80, $0a, $01, $5a
+		.byte	$06, $58, $02, $57, $08, $80, $0a, $01, $5b, $02, $5b, $02, $59, $02, $59, $02
+		.byte	$57, $02, $57, $02, $59, $02, $59, $02, $5b, $06, $59, $02, $57, $04, $57, $04
+		.byte	$80, $0a, $01, $8d, $60, $04, $60, $04, $5a, $04, $57, $04, $57, $04, $55, $04
+		.byte	$53, $04, $53, $04, $54, $04, $54, $04, $55, $04, $55, $04, $59, $04, $55, $04
+		.byte	$57, $08, $80, $0a, $00, $82, $14, $54, $06, $52, $02, $50, $08, $80, $14, $01
+		.byte	$57, $06, $55, $02, $53, $08, $80, $14, $01, $57, $02, $57, $02, $55, $02, $55
+		.byte	$02, $4b, $02, $52, $02, $55, $02, $55, $02, $57, $06, $55, $02, $4b, $02, $52
+		.byte	$02, $55, $02, $52, $02, $80, $14, $01, $82, $15, $48, $01, $50, $01, $53, $01
+		.byte	$50, $01, $80, $15, $01, $82, $16, $47, $01, $4a, $01, $53, $01, $4a, $01, $80
+		.byte	$16, $01, $82, $17, $47, $01, $4b, $01, $52, $01, $4b, $01, $80, $17, $01, $82
+		.byte	$18, $43, $01, $47, $01, $50, $01, $47, $01, $80, $18, $01, $82, $19, $47, $01
+		.byte	$4a, $01, $50, $01, $4a, $01, $80, $19, $01, $82, $1a, $45, $01, $48, $01, $50
+		.byte	$01, $48, $01, $80, $1a, $01, $82, $1b, $42, $01, $45, $01, $49, $01, $45, $01
+		.byte	$80, $1b, $01, $82, $1c, $47, $01, $4b, $01, $52, $01, $55, $01, $80, $1c, $01
+		.byte	$80, $14, $00, $47, $03, $47, $01, $47, $01, $47, $01, $50, $02, $47, $02, $50
+		.byte	$02, $54, $02, $50, $02, $54, $02, $57, $06, $44, $03, $44, $01, $44, $01, $44
+		.byte	$01, $47, $02, $44, $02, $47, $02, $50, $02, $49, $02, $50, $02, $4b, $06, $30
+		.byte	$06, $2b, $06, $29, $06, $27, $06, $4a, $02, $4a, $02, $49, $02, $45, $02, $43
+		.byte	$02, $43, $02, $42, $04, $44, $02, $47, $02, $40, $02, $40, $02, $39, $02, $40
+		.byte	$02, $35, $04, $20, $01, $20, $01, $24, $01, $24, $01, $25, $01, $25, $01, $29
+		.byte	$01, $29, $01, $25, $01, $25, $01, $29, $01, $29, $01, $2a, $04, $51, $01, $4a
+		.byte	$01, $47, $01, $44, $01, $50, $01, $48, $01, $45, $01, $42, $01, $4a, $01, $47
+		.byte	$01, $44, $01, $41, $01, $48, $04, $3a, $02, $3a, $02, $38, $02, $38, $02, $34
+		.byte	$02, $34, $02, $40, $04, $20, $04, $20, $04, $20, $04, $25, $04
+
+; SID frequencies: 16 words per octave, 12 of them used
+note_frequencies:
+		.word	$010c, $011c, $012d, $013e, $0151, $0166, $017b, $0191, $01a9, $01c3, $01dd, $01fa, $0000, $0000, $0000, $0000
+		.word	$0218, $0238, $025a, $027d, $02a3, $02cc, $02f6, $0323, $0353, $0386, $03bb, $03f4, $0000, $0000, $0000, $0000
+		.word	$0430, $0470, $04b4, $04fb, $0547, $0598, $05ed, $0647, $06a7, $070c, $0777, $07e9, $0000, $0000, $0000, $0000
+		.word	$0861, $08e1, $0968, $09f7, $0a8f, $0b30, $0bda, $0c8f, $0d4e, $0e18, $0eef, $0fd2, $0000, $0000, $0000, $0000
+		.word	$10c3, $11c3, $12d1, $13ef, $151f, $1660, $17b5, $191e, $1a9c, $1c31, $1ddf, $1fa5, $0000, $0000, $0000, $0000
+		.word	$2187, $2386, $25a2, $27df, $2a3e, $2cc1, $2f6b, $323c, $3539, $3863, $3bbe, $3f4b, $0000, $0000, $0000, $0000
+		.word	$430f, $470c, $4b45, $4fbf, $547d, $5983, $5ed6, $6479, $6a73, $70c7, $777c, $7e97, $0000, $0000, $0000, $0000
+		.word	$861e, $8e18, $968b, $9f7e, $a8fa, $b306, $bdac, $c8f3, $d4e6, $e18f, $eef8, $fd2e
+
+vc00e:
+		.byte	$08
+
+unused_golf:
+		.text	"GOLF"
+
+vc013:
+		.byte	$34
+vc014:		.byte	$05
+
+vc015:
+		.word	$7f40
+
+vc017:
+		.byte	$34
+
+vc018:
+		.word	$c17d
+
+lC01A:
+		lda #$ea
+		sta $a64e
+		jsr l0FF3
+		ldx #$01
+		cmp #$43
+		beq lC03B
+		cmp #$4e
+		beq lC036
+		ldx #$08
+		cmp #$44
+		beq lC03B
+		cmp #$4d
+		bne lC01A
+
+lC036:
+		lda #$00
+		sta $a64e
+
+lC03B:
+		stx vc00e
+		jsr lC0F3
+		lda cpu_port
+		and #$fd
+		sta cpu_port
+		lda #$00
+		sta vfb
+		lda #$e0
+		sta vfc
+		lda #$00
+		sta pointer_fd
+		lda #$60
+		sta pointer_fd + $1
+		ldy #$00
+
+lC059:
+		lda (vfb), y
+		sta (pointer_fd), y
+		iny 
+		bne lC059
+		inc vfc
+		inc pointer_fd + $1
+		lda vfc
+		cmp #$f0
+		bcc lC059
+		lda cpu_port
+		ora #$02
+		sta cpu_port
+		lda #$00
+		sta vc015
+		lda #$60
+		sta vc015 + $1
+		lda #$00
+		sta vc018
+		lda #$70
+		sta vc018 + $1
+		jsr lC13B
+		lda #$00
+		sta vc015
+		lda #$09
+		sta vc015 + $1
+		lda #$00
+		sta vc018
+		lda #$44
+		sta vc018 + $1
+		jsr lC13B
+		lda #$00
+		sta vc015
+		lda #$48
+		sta vc015 + $1
+		lda #$00
+		sta vc018
+		lda #$60
+		sta vc018 + $1
+		jsr lC13B
+		lda $a64e
+		beq lC0D4
+		lda #$40
+		sta vc015
+		lda #$7f
+		sta vc015 + $1
+		lda #$1a
+		sta vc018
+		lda #$c0
+		sta vc018 + $1
+		jsr lC13B
+		jmp lC0EB
+
+lC0D4:
+		lda #$40
+		sta vc015
+		lda #$7f
+		sta vc015 + $1
+		lda #$7d
+		sta vc018
+		lda #$c1
+		sta vc018 + $1
+		jsr lC13B
+
+lC0EB:
+		lda #$00
+		sta $a64e
+		jmp start
+
+lC0F3:
+		lda cpu_port
+		and #$fe
+		sta cpu_port
+		lda #$30
+		sta vc017
+		jsr clall
+		ldx vc00e
+		ldy #$01
+		lda vc00e
+		jsr setlfs
+		bcs lC129
+		jsr print_hex
+		jsr print_inline
+
+text_error_in_setlfs:
+		.text	" ERROR IN SETLFS", $0d, $ff
+
+lC126:
+		jmp lC126
+
+lC129:
+		lda vc014
+		ldx #$0f
+		ldy #$c0
+		jsr setnam
+		bcs lC13A
+		bcc lC13A
+
+lC137:
+		jmp lC137
+
+lC13A:
+		rts 
+
+lC13B:
+		inc vc017
+		lda vc017
+		sta vc013
+		lda vc015
+		sta text_pointer
+		lda vc015 + $1
+		sta text_pointer + $1
+		ldx vc018
+		ldy vc018 + $1
+		lda #$02
+		jsr save
+		bcc lC176
+		jsr print_hex
+		jsr print_inline
+
+text_save_routine_error:
+		.text	" SAVE ROUTINE ERROR", $0d, $ff
+
+lC176:
+		rts 
+
+; unreferenced: flashes the border forever
+lC177:
+		inc border_color
+		jmp lC177
+
+unused_nops:
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea
+; unreferenced leftover data
+unused_cb00:
+		.byte	$7e, $7e, $7e, $7e, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $7e, $7e, $7e, $7e, $7e, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $86, $86, $86, $86, $86, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $87, $87, $ff, $ff
+		.byte	$7e, $7e, $7e, $7e, $7e, $ff, $ff, $ff, $ff, $ff, $86, $86, $86, $86, $86, $86
+		.byte	$86, $86, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $87, $87, $87, $87, $ff, $ff, $7e, $7e, $7e, $7e, $ff, $ff, $ff
+		.byte	$ff, $ff, $86, $86, $86, $86, $86, $86, $86, $86, $86, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $87, $87, $87, $87, $ff
+		.byte	$ff, $7e, $7e, $7e, $ff, $ff, $ff, $ff, $ff, $86, $86, $86, $86, $86, $86, $86
+		.byte	$86, $86, $86, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $8c, $8c, $8a, $8a
+		.byte	$8a, $8a, $ff, $87, $87, $87, $87, $ff, $ff, $7e, $7e, $7e, $ff, $ff, $ff, $ff
+		.byte	$ff, $86, $86, $86, $86, $86, $86, $86, $86, $86, $86, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $8c, $8c, $8a, $8a, $8a, $8a, $8b, $87, $8e, $89, $89, $ff
+		.byte	$7e, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $86, $86, $86, $86, $86, $86
+		.byte	$86, $86, $8e, $8e, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $8e, $8e, $8c, $8a, $8a
+		.byte	$8c, $8b, $8b, $8e, $8e, $89, $89, $81, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $86, $86, $ff, $ff, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8c, $8e, $8e, $8e, $ff, $ff, $ff, $ff, $ff, $81, $81
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $86, $86, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $ff, $ff, $81, $81, $7e, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $ff, $ff
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $8e, $8e, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$ff, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $ff, $ff, $ff, $ff, $ff, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$ff, $ff, $ff, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $ff, $ff, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+		.byte	$8e, $8e, $8e, $8e, $8e, $8e, $8e, $8e
+unused_nops2:
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+
+.virtual $d000
+; ---- VIC-II ----
+sprite0_x:		.byte	?
+sprite0_y:		.byte	?
+sprite1_x:		.byte	?
+sprite1_y:		.byte	?
+sprite2_x:		.byte	?
+sprite2_y:		.byte	?
+sprite3_x:		.byte	?
+sprite3_y:		.byte	?
+sprite4_x:		.byte	?
+sprite4_y:		.byte	?
+sprite5_x:		.byte	?
+sprite5_y:		.byte	?
+sprite6_x:		.byte	?
+sprite6_y:		.byte	?
+sprite7_x:		.byte	?
+sprite7_y:		.byte	?
+sprites_x_msb:		.byte	?
+vic_control1:		.byte	?
+raster:		.byte	?
+light_pen_x:		.byte	?
+light_pen_y:		.byte	?
+sprite_enable:		.byte	?
+vic_control2:		.byte	?
+sprite_expand_y:		.byte	?
+vic_memory:		.byte	?
+vic_irq_status:		.byte	?
+vic_irq_enable:		.byte	?
+sprite_priority:		.byte	?
+sprite_multicolor:		.byte	?
+sprite_expand_x:		.byte	?
+sprite_sprite_collision:		.byte	?
+sprite_background_collision:		.byte	?
+border_color:		.byte	?
+background_color:		.byte	?
+background_color1:		.byte	?
+background_color2:		.byte	?
+background_color3:		.byte	?
+sprite_multicolor0:		.byte	?
+sprite_multicolor1:		.byte	?
+sprite0_color:		.byte	?
+sprite1_color:		.byte	?
+sprite2_color:		.byte	?
+sprite3_color:		.byte	?
+sprite4_color:		.byte	?
+sprite5_color:		.byte	?
+sprite6_color:		.byte	?
+sprite7_color:		.byte	?
+vic_unused_2f:		.byte	?
+; the C128's clock speed register; the decruncher runs at 2 MHz on a C128
+c128_clock:		.byte	?
+vic_mirrors:
+		.fill	975
+; ---- SID ----
+voice1_frequency:		.word	?
+voice1_pulse_width:		.word	?
+voice1_control:		.byte	?
+voice1_attack_decay:		.byte	?
+voice1_sustain_release:		.byte	?
+voice2_frequency:		.word	?
+voice2_pulse_width:		.word	?
+voice2_control:		.byte	?
+voice2_attack_decay:		.byte	?
+voice2_sustain_release:		.byte	?
+voice3_frequency:		.word	?
+voice3_pulse_width:		.word	?
+voice3_control:		.byte	?
+voice3_attack_decay:		.byte	?
+voice3_sustain_release:		.byte	?
+filter_cutoff:		.word	?
+filter_control:		.byte	?
+volume_filter_mode:		.byte	?
+sid_mirrors:
+		.fill	999
+; ---- color RAM ----
+color_ram:
+		.fill	1024
+; ---- CIAs ----
+cia1_port_a:		.byte	?
+cia1_port_b:		.byte	?
+cia1_unused:
+		.fill	11
+cia1_interrupt_control:		.byte	?
+cia1_rest:
+		.fill	242
+cia2_port_a:		.byte	?
+cia2_port_b:		.byte	?
+cia2_direction_a:		.byte	?
+cia2_rest:
+		.fill	253
+io_expansion:
+		.fill	512
+.endv
+
+*=$e000
+
+; ---- shape data, read with all RAM banked in ----
+; lists of x/y steps, each ending with $80
+shapes:
+		.addr	shape_e026, shape_e0b1, shape_e11c, shape_e1d0, shape_e2a6, shape_e2bd, shape_e35c, shape_e3c5, shape_e3fe, shape_e443, shape_e4e4, shape_e8ef, shape_e9a0, shape_ea63, shape_ea86, shape_eb0d
+		.addr	shape_eb26, shape_eb36, shape_eb0d
+
+shape_e026:
+		.byte	$00, $48, $04, $20, $18, $1c, $19, $14, $10, $11, $20, $0f, $24, $00, $1c, $00
+		.byte	$1c, $fb, $26, $f5, $25, $e9, $22, $e9, $1f, $e3, $20, $d8, $18, $d8, $14, $d4
+		.byte	$0d, $dc, $08, $dc, $0c, $e2, $18, $e5, $0e, $e8, $10, $ec, $0b, $f1, $08, $f1
+		.byte	$fd, $f8, $ed, $f0, $f5, $e9, $fa, $e1, $f8, $de, $ec, $de, $ee, $d8, $f4, $d6
+		.byte	$f4, $d3, $e8, $d2, $df, $de, $e4, $e6, $dc, $e8, $dd, $f8, $ee, $fc, $e0, $04
+		.byte	$e4, $14, $ee, $1e, $80, $05, $00, $d0, $03, $24, $04, $15, $0b, $21, $0c, $20
+		.byte	$04, $10, $04, $03, $0f, $0a, $10, $09, $04, $00, $05, $eb, $08, $e8, $02, $ea
+		.byte	$fa, $e8, $fc, $ec, $fc, $04, $f4, $05, $f8, $06, $ef, $0e, $f0, $0e, $fc, $06
+		.byte	$fd, $1c, $f5, $24, $fd, $1e, $fd, $28, $80, $09, $80
+shape_e0b1:
+		.byte	$00, $58, $00, $17, $0a, $12, $0e, $0e, $04, $08, $10, $04, $19, $f8, $16, $f6
+		.byte	$1f, $f1, $1a, $ee, $1e, $ea, $1c, $e8, $13, $ed, $07, $eb, $ff, $f3, $ec, $e0
+		.byte	$e5, $e5, $e7, $ec, $f8, $f4, $e4, $f4, $e5, $f8, $ec, $f9, $e6, $ff, $f2, $04
+		.byte	$ed, $06, $f0, $14, $80, $05, $10, $e0, $0c, $02, $08, $01, $0d, $fa, $04, $f8
+		.byte	$02, $fc, $f6, $00, $f1, $00, $f8, $08, $80, $05, $e0, $fc, $09, $04, $0e, $00
+		.byte	$0e, $ff, $f3, $f7, $f8, $00, $80, $05, $10, $f4, $01, $1d, $03, $1f, $01, $16
+		.byte	$03, $d8, $fe, $d8, $fe, $22, $ff, $23, $80, $09, $80
+shape_e11c:
+		.byte	$00, $20, $00, $40, $04, $31, $07, $29, $09, $20, $09, $14, $0a, $08, $08, $f8
+		.byte	$04, $ed, $00, $e9, $fc, $ed, $f8, $f8, $f6, $08, $f6, $18, $f8, $28, $fb, $30
+		.byte	$80, $05, $00, $e4, $01, $06, $01, $fc, $ff, $fc, $ff, $06, $80, $09, $80, $00
+		.byte	$30, $00, $21, $04, $25, $02, $1b, $0d, $22, $06, $14, $14, $1e, $19, $1c, $0c
+		.byte	$16, $1b, $17, $12, $14, $0c, $0d, $14, $0e, $16, $0c, $10, $0b, $0c, $07, $1a
+		.byte	$0c, $25, $00, $18, $08, $10, $00, $22, $fc, $25, $f5, $10, $fe, $20, $f0, $24
+		.byte	$e8, $10, $f8, $02, $fb, $ff, $ec, $fc, $fb, $f4, $f3, $f7, $fc, $f0, $f8, $f1
+		.byte	$ff, $e8, $f0, $ec, $ff, $e4, $fc, $da, $e9, $e0, $00, $f0, $0b, $e8, $0a, $da
+		.byte	$06, $df, $0b, $ec, $10, $db, $0d, $eb, $18, $f4, $19, $f8, $16, $f4, $1e, $e7
+		.byte	$1f, $f5, $22, $f9, $18, $f8, $24, $fc, $1c, $fd, $26, $80, $05, $00, $d8, $02
+		.byte	$23, $07, $22, $05, $18, $05, $f8, $fb, $f8, $fb, $18, $fa, $21, $fc, $23, $ff
+		.byte	$14, $80, $09, $80
+shape_e1d0:
+		.byte	$00, $18, $00, $58, $05, $4d, $07, $4d, $03, $48, $09, $48, $04, $46, $05, $3e
+		.byte	$10, $3f, $04, $3a, $12, $39, $05, $33, $0c, $2f, $16, $30, $08, $28, $1a, $27
+		.byte	$10, $24, $1c, $1e, $0b, $18, $20, $18, $0c, $11, $21, $0b, $0c, $04, $1b, $00
+		.byte	$24, $01, $13, $fa, $28, $f8, $0c, $f0, $02, $f4, $f8, $f4, $e0, $f1, $ec, $f6
+		.byte	$d8, $f8, $f5, $04, $de, $07, $f4, $08, $f0, $10, $e4, $10, $f4, $1c, $e4, $1a
+		.byte	$f6, $20, $e4, $20, $f8, $27, $e6, $29, $f9, $2e, $fc, $34, $e9, $32, $f9, $3a
+		.byte	$ee, $3b, $fc, $40, $f4, $41, $fe, $43, $f8, $47, $fe, $46, $fc, $49, $80, $05
+		.byte	$00, $ec, $02, $08, $02, $fc, $fe, $fc, $fe, $08, $80, $09, $80, $00, $54, $00
+		.byte	$0a, $05, $11, $06, $11, $00, $04, $0b, $08, $10, $04, $12, $00, $0b, $03, $03
+		.byte	$02, $0d, $ff, $11, $fa, $11, $f7, $02, $00, $07, $f8, $05, $f4, $01, $fc, $ff
+		.byte	$fd, $f6, $f6, $fa, $fc, $ec, $f4, $ea, $f4, $fa, $ff, $eb, $fe, $f1, $01, $f9
+		.byte	$02, $ec, $06, $ed, $08, $fa, $05, $f2, $14, $f5, $12, $f7, $12, $f9, $10, $f9
+		.byte	$14, $fc, $15, $fe, $13, $80, $05, $01, $b4, $02, $00, $03, $f8, $ff, $f8, $fc
+		.byte	$48, $fd, $4a, $80, $09, $80
+shape_e2a6:
+		.byte	$00, $08, $00, $22, $08, $10, $0c, $04, $0a, $fc, $04, $f8, $fc, $f8, $f6, $fc
+		.byte	$f4, $04, $f8, $10, $80, $05, $80
+shape_e2bd:
+		.byte	$00, $20, $00, $78, $02, $6b, $08, $6e, $02, $66, $02, $5e, $0c, $61, $03, $5a
+		.byte	$04, $55, $0f, $56, $04, $50, $05, $46, $18, $48, $06, $3d, $18, $3d, $04, $36
+		.byte	$1d, $37, $0a, $31, $0c, $2b, $23, $2d, $0a, $26, $10, $20, $27, $21, $14, $1c
+		.byte	$10, $16, $2c, $1a, $2e, $15, $10, $0f, $20, $0f, $10, $0c, $14, $08, $30, $08
+		.byte	$28, $06, $30, $04, $1a, $03, $2c, $ff, $18, $fe, $24, $f9, $12, $f9, $18, $f6
+		.byte	$fe, $f6, $e0, $f5, $f0, $f9, $dc, $fa, $ec, $fd, $d0, $04, $e8, $04, $d2, $09
+		.byte	$f8, $08, $e8, $10, $f9, $0c, $fb, $16, $d8, $20, $fc, $1d, $dc, $2a, $f6, $24
+		.byte	$fc, $32, $e8, $3f, $f4, $3d, $e8, $46, $fd, $41, $fd, $49, $f0, $54, $fe, $50
+		.byte	$f2, $60, $fd, $58, $fe, $5c, $f6, $6c, $fe, $63, $fe, $68, $fa, $72, $fe, $6d
+		.byte	$80, $05, $00, $e8, $02, $0e, $02, $f8, $fd, $f8, $fe, $0e, $80, $09, $80
+shape_e35c:
+		.byte	$00, $18, $04, $38, $0c, $37, $08, $35, $12, $33, $18, $2f, $14, $2e, $14, $2b
+		.byte	$1c, $28, $20, $24, $1c, $1c, $20, $1c, $24, $1a, $28, $14, $27, $0e, $24, $0b
+		.byte	$21, $0b, $25, $08, $23, $fc, $26, $fa, $21, $f8, $26, $f5, $1c, $f3, $10, $f5
+		.byte	$08, $f4, $fd, $f4, $f4, $f6, $e8, $f4, $e2, $f4, $dc, $f8, $dc, $00, $d9, $06
+		.byte	$dc, $10, $d8, $13, $d8, $18, $e0, $1f, $e0, $24, $e5, $28, $ec, $2a, $e7, $2d
+		.byte	$f0, $32, $f7, $33, $f5, $36, $fe, $37, $80, $05, $00, $ec, $04, $08, $04, $00
+		.byte	$05, $fc, $fc, $fc, $fd, $08, $80, $09, $80
+shape_e3c5:
+		.byte	$00, $08, $00, $14, $05, $19, $08, $18, $0c, $15, $11, $17, $14, $17, $18, $14
+		.byte	$1b, $10, $1c, $0c, $23, $0b, $24, $06, $2c, $02, $34, $f8, $d4, $f8, $d0, $fd
+		.byte	$d0, $04, $d8, $0c, $da, $10, $e0, $13, $e4, $1c, $e8, $1e, $ec, $1d, $f0, $1b
+		.byte	$f4, $18, $f6, $10, $fc, $0f, $80, $05, $80
+shape_e3fe:
+		.byte	$00, $04, $02, $0e, $04, $0c, $06, $08, $0b, $07, $0e, $03, $12, $02, $16, $03
+		.byte	$1a, $00, $1e, $fe, $22, $fe, $24, $00, $27, $01, $2c, $02, $2f, $00, $32, $fc
+		.byte	$cd, $fc, $d0, $fe, $d2, $02, $d5, $01, $d9, $03, $dc, $03, $de, $06, $e0, $08
+		.byte	$e4, $07, $e7, $04, $ec, $04, $ef, $06, $f3, $05, $f5, $08, $f9, $0a, $fb, $0d
+		.byte	$ff, $0d, $80, $05, $80
+shape_e443:
+		.byte	$00, $38, $15, $08, $21, $f5, $18, $f8, $0e, $f9, $f8, $f9, $ec, $f7, $eb, $08
+		.byte	$f8, $0a, $05, $0a, $80, $02, $e0, $d0, $40, $07, $58, $08, $56, $02, $4c, $f8
+		.byte	$16, $f8, $0f, $fa, $0c, $fa, $06, $f8, $ff, $fa, $f9, $fc, $f4, $fb, $f0, $f8
+		.byte	$d8, $06, $bc, $0c, $d8, $08, $f8, $07, $80, $07, $07, $0c, $00, $5c, $01, $04
+		.byte	$49, $04, $49, $03, $01, $02, $01, $fb, $fe, $fb, $ff, $5c, $80, $09, $21, $fc
+		.byte	$10, $02, $10, $ff, $f4, $ff, $f4, $02, $80, $0c, $f8, $18, $00, $32, $10, $20
+		.byte	$22, $04, $28, $f8, $2b, $f0, $21, $f3, $0d, $f5, $fc, $f6, $f3, $f6, $ec, $f5
+		.byte	$e8, $f0, $eb, $f8, $ec, $04, $eb, $24, $e8, $42, $f2, $3c, $80, $01, $d0, $f8
+		.byte	$08, $28, $16, $40, $14, $3c, $13, $38, $0e, $20, $0c, $10, $0b, $fc, $15, $ef
+		.byte	$0b, $f8, $04, $f9, $fe, $f9, $f4, $f8, $e2, $f1, $f3, $f9, $f9, $0c, $80, $01
+		.byte	$80
+shape_e4e4:
+		.byte	$fb, $14, $04, $07, $04, $fd, $fc, $fd, $fc, $07, $80, $0c, $05, $14, $04, $07
+		.byte	$04, $fd, $fc, $fd, $fc, $07, $80, $0c, $00, $24, $00, $02, $09, $fe, $f7, $fe
+		.byte	$80, $00, $e0, $19, $03, $06, $03, $fe, $fe, $fe, $fe, $06, $80, $0c, $e6, $19
+		.byte	$03, $06, $03, $fe, $fe, $fe, $fe, $06, $80, $0c, $e0, $10, $03, $06, $03, $fe
+		.byte	$fe, $fe, $fe, $06, $80, $0c, $e6, $10, $03, $06, $03, $fe, $fe, $fe, $fe, $06
+		.byte	$80, $0c, $19, $19, $03, $06, $03, $fe, $fe, $fe, $fe, $06, $80, $0c, $1f, $19
+		.byte	$03, $06, $03, $fe, $fe, $fe, $fe, $06, $80, $0c, $19, $10, $03, $06, $03, $fe
+		.byte	$fe, $fe, $fe, $06, $80, $0c, $1f, $10, $03, $06, $03, $fe, $fe, $fe, $fe, $06
+		.byte	$80, $0c, $e0, $40, $0a, $08, $0a, $fa, $fa, $fa, $fa, $08, $80, $0c, $f2, $42
+		.byte	$04, $06, $04, $fd, $fb, $fd, $fb, $06, $80, $0c, $0c, $43, $0b, $05, $0b, $fe
+		.byte	$fe, $fe, $fe, $05, $80, $0c, $1b, $43, $0b, $05, $0b, $fe, $fe, $fe, $fe, $05
+		.byte	$80, $0c, $0c, $3c, $0b, $05, $0b, $fe, $fe, $fe, $fe, $05, $80, $0c, $1b, $3c
+		.byte	$0b, $05, $0b, $fe, $fe, $fe, $fe, $05, $80, $0c, $d3, $30, $01, $08, $01, $fe
+		.byte	$ff, $fe, $ff, $08, $80, $0a, $d7, $30, $01, $08, $01, $fe, $ff, $fe, $ff, $08
+		.byte	$80, $0a, $db, $30, $01, $08, $01, $fe, $ff, $fe, $ff, $08, $80, $0a, $df, $30
+		.byte	$01, $08, $01, $fe, $ff, $fe, $ff, $08, $80, $0a, $e3, $30, $01, $08, $01, $fe
+		.byte	$ff, $fe, $ff, $08, $80, $0a, $e7, $30, $01, $08, $01, $fe, $ff, $fe, $ff, $08
+		.byte	$80, $0a, $eb, $30, $01, $08, $01, $fe, $ff, $fe, $ff, $08, $80, $0a, $ef, $30
+		.byte	$01, $08, $01, $fe, $ff, $fe, $ff, $08, $80, $0a, $f3, $30, $01, $08, $01, $fe
+		.byte	$ff, $fe, $ff, $08, $80, $0a, $f7, $30, $01, $08, $01, $fe, $ff, $fe, $ff, $08
+		.byte	$80, $0a, $fb, $30, $01, $08, $01, $fe, $ff, $fe, $ff, $08, $80, $0a, $05, $30
+		.byte	$01, $08, $01, $fe, $ff, $fe, $ff, $08, $80, $0a, $09, $30, $01, $08, $01, $fe
+		.byte	$ff, $fe, $ff, $08, $80, $0a, $0d, $30, $01, $08, $01, $fe, $ff, $fe, $ff, $08
+		.byte	$80, $0a, $11, $30, $01, $08, $01, $fe, $ff, $fe, $ff, $08, $80, $0a, $15, $30
+		.byte	$01, $08, $01, $fe, $ff, $fe, $ff, $08, $80, $0a, $19, $30, $01, $08, $01, $fe
+		.byte	$ff, $fe, $ff, $08, $80, $0a, $1d, $30, $01, $08, $01, $fe, $ff, $fe, $ff, $08
+		.byte	$80, $0a, $21, $30, $01, $08, $01, $fe, $ff, $fe, $ff, $08, $80, $0a, $25, $30
+		.byte	$01, $08, $01, $fe, $ff, $fe, $ff, $08, $80, $0a, $29, $30, $01, $08, $01, $fe
+		.byte	$ff, $fe, $ff, $08, $80, $0a, $2d, $30, $01, $08, $01, $fe, $ff, $fe, $ff, $08
+		.byte	$80, $0a, $00, $30, $01, $20, $01, $0a, $2e, $0a, $2e, $20, $30, $20, $30, $fc
+		.byte	$d0, $fc, $d0, $20, $d2, $20, $d2, $0a, $ff, $0a, $ff, $20, $80, $00, $ec, $3c
+		.byte	$0c, $0d, $0c, $fe, $ec, $fe, $ec, $0d, $80, $01, $18, $3c, $10, $0d, $10, $fe
+		.byte	$f0, $fe, $f0, $0d, $80, $01, $e0, $0d, $0a, $13, $0a, $ff, $fd, $ff, $fd, $13
+		.byte	$80, $01, $19, $0d, $0a, $13, $0a, $ff, $fd, $ff, $fd, $13, $80, $01, $00, $21
+		.byte	$00, $07, $12, $ff, $ee, $ff, $80, $01, $00, $08, $0a, $14, $0a, $fa, $f6, $fa
+		.byte	$f6, $14, $80, $01, $e0, $0b, $0c, $01, $0c, $ff, $fb, $ff, $fb, $01, $80, $09
+		.byte	$19, $0b, $0c, $01, $0c, $ff, $fb, $ff, $fb, $01, $80, $09, $00, $01, $14, $01
+		.byte	$14, $ff, $ec, $ff, $ec, $01, $80, $09, $f1, $04, $02, $1c, $02, $00, $03, $00
+		.byte	$03, $fe, $fe, $fe, $fe, $00, $ff, $00, $ff, $1c, $80, $01, $0e, $04, $02, $1c
+		.byte	$02, $00, $03, $00, $03, $fe, $fe, $fe, $fe, $00, $ff, $00, $ff, $1c, $80, $01
+		.byte	$d4, $04, $04, $28, $04, $26, $03, $26, $03, $00, $05, $00, $05, $fc, $fb, $fc
+		.byte	$fb, $00, $fd, $00, $fd, $26, $fc, $26, $fc, $28, $80, $01, $2c, $04, $04, $28
+		.byte	$04, $26, $03, $26, $03, $00, $05, $00, $05, $fc, $fb, $fc, $fb, $00, $fd, $00
+		.byte	$fd, $26, $fc, $26, $fc, $28, $80, $01, $e0, $40, $1f, $10, $1f, $fa, $f2, $fa
+		.byte	$f2, $10, $80, $0a, $10, $40, $1e, $10, $1e, $fa, $f1, $fa, $f1, $10, $80, $0a
+		.byte	$00, $28, $29, $02, $29, $d8, $d7, $d8, $d7, $02, $80, $0a, $00, $08, $0d, $18
+		.byte	$0d, $fa, $f3, $fa, $f3, $18, $80, $0a, $00, $58, $00, $14, $30, $f8, $d0, $f8
+		.byte	$80, $01, $00, $6e, $00, $02, $38, $e2, $30, $e2, $00, $fe, $d0, $e2, $c8, $e2
+		.byte	$80, $00, $a8, $48, $16, $03, $16, $ff, $fa, $ff, $fa, $03, $80, $0c, $a8, $3c
+		.byte	$16, $0a, $16, $fc, $fa, $fc, $fa, $0a, $80, $0c, $a8, $18, $1e, $0e, $1e, $fa
+		.byte	$fa, $fa, $fa, $0e, $80, $0c, $a8, $11, $20, $16, $20, $ff, $f8, $ff, $f8, $16
+		.byte	$80, $0c, $a8, $0f, $22, $01, $22, $ff, $f6, $ff, $f6, $01, $80, $09, $a8, $37
+		.byte	$18, $15, $18, $ff, $f8, $ff, $f8, $15, $80, $0c, $a8, $35, $1a, $01, $1a, $ff
+		.byte	$f6, $ff, $f6, $01, $80, $09, $b0, $28, $21, $2a, $21, $d8, $e8, $d8, $e8, $2a
+		.byte	$80, $0a, $c8, $53, $08, $01, $08, $ff, $c2, $ff, $c2, $01, $80, $00, $34, $53
+		.byte	$42, $01, $42, $ff, $fc, $ff, $fc, $01, $80, $00, $40, $48, $0e, $03, $0e, $ff
+		.byte	$fe, $ff, $fe, $03, $80, $0c, $40, $3c, $0e, $0a, $0e, $fc, $fe, $fc, $fe, $0a
+		.byte	$80, $0c, $40, $37, $10, $15, $10, $ff, $fc, $ff, $fc, $15, $80, $01, $40, $35
+		.byte	$12, $01, $12, $ff, $fa, $ff, $fa, $01, $80, $09, $40, $14, $1e, $12, $1e, $fe
+		.byte	$fa, $fe, $fa, $12, $80, $0c, $40, $11, $20, $16, $20, $ff, $f8, $ff, $f8, $16
+		.byte	$80, $01, $40, $0f, $22, $01, $22, $ff, $f6, $ff, $f6, $01, $80, $09, $40, $28
+		.byte	$28, $2a, $28, $d8, $ef, $d8, $ef, $2a, $80, $0a, $30, $58, $08, $14, $46, $fc
+		.byte	$01, $fc, $d7, $14, $80, $0c, $d0, $58, $29, $14, $ff, $fc, $ba, $fc, $f8, $14
+		.byte	$80, $0c, $64, $60, $04, $08, $04, $f9, $fc, $fc, $fc, $08, $80, $0a, $64, $69
+		.byte	$02, $02, $02, $ff, $fe, $ff, $fe, $02, $80, $0c, $80
+shape_e8ef:
+		.byte	$f8, $08, $0e, $00, $fe, $fe, $fd, $01, $80, $0c, $08, $fc, $0e, $05, $12, $06
+		.byte	$09, $0b, $14, $06, $1a, $06, $27, $04, $2c, $03, $30, $02, $30, $01, $2e, $00
+		.byte	$2e, $ff, $29, $fe, $22, $fe, $20, $01, $1d, $02, $1b, $02, $18, $01, $16, $fe
+		.byte	$f2, $fe, $f1, $ff, $f0, $01, $ee, $03, $eb, $04, $e8, $03, $e6, $01, $e5, $ff
+		.byte	$e4, $fe, $e2, $fe, $d9, $00, $d7, $00, $d7, $02, $d8, $02, $d8, $07, $db, $07
+		.byte	$f4, $0b, $f6, $0b, $f9, $06, $80, $02, $eb, $ff, $00, $03, $03, $02, $04, $00
+		.byte	$02, $fe, $fe, $fe, $fc, $00, $fd, $02, $80, $0c, $00, $00, $00, $05, $03, $04
+		.byte	$05, $02, $06, $00, $03, $fd, $00, $fc, $fd, $fd, $fa, $00, $fb, $02, $fd, $04
+		.byte	$80, $00, $31, $00, $00, $02, $03, $01, $04, $00, $03, $ff, $00, $fe, $fd, $ff
+		.byte	$fc, $00, $fd, $01, $80, $0c, $00, $00, $01, $03, $04, $02, $05, $00, $05, $ff
+		.byte	$04, $fd, $00, $fc, $fc, $fd, $fb, $ff, $fb, $00, $fc, $02, $ff, $03, $80, $00
+		.byte	$80
+shape_e9a0:
+		.byte	$00, $10, $08, $05, $08, $fe, $f3, $fe, $fd, $05, $80, $0c, $10, $00, $04, $05
+		.byte	$0c, $ff, $fa, $fe, $fa, $05, $80, $0c, $f0, $f8, $16, $0e, $26, $07, $32, $08
+		.byte	$32, $07, $2f, $05, $2f, $fd, $31, $fd, $31, $fb, $27, $fb, $26, $fc, $26, $fe
+		.byte	$24, $00, $22, $01, $1e, $01, $1c, $00, $1a, $fe, $1a, $fc, $19, $fb, $ef, $fb
+		.byte	$ee, $fc, $ee, $fe, $ec, $00, $e9, $01, $e7, $01, $e4, $00, $e2, $fe, $e2, $fc
+		.byte	$e1, $fb, $d2, $fb, $d2, $fd, $d4, $fd, $d4, $01, $d9, $03, $f0, $06, $fd, $0e
+		.byte	$80, $01, $e8, $fc, $00, $04, $03, $03, $04, $01, $03, $ff, $00, $fe, $fd, $ff
+		.byte	$fc, $01, $fd, $03, $80, $0c, $00, $00, $01, $05, $04, $04, $06, $02, $06, $00
+		.byte	$03, $fd, $01, $fc, $ff, $fc, $fd, $fd, $fa, $00, $fa, $02, $fc, $04, $ff, $05
+		.byte	$80, $00, $38, $00, $00, $04, $03, $03, $04, $01, $03, $ff, $00, $fe, $fd, $ff
+		.byte	$fc, $01, $fd, $03, $80, $0c, $00, $00, $02, $05, $04, $04, $06, $02, $06, $00
+		.byte	$03, $fd, $01, $fc, $ff, $fc, $fd, $fd, $fa, $00, $fa, $02, $fc, $04, $fe, $05
+		.byte	$80, $00, $80
+kernal_irq = $ea31
+
+shape_ea63:
+		.byte	$00, $18, $00, $54, $06, $4f, $08, $f0, $f8, $f0, $fa, $4f, $80, $07, $00, $ec
+		.byte	$10, $04, $10, $00, $18, $00, $18, $fc, $e8, $fc, $e8, $00, $f0, $00, $f0, $04
+		.byte	$80, $00, $80
+shape_ea86:
+		.byte	$f8, $5e, $03, $04, $03, $fc, $fc, $fc, $fc, $04, $80, $0c, $08, $00, $03, $04
+		.byte	$03, $fc, $fd, $fc, $fd, $04, $80, $0c, $08, $00, $04, $04, $04, $fc, $fd, $fc
+		.byte	$fd, $04, $80, $0c, $f8, $00, $0e, $06, $0e, $fa, $f2, $fa, $f2, $06, $80, $0b
+		.byte	$00, $c2, $00, $4e, $04, $4d, $08, $4b, $09, $48, $0a, $44, $0a, $20, $0b, $00
+		.byte	$0e, $eb, $06, $ec, $02, $eb, $f6, $ed, $f3, $ec, $f5, $00, $f6, $20, $f6, $44
+		.byte	$f7, $48, $f8, $4b, $fc, $4d, $80, $01, $00, $e4, $02, $07, $06, $08, $0c, $07
+		.byte	$0f, $07, $0f, $05, $15, $04, $17, $01, $1c, $ff, $1e, $fd, $20, $fc, $d0, $fc
+		.byte	$d6, $fe, $da, $fe, $db, $01, $dd, $03, $e2, $02, $e7, $02, $e8, $04, $ee, $05
+		.byte	$f0, $08, $f6, $09, $80, $0c, $80
+kernal_scnkey = $ea87
+
+shape_eb0d:
+		.byte	$00, $18, $07, $00, $ff, $fc, $ff, $e8, $ff, $04, $80, $02, $ff, $e8, $02, $00
+		.byte	$00, $fe, $fe, $00, $00, $02, $80, $00, $80
+shape_eb26:
+		.byte	$00, $00, $14, $0a, $1e, $00, $14, $f6, $ec, $f6, $e2, $00, $ec, $0a, $80, $00
+shape_eb36:		.byte	$80
+
+shapes2:
+		.addr	shape_eb63, shape_eb70, shape_eb7d, shape_eb8a, shape_eb97, shape_eba8, shape_ebb9, shape_ebca, shape_ebdb, shape_ebf0, shape_ec05, shape_ec1a, shape_ec2f, shape_ec44, shape_ec59, shape_ec6e
+		.addr	shape_ec83, shape_ec94, shape_eca5, shape_ecc4, shape_ecdd, shape_ecf2
+
+shape_eb63:
+		.byte	$01, $01, $02, $00, $01, $ff, $ff, $ff, $fe, $00, $ff, $01, $80
+shape_eb70:
+		.byte	$00, $02, $01, $01, $01, $ff, $00, $fe, $ff, $ff, $ff, $01, $80
+shape_eb7d:
+		.byte	$00, $01, $01, $01, $01, $00, $00, $fe, $fe, $fe, $fe, $00, $80
+shape_eb8a:
+		.byte	$00, $01, $01, $00, $01, $fe, $00, $fe, $fe, $00, $fe, $01, $80
+shape_eb97:
+		.byte	$00, $01, $02, $01, $02, $00, $02, $ff, $00, $fe, $fe, $ff, $fd, $00, $fe, $01
+		.byte	$80
+shape_eba8:
+		.byte	$00, $02, $01, $02, $01, $00, $01, $fe, $00, $fd, $ff, $fe, $fe, $00, $ff, $02
+		.byte	$80
+shape_ebb9:
+		.byte	$00, $02, $02, $02, $02, $00, $01, $ff, $ff, $fe, $fe, $fe, $fe, $ff, $ff, $01
+		.byte	$80
+shape_ebca:
+		.byte	$01, $01, $02, $ff, $02, $fe, $00, $fe, $ff, $ff, $fe, $00, $fe, $02, $ff, $02
+		.byte	$80
+shape_ebdb:
+		.byte	$01, $01, $03, $01, $03, $00, $03, $ff, $01, $fe, $ff, $fe, $fd, $ff, $fc, $00
+		.byte	$fd, $01, $ff, $01, $80
+shape_ebf0:
+		.byte	$00, $03, $01, $03, $01, $01, $01, $ff, $01, $fd, $00, $fc, $ff, $fd, $fe, $ff
+		.byte	$fe, $01, $ff, $03, $80
+shape_ec05:
+		.byte	$00, $02, $01, $02, $02, $02, $02, $01, $02, $00, $00, $fe, $fe, $fd, $fd, $fd
+		.byte	$fd, $fe, $fe, $00, $80
+shape_ec1a:
+		.byte	$00, $02, $02, $00, $02, $fe, $02, $fd, $01, $fd, $00, $fe, $fe, $00, $fd, $01
+		.byte	$fd, $02, $fe, $02, $80
+shape_ec2f:
+		.byte	$01, $02, $04, $01, $04, $00, $04, $ff, $01, $fe, $ff, $fe, $fc, $ff, $fb, $00
+		.byte	$fc, $01, $ff, $02, $80
+shape_ec44:
+		.byte	$00, $04, $01, $04, $02, $01, $02, $ff, $01, $fc, $00, $fb, $ff, $fc, $fe, $ff
+		.byte	$fe, $01, $ff, $04, $80
+shape_ec59:
+		.byte	$02, $03, $03, $03, $03, $02, $02, $ff, $00, $fd, $fe, $fc, $fd, $fd, $fc, $fe
+		.byte	$fd, $00, $ff, $02, $80
+shape_ec6e:
+		.byte	$00, $02, $02, $00, $03, $fe, $03, $fd, $02, $fc, $ff, $fd, $fd, $ff, $fc, $02
+		.byte	$fd, $03, $fe, $03, $80
+shape_ec83:
+		.byte	$00, $01, $01, $00, $01, $ff, $00, $fe, $ff, $fe, $fe, $ff, $fe, $00, $ff, $01
+		.byte	$80
+shape_ec94:
+		.byte	$00, $02, $01, $01, $02, $00, $01, $fe, $00, $fe, $fe, $fe, $fe, $00, $fe, $01
+		.byte	$80
+shape_eca5:
+		.byte	$00, $02, $01, $02, $02, $01, $02, $00, $02, $ff, $02, $fe, $01, $fe, $00, $fd
+		.byte	$ff, $fd, $fe, $fe, $fe, $fe, $fd, $ff, $fd, $00, $fe, $01, $fe, $02, $80
+shape_ecc4:
+		.byte	$00, $03, $01, $02, $02, $01, $03, $00, $02, $fe, $01, $fd, $00, $fd, $fe, $fd
+		.byte	$fd, $fe, $fd, $00, $fd, $01, $fe, $02, $80
+shape_ecdd:
+		.byte	$01, $02, $03, $01, $03, $00, $03, $fe, $01, $fd, $ff, $fd, $fd, $fe, $fc, $00
+		.byte	$fd, $01, $ff, $02, $80
+shape_ecf2:
+		.byte	$00, $03, $01, $03, $02, $01, $02, $ff, $01, $fd, $00, $fc, $fe, $fd, $fd, $ff
+		.byte	$fd, $01, $fe, $03, $80
+
+.virtual $ed07
+; never written: still the RAM's power-on pattern
+unused_ed07:
+		.fill	4345
+kernal_copy:
+		.fill	385
+cint:
+		.fill	3
+ioinit:
+		.fill	3
+ramtas:
+		.fill	3
+restor:
+		.fill	3
+vector:
+		.fill	3
+setmsg:
+		.fill	3
+second:
+		.fill	3
+tksa:
+		.fill	3
+memtop:
+		.fill	3
+membot:
+		.fill	3
+scnkey:
+		.fill	3
+settmo:
+		.fill	3
+acptr:
+		.fill	3
+ciout:
+		.fill	3
+untlk:
+		.fill	3
+unlsn:
+		.fill	3
+listen:
+		.fill	3
+talk:
+		.fill	3
+readst:
+		.fill	3
+setlfs:
+		.fill	3
+setnam:
+		.fill	3
+open:
+		.fill	3
+close:
+		.fill	3
+chkin:
+		.fill	3
+chkout:
+		.fill	3
+clrchn:
+		.fill	3
+chrin:
+		.fill	3
+chrout:
+		.fill	3
+load:
+		.fill	3
+save:
+		.fill	3
+settim:
+		.fill	3
+rdtim:
+		.fill	3
+stop:
+		.fill	3
+getin:
+		.fill	3
+clall:
+		.fill	3
+udtim:
+		.fill	3
+screen_size:
+		.fill	3
+plot:
+		.fill	3
+iobase:
+		.fill	3
+unused_fff6:
+		.fill	4
+nmi_hw_vector:		.addr	?
+reset_hw_vector:		.addr	?
+irq_hw_vector:		.addr	?
+.endv
