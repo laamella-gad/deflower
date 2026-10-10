@@ -65,6 +65,11 @@ class DeflowerTest {
     }
 
     @Test
+    void deflower3DGolfPicSnapshot() throws IOException, URISyntaxException {
+        assertDeflowered("3dgolfpic_snap");
+    }
+
+    @Test
     void deflower1nvaderSnapshot() throws IOException, URISyntaxException {
         assertDeflowered("1nvader_snap");
     }

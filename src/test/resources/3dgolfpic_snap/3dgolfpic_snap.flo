@@ -1,0 +1,190 @@
+deflower 3dgolfpic_snap.vsf
+; 3dgolfpic.prg, a crunched title picture, taken while it waits for the space bar.
+; RAM holds the BASIC stub with the decruncher and the packed data as loaded, the
+; decruncher's copies in zero page, the stack and $0200, and the unpacked picture
+; with its viewer at $5800-$7f89. Memory marked untouched still has VICE's power-on
+; pattern.
+
+; ---- zero page ----
+$00 virtual byte cpu_port_direction
+$01 virtual byte cpu_port
+$02-$2d virtual byte basic_zero_page
+; where a match copies from; at the end, the end of the unpacked data, handed to
+; BASIC as the end of the program
+$2d virtual word decrunch_pointer
+$2f-$c5 virtual byte basic_kernal_zero_page
+; the KERNAL's last key pressed
+$c5 virtual byte kernal_lstx
+$c6-$f7 virtual byte kernal_zero_page
+; the decruncher's bits not read yet, shifted out to the left
+$f7 byte bit_buffer
+; the 2-bit code that starts a match; any other 2 bits start a literal byte
+$f8 byte escape_code
+
+; ---- decruncher, copied from decruncher_source by decrunch ----
+; stores A at the output pointer, the operand at $fa, and counts down X
+$f9 code store_byte
+$fa output_pointer
+; reads a new escape_code, then stores a literal byte that starts with the old one
+$0104 code new_escape_code
+; reads 6 more bits after the 2 in A, and stores the 8 as a literal byte
+$010e code store_literal
+$0116 code decrunch_loop
+$0193 code decrunch_done
+; lengths for codes below $20, indexed from 1 through decrunch_table_base
+$01a5 decrunch_table_base
+$01a6-$01c6 byte decrunch_table
+$01c6-$01f7 byte unused_stack
+$01f7-$0200 byte stack
+; returns the next packed byte in bit_buffer, from the input pointer at $0202
+$0200 code decrunch_get_byte
+$0202 input_pointer
+; reads a number: counts 1 bits up to a 0 (at most 7), then reads that many bits
+; into A after a leading 1
+$0211 code get_gamma
+$0223 code get_8_bits
+; reads X bits into A
+$0226 code get_bits
+
+; ---- KERNAL workspace ----
+$0233-$0314 virtual byte kernal_workspace
+; the KERNAL's IRQ and NMI vectors, still pointing into ROM
+$0314 virtual addr irq_vector
+$0316 virtual addr brk_vector
+$0318 virtual addr nmi_vector
+$031a-$033c virtual byte kernal_vectors
+$033c-$0400 virtual byte tape_buffer
+$0400-$0800 virtual byte text_screen
+$ea31 kernal_irq
+$fe66 kernal_brk
+$fe47 kernal_nmi
+
+; ---- the PRG as loaded ----
+$0800 byte basic_start
+; BASIC stub: SYS 2061
+$0801-$080d byte basic_stub
+; copies the decruncher to $0200 and $00f7, and the packed data to the top of the
+; picture's memory, then unpacks it to $5800
+$080d code decrunch
+$0843-$0877 byte get_byte_source
+$0877-$0944 byte decruncher_source
+; moved to $6ec4-$7f92 before unpacking
+$0944-$1a12 byte packed_data
+$1a12-$5800 virtual byte untouched_1a12
+
+; ---- the picture: multicolor bitmap in VIC bank 1 ----
+; copied to color RAM
+$5800 byte[40*25] picture_colors
+$5be8-$5c00 byte unused_5be8
+$5c00 byte[40*25] picture_screen
+$5fe8-$6000 byte unused_5fe8
+$6000 byte[8*40*25] picture_bitmap
+; shows the picture, then waits for space and resets the machine
+$7f40 code show_picture
+$7f80 wait_for_space
+; where the CPU was when the snapshot was taken
+$7f84 code snapshot_pc
+; the end of the packed data, not overwritten by the unpacked data
+$7f89-$7f92 byte packed_data_end
+$7f92-$d000 virtual byte untouched_7f92
+$e000-$fce2 virtual byte untouched_e000
+; KERNAL reset, in ROM; the RAM under it is untouched
+$fce2-$10000 virtual byte untouched_fce2
+$fce2 kernal_reset
+
+; ---- VIC-II ----
+$d000 virtual {
+    $00 byte sprite0_x
+    $01 byte sprite0_y
+    $02 byte sprite1_x
+    $03 byte sprite1_y
+    $04 byte sprite2_x
+    $05 byte sprite2_y
+    $06 byte sprite3_x
+    $07 byte sprite3_y
+    $08 byte sprite4_x
+    $09 byte sprite4_y
+    $0a byte sprite5_x
+    $0b byte sprite5_y
+    $0c byte sprite6_x
+    $0d byte sprite6_y
+    $0e byte sprite7_x
+    $0f byte sprite7_y
+    $10 byte sprites_x_msb
+    $11 byte vic_control1
+    $12 byte raster
+    $13 byte light_pen_x
+    $14 byte light_pen_y
+    $15 byte sprite_enable
+    $16 byte vic_control2
+    $17 byte sprite_expand_y
+    $18 byte vic_memory
+    $19 byte vic_irq_status
+    $1a byte vic_irq_enable
+    $1b byte sprite_priority
+    $1c byte sprite_multicolor
+    $1d byte sprite_expand_x
+    $1e byte sprite_sprite_collision
+    $1f byte sprite_background_collision
+    $20 byte border_color
+    $21 byte background_color
+    $22 byte background_color1
+    $23 byte background_color2
+    $24 byte background_color3
+    $25 byte sprite_multicolor0
+    $26 byte sprite_multicolor1
+    $27 byte sprite0_color
+    $28 byte sprite1_color
+    $29 byte sprite2_color
+    $2a byte sprite3_color
+    $2b byte sprite4_color
+    $2c byte sprite5_color
+    $2d byte sprite6_color
+    $2e byte sprite7_color
+    $2f byte vic_unused_2f
+    ; the C128's clock speed register; the decruncher runs at 2 MHz on a C128
+    $30 byte c128_clock
+    $31-$400 byte vic_mirrors
+}
+
+; ---- SID ----
+$d400 virtual {
+    $00 word voice1_frequency
+    $02 word voice1_pulse_width
+    $04 byte voice1_control
+    $05 byte voice1_attack_decay
+    $06 byte voice1_sustain_release
+    $07 word voice2_frequency
+    $09 word voice2_pulse_width
+    $0b byte voice2_control
+    $0c byte voice2_attack_decay
+    $0d byte voice2_sustain_release
+    $0e word voice3_frequency
+    $10 word voice3_pulse_width
+    $12 byte voice3_control
+    $13 byte voice3_attack_decay
+    $14 byte voice3_sustain_release
+    $15 word filter_cutoff
+    $17 byte filter_control
+    $18 byte volume_filter_mode
+    $19-$400 byte sid_mirrors
+}
+
+; ---- color RAM ----
+$d800-$dc00 virtual byte color_ram
+
+; ---- CIAs ----
+$dc00 virtual {
+    $00 byte cia1_port_a
+    $01 byte cia1_port_b
+    $02-$0d byte cia1_unused
+    $0d byte cia1_interrupt_control
+    $0e-$100 byte cia1_rest
+}
+$dd00 virtual {
+    $00 byte cia2_port_a
+    $01 byte cia2_port_b
+    $02 byte cia2_direction_a
+    $03-$100 byte cia2_rest
+}
+$de00-$e000 virtual byte io_expansion

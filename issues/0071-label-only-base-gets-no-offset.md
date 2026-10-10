@@ -29,6 +29,8 @@ Seen in fixture `3dgolf_snap`. Tables indexed from 1 are read through a base add
 
 The second load should be `hole_shapes_base + $1`. The same happens with `hole_positions_base` (`$942b`), read as `+ $0` to `+ $3`, which print as `hole_positions_base` and `pointers_9421 + $b`/`$c`/`$d`.
 
+Fixture `3dgolfpic_snap` has a variant where the base lies inside an instruction: the decruncher reads `decrunch_table` (`$01a6`) through `lda $01a5, x`, and `$01a5` is the high byte of the `jmp show_picture` operand before the table. `$01a5 decrunch_table_base` only produces the define `decrunch_table_base = $01a5`; the operand stays `$01a5`.
+
 Can't be fixed in the `.flo` file: the base's bytes belong to the area before the table, so a typed base would conflict with it.
 
 Options:
