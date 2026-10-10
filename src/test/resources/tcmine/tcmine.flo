@@ -1,4 +1,186 @@
 deflower tcmine.prg
-$c000 code xx_1
+; TC Mine by Anthony Crowther, a Manic Miner like game. This is its machine code part,
+; loaded at $c000 and driven by a BASIC program through SYS calls. The level data
+; ($4000, $159 bytes per level), the enemy table ($2580, $12 bytes per level), the jump
+; table ($8407) and the music ($8500 and $8b84) are loaded separately, so they are not
+; in this file.
 
+; ---- zero page ----
+; the level data while drawing, the screen cell of the player otherwise
+$fa virtual word level_pointer
+; the screen address while drawing; $fc is also the player's row
+$fc virtual word screen_pointer
+$fe virtual byte draw_column
+$ff virtual byte draw_row
+$8e virtual byte stray_8e
+$da virtual word voice1_music
+$dc virtual byte voice2_duration
+$dd virtual byte voice1_duration
+$de virtual word voice2_music
+$e4 virtual word air_pointer
 
+$0314 virtual addr irq_vector
+; set by the BASIC program
+$033f virtual byte level
+; the enemy table entry of the level: per enemy x, y, direction, first frame, steps
+$0341 virtual byte[10] enemies
+$034b virtual byte unused_034b
+$034c virtual byte[4] enemy_steps
+
+$0400 virtual byte[1000] screen
+$07e8-$07f8 virtual byte unused_07e8
+$07f8 virtual byte[8] sprite_pointers
+
+; the animated characters of the character set
+$3238 virtual byte[16] animated_chars
+$3248 virtual byte[8] conveyor_char_1
+$3250 virtual byte[8] conveyor_char_2
+
+; pairs of a flag and a height change, one pair per step of a jump
+$8407 virtual byte[$5a] jump_table
+
+; ---- draws the level from the level data onto the screen ----
+; each level byte holds two tiles, each nibble indexing tile_chars_left/right
+$c000 code draw_level
+$c074 byte[2] unused_c074
+$c076 char[10] tile_chars_left
+$c080 char[10] tile_chars_right
+; an older copy of draw_level's start that was patched over; nothing calls it
+$c08a code unused_c08a
+$c0b0 code unused_c0b0
+
+$c0c5 code install_irq
+; animates the characters and the enemies, then continues in the KERNAL
+$c0e7 code irq
+$c152 byte[4] char_animation_bits
+$c156 byte[6] unused_c156
+$c15c code init_player
+
+; joystick port 2, or Z for left, X for right and right shift for jump
+$c174 byte controls
+$c175 code read_controls
+$c1ce byte unused_c1ce
+; points level_pointer at the screen cell of the player
+$c1cf code find_player_cell
+; C set when the character at (level_pointer),y is a wall
+$c201 code is_wall
+$c20f byte unused_c20f
+$c210 code walk
+$c233 code check_walls
+$c24b code continue_walk
+$c24e code check_floor
+$c25e code unused_c25e
+$c276 code animate_player
+$c2c8 byte jump_direction
+; 0 when not jumping, otherwise the index into jump_table
+$c2c9 byte jump_step
+$c2ca code start_jump
+$c2dd code jump
+$c2ed code next_jump_step
+$c30d code jump_sideways
+$c322 code check_landing
+$c349 byte[7] unused_c349
+
+; plays the level until the player dies, the air runs out, or the level is done
+$c350 code main_loop
+$c385 code fall
+; never set: fall stores into $008e instead of here
+$c38e byte falling
+$c38f code not_falling
+$c397 code check_jump
+$c3a0 code jump_sideways_checked
+$c3c1 code jump_direction_controls
+$c3ce code jump_height
+$c40e code init_draw_pointers
+$c417 byte unused_c417
+$c418 code conveyor
+$c41f code check_conveyor
+$c43b code check_slope
+$c451 code unused_c451
+$c459 byte[2] unused_c459
+$c45b byte music_divider
+$c45c code tick_music
+$c471 code play_music
+$c4f4 code init_music
+$c51d byte items_collected
+$c51e code check_pickups
+$c535 code check_pickup
+$c548 code collect_item
+; leaves main_loop: the player touched something deadly
+$c550 code die
+; draws the air bar and starts the level
+$c553 code play_level
+$c586 byte air_divider
+$c587 code drain_air
+; loads itself, but does nothing with it
+$c591 drain_air_step
+$c5c2 code animate_portal
+$c5da byte sprite_collisions
+$c5db code add_score
+$c5fd code check_collisions
+$c614 code level_done
+$c61a code move_enemies
+; sets up the enemies of the level from the enemy table
+$c666 code init_enemies
+$c6d1 byte animation_divider
+$c6d2 code animate_enemies
+$c707 code check_enemy_collision
+$c719 byte air_empty
+$c71a code drain_air_once
+; turns the air left into score at the end of a level
+$c750 code count_air_bonus
+$c794 byte bonus_sound_frequency
+$c795 code remove_irq
+$c7b1 code add_to_level_pointer
+$c7b9 byte[7] unused_c7b9
+
+; the sprite 4-7 coordinates, read through init_enemies' $cffe + $0a, y
+$cffe sprite4_coords_base
+$cfff virtual byte frame_counter
+
+$d000 virtual {
+    $00 byte[16] vic_sprite_coords
+    $10 byte vic_sprite_x_high_bits
+    $11 byte vic_control
+    $12 byte vic_raster
+    $13-$15 byte vic_light_pen
+    $15 byte vic_sprite_enable
+    $16-$19 byte vic_registers
+    $19 byte vic_irq_status
+    $1a byte vic_irq_enable
+    $1b byte vic_sprite_priority
+    $1c byte vic_sprite_multicolor
+    $1d byte vic_sprite_double_width
+    $1e byte vic_sprite_coll
+    $1f-$400 byte vic_rest
+}
+$d400 virtual {
+    $00 word voice1_frequency
+    $02 word voice1_pulse_width
+    $04 byte voice1_control
+    $05 byte voice1_attack_decay
+    $06 byte voice1_sustain_release
+    $07 word voice2_frequency
+    $09 word voice2_pulse_width
+    $0b byte voice2_control
+    $0c byte voice2_attack_decay
+    $0d byte voice2_sustain_release
+    $0e word voice3_frequency
+    $10 word voice3_pulse_width
+    $12 byte voice3_control
+    $13 byte voice3_attack_decay
+    $14 byte voice3_sustain_release
+    $15 word filter_cutoff
+    $17 byte filter_control
+    $18 byte sid_vol_filter
+    $19-$400 byte sid_mirrors
+}
+$dc00 virtual {
+    $00 byte cia1_port_a
+    $01 byte cia1_port_b
+    $02-$0e byte cia1_registers
+    $0e byte cia1_timer_a_control
+    $0f byte cia1_timer_b_control
+}
+; in the KERNAL ROM
+$ea31 virtual byte kernal_irq
