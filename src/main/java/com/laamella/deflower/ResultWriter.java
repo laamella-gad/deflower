@@ -4,6 +4,8 @@ import com.laamella.mpu6502.specification.Instruction;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import static com.laamella.Printing.*;
@@ -30,8 +32,8 @@ class AssemblyFileFormat {
      * Exception (issue 0027): when this address merely continues the same
      * contiguous same-type data run as the address before it, skip the
      * blank-line separator and put the label/comment on its own line
-     * instead, so a label landing inside a big array doesn't fragment it
-     * into separate .BYTE groups.
+     * instead. (A label inside one array doesn't get here at all: it is
+     * printed as an address define after the array, issue 0028.)
      * <p>
      * Within that, whether the label's own line glues onto its data or
      * gets its own line (issue 0029) depends on how much data actually
@@ -51,9 +53,7 @@ class AssemblyFileFormat {
                 && ((DataArea) lastArea).type == ((DataArea) currentArea).type;
         boolean continuesRun = sameKindAsPrevious && lastArea.lastOccupiedAddress == address - 1;
         if (continuesRun) {
-            if (out.column() != 0) {
-                out.newLine();
-            }
+            out.finishLine();
         } else {
             // finishLine() closes whatever line is still dangling (if
             // any); newLine() adds the actual blank-line separator. When
@@ -67,21 +67,7 @@ class AssemblyFileFormat {
         printCommentLines(comment);
         if (label != null) {
             out.print(label + ":");
-            // A label can land on an address that's covered by an area but
-            // isn't where that area actually prints anything - the second
-            // byte of a WORD/DWORD, an instruction's operand byte - because
-            // print(DataArea, ...) and printInstruction() only emit output
-            // at an area's own start address. There, nothing follows this
-            // label from the area it names, so it must get its own line
-            // unconditionally: gluing it to whatever unrelated address's
-            // label/comment happens to print right after it is a bug, not
-            // a glue. An address with no area at all is unaffected - the
-            // next thing printed always starts with its own considerReOrg
-            // or print call, which supplies the missing newline itself.
-            boolean labelInsideAreaButNotAtItsStart = currentArea != null && currentArea.address != address;
-            if (labelInsideAreaButNotAtItsStart) {
-                out.newLine();
-            } else if (sameKindAsPrevious && !isSingleValueRun(address, (DataArea) currentArea, subject)) {
+            if (sameKindAsPrevious && !isSingleValueRun(address, (DataArea) currentArea, subject)) {
                 // Issue 0029: among same-kind labels, glue a single value
                 // onto the label's line; several values get their own line
                 // so the tabular dump underneath stays readable. A label
@@ -102,7 +88,27 @@ class AssemblyFileFormat {
      * better than putting the label on its own line.
      */
     private boolean isSingleValueRun(int address, DataArea block, Subject subject) {
-        return !subject.continuesRun(block, address + block.size);
+        return !subject.continuesArray(block, address + block.size);
+    }
+
+    /**
+     * Prints the labels at `addresses` as address defines (issue 0028),
+     * each after its comment lines. The last define's line is left open,
+     * like any other printed content, for whatever prints next to close;
+     * forgetting the last area makes the next data start a fresh line.
+     */
+    void printDefines(List<Integer> addresses, Subject subject) throws IOException {
+        if (!addresses.isEmpty()) {
+            lastArea = null;
+        }
+        for (int address : addresses) {
+            out.finishLine();
+            printCommentLines(subject.memory[address].comment);
+            String label = subject.memory[address].label;
+            if (label != null) {
+                out.print(label + " = " + asHexWord(address));
+            }
+        }
     }
 
     /**
@@ -372,11 +378,26 @@ class AssemblyFileFormat {
 
 class ResultWriter {
 
+    /**
+     * Labels that would interrupt what is being printed become address
+     * defines instead (issue 0028): a label inside a declared array,
+     * inside a multi-byte element or on an instruction's operand byte is
+     * printed as {@code label = $XXXX} after the array or instruction, so
+     * its dump stays unbroken and the label still gets its exact address. A label
+     * on memory no area covers is printed as a define in place, instead
+     * of an origin block with nothing in it.
+     */
     void write(Subject subject, Writer w) throws IOException {
         AssemblyFileFormat assemblyFile = new AssemblyFileFormat(w);
+        List<Integer> deferred = new ArrayList<>();
         for (int address = 0; address < 0x10000; address++) {
 
             Area currentArea = subject.peek(address);
+            if (!continuesPrevious(currentArea, address, subject)) {
+                assemblyFile.printDefines(deferred, subject);
+                deferred.clear();
+            }
+
             if (currentArea != null && currentArea.isVirtual()) {
                 // The loop's own address++ then lands on the first
                 // address after the stretch.
@@ -388,7 +409,13 @@ class ResultWriter {
             String comment = subject.memory[address].comment;
             String label = subject.memory[address].label;
             if (comment != null || label != null) {
-                assemblyFile.printAnnotation(address, comment, label, currentArea, subject);
+                if (currentArea == null) {
+                    assemblyFile.printDefines(List.of(address), subject);
+                } else if (continuesPrevious(currentArea, address, subject)) {
+                    deferred.add(address);
+                } else {
+                    assemblyFile.printAnnotation(address, comment, label, currentArea, subject);
+                }
             }
             if (currentArea != null) {
                 if (currentArea instanceof DataArea) {
@@ -402,6 +429,23 @@ class ResultWriter {
             }
 
         }
+        assemblyFile.printDefines(deferred, subject);
         assemblyFile.close();
+    }
+
+    /**
+     * True when `address` carries on what the address before it printed:
+     * it lies inside the same area (a multi-byte element, an instruction's
+     * operand), or starts the next element of the same array.
+     */
+    private static boolean continuesPrevious(Area area, int address, Subject subject) {
+        if (area == null || address == 0) {
+            return false;
+        }
+        Area previous = subject.peek(address - 1);
+        if (area == previous) {
+            return true;
+        }
+        return previous instanceof DataArea && subject.continuesArray((DataArea) previous, address);
     }
 }

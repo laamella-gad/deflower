@@ -1,0 +1,7 @@
+deflower arraylabel.prg
+$c000 code entry
+$c004 byte[8] screen
+; the high score sits inside the screen
+$c006 hiscore
+$c00c word vector
+$c00d vector_hi

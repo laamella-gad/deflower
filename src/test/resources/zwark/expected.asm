@@ -1430,22 +1430,77 @@ l9BA3:
 		RTS 
 
 draw_logo:
-		.byte	$A2
-*=$9C45
+		LDX #$00
 
-logo0:		.byte	$5F
-*=$9C61
+l9BCE:
+		LDA logo0, X
+		STA vic_screen + $C8, X
+		LDA #$06
+		STA vic_color_ram + $C8, X
+		INX 
+		CPX #$1C
+		BCC l9BCE
+		LDX #$00
 
-logo1:		.byte	$20
-*=$9C7D
+l9BE0:
+		LDA logo1, X
+		STA vic_screen + $F0, X
+		LDA #$06
+		STA vic_color_ram + $F0, X
+		INX 
+		CPX #$1C
+		BCC l9BE0
+		LDX #$00
 
-logo2:		.byte	$20
-*=$9C98
+l9BF2:
+		LDA logo2, X
+		STA vic_screen + $118, X
+		LDA #$06
+		STA vic_color_ram + $118, X
+		INX 
+		CPX #$1C
+		BCC l9BF2
+		LDX #$00
 
-logo3:		.byte	$20
-*=$9CB7
+l9C04:
+		LDA logo3, X
+		STA vic_screen + $140, X
+		LDA #$06
+		STA vic_color_ram + $140, X
+		INX 
+		CPX #$1C
+		BCC l9C04
+		LDX #$00
 
-logo4:		.byte	$E9
+l9C16:
+		LDA logo4, X
+		STA vic_screen + $168, X
+		LDA #$06
+		STA vic_color_ram + $168, X
+		INX 
+		CPX #$1C
+		BCC l9C16
+		LDX #$00
+		LDY #$05
+
+l9C2A:
+		LDA f1_1_player_text, X
+		STA vic_screen + $1E0, Y
+		LDA f3_2_player_text, X
+		STA vic_screen + $230, Y
+		LDA #$04
+		STA vic_color_ram + $1E0, Y
+		STA vic_color_ram + $230, Y
+		INY 
+		INX 
+		CPX #$14
+		BCC l9C2A
+		RTS 
+logo0 = $9C45
+logo1 = $9C61
+logo2 = $9C7D
+logo3 = $9C98
+logo4 = $9CB7
 *=$9CD5
 
 l9CD5:
@@ -1521,14 +1576,9 @@ table_with_timed_stuff:
 		.byte	$76, $FA, $EA, $92, $01, $C8, $C8, $A3
 table_with_timers:
 		.byte	$2A, $12, $32, $20, $0E, $2E, $2A, $2A
-*=$9D88
-
-joystick_state:
-		.byte	$7E
-sprite_coll_state:		.byte	$00
-*=$9DA4
-
-init_sprite_coords:		.byte	$A0
+joystick_state = $9D88
+sprite_coll_state = $9D89
+init_sprite_coords = $9DA4
 *=$9E00
 
 start:

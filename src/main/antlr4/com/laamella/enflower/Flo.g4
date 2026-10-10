@@ -23,9 +23,13 @@
  *     - virtual: memory the program uses but doesn't contain (I/O,
  *       zero page, screen). Output as a .virtual reservation, not as data.
  *     - type: char (text), byte, word, dword, or code (an entry point to
- *       trace from; any [size] is ignored). Without a type, the line is a
+ *       trace from; any [size] is ignored). A range without a type is a
  *       placeholder: printed as bytes, but a later, more specific line
- *       may narrow part of it without a conflict.
+ *       may narrow part of it without a conflict. A single address
+ *       without a type only names (or comments) that address and covers
+ *       no memory, so it can sit inside another line's array or word,
+ *       e.g. a high score on the screen. Inside an array, a word or an
+ *       instruction, a label is printed as "label = $addr" after it.
  *     - size: [n], the element count, e.g. byte[8]. n is a number, or *
  *       and + over numbers (* binds tighter, no parentheses): byte[$af],
  *       byte[40*21], byte[40*19+5]. A count of 0 (or a range too short

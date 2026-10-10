@@ -120,6 +120,27 @@ class DeflowerTest {
     }
 
     /**
+     * Issue 0028: a single address without a type covers no memory, so
+     * `virtual` on it would do nothing; it is reported instead.
+     */
+    @Test
+    void reportsVirtualOnPlainAddress() throws IOException, URISyntaxException {
+        String flowerFile = "virtualaddress/virtualaddress.flo";
+        ByteArrayOutputStream capturedErr = new ByteArrayOutputStream();
+        PrintStream originalErr = System.err;
+        System.setErr(new PrintStream(capturedErr));
+        try {
+            new Deflower().deflower(flowerFile);
+        } finally {
+            System.setErr(originalErr);
+        }
+        assertThat(capturedErr.toString())
+                .contains("Virtual address $D020 needs a type or a range")
+                .contains("Errors detected");
+        assertThat(isEmpty(outDir(flowerFile))).as("output directory for a subject with a virtual plain address").isTrue();
+    }
+
+    /**
      * Issue 0014: a .prg whose load address plus length runs past $FFFF is
      * rejected with a message naming the file and load address, instead of
      * an ArrayIndexOutOfBoundsException.
@@ -252,6 +273,15 @@ class DeflowerTest {
     @Test
     void virtualAreaBecomesVirtualBlockInsteadOfData() throws IOException, URISyntaxException {
         assertDeflowered("virtualarea");
+    }
+
+    /**
+     * Issue 0028: a label inside a declared array or a word is printed as
+     * an address define after it, so the array's dump stays unbroken.
+     */
+    @Test
+    void labelInsideArrayBecomesAddressDefine() throws IOException, URISyntaxException {
+        assertDeflowered("arraylabel");
     }
 
     /**

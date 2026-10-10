@@ -48,7 +48,7 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0025](0025-adopt-assertj.md) | done | Adopt AssertJ to clean up ugly asserts |
 | [0026](0026-array-as-one-area-not-one-per-element.md) | rejected | Model an array annotation as one Area, not one per element |
 | [0027](0027-label-mid-block-fragments-byte-output.md) | done | A label in the middle of a data block breaks up its .BYTE output |
-| [0028](0028-mid-block-labels-as-address-defines.md) | open | Emit a label inside a larger area as an address define, not inline |
+| [0028](0028-mid-block-labels-as-address-defines.md) | done | Emit a label inside a larger area as an address define, not inline |
 | [0029](0029-first-label-in-run-still-glued.md) | done | First label of a run still glues onto its .BYTE line, inconsistent with the rest of the run |
 | [0030](0030-ai-friendliness-of-flo-grammar.md) | done | Investigate whether the .flo format/grammar is easy to use, including for an AI writing it |
 | [0031](0031-carving-specific-types-out-of-unknown-data-is-a-conflict.md) | done | Carving a specific type out of a placeholder data block is reported as a conflict, blocking output |
@@ -75,3 +75,4 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0052](0052-auto-labels-are-64tass-local-labels.md) | done | Auto-generated labels start with `_`, which makes them 64tass local labels |
 | [0053](0053-force-absolute-operand-on-zero-page-label.md) | open | Absolute operand on a zero-page label reassembles as zero page |
 | [0054](0054-empty-labels-on-uncovered-memory.md) | done | Labels on memory no area covers come out as empty origin blocks |
+| [0055](0055-placeholder-blocks-code-entry.md) | open | A jump target inside a placeholder is never traced |

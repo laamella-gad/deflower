@@ -1,7 +1,4 @@
-
-*=$C000
-
-entry:
+entry = $C000
 *=$C002
 
 guard:

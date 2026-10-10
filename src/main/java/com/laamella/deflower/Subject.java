@@ -78,6 +78,15 @@ class Subject {
             memory[address].comment = annotation.comment;
         }
         LineType type = annotation.type;
+        if (type == LineType.UNKNOWN_BLOCK && annotation.addressEnd == null) {
+            // No type and no size: just a label or comment for an address
+            // (issue 0028), which can sit inside an area another line
+            // declared, like a high score on the screen.
+            if (annotation.virtual) {
+                errors.add(String.format("Virtual address %s needs a type or a range", asHexWord(address)));
+            }
+            return;
+        }
         switch (type) {
             case CODE_ENTRY -> {
                 potentialCodeLocations.add(address);
@@ -142,6 +151,23 @@ class Subject {
                 && area.address == address
                 && ((DataArea) area).type == block.type
                 && area.isVirtual() == block.isVirtual();
+    }
+
+    /**
+     * True when the next element of the array `block` belongs to starts
+     * at `address`. A label there doesn't interrupt the array's dump: it
+     * is printed as an address define after the array (issue 0028). A
+     * comment without a label still does.
+     */
+    boolean continuesArray(DataArea block, int address) {
+        if (address >= memory.length || (memory[address].comment != null && memory[address].label == null)) {
+            return false;
+        }
+        Area area = peek(address);
+        return area != null
+                && area.address == address
+                && area.isVirtual() == block.isVirtual()
+                && block.isInSameArray(area, block.indexInArray + 1);
     }
 
     /**

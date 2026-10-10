@@ -633,50 +633,51 @@ snake_pos_tbl_lo:		.byte	$E1
 snake_pos_tbl_hi:		.byte	$05
 
 d265C:
-		.byte	$09
-d265D:		.byte	$06
-d265E:		.byte	$31
-d265F:		.byte	$06
-d2660:		.byte	$59
-d2661:		.byte	$06
+		.byte	$09, $06, $31, $06, $59, $06
+d265D = $265D
+d265E = $265E
+d265F = $265F
+d2660 = $2660
+d2661 = $2661
 
 snake_pos_tbl:
 		.byte	$41
 
 d2663:
-		.byte	$05
-d2664:		.byte	$19
-d2665:		.byte	$05
-d2666:		.byte	$F1
-d2667:		.byte	$04
-d2668:		.byte	$F2
-d2669:		.byte	$04
+		.byte	$05, $19, $05, $F1, $04, $F2, $04
+d2664 = $2664
+d2665 = $2665
+d2666 = $2666
+d2667 = $2667
+d2668 = $2668
+d2669 = $2669
 
 clear_snake_lo:
 		.byte	$F3
 clear_snake_hi:		.byte	$04
 
 d266C:
-		.byte	$D3
-d266D:		.byte	$05
-d266E:		.byte	$D2
-d266F:		.byte	$05
-d2670:		.byte	$D1
-d2671:		.byte	$05
-d2672:		.byte	$D0
-d2673:		.byte	$05
-d2674:		.byte	$CF
-d2675:		.byte	$05
-d2676:		.byte	$5B
-d2677:		.byte	$06
-d2678:		.byte	$83
-d2679:		.byte	$06
-d267A:		.byte	$AB
-d267B:		.byte	$06
-d267C:		.byte	$D3
-d267D:		.byte	$06
-d267E:		.byte	$FB
-d267F:		.byte	$06
+		.byte	$D3, $05, $D2, $05, $D1, $05, $D0, $05, $CF, $05, $5B, $06, $83, $06, $AB, $06
+		.byte	$D3, $06, $FB, $06
+d266D = $266D
+d266E = $266E
+d266F = $266F
+d2670 = $2670
+d2671 = $2671
+d2672 = $2672
+d2673 = $2673
+d2674 = $2674
+d2675 = $2675
+d2676 = $2676
+d2677 = $2677
+d2678 = $2678
+d2679 = $2679
+d267A = $267A
+d267B = $267B
+d267C = $267C
+d267D = $267D
+d267E = $267E
+d267F = $267F
 *=$2681
 
 var7_init_0:
@@ -687,8 +688,8 @@ bonus_guy_char:		.byte	$02
 lives:		.byte	$00
 
 d2686:
-		.byte	$68
-d2687:		.byte	$07
+		.byte	$68, $07
+d2687 = $2687
 
 var2_init_with_1:
 		.byte	$03
