@@ -74,7 +74,7 @@ Test-driven workflow:
 - To accept a new fixture or a deliberate output change, delete the matching `expected.asm` and rerun the test. It creates the file and fails once, so you can review it before committing.
 - The small fixtures' `expected.asm` can be checked with 64tass: `64tass -q -b -o x.bin expected.asm` must equal the `.prg` minus its 2-byte header.
 
-Issues are tracked as `issues/NNNN-slug.md` (frontmatter `title`/`status`/`priority`/`labels`, priority `low`/`medium`/`high`), indexed in `issues/README.md`. To close one, set `status: done`, remove its `priority`, add a "## Closing note" and update the index row (leaving its priority cell empty).
+Issues are tracked as `issues/NNNN-slug.md` (frontmatter `title`/`status`/`priority`/`labels`, priority `low`/`medium`/`high`); `issues/README.md` describes the format. To close one, set `status: done`, remove its `priority` and add a "## Closing note".
 
 ## Notes
 

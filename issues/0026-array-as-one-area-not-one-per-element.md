@@ -1,7 +1,6 @@
 ---
 title: Model an array annotation as one Area, not one per element
 status: rejected
-priority: low
 labels: refactor
 ---
 

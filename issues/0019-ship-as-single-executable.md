@@ -1,7 +1,6 @@
 ---
 title: Project should ship as a single executable, not a Java jar
 status: superseded
-priority: medium
 labels: enhancement
 ---
 
