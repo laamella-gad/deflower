@@ -26,3 +26,7 @@ Options:
 - **Buffer the current line** and choose its directive when the line is closed. This only covers strings that fit on one line.
 
 Done when: the `strings` fixture's `nulled` and `counted` print as `.null "BYE"` and `.ptext "ABC"`, and wrapped long strings still assemble to the same bytes.
+
+## Decisions
+
+- **Detect, no `.flo` syntax.** When a char array opens, look at its shape and pick `.null` (ends in its only `$00`) or `.ptext` (first byte is the length of the rest). A wrong guess still assembles to the same bytes, because the directive only adds back the byte it left out, so detection is safe. This matches the existing encoding guess (`likelyTextEncoding`).

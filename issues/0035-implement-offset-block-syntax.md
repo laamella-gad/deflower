@@ -28,3 +28,8 @@ Scope:
 - **Labels inside the block**: should still resolve/print normally (`freq1` at `$D400`, not `sid + $00`) - the offset is purely an input-side convenience, the output model shouldn't need to know a block was ever used.
 
 Done when: a `.flo` block (`base { ... lines with offset addresses ... }`) resolves every inner address as `base + offset`, with a fixture modeled on a real hardware register map (SID chip base + a handful of register offsets is the ready-made example) confirming both the resolved absolute addresses and that labels inside the block print and resolve exactly as if they'd been declared with full absolute addresses.
+
+## Decisions
+
+- **No nesting.** A `{` while a block is open is an error.
+- **The opening line: not decided yet.** The direction: the opening line gives the start address and things that apply to every line inside the block (like `virtual`), and possibly no label. Settle this before implementing.

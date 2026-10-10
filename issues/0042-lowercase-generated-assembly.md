@@ -19,3 +19,7 @@ Not in scope - must stay exactly as-is, since they're either user-supplied or ra
 Scope: `ResultWriter.java`'s `printInstruction(...)` (opcode + index-register suffixes) and `Printing.java`'s hex-formatting helpers (digit casing). Check whether 64tass accepts/prefers lowercase hex digits too (not yet confirmed from the manual, unlike the directive-casing precedent) before changing `Printing`, since that file is shared and a case change there is more far-reaching than the two other spots.
 
 Done when: a fresh fixture run shows lowercase opcodes (`lda`, `sta`, `rts`, ...), lowercase `, x`/`, y` suffixes, and (if confirmed correct for 64tass) lowercase hex digits (`$4a` not `$4A`) - with all affected `expected.asm` fixtures regenerated and reviewed to confirm the only changes are casing.
+
+## Decisions
+
+- **Everything generated becomes lowercase except labels:** mnemonics (`lda`), index suffixes (`, x`/`, y`) and hex digits (`$c0a2`, `.byte $4a`; 64tass reads hex digits in either case). User labels, comments and auto-labels (`lC0A2`, `dC0A2`) stay as they are.

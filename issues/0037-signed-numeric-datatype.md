@@ -22,3 +22,7 @@ Decide between:
 2. Repurpose the existing `CHAR` type's output directive to `.char` anyway, accepting the name mismatch (it would still be printing printable-ASCII literals, just under 64tass's signed-byte directive name).
 
 Done when: a decision is made and a signed value (at minimum, a signed byte; `.sint`/`.lint`/`.dint` as needed if a fixture calls for the bigger sizes) can be declared in a `.flo` file and prints under the matching 64tass directive, two's-complement value shown correctly, with a fixture covering it.
+
+## Decisions
+
+- **Option 1: new types `sbyte`, `sword` and `sdword`**, printed as `.char`, `.sint` and `.dint` with the two's-complement value (`.char -3`). deflower's `char` stays the text type (`.text`, issue 0039). `.lint` (24-bit) only if a fixture needs it, which would also need a 3-byte type.

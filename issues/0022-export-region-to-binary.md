@@ -14,3 +14,7 @@ Done when:
 - `ResultWriter`/ `Deflower` writes the region's bytes to `out/<name>.bin`.
 - `AssemblyFileFormat` emits an include line at that address pointing at `<name>.bin` instead of `.BYTE` data.
 - A fixture + test covers an exported region: binary file exists with the right bytes, and the `.asm` output has the include line instead of inline bytes.
+
+## Decisions
+
+- **Syntax, shared with [0058](0058-disassemble-region-to-separate-asm-file.md): one keyword, `export`, and the file name's extension decides.** `$2000-$2800 export font.bin` writes the bytes to `out/font.bin` and puts 64tass's `.binary "font.bin"` at that address. `$c000-$c800 export music.asm` is 0058's source file. The `.flo` ID token already allows dots. Any other extension is an error.

@@ -27,3 +27,9 @@ Approach to decide:
 - **Debug output.** The Java code prints a lot of `System.out` tracing ("Marking block", "Unnamed target"). Decide whether to port it, drop it, or put it behind a `--verbose` flag (see [0056](0056-help-flag.md)).
 
 Done when: a Nim build produces one executable that turns every fixture's `.flo` into output byte-identical to its `expected.asm`, the error cases the Java tests cover (parse errors, area conflicts, duplicate labels, an image past `$FFFF`, ...) are reported the same way, the Java sources, pom.xml and grammar are gone, and CLAUDE.md describes the Nim project.
+
+## Decisions
+
+- **Side by side.** The Nim version lives in its own directory next to the Java one. Both run on all fixtures until every `expected.asm` matches, then the Java code is deleted. A straight port: no output changes in the same step.
+- **Tracing behind `--verbose`.** The tracing is ported, but printed only with `--verbose`; a normal run prints errors and the files it writes.
+- **Hand-written parser.** A small tokenizer and line parser replace ANTLR, with no dependency. The format description moves from `Flo.g4`'s header to its own document.

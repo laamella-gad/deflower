@@ -18,3 +18,8 @@ Scope:
 - Possibly: `FlowAnalyser` could treat an `.rta` table as containing code entry points too (each entry is a real place execution continues, same as a jump table) - worth considering alongside issue 0031's placeholder-carving workflow, though that may be its own follow-up rather than part of this one.
 
 Done when: a `.flo` line can mark a table as `rta`, it prints as `.rta` with correctly-resolved (not off-by-one) labels, and there's a fixture modeling a real RTS-trick dispatch table (push hi/push lo/RTS reading from the table) to anchor it.
+
+## Decisions
+
+- **Keyword `rta`**, a type like `word`: `$c100 rta[4] handlers`, printed as `.rta label` with the label of value + 1.
+- **The entries are traced as code.** Each entry + 1 is where an `RTS` lands, so it is pushed as a code entry point, like a `code` line. A table then disassembles its handlers without separate `code` lines.

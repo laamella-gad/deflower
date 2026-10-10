@@ -30,3 +30,8 @@ Open questions:
 Implementation hint: file-system watchers often watch directories, not files (Java's `java.nio.file.WatchService` and Linux inotify-based ones do), so register the directories that hold the watched files and filter events by file name.
 
 Done when: `--watch <file.flo>` runs once, then re-runs after a change to the `.flo` file or one of its binaries, survives a run with errors, and a test covers at least the re-run after a change to the `.flo` file.
+
+## Decisions
+
+- **A watching server, terminal only.** `--watch` keeps deflower running, watches the files, re-runs on a change and prints each run's stdout and/or stderr to the terminal. No browser page, HTTP or editor plugin.
+- **Keep the last good output on error.** A failed run prints its errors and leaves `out/*.asm` as it was; only a successful run replaces it.

@@ -15,3 +15,7 @@ Scope:
 - A `word_2_048e`-style element that's actually a pointer (squirm/zwark both have screen-code data and sprite pointers already using plain `word`) is a candidate for a fixture, or a small dedicated one.
 
 Done when: a `.flo` line like `$2000 address jump_table[4]` registers a `POINTER` area and the output shows `.addr` with resolved labels, same as the auto-generated indirect-JMP case.
+
+## Decisions
+
+- **Keyword `addr`**, matching 64tass's `.addr` and as short as `byte`/`word`: `$2000 addr[4] jump_table`. It maps to `DataType.POINTER` and becomes a reserved word.

@@ -5,16 +5,33 @@ priority: medium
 labels: enhancement
 ---
 
-tass64 (https://tass64.sourceforge.net/, "Bit string extraction operators") has prefix operators for pulling one byte out of a 16-bit value: `<expr` is the low byte, `>expr` is the high byte (e.g. `lda #<label`, `ldy #>label`). Right now deflower has no equivalent, and the `.flo`/output conventions work around that in two ways that this operator would remove:
+tass64 (https://tass64.sourceforge.net/, "Bit string extraction operators") has prefix operators for pulling one byte out of a 16-bit value: `<expr` is the low byte, `>expr` is the high byte.
 
-1. **Separate `_lo`/`_hi` labels.** `squirm.flo` (and others) declare two labels for one logical 16-bit value split across two bytes, e.g. `snk_head_loc_lo` / `snk_head_loc_hi` at consecutive addresses. Code that does `LDA snk_head_loc_lo` / `LDA snk_head_loc_hi` could instead read `LDA #<snk_head_loc` / `LDA #>snk_head_loc` against a single `word` (or `pointer`) declaration - one label instead of two, and the name itself stops needing to encode which half it is.
+6502 code sets up a pointer by loading the two halves of an address as constants and storing them into a pointer variable:
 
-2. **`label + $01`-style offsets.** `nameForAddress` (`ResultWriter.java`) resolves an operand that lands one byte into a labeled `word`/array as `label + $01` (issue 0024's fix). When that "+1" is specifically the high byte of a 16-bit value (a `word`/`pointer` area, or any 2-byte element), `>label` is the more meaningful rendering than a raw offset - it says *what* the byte is (the high half of this address), not just *where* it is.
+```
+LDA #$00      ; low byte of $C000
+STA $FB
+LDA #$C0      ; high byte of $C000
+STA $FC       ; $FB/$FC now points at $C000
+```
 
-Scope to figure out:
+If `$C000` has a label, `level_data`, the constants can say what they are: `LDA #<level_data` and `LDA #>level_data`. Today deflower prints `#$00` and `#$C0`, and the reader has to work out that they belong together.
 
-- **Recognizing the case.** `>label` only makes sense when the operand's address is exactly `area.address + 1` of a `word`/`pointer`-typed `DataArea` (or `+1`/`+2`/`+3` of a `dword`) - needs distinguishing from an arbitrary `label + $01` into a `byte`/`char` array, which should keep printing as a plain offset.
-- **Where it plugs in.** Likely `nameForAddress` in `ResultWriter.java` for existing `word`/`dword`/`pointer` areas (case 2) is the smaller, mechanical part. Collapsing an existing `_lo`/`_hi` label pair declared via two separate `.flo` lines into one `word` declaration (case 1) is a bigger, more "AI-assisted-refactor" kind of change to an existing `.flo` file - probably starts as a recommendation/detection (flag the pattern) rather than an automatic rewrite.
-- **Addressing modes that take it.** tass64's `<`/`>` are general expression operators, usable wherever a byte-sized operand is expected - immediate (`#<label`), but also zero-page-style operands if the low/high byte happens to be used as an address itself. Deflower's own operand rendering (`AssemblyFileFormat.printInstruction`'s `operand` switch) would need to apply it only where it's actually correct (an IMMEDIATE byte that is in fact one half of a known 16-bit value - the common 6502 "set up a pointer" idiom: `LDA #<label` / `STA ptr` / `LDA #>label` / `STA ptr+1`).
+## Decisions
 
-Done when: an operand that reads the low or high byte of a known 2-byte area prints as `<label`/`>label` instead of a bare `label + $01` offset or a separately-declared `_lo`/`_hi` label, with a fixture covering the classic "set up a 16-bit pointer via two immediate loads" idiom.
+- **Only immediates stored into a typed pointer.** `<`/`>` are used only when two immediate values are stored into the low and the high byte of an area typed `word` (or `addr`, [0041](0041-user-declarable-address-pointer-type.md)). With `$fb virtual word ptr` in the `.flo` file, the example prints as:
+
+  ```
+  LDA #<level_data
+  STA ptr
+  LDA #>level_data
+  STA ptr + $1
+  ```
+
+- **Both halves are needed.** One half alone doesn't say which address it belongs to, so the low and high store have to be paired to form the address, and its label is printed. Without a label at that address, or without a pair, the immediates stay numeric. Nothing is guessed at stores into untyped memory.
+- **Memory loads are out of scope.** The original version of this issue also proposed printing `LDA snk_head_loc_hi` (a load from memory) or `label + $01` (an operand inside a word) as `>label`. That is wrong: those read a byte at an address, while `#>label` is a constant, the high byte of the label's own address. They stay as they are.
+
+Points to settle while implementing: how far apart the two stores may be (same basic block, or any order within the flow), and which loads count (`LDA`/`LDX`/`LDY` immediate, followed by the matching `STA`/`STX`/`STY`).
+
+Done when: the pointer-setup idiom storing into a `word`-typed area prints `#<label`/`#>label`, with a fixture covering it, and immediates that aren't such a pair are unchanged.

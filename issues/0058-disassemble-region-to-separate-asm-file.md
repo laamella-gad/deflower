@@ -26,3 +26,8 @@ Open questions:
 Related: [0057](0057-watch-mode.md) should also rewrite the included files. `Deflower` clears `out/` per `.flo` file, so the extra files are cleaned up along with the main one.
 
 Done when: a region marked in the `.flo` file is written to its own `.asm` file, the main file includes it at the right place, and a fixture shows that the main file assembles with 64tass to the same bytes as without the split.
+
+## Decisions
+
+- **Syntax, shared with [0022](0022-export-region-to-binary.md): one keyword, `export`, and the file name's extension decides.** `$c000-$c800 export music.asm` writes that region's disassembly to `out/music.asm` and puts `.include "music.asm"` in the main file; `export font.bin` is 0022's binary file. No separate `include` keyword.
+- **Boundaries: report an error.** An instruction or multi-byte element that straddles the region's edge is reported like an area conflict (e.g. "Region music.asm ends inside the instruction at $C7FF"), and no output is written. The edge is never moved silently.
