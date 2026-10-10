@@ -32,4 +32,13 @@ Done when: a `.flo` block (`base { ... lines with offset addresses ... }`) resol
 ## Decisions
 
 - **No nesting.** A `{` while a block is open is an error.
-- **The opening line: not decided yet.** The direction: the opening line gives the start address and things that apply to every line inside the block (like `virtual`), and possibly no label. Settle this before implementing.
+- **The opening line is `<address> [virtual] {`.** It gives only the base address and, optionally, `virtual`. No label, no type and no range: any of those on a `{` line is an error. The block covers no memory itself. This replaces the `$d400 system sid {` form described above; a name for the base goes on an inner line (`$00 word freq1`).
+- **`virtual` applies to every inner line.** In a `$d400 virtual {` block, each inner line is virtual without saying so. Inner lines give their own type, as usual.
+
+  ```
+  $d400 virtual {
+      $00 word freq1
+      $02 word pw1
+      $04 byte control1
+  }
+  ```
