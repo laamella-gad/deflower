@@ -1,6 +1,7 @@
 ---
 title: Support tass64's `<`/`>` hi/lo byte extraction operators in output
-status: rejected
+status: open
+priority: low
 labels: enhancement
 ---
 
@@ -16,6 +17,8 @@ STA $FC       ; $FB/$FC now holds $C000
 ```
 
 If `$C000` has a label, `level_data`, the constants can say what they are: `LDA #<level_data` and `LDA #>level_data`. Today deflower prints `#$00` and `#$C0`, and the reader has to work out that they belong together.
+
+**Blocked by [0074](0074-detect-address-setup-pattern.md).** That issue detects the pattern and annotates the address it builds; this one only changes how the immediates are printed.
 
 ## Decisions
 
@@ -38,3 +41,7 @@ Done when: the address-setup idiom storing into a `word`-typed area prints `#<la
 ## Closing note
 
 Rejected: too complex for little gain. Even limited to the exact four-instruction pattern (`lda #lo`, `sta target`, `lda #hi`, `sta target + $1`, register A only, low byte first, no label in between), it needs pattern detection across instructions, plus a rule for which label to print, to improve a handful of operands. No code was written.
+
+## Reopened
+
+Reopened with the pattern detection split off into [0074](0074-detect-address-setup-pattern.md), which removes most of the complexity that got this rejected. Once 0074 finds the pairs and gives the built address a label, printing `#<label`/`#>label` for the paired immediates is a change to the output only.
