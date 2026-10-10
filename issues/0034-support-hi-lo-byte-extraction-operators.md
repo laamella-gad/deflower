@@ -1,7 +1,6 @@
 ---
 title: Support tass64's `<`/`>` hi/lo byte extraction operators in output
-status: open
-priority: medium
+status: rejected
 labels: enhancement
 ---
 
@@ -35,3 +34,7 @@ If `$C000` has a label, `level_data`, the constants can say what they are: `LDA 
 Points to settle while implementing: how far apart the two stores may be (same basic block, or any order within the flow), and which loads count (`LDA`/`LDX`/`LDY` immediate, followed by the matching `STA`/`STX`/`STY`).
 
 Done when: the address-setup idiom storing into a `word`-typed area prints `#<label`/`#>label`, with a fixture covering it, and immediates that aren't such a pair are unchanged.
+
+## Closing note
+
+Rejected: too complex for little gain. Even limited to the exact four-instruction pattern (`lda #lo`, `sta target`, `lda #hi`, `sta target + $1`, register A only, low byte first, no label in between), it needs pattern detection across instructions, plus a rule for which label to print, to improve a handful of operands. No code was written.
