@@ -342,9 +342,9 @@ class AssemblyFileFormat {
             case IND_Y -> format("(%s), Y", nameForAddress(byte1, "$%02X", subject));
             case RELATIVE -> format("%s", nameForAddress(block.address + toSignedByte(byte1) + 2, "$%04X", subject));
             case INDIRECT -> format("(%s)", nameForAddress(word, "$%04X", subject));
-            case ABSOLUTE -> format("%s", nameForAddress(word, "$%04X", subject));
-            case ABSOLUTE_X -> format("%s, X", nameForAddress(word, "$%04X", subject));
-            case ABSOLUTE_Y -> format("%s, Y", nameForAddress(word, "$%04X", subject));
+            case ABSOLUTE -> format("%s", nameForAbsoluteAddress(word, subject));
+            case ABSOLUTE_X -> format("%s, X", nameForAbsoluteAddress(word, subject));
+            case ABSOLUTE_Y -> format("%s, Y", nameForAbsoluteAddress(word, subject));
             case IMMEDIATE -> format("#$%02X", byte1);
             case ZERO_PAGE -> format("%s", nameForAddress(byte1, "$%02X", subject));
             case ZERO_PAGE_X -> format("%s, X", nameForAddress(byte1, "$%02X", subject));
@@ -358,6 +358,16 @@ class AssemblyFileFormat {
         out.print(operand);
 
         lastArea = block;
+    }
+
+    /**
+     * An absolute-mode operand. Below $100, 64tass would pick the shorter
+     * zero-page form, label or number alike, so `@w` forces the 16-bit
+     * one (issue 0053).
+     */
+    private String nameForAbsoluteAddress(int address, Subject subject) {
+        String name = nameForAddress(address, "$%04X", subject);
+        return address < 0x100 ? "@w " + name : name;
     }
 
     private String nameForAddress(int address, String formatWhenNumeric, Subject subject) {

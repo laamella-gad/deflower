@@ -1,6 +1,7 @@
 ---
 title: Implement the `{ }` block syntax as address-offset scoping
 status: open
+priority: medium
 labels: enhancement
 ---
 

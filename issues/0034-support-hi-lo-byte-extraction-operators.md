@@ -1,6 +1,7 @@
 ---
 title: Support tass64's `<`/`>` hi/lo byte extraction operators in output
 status: open
+priority: medium
 labels: enhancement
 ---
 

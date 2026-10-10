@@ -1,6 +1,7 @@
 ---
 title: Address range end is off by one
 status: invalid
+priority: high
 labels: bug
 ---
 

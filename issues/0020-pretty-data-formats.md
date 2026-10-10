@@ -1,6 +1,7 @@
 ---
 title: Add pretty disassembly formats for known data shapes (charset, screen, sprite)
 status: open
+priority: low
 labels: enhancement
 ---
 

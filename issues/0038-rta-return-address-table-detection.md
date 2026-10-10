@@ -1,6 +1,7 @@
 ---
 title: Detect and support 64tass's `.rta` return-address-table idiom
 status: open
+priority: low
 labels: enhancement
 ---
 

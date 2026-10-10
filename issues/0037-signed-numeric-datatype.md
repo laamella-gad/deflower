@@ -1,6 +1,7 @@
 ---
 title: Add a signed numeric DataType (64tass's `.char`/`.sint`/`.lint`/`.dint`)
 status: open
+priority: low
 labels: enhancement
 ---
 

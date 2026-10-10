@@ -294,6 +294,16 @@ class DeflowerTest {
     }
 
     /**
+     * Issue 0053: an absolute-mode operand below $100, label or number,
+     * carries `@w`, so 64tass doesn't shorten it to zero page. The same
+     * operands in zero-page form stay without it.
+     */
+    @Test
+    void absoluteOperandBelow100KeepsAbsoluteForm() throws IOException, URISyntaxException {
+        assertDeflowered("absolutezeropage");
+    }
+
+    /**
      * Issue 0039: consecutive CHAR values print as `.text` lines, printable
      * characters sharing a double-quoted literal and anything else
      * (control codes, double quotes, a $00 terminator, a length byte) as

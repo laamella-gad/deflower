@@ -1,6 +1,7 @@
 ---
 title: Convert the whole project to Nim
 status: open
+priority: medium
 labels: enhancement
 ---
 

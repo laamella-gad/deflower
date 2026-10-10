@@ -1620,7 +1620,7 @@ crack_trainer_msg:
 *=$9F1C
 
 install_trainer:
-		ISC $00FF, X
+		ISC @w $00FF, X
 		BRK 
 
 .virtual $D000
@@ -1670,7 +1670,7 @@ lE544:
 *=$FFE1
 
 lFFE1:
-		ISC $0000, X
+		ISC @w $0000, X
 
 lFFE4:
 		BRK 

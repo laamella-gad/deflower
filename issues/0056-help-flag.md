@@ -1,6 +1,7 @@
 ---
 title: Support a --help flag
 status: open
+priority: low
 labels: enhancement
 ---
 

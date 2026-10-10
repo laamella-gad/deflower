@@ -1,6 +1,7 @@
 ---
 title: Mark regions for export to a binary file, included from the generated asm
 status: open
+priority: medium
 labels: enhancement
 ---
 

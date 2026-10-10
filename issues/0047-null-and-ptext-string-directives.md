@@ -1,6 +1,7 @@
 ---
 title: Emit `.null`/`.ptext` for null-terminated and length-prefixed strings
 status: open
+priority: low
 labels: enhancement
 ---
 

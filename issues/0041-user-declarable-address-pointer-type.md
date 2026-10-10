@@ -1,6 +1,7 @@
 ---
 title: Allow annotating a `.flo` line with type `address`/`pointer`
 status: open
+priority: medium
 labels: enhancement
 ---
 

@@ -1,6 +1,7 @@
 ---
 title: Generate lowercase assembly output (except user labels/comments)
 status: open
+priority: low
 labels: enhancement
 ---
 

@@ -1,6 +1,7 @@
 ---
 title: Disassemble a region into a separate .asm file, included from the main one
 status: open
+priority: medium
 labels: enhancement
 ---
 
