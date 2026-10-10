@@ -75,7 +75,7 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0052](0052-auto-labels-are-64tass-local-labels.md) | done | Auto-generated labels start with `_`, which makes them 64tass local labels |
 | [0053](0053-force-absolute-operand-on-zero-page-label.md) | open | Absolute operand on a zero-page label reassembles as zero page |
 | [0054](0054-empty-labels-on-uncovered-memory.md) | done | Labels on memory no area covers come out as empty origin blocks |
-| [0055](0055-placeholder-blocks-code-entry.md) | open | A jump target inside a placeholder is never traced |
+| [0055](0055-placeholder-blocks-code-entry.md) | done | A jump target inside a placeholder is never traced |
 | [0056](0056-help-flag.md) | open | Support a --help flag |
 | [0057](0057-watch-mode.md) | open | Add a flag to run deflower as a live server that re-runs on file changes |
 | [0058](0058-disassemble-region-to-separate-asm-file.md) | open | Disassemble a region into a separate .asm file, included from the main one |

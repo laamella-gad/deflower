@@ -285,6 +285,15 @@ class DeflowerTest {
     }
 
     /**
+     * Issue 0055: a JSR into a placeholder range is traced, and the rest
+     * of the range still prints as placeholder bytes.
+     */
+    @Test
+    void jumpIntoPlaceholderIsTraced() throws IOException, URISyntaxException {
+        assertDeflowered("placeholderjump");
+    }
+
+    /**
      * Issue 0039: consecutive CHAR values print as `.text` lines, printable
      * characters sharing a double-quoted literal and anything else
      * (control codes, double quotes, a $00 terminator, a length byte) as

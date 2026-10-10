@@ -6,7 +6,7 @@ $0400 virtual byte[1000] screen_ram
 $2800-$2ff9
 $0fa0-$23f3
 $23f9-$23fa
-$243e-$243f
+$243e-$243f byte
 $2572-$2680
 $3e81-$3ee3
 $3ee3-$3f46

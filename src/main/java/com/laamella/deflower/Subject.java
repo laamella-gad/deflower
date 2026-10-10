@@ -256,7 +256,8 @@ class Subject {
         if (labelIt) {
             ensureLabelled(address, "l", referencingAddress);
         }
-        if (location.area == null) {
+        // A placeholder may still turn out to be code (issue 0055).
+        if (location.area == null || location.area.isPlaceholder()) {
             potentialCodeLocations.add(address);
         }
     }
