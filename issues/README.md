@@ -79,3 +79,4 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0056](0056-help-flag.md) | open | Support a --help flag |
 | [0057](0057-watch-mode.md) | open | Add a flag to run deflower as a live server that re-runs on file changes |
 | [0058](0058-disassemble-region-to-separate-asm-file.md) | open | Disassemble a region into a separate .asm file, included from the main one |
+| [0059](0059-convert-to-nim.md) | open | Convert the whole project to Nim |
