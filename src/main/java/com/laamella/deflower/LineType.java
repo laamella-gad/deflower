@@ -3,8 +3,8 @@ package com.laamella.deflower;
 import static com.laamella.deflower.DataType.*;
 
 enum LineType {
-    CHAR_LINE(CHAR), BYTE_LINE(BYTE), CODE_LINE(null), WORD_LINE(WORD), DWORD_LINE(DWORD), ADDR_LINE(ADDR),
-    SBYTE_LINE(SBYTE), SWORD_LINE(SWORD), SDWORD_LINE(SDWORD),
+    CHAR_LINE(CHAR), BYTE_LINE(BYTE), CODE_LINE(null), WORD_LINE(WORD), LONG_LINE(LONG), DWORD_LINE(DWORD), ADDR_LINE(ADDR),
+    SBYTE_LINE(SBYTE), SWORD_LINE(SWORD), SLONG_LINE(SLONG), SDWORD_LINE(SDWORD),
     /**
      * The default when a line has no explicit type keyword (issue
      * 0031) - a placeholder for memory that isn't understood yet,

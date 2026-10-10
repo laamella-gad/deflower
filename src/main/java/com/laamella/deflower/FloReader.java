@@ -110,6 +110,8 @@ class FloReader {
                 type = BYTE_LINE;
             } else if (ctx.WORD() != null) {
                 type = WORD_LINE;
+            } else if (ctx.LONG() != null) {
+                type = LONG_LINE;
             } else if (ctx.DWORD() != null) {
                 type = DWORD_LINE;
             } else if (ctx.ADDR() != null) {
@@ -118,6 +120,8 @@ class FloReader {
                 type = SBYTE_LINE;
             } else if (ctx.SWORD() != null) {
                 type = SWORD_LINE;
+            } else if (ctx.SLONG() != null) {
+                type = SLONG_LINE;
             } else if (ctx.SDWORD() != null) {
                 type = SDWORD_LINE;
             } else if (ctx.CODE() != null) {

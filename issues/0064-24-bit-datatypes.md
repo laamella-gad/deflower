@@ -1,7 +1,6 @@
 ---
 title: Support 24-bit datatypes (64tass's `.long`/`.lint`)
-status: open
-priority: low
+status: done
 labels: enhancement
 ---
 
@@ -25,3 +24,9 @@ Done when: both types can be declared in a `.flo` file and print under `.long`/`
 ## Decisions
 
 - **Names: `long` and `slong`.** `long` is 64tass's own name for the unsigned one (`$c010 long score` prints `.long $123456`); `slong` follows deflower's `s` prefix for signed types, like `sbyte`/`sword`/`sdword` (`$c013 slong offset` prints `.lint -3`).
+
+## Closing note
+
+Added as decided. `.flo` types `long` and `slong` (`DataType` `LONG`/`SLONG`, 3 bytes, read little-endian by the new `Subject.longAt`): `long` prints as 6-digit hex under `.long` (new `Printing.asHexLong`, with tests in `PrintingTest`), `slong` as a sign-extended decimal under `.lint`. Both reserve with `.long ?`/`.lint ?` in a `.virtual` block. `long` and `slong` are now reserved words; no existing fixture used them as labels. The format comment in `Flo.g4` and CLAUDE.md list the types.
+
+Fixture `long`: a virtual `long`, `long[2]` (`$123456, $ffffff`) and `slong[2]` (`-3, -8388608`), read by a small routine. Its `expected.asm` reassembles with 64tass to the `.prg` minus its header. Test `emitsLongs`. `mvn -o test`: 62 tests green.

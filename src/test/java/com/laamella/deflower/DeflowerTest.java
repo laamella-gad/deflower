@@ -90,6 +90,15 @@ class DeflowerTest {
     }
 
     /**
+     * Issue 0064: long and slong are 24-bit, printed under 64tass's .long
+     * (hex) and .lint (signed decimal).
+     */
+    @Test
+    void emitsLongs() throws IOException, URISyntaxException {
+        assertDeflowered("long");
+    }
+
+    /**
      * registerArea collects an error when one area overwrites a genuinely
      * different one (Subject.errors), and Deflower refuses to write an
      * (illegal) asm file for a subject that has any (issue 0018).

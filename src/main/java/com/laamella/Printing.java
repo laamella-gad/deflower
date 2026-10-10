@@ -18,6 +18,11 @@ public class Printing {
         return String.format("$%04x", value);
     }
 
+    public static String asHexLong(int value) {
+        assertState(value >= 0 && value <= 0xFFFFFF, "Invalid long %d", value);
+        return String.format("$%06x", value);
+    }
+
     public static String asHexDword(int value) {
         assertState(value >= 0 && value <= 0xFFFFFFFFL, "Invalid dword %d", value);
         return String.format("$%08x", value);

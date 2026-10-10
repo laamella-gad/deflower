@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import static com.laamella.Printing.asAddress;
 import static com.laamella.Printing.asHexByte;
 import static com.laamella.Printing.asHexDword;
+import static com.laamella.Printing.asHexLong;
 import static com.laamella.Printing.asHexWord;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -59,6 +60,23 @@ class PrintingTest {
     @Test
     void asHexWordRejectsValuesAboveRange() {
         assertThatThrownBy(() -> asHexWord(0x10000)).isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void asHexLongFormatsValidValues() {
+        assertThat(asHexLong(0)).isEqualTo("$000000");
+        assertThat(asHexLong(0xFFFF)).isEqualTo("$00ffff");
+        assertThat(asHexLong(0xFFFFFF)).isEqualTo("$ffffff");
+    }
+
+    @Test
+    void asHexLongRejectsNegativeValues() {
+        assertThatThrownBy(() -> asHexLong(-1)).isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void asHexLongRejectsValuesAboveRange() {
+        assertThatThrownBy(() -> asHexLong(0x1000000)).isInstanceOf(IllegalStateException.class);
     }
 
     @Test

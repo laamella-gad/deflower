@@ -171,10 +171,12 @@ class AssemblyFileFormat {
         return switch (type) {
             case BYTE, UNKNOWN, CHAR -> ".byte";
             case WORD -> ".word";
+            case LONG -> ".long";
             case DWORD -> ".dword";
             case ADDR -> ".addr";
             case SBYTE -> ".char";
             case SWORD -> ".sint";
+            case SLONG -> ".lint";
             case SDWORD -> ".dint";
         };
     }
@@ -189,7 +191,7 @@ class AssemblyFileFormat {
     }
 
     public void print(DataArea area, int address, Subject subject) throws IOException {
-        // A multi-byte area (WORD, DWORD, ADDR) owns several consecutive
+        // A multi-byte area (WORD, LONG, DWORD, ADDR, ...) owns several consecutive
         // addresses but is one value: print it once, at its first address.
         if (address != area.address) {
             return;
@@ -208,6 +210,9 @@ class AssemblyFileFormat {
             case WORD:
                 tabularPrint(".word", asHexWord(subject.wordAt(address)));
                 break;
+            case LONG:
+                tabularPrint(".long", asHexLong(subject.longAt(address)));
+                break;
             case DWORD:
                 tabularPrint(".dword", asHexDword(subject.dwordAt(address)));
                 break;
@@ -222,6 +227,10 @@ class AssemblyFileFormat {
                 break;
             case SWORD:
                 tabularPrint(".sint", Integer.toString((short) subject.wordAt(address)));
+                break;
+            case SLONG:
+                // Sign-extend the 24-bit value.
+                tabularPrint(".lint", Integer.toString(subject.longAt(address) << 8 >> 8));
                 break;
             case SDWORD:
                 tabularPrint(".dint", Integer.toString(subject.dwordAt(address)));

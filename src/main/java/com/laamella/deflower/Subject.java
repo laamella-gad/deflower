@@ -60,6 +60,10 @@ class Subject {
         return byteAt(address) + 256 * byteAt(address + 1);
     }
 
+    int longAt(int address) {
+        return wordAt(address) + 256 * 256 * byteAt(address + 2);
+    }
+
     int dwordAt(int address) {
         return wordAt(address) + 256 * 256 * wordAt(address + 2);
     }
@@ -92,7 +96,7 @@ class Subject {
                 potentialCodeLocations.add(address);
                 System.out.format("Will disassemble from %X\n", address);
             }
-            case CHAR_LINE, BYTE_LINE, WORD_LINE, DWORD_LINE, ADDR_LINE, SBYTE_LINE, SWORD_LINE, SDWORD_LINE, UNKNOWN_LINE -> {
+            case CHAR_LINE, BYTE_LINE, WORD_LINE, LONG_LINE, DWORD_LINE, ADDR_LINE, SBYTE_LINE, SWORD_LINE, SLONG_LINE, SDWORD_LINE, UNKNOWN_LINE -> {
                 int amount = annotation.addressEnd != null
                         ? (annotation.addressEnd - address) / type.dataType.sizeInBytes
                         : annotation.amount;
