@@ -92,7 +92,7 @@ class Subject {
                 potentialCodeLocations.add(address);
                 System.out.format("Will disassemble from %X\n", address);
             }
-            case CHAR_LINE, BYTE_LINE, WORD_LINE, DWORD_LINE, ADDR_LINE, UNKNOWN_LINE -> {
+            case CHAR_LINE, BYTE_LINE, WORD_LINE, DWORD_LINE, ADDR_LINE, SBYTE_LINE, SWORD_LINE, SDWORD_LINE, UNKNOWN_LINE -> {
                 int amount = annotation.addressEnd != null
                         ? (annotation.addressEnd - address) / type.dataType.sizeInBytes
                         : annotation.amount;

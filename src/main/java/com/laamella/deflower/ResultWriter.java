@@ -173,6 +173,9 @@ class AssemblyFileFormat {
             case WORD -> ".word";
             case DWORD -> ".dword";
             case ADDR -> ".addr";
+            case SBYTE -> ".char";
+            case SWORD -> ".sint";
+            case SDWORD -> ".dint";
         };
     }
 
@@ -213,6 +216,15 @@ class AssemblyFileFormat {
                 // (issue 0036) - more precise than .WORD for a value that's
                 // always an address, not an arbitrary 16-bit number.
                 tabularPrint(".addr", nameForAddress(subject.wordAt(address), "$%04x", subject));
+                break;
+            case SBYTE:
+                tabularPrint(".char", Integer.toString((byte) subject.byteAt(address)));
+                break;
+            case SWORD:
+                tabularPrint(".sint", Integer.toString((short) subject.wordAt(address)));
+                break;
+            case SDWORD:
+                tabularPrint(".dint", Integer.toString(subject.dwordAt(address)));
                 break;
         }
         lastArea = area;

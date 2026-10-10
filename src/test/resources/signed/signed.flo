@@ -1,0 +1,6 @@
+deflower signed.prg
+$02 virtual sbyte velocity
+$c000 code start
+$c004 sbyte[4] deltas
+$c008 sword[2] speeds
+$c00c sdword offset

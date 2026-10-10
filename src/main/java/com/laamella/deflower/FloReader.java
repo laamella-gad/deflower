@@ -114,6 +114,12 @@ class FloReader {
                 type = DWORD_LINE;
             } else if (ctx.ADDR() != null) {
                 type = ADDR_LINE;
+            } else if (ctx.SBYTE() != null) {
+                type = SBYTE_LINE;
+            } else if (ctx.SWORD() != null) {
+                type = SWORD_LINE;
+            } else if (ctx.SDWORD() != null) {
+                type = SDWORD_LINE;
             } else if (ctx.CODE() != null) {
                 type = CODE_LINE;
             }

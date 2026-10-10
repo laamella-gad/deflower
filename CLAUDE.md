@@ -33,7 +33,7 @@ The pipeline is: **flow file → parse → memory image + annotations → code-f
   - `deflower <file>` starts a run: it loads a `.vsf` VICE snapshot or a `.prg`, relative to the `.flo` file. Each run is independent and writes `out/<file without extension>.asm`.
   - An annotation line is `<address or start-end> [virtual] [<type>[<size>]] [<label>] [export <id>] [{]`, with the parts in exactly that order and each at most once. Anything else is a parse error.
     - The range end is exclusive.
-    - Types are `char`, `byte`, `word`, `dword`, `addr` (a 16-bit address, printed as `.addr` with its target's label) and `code` (an entry point). A range with no type is an `UNKNOWN` placeholder, which a later line may narrow without an area conflict. A single address with no type is only a label/comment and registers no area.
+    - Types are `char`, `byte`, `word`, `dword`, `addr` (a 16-bit address, printed as `.addr` with its target's label), `sbyte`/`sword`/`sdword` (signed, printed as `.char`/`.sint`/`.dint`) and `code` (an entry point). A range with no type is an `UNKNOWN` placeholder, which a later line may narrow without an area conflict. A single address with no type is only a label/comment and registers no area.
     - The size is a number or `*`/`+` over numbers (`byte[40*21]`, `byte[$af]`). A size of 0 is an error.
     - The reserved words can't be labels.
     - `export` parses but does nothing yet.
@@ -56,7 +56,7 @@ The pipeline is: **flow file → parse → memory image + annotations → code-f
 - **`ResultWriter`** walks 0x0000–0xFFFF and drives `AssemblyFileFormat`, which owns the layout and the per-type printing (64tass syntax, all lowercase except labels and comments):
   - `*=` origins at gaps;
   - blank-line separators and label placement inside data runs;
-  - `.byte`/`.word`/`.dword`/`.addr` tables;
+  - `.byte`/`.word`/`.dword`/`.addr`/`.char`/`.sint`/`.dint` tables;
   - `.text` strings, with `.enc "screen"`/`"none"` switches chosen per char array;
   - `.virtual` blocks;
   - instructions with operands resolved to labels (`label + $offset` inside arrays), and `@w` on absolute operands below `$100` so they don't reassemble as zero page;

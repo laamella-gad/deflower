@@ -23,8 +23,10 @@
  *     - virtual: memory the program uses but doesn't contain (I/O,
  *       zero page, screen). Output as a .virtual reservation, not as data.
  *     - type: char (text), byte, word, dword, addr (a 16-bit address,
- *       printed as .addr with the label of the address it holds), or code
- *       (an entry point to trace from; any [size] is ignored). A range without a type is a
+ *       printed as .addr with the label of the address it holds), sbyte,
+ *       sword, sdword (signed numbers, printed as .char, .sint and .dint,
+ *       e.g. .char -3), or code (an entry point to trace from; any [size]
+ *       is ignored). A range without a type is a
  *       placeholder: printed as bytes, but a later, more specific line
  *       may narrow part of it without a conflict. A single address
  *       without a type only names (or comments) that address and covers
@@ -37,7 +39,7 @@
  *       for one element) is an error.
  *     - label: a name for the address, from [A-Za-z0-9._?]. It can't be
  *       a reserved word: deflower, virtual, export, char, byte, word,
- *       dword, addr, code.
+ *       dword, addr, sbyte, sword, sdword, code.
  *     - export <id> parses, but has no effect yet.
  *     Two lines may only cover the same memory if the earlier one is a
  *     placeholder (or both say exactly the same); otherwise it's an area
@@ -80,7 +82,7 @@ setVirtual: 'virtual';
 setLabel: ID;
 export: 'export' ID;
 
-datatype: (CHAR|BYTE|WORD|DWORD|ADDR|CODE) ( '[' arraySize? ']')?;
+datatype: (CHAR|BYTE|WORD|DWORD|ADDR|SBYTE|SWORD|SDWORD|CODE) ( '[' arraySize? ']')?;
 // The element count of an array: a number, or * and + over numbers, with
 // * binding tighter.
 arraySize: arraySize '*' arraySize  # arraySizeMul
@@ -94,6 +96,9 @@ BYTE: 'byte';
 WORD: 'word';
 DWORD: 'dword';
 ADDR: 'addr';
+SBYTE: 'sbyte';
+SWORD: 'sword';
+SDWORD: 'sdword';
 CODE: 'code';
 OPEN_BLOCK: '{';
 CLOSE_BLOCK: '}';

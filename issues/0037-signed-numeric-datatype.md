@@ -1,7 +1,6 @@
 ---
 title: Add a signed numeric DataType (64tass's `.char`/`.sint`/`.lint`/`.dint`)
-status: open
-priority: low
+status: done
 labels: enhancement
 ---
 
@@ -26,3 +25,9 @@ Done when: a decision is made and a signed value (at minimum, a signed byte; `.s
 ## Decisions
 
 - **Option 1: new types `sbyte`, `sword` and `sdword`**, printed as `.char`, `.sint` and `.dint` with the two's-complement value (`.char -3`). deflower's `char` stays the text type (`.text`, issue 0039). `.lint` (24-bit) only if a fixture needs it, which would also need a 3-byte type.
+
+## Closing note
+
+Added as decided. `.flo` types `sbyte`, `sword` and `sdword` (`DataType` `SBYTE`/`SWORD`/`SDWORD`) print their two's-complement value in decimal under `.char`, `.sint` and `.dint`, and reserve with `.char ?` etc. in a `.virtual` block. No `.lint`: no fixture needs a 3-byte type; that is [0064](0064-24-bit-datatypes.md). The format comment in `Flo.g4` and CLAUDE.md list the new types.
+
+Fixture `signed`: a virtual `sbyte`, `sbyte[4]` (`-3, 3, -128, 127`), `sword[2]` (`-32768, -1`) and an `sdword` (`-2`), read by a small routine. Its `expected.asm` reassembles with 64tass to the `.prg` minus its header. Test `emitsSignedNumbers`. `mvn -o test`: 58 tests green.

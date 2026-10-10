@@ -81,6 +81,15 @@ class DeflowerTest {
     }
 
     /**
+     * Issue 0037: sbyte, sword and sdword print their two's-complement
+     * value under 64tass's .char, .sint and .dint.
+     */
+    @Test
+    void emitsSignedNumbers() throws IOException, URISyntaxException {
+        assertDeflowered("signed");
+    }
+
+    /**
      * registerArea collects an error when one area overwrites a genuinely
      * different one (Subject.errors), and Deflower refuses to write an
      * (illegal) asm file for a subject that has any (issue 0018).
