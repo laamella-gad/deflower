@@ -430,6 +430,56 @@ class DeflowerTest {
     }
 
     /**
+     * Issue 0035: inside a { } block, every address is an offset from the
+     * opening line's address, and 'virtual' on the opening line applies to
+     * every line inside. The output is the same as with absolute addresses.
+     */
+    @Test
+    void resolvesBlockOffsetsFromTheBase() throws IOException, URISyntaxException {
+        assertDeflowered("block");
+    }
+
+    @Test
+    void rejectsLabelOnBlockOpeningLine() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/block-label.flo", "line 2: a block's opening line takes only an address and 'virtual'");
+    }
+
+    @Test
+    void rejectsTypeOnBlockOpeningLine() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/block-type.flo", "line 2: a block's opening line takes only an address and 'virtual'");
+    }
+
+    @Test
+    void rejectsRangeOnBlockOpeningLine() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/block-range.flo", "line 2: a block's opening line takes only an address and 'virtual'");
+    }
+
+    @Test
+    void rejectsNestedBlock() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/block-nested.flo", "line 3: blocks can't be nested (the open one starts at line 2)");
+    }
+
+    @Test
+    void rejectsBlockNotClosedAtEndOfFile() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/block-unclosed.flo", "line 2: block is not closed with '}'");
+    }
+
+    @Test
+    void rejectsBlockNotClosedBeforeNextDeflowerLine() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/block-unclosed-before-deflower.flo", "line 2: block is not closed with '}'");
+    }
+
+    @Test
+    void rejectsCloseWithoutOpenBlock() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/block-unopened.flo", "line 3: '}' without an open block");
+    }
+
+    @Test
+    void rejectsBlockOffsetPastFFFF() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/block-past-ffff.flo", "line 3: the block's base plus this offset runs past $ffff");
+    }
+
+    /**
      * Issue 0017: the whole .flo file is parsed before any memory image is
      * loaded or annotated, so an annotation line before the first
      * 'deflower' line is reported up front (no NullPointerException, as in
@@ -457,6 +507,10 @@ class DeflowerTest {
      * stderr, and nothing written to its output directory.
      */
     private void assertFailsToParse(String flowerFile) throws IOException, URISyntaxException {
+        assertFailsToParse(flowerFile, "Failed to parse");
+    }
+
+    private void assertFailsToParse(String flowerFile, String expectedError) throws IOException, URISyntaxException {
         ByteArrayOutputStream capturedErr = new ByteArrayOutputStream();
         PrintStream originalErr = System.err;
         System.setErr(new PrintStream(capturedErr));
@@ -465,7 +519,7 @@ class DeflowerTest {
         } finally {
             System.setErr(originalErr);
         }
-        assertThat(capturedErr.toString()).contains("Failed to parse");
+        assertThat(capturedErr.toString()).contains("Failed to parse").contains(expectedError);
         assertThat(isEmpty(outDir(flowerFile))).as("output directory for a file that failed to parse").isTrue();
     }
 

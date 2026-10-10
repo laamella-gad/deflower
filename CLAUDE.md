@@ -36,7 +36,8 @@ The pipeline is: **flow file → parse → memory image + annotations → code-f
     - Types are `char`, `byte`, `word`, `dword`, `addr` (a 16-bit address, printed as `.addr` with its target's label) and `code` (an entry point). A range with no type is an `UNKNOWN` placeholder, which a later line may narrow without an area conflict. A single address with no type is only a label/comment and registers no area.
     - The size is a number or `*`/`+` over numbers (`byte[40*21]`, `byte[$af]`). A size of 0 is an error.
     - The reserved words can't be labels.
-    - `export` and `{ }` parse but do nothing yet.
+    - `export` parses but does nothing yet.
+  - A `<address> [virtual] {` line opens a block, closed by `}`: addresses inside are offsets from that address, and `virtual` applies to every line inside. Blocks don't nest; `FloReader` resolves them, so nothing after parsing knows about them.
   - `;`/`#` comments sit on their own line and attach to the next annotation line.
 - **`SubjectConfigurer`** drives the two configuration phases.
   - **Parse:** `FloReader` turns the `.flo` file into one `DeflowerRun` per `deflower` line, each holding its `Annotation`s (one per line, plain values; `LineType` is the line's kind). It reads nothing else and changes no memory. Syntax errors abort with "Failed to parse".

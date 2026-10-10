@@ -38,11 +38,25 @@
  *     - label: a name for the address, from [A-Za-z0-9._?]. It can't be
  *       a reserved word: deflower, virtual, export, char, byte, word,
  *       dword, addr, code.
- *     - export <id> and the { ... } block (a '}' on its own line) parse,
- *       but have no effect yet.
+ *     - export <id> parses, but has no effect yet.
  *     Two lines may only cover the same memory if the earlier one is a
  *     placeholder (or both say exactly the same); otherwise it's an area
  *     conflict, and that run's output isn't written.
+ *
+ * <address> [virtual] {
+ *     ...
+ * }
+ *     A block: every address inside it, up to the '}' on its own line, is
+ *     an offset from the opening line's address, e.g. a chip's registers
+ *     from its base. 'virtual' on the opening line makes every line inside
+ *     virtual. The opening line takes nothing else (no range, type or
+ *     label) and covers no memory; a comment above it goes onto the base
+ *     address. Blocks don't nest, and a block must be closed before the
+ *     next 'deflower' line or the end of the file.
+ *         $d400 virtual {
+ *             $00 word freq1
+ *             $04 byte control1
+ *         }
  *
  * Example:
  *     deflower game.prg
@@ -56,8 +70,8 @@ prog:	(statement NEWLINE)* EOF;
 
 statement: COMMENT # comment
     | 'deflower' ID         # setFileName
-    | (address | memoryRange) setVirtual? datatype? setLabel? export? '{'? # line
-    | '}'                           # endBlock
+    | (address | memoryRange) setVirtual? datatype? setLabel? export? OPEN_BLOCK? # line
+    | CLOSE_BLOCK                   # endBlock
     ;
 
 address: number;
@@ -81,6 +95,8 @@ WORD: 'word';
 DWORD: 'dword';
 ADDR: 'addr';
 CODE: 'code';
+OPEN_BLOCK: '{';
+CLOSE_BLOCK: '}';
 COMMENT: (';'| '#')  ~[\r\n]*;
 WS: [ \t]+ -> skip;
 NEWLINE : [\r\n]+ ;

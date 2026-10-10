@@ -32,6 +32,8 @@ class FloReader {
         assertState(parseErrors.isEmpty(), "Failed to parse %s:%n%s", sourceName, String.join("\n", parseErrors));
         AnnotationCollector collector = new AnnotationCollector();
         new ParseTreeWalker().walk(collector, tree);
+        collector.closeRun();
+        assertState(collector.errors.isEmpty(), "Failed to parse %s:%n%s", sourceName, String.join("\n", collector.errors));
         return collector.runs;
     }
 
@@ -65,6 +67,13 @@ class FloReader {
         int amount = 1;
         String name = null;
         final List<String> pendingComments = new ArrayList<>();
+        // Mistakes the grammar can't catch, like a misplaced block.
+        final List<String> errors = new ArrayList<>();
+        // The open { } block (issue 0035): inner addresses are offsets
+        // from blockBase. Null when no block is open; blocks don't nest.
+        Integer blockBase = null;
+        boolean blockVirtual = false;
+        int blockLine = 0;
 
         void startNewLine() {
             address = null;
@@ -77,6 +86,7 @@ class FloReader {
 
         @Override
         public void enterSetFileName(FloParser.SetFileNameContext ctx) {
+            closeRun();
             run = new DeflowerRun(ctx.ID().getText());
             pendingComments.clear();
             runs.add(run);
@@ -136,9 +146,66 @@ class FloReader {
         @Override
         public void exitLine(FloParser.LineContext ctx) {
             assertState(run != null, "Start the file with a 'deflower <file>' line.", ctx.getStart().getLine(), ctx.getText());
+            int line = ctx.getStart().getLine();
             String comment = pendingComments.isEmpty() ? null : String.join("\n", pendingComments);
             pendingComments.clear();
+            if (blockBase != null) {
+                address += blockBase;
+                if (addressEnd != null) {
+                    addressEnd += blockBase;
+                }
+                isVirtual |= blockVirtual;
+                if (address > 0xFFFF || (addressEnd != null && addressEnd > 0x10000)) {
+                    errors.add(String.format("line %d: the block's base plus this offset runs past $ffff", line));
+                    return;
+                }
+            }
+            if (ctx.OPEN_BLOCK() != null) {
+                openBlock(ctx, line, comment);
+                return;
+            }
             run.annotations.add(new Annotation(address, addressEnd, type, isVirtual, amount, name, comment));
+        }
+
+        /**
+         * A '{' line only gives the base address and, optionally,
+         * 'virtual', which then applies to every line inside. It covers
+         * no memory itself; a comment above it goes onto the base address.
+         */
+        private void openBlock(FloParser.LineContext ctx, int line, String comment) {
+            if (blockBase != null) {
+                errors.add(String.format("line %d: blocks can't be nested (the open one starts at line %d)", line, blockLine));
+                return;
+            }
+            if (addressEnd != null || ctx.datatype() != null || name != null || ctx.export() != null) {
+                errors.add(String.format("line %d: a block's opening line takes only an address and 'virtual'", line));
+                return;
+            }
+            blockBase = address;
+            blockVirtual = isVirtual;
+            blockLine = line;
+            if (comment != null) {
+                run.annotations.add(new Annotation(address, null, UNKNOWN_LINE, false, 1, null, comment));
+            }
+        }
+
+        @Override
+        public void enterEndBlock(FloParser.EndBlockContext ctx) {
+            if (blockBase == null) {
+                errors.add(String.format("line %d: '}' without an open block", ctx.getStart().getLine()));
+            }
+            blockBase = null;
+        }
+
+        /**
+         * A block ends inside the run it opened in: a new 'deflower' line
+         * or the end of the file with a block still open is an error.
+         */
+        void closeRun() {
+            if (blockBase != null) {
+                errors.add(String.format("line %d: block is not closed with '}'", blockLine));
+            }
+            blockBase = null;
         }
     }
 

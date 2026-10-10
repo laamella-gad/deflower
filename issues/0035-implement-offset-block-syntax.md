@@ -1,7 +1,6 @@
 ---
 title: Implement the `{ }` block syntax as address-offset scoping
-status: open
-priority: medium
+status: done
 labels: enhancement
 ---
 
@@ -42,3 +41,18 @@ Done when: a `.flo` block (`base { ... lines with offset addresses ... }`) resol
       $04 byte control1
   }
   ```
+
+## Closing note
+
+Implemented as decided, entirely in `FloReader`: while a block is open, each line's address (and range end) gets the base added and `virtual` from the opening line, so `Annotation`, `Subject` and the output never see a block. The grammar names the braces as tokens, `OPEN_BLOCK` and `CLOSE_BLOCK`, so `FloReader` can ask `ctx.OPEN_BLOCK()`.
+
+The opening line registers nothing; a comment above it goes onto the base address. These mistakes are reported with their line number under "Failed to parse", and nothing is written:
+- a range, type, label or `export` on a `{` line;
+- a `{` inside an open block;
+- a `}` without an open block;
+- a block still open at the next `deflower` line or the end of the file;
+- a base plus offset past `$ffff`.
+
+The format comment in `Flo.g4` and CLAUDE.md describe blocks.
+
+Fixture `block`: a virtual SID block at `$d400` (`freq1`, `control1`, `volume`) and a non-virtual data block at `$c00c` (`waveform`, `notes`), used by a small routine. Its output is identical to the output of the same `.flo` written with absolute addresses (checked by hand with a temporary copy), and reassembles with 64tass to the `.prg` minus its header. Test `resolvesBlockOffsetsFromTheBase`, plus one test per error above (fixtures `invalid/block-*.flo`). `mvn -o test`: 57 tests green.
