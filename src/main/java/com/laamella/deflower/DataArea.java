@@ -71,7 +71,7 @@ class DataArea extends Area {
      * An array annotation (issue 0024) registers one single-element
      * DataArea per index (issue 0033), each one already knowing its own
      * array label and index, so "STA $422" into a `byte[1000] screen`
-     * block starting at $400 resolves to "screen + $22" by direct
+     * array starting at $400 resolves to "screen + $22" by direct
      * computation - no scanning through neighboring MemoryLocations for
      * the nearest label. `address` may differ from this element's own
      * address when it lands on a later byte of a multi-byte element

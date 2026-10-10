@@ -84,4 +84,4 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0060](0060-investigate-da65-features.md) | open | low | Investigate da65 for features worth adopting |
 | [0061](0061-investigate-6502bench-features.md) | open | low | Investigate 6502bench SourceGen for features worth adopting |
 | [0062](0062-snippet-test-factories.md) | open | medium | Replace the fixture tests with two SnippetTestFactories |
-| [0063](0063-area-or-block-naming.md) | open | low | Choose between the names "area" and "block" |
+| [0063](0063-area-or-block-naming.md) | done |  | Choose between the names "area" and "block" |

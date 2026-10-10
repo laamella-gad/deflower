@@ -81,14 +81,14 @@ class AssemblyFileFormat {
     }
 
     /**
-     * True when printing `block` at `address` produces just one value
+     * True when printing `area` at `address` produces just one value
      * before the run breaks (the next address has its own label/comment,
      * isn't the same kind of data, or isn't there at all) - the case
      * where gluing the label onto its one data value (issue 0029) reads
      * better than putting the label on its own line.
      */
-    private boolean isSingleValueRun(int address, DataArea block, Subject subject) {
-        return !subject.continuesArray(block, address + block.size);
+    private boolean isSingleValueRun(int address, DataArea area, Subject subject) {
+        return !subject.continuesArray(area, address + area.size);
     }
 
     /**
@@ -128,11 +128,11 @@ class AssemblyFileFormat {
         out.newLine();
         int address = start;
         while (address < subject.memory.length && subject.isVirtualAt(address)) {
-            DataArea block = (DataArea) subject.peek(address);
+            DataArea area = (DataArea) subject.peek(address);
             String comment = subject.memory[address].comment;
             String label = subject.memory[address].label;
             printCommentLines(comment);
-            if (address != block.address) {
+            if (address != area.address) {
                 // A label landing inside a multi-byte element (the second
                 // byte of a word): no reservation of its own to hang it on.
                 if (label != null) {
@@ -142,14 +142,14 @@ class AssemblyFileFormat {
                 address++;
                 continue;
             }
-            int end = subject.endOfRun(block);
-            int count = (end - address) / block.size;
+            int end = subject.endOfRun(area);
+            int count = (end - address) / area.size;
             if (label != null) {
                 out.print(label + ":");
             }
             if (count == 1) {
                 out.indent();
-                out.print(reservationDirective(block.type) + "\t?");
+                out.print(reservationDirective(area.type) + "\t?");
             } else {
                 if (label != null) {
                     out.newLine();
@@ -185,22 +185,22 @@ class AssemblyFileFormat {
         }
     }
 
-    public void print(DataArea block, int address, Subject subject) throws IOException {
+    public void print(DataArea area, int address, Subject subject) throws IOException {
         // A multi-byte area (WORD, DWORD, ADDR) owns several consecutive
         // addresses but is one value: print it once, at its first address.
-        if (address != block.address) {
+        if (address != area.address) {
             return;
         }
         considerReOrg(address);
-        if ((!(lastArea instanceof DataArea)) || block.type != ((DataArea) lastArea).type) {
+        if ((!(lastArea instanceof DataArea)) || area.type != ((DataArea) lastArea).type) {
             out.newLine();
         }
-        switch (block.type) {
+        switch (area.type) {
             case BYTE, UNKNOWN:
                 tabularPrint(".byte", asHexByte(subject.byteAt(address)));
                 break;
             case CHAR:
-                textPrint(block, subject.byteAt(address), subject);
+                textPrint(area, subject.byteAt(address), subject);
                 break;
             case WORD:
                 tabularPrint(".word", asHexWord(subject.wordAt(address)));
@@ -215,7 +215,7 @@ class AssemblyFileFormat {
                 tabularPrint(".addr", nameForAddress(subject.wordAt(address), "$%04X", subject));
                 break;
         }
-        lastArea = block;
+        lastArea = area;
     }
 
     private static final int TEXT_BYTES_PER_LINE = 32;
@@ -243,8 +243,8 @@ class AssemblyFileFormat {
      * first switches it with {@code .enc}, so the output reassembles to the
      * same bytes; an array changing encoding mid-line starts a new line.
      */
-    private void textPrint(DataArea block, int value, Subject subject) throws IOException {
-        String valueEncoding = encodingFor(block, subject);
+    private void textPrint(DataArea area, int value, Subject subject) throws IOException {
+        String valueEncoding = encodingFor(area, subject);
         if (out.column() == TEXT_BYTES_PER_LINE || (out.column() != 0 && !valueEncoding.equals(encoding))) {
             out.newLine();
         }
@@ -267,15 +267,15 @@ class AssemblyFileFormat {
     }
 
     /**
-     * The encoding to read the char array `block` belongs to in (the
+     * The encoding to read the char array `area` belongs to in (the
      * elements one {@code .flo} line declared), chosen once per array by
      * {@link Subject#likelyTextEncoding}. A tie keeps the encoding already
      * in effect, so it doesn't cause a needless {@code .enc} switch.
      */
-    private String encodingFor(DataArea block, Subject subject) {
-        if (block.address < encodingArrayStart || block.address >= encodingArrayEnd) {
-            encodingArrayStart = block.arrayStart();
-            encodingArrayEnd = subject.endOfArray(block);
+    private String encodingFor(DataArea area, Subject subject) {
+        if (area.address < encodingArrayStart || area.address >= encodingArrayEnd) {
+            encodingArrayStart = area.arrayStart();
+            encodingArrayEnd = subject.endOfArray(area);
             arrayEncoding = subject.likelyTextEncoding(encodingArrayStart, encodingArrayEnd, encoding);
         }
         return arrayEncoding;
@@ -328,19 +328,19 @@ class AssemblyFileFormat {
         out.item(data);
     }
 
-    public void printInstruction(InstructionArea block, Subject subject) throws IOException {
-        considerReOrg(block.address);
-        if (Objects.equals(block, lastArea)) {
+    public void printInstruction(InstructionArea area, Subject subject) throws IOException {
+        considerReOrg(area.address);
+        if (Objects.equals(area, lastArea)) {
             return;
         }
-        Instruction instruction = block.instruction;
-        int byte1 = subject.memory[block.address + 1].data;
-        int byte2 = subject.memory[block.address + 2].data;
+        Instruction instruction = area.instruction;
+        int byte1 = subject.memory[area.address + 1].data;
+        int byte2 = subject.memory[area.address + 2].data;
         int word = word(byte1, byte2);
         String operand = switch (instruction.addressingMode) {
             case IND_X -> format("(%s, X)", nameForAddress(byte1, "$%02X", subject));
             case IND_Y -> format("(%s), Y", nameForAddress(byte1, "$%02X", subject));
-            case RELATIVE -> format("%s", nameForAddress(block.address + toSignedByte(byte1) + 2, "$%04X", subject));
+            case RELATIVE -> format("%s", nameForAddress(area.address + toSignedByte(byte1) + 2, "$%04X", subject));
             case INDIRECT -> format("(%s)", nameForAddress(word, "$%04X", subject));
             case ABSOLUTE -> format("%s", nameForAbsoluteAddress(word, subject));
             case ABSOLUTE_X -> format("%s, X", nameForAbsoluteAddress(word, subject));
@@ -357,7 +357,7 @@ class AssemblyFileFormat {
         out.print(" ");
         out.print(operand);
 
-        lastArea = block;
+        lastArea = area;
     }
 
     /**
@@ -431,8 +431,8 @@ class ResultWriter {
                 if (currentArea instanceof DataArea) {
                     assemblyFile.print((DataArea) currentArea, address, subject);
                 } else if (currentArea instanceof InstructionArea) {
-                    InstructionArea instructionBlock = (InstructionArea) currentArea;
-                    assemblyFile.printInstruction(instructionBlock, subject);
+                    InstructionArea instructionArea = (InstructionArea) currentArea;
+                    assemblyFile.printInstruction(instructionArea, subject);
                 }
             } else {
                 assemblyFile.needsToReOrg = true;

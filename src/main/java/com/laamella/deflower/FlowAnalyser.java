@@ -38,8 +38,8 @@ class FlowAnalyser {
         if (runsIntoExistingArea(address, instruction, subject)) {
             return;
         }
-        InstructionArea instructionBlock = new InstructionArea(address, instruction);
-        subject.registerBlock(instructionBlock);
+        InstructionArea instructionArea = new InstructionArea(address, instruction);
+        subject.registerArea(instructionArea);
         switch (instruction.opcode) {
             case RTS:
             case BRK:
@@ -53,7 +53,7 @@ class FlowAnalyser {
                     // the address stored there.
                     int addrLocation = getAbsoluteAddressOperand(address, subject);
                     subject.ensureLabelled(addrLocation, "a", address);
-                    subject.registerBlock(new DataArea(addrLocation, DataType.ADDR, false, null, 0));
+                    subject.registerArea(new DataArea(addrLocation, DataType.ADDR, false, null, 0));
                     subject.addPotentialCodeLocation(subject.wordAt(addrLocation), true, address);
                 } else {
                     subject.addPotentialCodeLocation(getAbsoluteAddressOperand(address, subject), true, address);

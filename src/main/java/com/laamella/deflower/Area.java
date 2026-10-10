@@ -24,7 +24,7 @@ abstract class Area {
      * Two areas are equal when they describe the same memory the same way
      * (same kind, address, size, and whatever else a subclass adds), so a
      * redundant re-annotation isn't flagged as a conflict in
-     * {@link Subject#registerBlock}.
+     * {@link Subject#registerArea}.
      */
     @Override
     public boolean equals(Object o) {
@@ -43,7 +43,7 @@ abstract class Area {
      * True for an area that only marks memory as "not yet understood" -
      * i.e. a {@code .flo} line with no explicit type keyword (issue 0031).
      * A placeholder may be silently narrowed by any later, more specific
-     * annotation ({@link Subject#registerBlock}), and {@link FlowAnalyser}
+     * annotation ({@link Subject#registerArea}), and {@link FlowAnalyser}
      * may decode straight through one instead of refusing as it would for
      * a deliberate area.
      */

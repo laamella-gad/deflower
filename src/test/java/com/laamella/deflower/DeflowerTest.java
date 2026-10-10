@@ -81,7 +81,7 @@ class DeflowerTest {
     }
 
     /**
-     * registerBlock collects an error when one area overwrites a genuinely
+     * registerArea collects an error when one area overwrites a genuinely
      * different one (Subject.errors), and Deflower refuses to write an
      * (illegal) asm file for a subject that has any (issue 0018).
      * overlap.flo declares a 2-byte word at $C000, then a byte at $C001
@@ -192,8 +192,8 @@ class DeflowerTest {
     /**
      * `byte[48] screen` at $400 registers 48 separate one-element
      * DataAreas (issue 0024), so an operand pointing into the middle of
-     * the block, e.g. `STA $422` (offset $22), must still resolve against
-     * the block's label - "screen + $22" - instead of falling back to a
+     * the array, e.g. `STA $422` (offset $22), must still resolve against
+     * the array's label - "screen + $22" - instead of falling back to a
      * bare hex address just because that particular element has no label
      * of its own.
      */
@@ -228,8 +228,8 @@ class DeflowerTest {
     /**
      * A label landing on an address that merely continues a contiguous
      * same-type data run (issue 0027) must not fragment the run into
-     * separate, blank-line-separated .BYTE blocks: the dump keeps running
-     * as one block, with each label on its own line right above the data
+     * separate, blank-line-separated .BYTE runs: the dump keeps running
+     * as one run, with each label on its own line right above the data
      * that continues beneath it.
      */
     @Test

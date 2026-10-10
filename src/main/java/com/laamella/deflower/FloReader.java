@@ -60,7 +60,7 @@ class FloReader {
         DeflowerRun run = null;
         Integer address = null;
         Integer addressEnd = null;
-        LineType type = UNKNOWN_BLOCK;
+        LineType type = UNKNOWN_LINE;
         boolean isVirtual = false;
         int amount = 1;
         String name = null;
@@ -69,7 +69,7 @@ class FloReader {
         void startNewLine() {
             address = null;
             addressEnd = null;
-            type = UNKNOWN_BLOCK;
+            type = UNKNOWN_LINE;
             isVirtual = false;
             amount = 1;
             name = null;
@@ -95,17 +95,17 @@ class FloReader {
         @Override
         public void enterDatatype(FloParser.DatatypeContext ctx) {
             if (ctx.CHAR() != null) {
-                type = CHAR_BLOCK;
+                type = CHAR_LINE;
             } else if (ctx.BYTE() != null) {
-                type = BYTE_BLOCK;
+                type = BYTE_LINE;
             } else if (ctx.WORD() != null) {
-                type = WORD_BLOCK;
+                type = WORD_LINE;
             } else if (ctx.DWORD() != null) {
-                type = DWORD_BLOCK;
+                type = DWORD_LINE;
             } else if (ctx.ADDR() != null) {
-                type = ADDR_BLOCK;
+                type = ADDR_LINE;
             } else if (ctx.CODE() != null) {
-                type = CODE_ENTRY;
+                type = CODE_LINE;
             }
             if (ctx.arraySize() != null) {
                 amount = evaluate(ctx.arraySize());

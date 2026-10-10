@@ -52,7 +52,7 @@ $c000 code entry
 Reading test.prg
 Reading prg test.prg
 load address 49152
-Marking block of 1 byte at 10 "counter"
+Marking area of 1 byte at 10 "counter"
 Will disassemble from C000
 Starting flow analysis.
 Writing out/test.asm

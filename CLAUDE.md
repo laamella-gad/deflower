@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Purpose
 
-Deflower semi-automatically disassembles 6502 binaries. The tool traces code automatically, following control flow from entry points. The user supplies the rest by hand: labels, and marked blocks (data, bytes, words, code entries). The `.flo` file is where those annotations live, so the tool is a loop of: run, read the output, add annotations, run again.
+Deflower semi-automatically disassembles 6502 binaries. The tool traces code automatically, following control flow from entry points. The user supplies the rest by hand: labels, and marked areas (data, bytes, words, code entries). The `.flo` file is where those annotations live, so the tool is a loop of: run, read the output, add annotations, run again.
 
 Suggested way to use it: keep the disassembler re-running on every save of the `.flo` file, and read the generated `out/<binary>.asm` as it updates. The tool itself does a single run per invocation (`Deflower.main`); there is no built-in file watcher, so the re-run has to come from an external watcher around it.
 
@@ -45,12 +45,12 @@ The pipeline is: **flow file → parse → memory image + annotations → code-f
 - **`Subject`** holds:
   - the 64K `MemoryLocation[]` (each location has the byte, an `Area` reference, a label and a comment);
   - the `potentialCodeLocations` stack and the output path;
-  - the `errors` list. `registerBlock` reports one area overwriting a different, non-placeholder one, and `Deflower` skips writing output for a subject with errors.
+  - the `errors` list. `registerArea` reports one area overwriting a different, non-placeholder one, and `Deflower` skips writing output for a subject with errors.
   - It also answers memory questions used by the output: run and array boundaries (`continuesRun`, `endOfRun`, `endOfArray`), annotations (`isAnnotated`), and the ASCII/screen-code guess (`likelyTextEncoding`).
 - **`FlowAnalyser`** pops entry points and follows 6502 control flow using `mpu6502`'s `Instruction` table.
   - It registers an `InstructionArea` for each decoded instruction, follows fall-through and branch/jump/JSR targets (including `JMP (indirect)` through the address it reads), and auto-labels targets (`lXXXX`, `dXXXX`, `aXXXX`).
   - Analysis stops at addresses already covered by a non-placeholder area, and won't decode an instruction whose bytes run into one. That is how it avoids loops and detects jumps into data ("Jumping into non-code area").
-- **`Area`** is the common base for `DataArea` and `InstructionArea`. Each address belongs to at most one area, and `registerBlock` writes that link into `Subject.memory`. Address ownership is the main signal the analyser uses, so an overlapping `.flo` declaration changes the output.
+- **`Area`** is the common base for `DataArea` and `InstructionArea`. Each address belongs to at most one area, and `registerArea` writes that link into `Subject.memory`. Address ownership is the main signal the analyser uses, so an overlapping `.flo` declaration changes the output.
 - **`Deflower`** runs the pipeline. It clears and recreates `<basePath>/out` once per `.flo` file, then for each subject analyses and, if there are no errors, opens `out/<binary>.asm` and hands the writer to `ResultWriter`.
 - **`ResultWriter`** walks 0x0000–0xFFFF and drives `AssemblyFileFormat`, which owns the layout and the per-type printing (64tass syntax):
   - `*=` origins at gaps;
@@ -77,5 +77,5 @@ Issues are tracked as `issues/NNNN-slug.md` (frontmatter `title`/`status`/`prior
 
 ## Notes
 
-- Much of the code is debugging-era, with lots of `System.out` tracing ("Marking block", "Unnamed target", "Jumping into non-code area"). Keep that in mind when reading output; it is not a sign of failure.
+- Much of the code is debugging-era, with lots of `System.out` tracing ("Marking area", "Unnamed target", "Jumping into non-code area"). Keep that in mind when reading output; it is not a sign of failure.
 - Numbers in `.flo` files are decimal, or hex with a `$` prefix.

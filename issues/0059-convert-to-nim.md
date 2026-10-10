@@ -24,7 +24,7 @@ Translates fairly directly: `Subject` and the memory model, the `Area` classes (
 Approach to decide:
 - **Big bang or side by side.** Write the Nim version next to the Java one, for example in its own directory, run both on all fixtures until every `expected.asm` matches, then delete the Java code. Or convert in place.
 - **Behaviour changes on the way.** Keep it a straight port: no output changes in the same step, so the existing expectations prove it works. Fix open issues before or after the port.
-- **Debug output.** The Java code prints a lot of `System.out` tracing ("Marking block", "Unnamed target"). Decide whether to port it, drop it, or put it behind a `--verbose` flag (see [0056](0056-help-flag.md)).
+- **Debug output.** The Java code prints a lot of `System.out` tracing ("Marking area", "Unnamed target"). Decide whether to port it, drop it, or put it behind a `--verbose` flag (see [0056](0056-help-flag.md)).
 
 Done when: a Nim build produces one executable that turns every fixture's `.flo` into output byte-identical to its `expected.asm`, the error cases the Java tests cover (parse errors, area conflicts, duplicate labels, an image past `$FFFF`, ...) are reported the same way, the Java sources, pom.xml and grammar are gone, and CLAUDE.md describes the Nim project.
 

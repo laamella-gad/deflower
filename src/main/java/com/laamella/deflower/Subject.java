@@ -78,7 +78,7 @@ class Subject {
             memory[address].comment = annotation.comment;
         }
         LineType type = annotation.type;
-        if (type == LineType.UNKNOWN_BLOCK && annotation.addressEnd == null) {
+        if (type == LineType.UNKNOWN_LINE && annotation.addressEnd == null) {
             // No type and no size: just a label or comment for an address
             // (issue 0028), which can sit inside an area another line
             // declared, like a high score on the screen.
@@ -88,11 +88,11 @@ class Subject {
             return;
         }
         switch (type) {
-            case CODE_ENTRY -> {
+            case CODE_LINE -> {
                 potentialCodeLocations.add(address);
                 System.out.format("Will disassemble from %X\n", address);
             }
-            case CHAR_BLOCK, BYTE_BLOCK, WORD_BLOCK, DWORD_BLOCK, ADDR_BLOCK, UNKNOWN_BLOCK -> {
+            case CHAR_LINE, BYTE_LINE, WORD_LINE, DWORD_LINE, ADDR_LINE, UNKNOWN_LINE -> {
                 int amount = annotation.addressEnd != null
                         ? (annotation.addressEnd - address) / type.dataType.sizeInBytes
                         : annotation.amount;
@@ -103,9 +103,9 @@ class Subject {
                     errors.add(String.format("Zero-size %s at %s", type.dataType.name().toLowerCase(), asHexWord(address)));
                     return;
                 }
-                System.out.format("Marking block of %d %s at %X \"%s\"\n", amount, type.dataType.name().toLowerCase(), address, annotation.name);
+                System.out.format("Marking area of %d %s at %X \"%s\"\n", amount, type.dataType.name().toLowerCase(), address, annotation.name);
                 for (int i = 0; i < amount; i++) {
-                    registerBlock(new DataArea(address + i * type.dataType.sizeInBytes, type.dataType, annotation.virtual, annotation.name, i));
+                    registerArea(new DataArea(address + i * type.dataType.sizeInBytes, type.dataType, annotation.virtual, annotation.name, i));
                 }
             }
             default -> throw new RuntimeException("No data type");
@@ -138,36 +138,36 @@ class Subject {
     }
 
     /**
-     * True when the run of data `block` is part of carries on at `address`:
-     * an element of the same type, virtual or not like `block`, starts
+     * True when the run of data `area` is part of carries on at `address`:
+     * an element of the same type, virtual or not like `area`, starts
      * there, and no label or comment interrupts the run.
      */
-    boolean continuesRun(DataArea block, int address) {
+    boolean continuesRun(DataArea area, int address) {
         if (address >= memory.length || isAnnotated(address)) {
             return false;
         }
-        Area area = peek(address);
-        return area instanceof DataArea
-                && area.address == address
-                && ((DataArea) area).type == block.type
-                && area.isVirtual() == block.isVirtual();
+        Area next = peek(address);
+        return next instanceof DataArea
+                && next.address == address
+                && ((DataArea) next).type == area.type
+                && next.isVirtual() == area.isVirtual();
     }
 
     /**
-     * True when the next element of the array `block` belongs to starts
+     * True when the next element of the array `area` belongs to starts
      * at `address`. A label there doesn't interrupt the array's dump: it
      * is printed as an address define after the array (issue 0028). A
      * comment without a label still does.
      */
-    boolean continuesArray(DataArea block, int address) {
+    boolean continuesArray(DataArea area, int address) {
         if (address >= memory.length || (memory[address].comment != null && memory[address].label == null)) {
             return false;
         }
-        Area area = peek(address);
-        return area != null
-                && area.address == address
-                && area.isVirtual() == block.isVirtual()
-                && block.isInSameArray(area, block.indexInArray + 1);
+        Area next = peek(address);
+        return next != null
+                && next.address == address
+                && next.isVirtual() == area.isVirtual()
+                && area.isInSameArray(next, area.indexInArray + 1);
     }
 
     /**
@@ -240,7 +240,7 @@ class Subject {
         }
     }
 
-    void registerBlock(Area area) {
+    void registerArea(Area area) {
         for (int a = 0; a < area.size; a++) {
             int address = a + area.address;
             Area existing = memory[address].area;

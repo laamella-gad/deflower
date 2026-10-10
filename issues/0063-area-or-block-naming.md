@@ -1,7 +1,6 @@
 ---
 title: Choose between the names "area" and "block"
-status: open
-priority: low
+status: done
 labels: cleanup
 ---
 
@@ -25,3 +24,16 @@ Done when: one word is chosen, the code, tracing, CLAUDE.md and the grammar head
 
 - **"Area".** It names memory with one meaning everywhere: `registerBlock` becomes `registerArea`, parameters named `block` or `instructionBlock` that hold an area become `area`/`instructionArea`, and the tracing says "Marking area of ...". The class names and the "Area conflict" error stay. "Block" is left for the `{ }` syntax ([0035](0035-implement-offset-block-syntax.md)) and 64tass's own blocks.
 - **`_LINE` suffix for `LineType`.** The constants name the kind of a `.flo` line: `CHAR_LINE`, `BYTE_LINE`, `WORD_LINE`, `DWORD_LINE`, `ADDR_LINE`, `UNKNOWN_LINE` and `CODE_LINE` (was `CODE_ENTRY`).
+
+## Closing note
+
+Renamed as decided:
+- `Subject.registerBlock` is now `registerArea` (callers in `Subject` and `FlowAnalyser`, references in `Area`'s Javadoc and `DeflowerTest`).
+- Every parameter or local named `block`/`instructionBlock` that holds an area is now `area`/`instructionArea` (`ResultWriter`, `FlowAnalyser`, `Subject.continuesRun`/`continuesArray`, where the existing local `area` became `next`).
+- The `LineType` constants are `CHAR_LINE`, `BYTE_LINE`, `WORD_LINE`, `DWORD_LINE`, `ADDR_LINE`, `UNKNOWN_LINE` and `CODE_LINE`.
+- The tracing says "Marking area of ...". Comments that used "block" for an array or a data run now say "array" or "run".
+- CLAUDE.md and the open issues 0059 and 0062 follow.
+
+"Block" still names the `{ }` syntax in the grammar, 64tass's `.virtual` blocks and an output section after a `*=` origin ("origin block"), none of which is an area. The VICE snapshot reader's own "block" is left as is.
+
+`mvn -o test`: 48 tests green, no `expected.asm` changed.
