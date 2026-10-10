@@ -10,7 +10,7 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
   title: One-line summary
   status: open | in-progress | done | invalid | rejected | superseded
   priority: low | medium | high    (not on done issues)
-  labels: bug, enhancement, cleanup, test
+  labels: bug, enhancement, cleanup, test, research
   ---
   ```
 
@@ -81,3 +81,5 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0057](0057-watch-mode.md) | open | high | Add a flag to run deflower as a live server that re-runs on file changes |
 | [0058](0058-disassemble-region-to-separate-asm-file.md) | open | low | Disassemble a region into a separate .asm file, included from the main one |
 | [0059](0059-convert-to-nim.md) | open | medium | Convert the whole project to Nim |
+| [0060](0060-investigate-da65-features.md) | open | low | Investigate da65 for features worth adopting |
+| [0061](0061-investigate-6502bench-features.md) | open | low | Investigate 6502bench SourceGen for features worth adopting |
