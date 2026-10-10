@@ -1,48 +1,226 @@
 
-.virtual $0057
-; 3b20 screen 0400 charset 2800
+.virtual $0000
+; Squirm, taken while the game runs. The player walks a maze and eats the dots that
+; some of the snakes leave behind; touching a snake costs a life. After every level
+; there is a bonus run, in which the player eats the snakes instead.
+; The program sits at $0801-$3f48, started by a BASIC SYS line. The memory between
+; the BASIC line and the screens still holds the remains of an assembler's BASIC
+; program, and the upper half of the character set holds its tables. Memory marked
+; untouched still has VICE's power-on pattern.
+; ---- zero page ----
+cpu_port_direction:		.byte	?
+cpu_port:		.byte	?
+basic_zero_page:
+		.fill	85
+; the joystick direction the player keeps walking in, $ef when standing still
 player_direction:		.byte	?
 joy_dir_for_move:		.byte	?
-.endv
-
-.virtual $00a2
+basic_kernal_zero_page:
+		.fill	71
+jiffy_clock:
+		.fill	2
+; the game waits by setting this negative and waiting until it counts up past 0
 jiffy_timer:		.byte	?
-.endv
-
-.virtual $00c5
+kernal_zero_page:
+		.fill	34
 last_key_pressed:		.byte	?
-.endv
-
-.virtual $00fb
+kernal_zero_page2:
+		.fill	53
+; the screen cell of the player
 new_loc_lo:		.byte	?
 new_loc_hi:		.byte	?
+; the previous screen cell of the player, also a scratch pointer
 tmp_loc_lo:		.byte	?
 tmp_loc_hi:		.byte	?
-.endv
-
-.virtual $0400
+unused_00ff:		.byte	?
+; ---- stack and KERNAL workspace ----
+stack:
+		.fill	256
+kernal_workspace:
+		.fill	276
+irq_vector:		.addr	?
+kernal_vectors:
+		.fill	234
+; ---- screen ----
 screen_ram:
-		.fill	36
-var_init_b1:
+		.fill	35
+; the level number on the top line
+level_tens:		.byte	?
+level_ones:
 		.fill	817
+; the home position of snake_1 and of the bonus guy
 bonus_guy_2_start:
 		.fill	137
 bonus_timer_digit_1:		.byte	?
 bonus_timer_digit_2:		.byte	?
 bonus_timer_digit_3:
 		.fill	8
+unused_07e8:
+		.fill	24
 .endv
 
-*=$0fa0
+*=$0800
 
+; ---- BASIC: 10 SYS15133 ----
+basic_start:
+		.byte	$00
+
+basic_next_line:
+		.addr	basic_program_end
+
+basic_line_number:
+		.word	$000a
+
+basic_sys_token:
+		.byte	$9e
+
+basic_sys_address:
+		.text	"15133"
+
+basic_line_end:
+		.byte	$00
+
+basic_program_end:
+		.word	$0000
+
+; the remains of an assembler's BASIC program
+unused_080e:
+		.byte	$35, $31, $33, $33, $00, $00, $00, $22, $13, $11, $11, $11, $22, $3b, $41, $3a
+		.byte	$85, $22, $13, $22, $3b, $42, $3a, $97, $41, $2c, $42, $3a, $82, $00, $00, $00
+		.byte	$41, $00, $8e, $79, $28, $00, $00, $42, $00, $81, $00, $00, $00, $00, $4e, $20
+		.byte	$32, $2e, $30, $33, $2f, $30, $36, $2d, $30, $37, $2d, $38, $33, $00, $83, $08
+		.byte	$0f, $00, $56, $43, $b2, $35, $33, $32, $38, $30, $3a, $97, $31, $30, $32, $30
+		.byte	$2c, $c2, $28, $56, $43, $29, $3a, $97, $56, $43, $2c, $31, $35, $3a, $97, $31
+		.byte	$30, $32, $31, $2c, $c2, $28, $56, $43, $aa, $31, $29, $3a, $97, $56, $43, $aa
+		.byte	$31, $2c, $31, $35, $00, $b2, $08, $14, $00, $97, $31, $30, $32, $32, $2c, $c2
+		.byte	$28, $36, $34, $36, $29, $3a, $9e, $35, $32, $34, $32, $31, $3a, $99, $22, $93
+		.byte	$08, $22, $3b, $3a, $9e, $35, $32, $32, $38, $32, $3a, $97, $35, $32, $32, $38
+		.byte	$33, $2c, $36, $00, $db, $08, $19, $00, $99, $22, $11, $11, $11, $11, $11, $11
+		.byte	$22, $a3, $31, $31, $29, $22, $1c, $12, $8e, $20, $43, $42, $4d, $20, $36, $34
+		.byte	$20, $41, $53, $53, $45, $4d, $42, $4c, $45, $52, $20, $22, $00, $eb, $08, $1e
+		.byte	$00, $81, $58, $b2, $31, $a4, $32, $30, $30, $3a, $82, $58, $00, $13, $09, $23
+		.byte	$00, $99, $22, $11, $11, $11, $11, $1d, $96, $20, $20, $20, $20, $20, $20, $20
+		.byte	$20, $20, $20, $20, $20, $43, $4f, $50, $59, $52, $49, $47, $48, $54, $20, $31
+		.byte	$39, $38, $33, $22, $00, $28, $09, $28, $00, $99, $22, $1d, $96, $20, $20, $20
+		.byte	$20, $20, $20, $20, $20, $d5, $c0, $c9, $22, $00, $4b, $09, $2d, $00, $99, $22
+		.byte	$1d, $96, $20, $20, $20, $20, $20, $20, $20, $20, $dd, $43, $dd, $1c, $20, $20
+		.byte	$20, $44, $45, $52, $45, $4b, $20, $42, $55, $53, $48, $22, $00, $61, $09, $32
+		.byte	$00, $99, $22, $1d, $96, $20, $20, $20, $20, $20, $20, $20, $20, $ca, $c0, $cb
+		.byte	$1c, $22, $00, $84, $09, $37, $00, $99, $a3, $31, $39, $29, $22, $26, $11, $22
+		.byte	$3a, $99, $a3, $31, $34, $29, $22, $50, $45, $54, $45, $52, $20, $48, $4f, $4c
+		.byte	$4d, $45, $53, $1f, $22, $00, $9f, $09, $3c, $00, $81, $58, $b2, $31, $a4, $31
+		.byte	$30, $30, $30, $3a, $82, $58, $3a, $97, $35, $33, $32, $38, $30, $2c, $31, $34
+		.byte	$00, $af, $09, $41, $00, $81, $58, $b2, $31, $a4, $35, $30, $30, $3a, $82, $58
+		.byte	$00, $bd, $09, $46, $00, $9c, $3a, $86, $58, $24, $28, $32, $35, $29, $00, $cf
+		.byte	$09, $4b, $00, $86, $46, $24, $28, $32, $30, $29, $2c, $46, $28, $32, $30, $29
+		.byte	$00, $e8, $09, $50, $00, $86, $4b, $24, $28, $32, $30, $29, $2c, $4b, $28, $32
+		.byte	$30, $29, $2c, $4b, $31, $28, $32, $30, $29, $00, $01, $0a, $55, $00, $86, $4d
+		.byte	$24, $28, $31, $30, $29, $2c, $4d, $28, $31, $30, $29, $2c, $4d, $31, $28, $31
+		.byte	$30, $29, $00, $36, $0a, $5a, $00, $44, $24, $b2, $22, $30, $31, $32, $33, $34
+		.byte	$35, $36, $37, $38, $39, $41, $42, $43, $44, $45, $46, $22, $3a, $54, $35, $24
+		.byte	$b2, $22, $1d, $1d, $1d, $1d, $1d, $22, $3a, $53, $38, $24, $b2, $22, $20, $20
+		.byte	$20, $20, $20, $20, $20, $20, $22, $00, $60, $0a, $5f, $00, $99, $22, $93, $11
+		.byte	$22, $3a, $97, $35, $32, $32, $38, $33, $2c, $36, $3a, $9e, $35, $32, $32, $38
+		.byte	$32, $3a, $99, $a3, $31, $37, $29, $22, $1c, $0e, $a2, $a2, $a2, $a2, $a2, $a2
+		.byte	$22, $00, $73, $0a, $64, $00, $99, $a3, $31, $37, $29, $22, $12, $20, $cd, $45
+		.byte	$4e, $55, $20, $22, $00, $8c, $0a, $69, $00, $99, $a3, $31, $37, $29, $22, $b7
+		.byte	$b7, $b7, $b7, $b7, $b7, $1f, $22, $3a, $99, $22, $11, $11, $22, $00, $ae, $0a
+		.byte	$6e, $00, $99, $a3, $39, $29, $3b, $22, $c5, $4e, $54, $45, $52, $20, $50, $52
+		.byte	$4f, $47, $52, $41, $4d, $2e, $2e, $2e, $2e, $2e, $2e, $2e, $c5, $11, $22, $00
+		.byte	$d0, $0a, $73, $00, $99, $a3, $39, $29, $3b, $22, $cc, $49, $53, $54, $20, $50
+		.byte	$52, $4f, $47, $52, $41, $4d, $2e, $2e, $2e, $2e, $2e, $2e, $2e, $2e, $cc, $11
+		.byte	$22, $00, $f2, $0a, $78, $00, $99, $a3, $39, $29, $3b, $22, $d2, $55, $4e, $20
+		.byte	$50, $52, $4f, $47, $52, $41, $4d, $2e, $2e, $2e, $2e, $2e, $2e, $2e, $2e, $2e
+		.byte	$d2, $11, $22, $00, $14, $0b, $7d, $00, $99, $a3, $39, $29, $3b, $22, $cf, $54
+		.byte	$48, $45, $52, $20, $46, $55, $4e, $43, $54, $49, $4f, $4e, $53, $2e, $2e, $2e
+		.byte	$2e, $2e, $cf, $11, $22, $00, $37, $0b, $82, $00, $99, $a3, $39, $29, $3b, $22
+		.byte	$45, $d8, $49, $54, $2e, $2e, $2e, $2e, $2e, $2e, $2e, $2e, $2e, $2e, $2e, $2e
+		.byte	$2e, $2e, $2e, $2e, $d8, $11, $11, $22, $00, $5d, $0b, $87, $00, $99, $a3, $37
+		.byte	$29, $3b, $22, $11, $a2, $a2, $a2, $a2, $a2, $a2, $a2, $a2, $a2, $a2, $a2, $a2
+		.byte	$a2, $a2, $a2, $a2, $a2, $a2, $a2, $a2, $a2, $a2, $a2, $a2, $a2, $22, $00, $83
+		.byte	$0b, $8c, $00, $99, $a3, $37, $29, $3b, $22, $12, $20, $d4, $59, $50, $45, $20
+		.byte	$49, $4e, $20, $43, $48, $4f, $49, $43, $45, $20, $52, $45, $51, $55, $49, $52
+		.byte	$45, $44, $20, $22, $00, $a8, $0b, $91, $00, $99, $a3, $37, $29, $3b, $22, $b7
+		.byte	$b7, $b7, $b7, $b7, $b7, $b7, $b7, $b7, $b7, $b7, $b7, $b7, $b7, $b7, $b7, $b7
+		.byte	$b7, $b7, $b7, $b7, $b7, $b7, $b7, $b7, $22, $00, $ca, $0b, $96, $00, $97, $31
+		.byte	$39, $38, $2c, $30, $3a, $8f, $20, $43, $4c, $45, $41, $52, $20, $4b, $2f, $42
+		.byte	$4f, $41, $52, $44, $20, $42, $55, $46, $46, $45, $52, $00, $d4, $0b, $a0, $00
+		.byte	$8d, $31, $31, $34, $35, $00, $e9, $0b, $a5, $00, $8b, $5a, $24, $b2, $22, $45
+		.byte	$22, $a7, $8d, $32, $31, $30, $3a, $89, $39, $35, $00, $fe, $0b, $aa, $00, $8b
+		.byte	$5a, $24, $b2, $22, $4c, $22, $a7, $8d, $33, $33, $35, $3a, $89, $39, $35, $00
+		.byte	$14, $0c, $af, $00, $8b, $5a, $24, $b2, $22, $52, $22, $a7, $8d, $34, $37, $30
+		.byte	$3a, $89, $31, $39, $35, $00, $29, $0c, $b4, $00, $8b, $5a, $24, $b2, $22, $4f
+		.byte	$22, $a7, $8d, $37, $36, $30, $3a, $89, $39, $35, $00, $3a, $0c, $b9, $00, $8b
+		.byte	$5a, $24, $b3, $b1, $22, $58, $22, $a7, $31, $36, $30, $00, $73, $0c, $be, $00
+		.byte	$56, $b2, $35, $33, $32, $38, $30, $3a, $97, $56, $2c, $c2, $28, $31, $30, $32
+		.byte	$30, $29, $3a, $97, $56, $aa, $31, $2c, $c2, $28, $31, $30, $32, $31, $29, $3a
+		.byte	$97, $36, $34, $36, $2c, $c2, $28, $31, $30, $32, $32, $29, $3a, $99, $22, $93
+		.byte	$09, $22, $3a, $80, $00, $80, $0c, $c3, $00, $8d, $32, $30, $30, $3a, $89, $39
+		.byte	$35, $00, $bf, $0c, $c8, $00, $99, $22, $13, $11, $11, $11, $11, $11, $11, $11
+		.byte	$11, $11, $11, $11, $11, $11, $11, $11, $11, $11, $11, $11, $11, $1d, $1d, $1d
+		.byte	$1d, $1d, $1d, $12, $20, $50, $52, $45, $53, $53, $20, $41, $4e, $59, $20, $4b
+		.byte	$45, $59, $20, $54, $4f, $20, $43, $4f, $4e, $54, $49, $4e, $55, $45, $20, $22
+		.byte	$00, $cb, $0c, $cd, $00, $8d, $31, $31, $34, $35, $3a, $8e, $00, $fc, $0c, $d2
+		.byte	$00, $99, $22, $93, $11, $8e, $20, $45, $4e, $54, $45, $52, $20, $41, $53, $53
+		.byte	$45, $4d, $42, $4c, $59, $20, $4c, $41, $4e, $47, $55, $41, $47, $45, $20, $50
+		.byte	$52, $4f, $47, $52, $41, $4d, $20, $4e, $4f, $57, $2e, $11, $22, $00, $2b, $0d
+		.byte	$d7, $00, $99, $22, $20, $53, $54, $41, $52, $54, $20, $41, $44, $44, $52, $45
+		.byte	$53, $53, $22, $3b, $3a, $8d, $31, $31, $36, $30, $3a, $4c, $b2, $43, $3a, $8b
+		.byte	$49, $56, $25, $b0, $48, $4c, $b3, $31, $a7, $32, $31, $30, $00, $4d, $0d, $dc
+		.byte	$00, $85, $58, $24, $3a, $9e, $35, $32, $31, $31, $33, $2c, $58, $24, $2c, $4c
+		.byte	$42, $24, $2c, $4f, $43, $24, $2c, $41, $44, $24, $2c, $49, $56, $25, $00, $5c
+		.byte	$0d, $e1, $00, $8b, $49, $56, $25, $b2, $30, $a7, $32, $33, $35, $00, $a4, $0d
+		.byte	$e6, $00, $99, $22, $1c, $20, $2a, $45, $58, $54, $52, $41, $20, $53, $50, $41
+		.byte	$43, $45, $53, $20, $4f, $52, $20, $4d, $49, $53, $53, $49, $4e, $47, $20, $4c
+		.byte	$41, $42, $45, $4c, $20, $4f, $52, $20, $4d, $41, $43, $52, $4f, $20, $20, $46
+		.byte	$4c, $41, $47, $20, $49, $4e, $44, $49, $43, $41, $54, $4f, $52, $2a, $1f, $22
+		.byte	$3a, $89, $32, $32, $30, $00, $b7, $0d, $eb, $00, $8b, $4f, $43, $24, $b2, $22
+		.byte	$45, $4e, $44, $22, $a7, $36, $39, $30, $00, $c8, $0d, $f0, $00, $8b, $4c, $42
+		.byte	$24, $b3, $b1, $22, $22, $a7, $34, $38, $30, $00, $e5, $0d, $f5, $00, $8b, $41
+		.byte	$44, $24, $b2, $22, $22, $b0, $c8, $28, $41, $44, $24, $2c, $31, $29, $b1, $22
+		.byte	$41, $22, $a7, $32, $36, $30, $00, $00, $0e, $fa, $00, $48, $49, $24, $b2, $41
+		.byte	$44, $24, $3a, $8d, $31, $31, $36, $35, $3a, $8b, $49, $56, $25, $a7, $32, $32
+		.byte	$30, $00, $09, $0e, $ff, $00, $41, $44, $b2, $43, $00, $20, $0e, $04, $01, $9e
+		.byte	$35, $31, $39, $37, $32, $2c, $4f, $43, $24, $2c, $4f, $43, $25, $2c, $42, $43
+		.byte	$25, $00, $50, $0e, $09, $01, $8b, $42, $43, $25, $b2, $32, $35, $35, $a7, $99
+		.byte	$22, $1c, $20, $2a, $55, $4e, $52, $45, $43, $4f, $47, $4e, $49, $53, $45, $44
+		.byte	$20, $20, $4f, $50, $2d, $43, $4f, $44, $45, $2a, $1f, $22, $3a, $89, $32, $32
+		.byte	$30, $00, $5f, $0e, $0e, $01, $8b, $42, $43, $25, $b2, $30, $a7, $32, $38, $35
+		.byte	$00, $88, $0e, $13, $01, $8b, $41, $44, $24, $b2, $22, $22, $a7, $99, $22, $1c
+		.byte	$20, $2a, $4d, $49, $53, $53, $49, $4e, $47, $20, $4f, $50, $45, $52, $41, $4e
+		.byte	$44, $2a, $1f, $22, $3a, $89, $32, $32, $30, $00, $a1, $0e, $18, $01, $8b, $c8
+		.byte	$28, $41, $44, $24, $2c, $31, $29, $20, $b1, $b2, $22, $41, $22, $a7, $8d, $36
+		.byte	$37, $30, $00, $af, $0e, $1d, $01, $8d, $32, $39, $30, $3a, $89, $32, $32, $30
+		.byte	$00, $bd, $0e, $22, $01, $8b, $41, $44, $b3, $30, $a7, $33, $32, $30, $00, $c8
+		.byte	$0e, $27, $01, $97, $4c, $2c, $4f, $43, $25, $00, $e6, $0e, $2c, $01, $41, $32
+		.byte	$25, $b2, $41, $44, $ad, $32, $35, $36, $3a, $41, $31, $25, $b2, $41, $44, $ab
+		.byte	$32, $35, $36, $ac, $41, $32, $25, $00, $fd, $0e, $31, $01, $91, $42, $43, $25
+		.byte	$aa, $31, $89, $33, $33, $30, $2c, $33, $31, $35, $2c, $33, $31, $30, $00, $0f
+		.byte	$0f, $36, $01, $97, $4c, $aa, $32, $2c, $41, $32, $25, $3a, $89, $33, $32, $35
+		.byte	$00, $1f, $0f, $3b, $01, $8b, $41, $44, $b3, $32, $35, $36, $a7, $33, $32, $35
+		.byte	$00, $3d, $0f, $40, $01, $99, $22, $1c, $20, $2a, $49, $4e, $56, $41, $4c, $49
+		.byte	$44, $20, $41, $44, $44, $52, $45, $53, $53, $2a, $1f, $22, $3a, $8e, $00, $4a
+		.byte	$0f, $45, $01, $97, $4c, $aa, $31, $2c, $41, $31, $25, $00, $5a, $0f, $4a, $01
+		.byte	$4c, $b2, $4c, $aa, $42, $43, $25, $aa, $31, $3a, $8e, $00, $65, $0f, $4f, $01
+		.byte	$99, $22, $93, $0e, $11, $22, $00, $a1, $0f, $54, $01, $99, $22, $1d, $20, $20
+		.byte	$20, $c5, $4e, $54, $45, $52, $20, $d3, $54, $41, $52, $54, $20, $c1, $44, $44
+		.byte	$52, $45, $53, $53, $22, $3b, $3a, $8d, $31, $31, $36, $30, $3a, $4c, $b2, $43
+		.byte	$3a, $59, $b2, $30, $3a, $8b, $49, $56, $25, $b0, $48, $4c, $b3, $31, $a7, $33
+		.byte	$33, $35
+; ---- texts and screens, in screen codes ----
+; the top two lines of the screen
 top_line:
 		.byte	$a0, $88, $89, $a0
 hi_text:
-		.byte	$b0, $b0, $b0, $b0, $b0, $b0, $a0, $a0, $a0, $a0, $93, $83, $8f, $92, $85, $a0
-		.byte	$b0, $b0, $b0, $b0, $b0, $b0, $a0, $a0, $a0, $8c, $85, $96, $85, $8c, $a0, $b0
-		.byte	$b0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0
+		.byte	$b0, $b0, $b0, $b0, $b0, $b0
+top_line_rest:
+		.byte	$a0, $a0, $a0, $a0, $93, $83, $8f, $92, $85, $a0, $b0, $b0, $b0, $b0, $b0, $b0
+		.byte	$a0, $a0, $a0, $8c, $85, $96, $85, $8c, $a0, $b0, $b0, $a0, $a0, $a0, $a0, $a0
 		.byte	$a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0
-		.byte	$a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $5a
+		.byte	$a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0
+		.byte	$a0, $a0, $a0, $a0, $a0, $a0
+unused_0ff0:		.byte	$5a
+; the bottom two lines of the screen
 empty_line:
 		.byte	$a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0
 		.byte	$a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0
@@ -51,68 +229,80 @@ bottom_line:
 		.byte	$a0, $a0, $8c, $89, $96, $85, $93, $a0, $4e, $4f, $50, $a0, $a0, $a0, $a0, $a0
 		.byte	$a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $94, $89, $8d, $85, $92, $a0, $b0, $b0
 		.byte	$b0, $a0, $a0, $a0, $a0, $a0, $a0, $5a
+unused_1041:		.byte	$20
+; the high score screen is 40*21 bytes, with the 5 entries of 10 bytes in it
 high_score_screen:
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
-		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $13, $11, $15, $09, $12, $0d, $20, $20
+		.byte	$20, $20, $20, $20, $20, $20, $20, $13, $11, $15, $09, $12, $0d, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
-		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $31, $20
+		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $31, $20
 high_score_table_1:
-		.byte	$14, $0b, $31, $20, $30, $30, $30, $30, $30, $30, $20, $20, $20, $20, $20, $20
+		.byte	$14, $0b, $31, $20, $30, $30, $30, $30, $30, $30
+high_score_screen_2:
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
-		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $32, $20
+		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
+		.byte	$20, $20, $20, $20, $32, $20
 high_score_table_2:
-		.byte	$14, $0b, $32, $20, $30, $30, $30, $30, $30, $30, $20, $20, $20, $20, $20, $20
+		.byte	$14, $0b, $32, $20, $30, $30, $30, $30, $30, $30
+high_score_screen_3:
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
-		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $33, $20
+		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
+		.byte	$20, $20, $20, $20, $33, $20
 high_score_table_3:
-		.byte	$14, $0b, $33, $20, $30, $30, $30, $30, $30, $30, $20, $20, $20, $20, $20, $20
+		.byte	$14, $0b, $33, $20, $30, $30, $30, $30, $30, $30
+high_score_screen_4:
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
-		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $34, $20
+		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
+		.byte	$20, $20, $20, $20, $34, $20
 high_score_table_4:
-		.byte	$14, $0b, $34, $20, $30, $30, $30, $30, $30, $30, $20, $20, $20, $20, $20, $20
+		.byte	$14, $0b, $34, $20, $30, $30, $30, $30, $30, $30
+high_score_screen_5:
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
-		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $35, $20
+		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
+		.byte	$20, $20, $20, $20, $35, $20
 high_score_table_5:
-		.byte	$14, $0b, $35, $20
-hiscore:
-		.byte	$30, $30, $30, $30, $30, $30, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
-		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
-		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
-		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
-		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $5b, $5b
-		.byte	$5b, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
-		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
-		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
-		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
-		.byte	$20, $20, $20, $01, $02, $03, $04, $05, $06, $07, $08, $09, $0a, $0b, $0c, $0d
-		.byte	$0e, $0f, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $1a, $20, $20, $20
+		.byte	$14, $0b, $35, $20, $30, $30, $30, $30, $30, $30
+; the digits of the lowest high score
+hiscore = $1234
+
+high_score_screen_6:
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
+		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $5b, $5b, $5b, $20, $20, $20, $20, $20
+		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
+		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
+		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
+		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $01, $02, $03
+		.byte	$04, $05, $06, $07, $08, $09, $0a, $0b, $0c, $0d, $0e, $0f, $10, $11, $12, $13
+		.byte	$14, $15, $16, $17, $18, $19, $1a, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
-		.byte	$20, $20, $20, $20, $20, $20
-; title screen is 40*21 bytes; rest_of_title is its last 75
+		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
+		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
+		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
+		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
+; the title screen is 40*21 bytes; rest_of_title is its last 75
 title:
 		.byte	$a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $a0
@@ -330,8 +520,7 @@ level_3:
 		.byte	$21, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d
 		.byte	$1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d
 		.byte	$1d, $1d, $1d, $1d, $1d, $1d, $1d, $1f
-		.byte	$04
-
+unused_20aa:		.byte	$04
 title_screen_colors:
 		.byte	$f2, $f2, $c2, $f2, $92, $f2, $f2, $c2, $f2, $62, $12, $f2, $f2, $f2, $12, $f2
 		.byte	$f2, $a2, $62, $f2, $f2, $f2, $92, $12, $f2, $f2, $12, $f2, $f2, $f2, $12, $02
@@ -386,9 +575,10 @@ title_screen_colors:
 		.byte	$f2, $f2, $c2, $f2, $82, $b2, $f2, $62, $f2, $02, $12, $c2, $b2, $f2, $b2, $c2
 		.byte	$12, $d2, $f2, $f2, $f2, $f2, $f2, $f2, $f2, $32, $f2, $f2, $92, $f2, $02, $82
 		.byte	$f2, $f2, $e2, $f2, $f2, $b2, $b2, $62
-*=$23f9
-		.byte	$31
+unused_23f3:
+		.byte	$b1, $31, $35, $a7, $31, $32, $31
 
+; ---- drawing ----
 set_top_bottom_text:
 		ldx #$00
 
@@ -413,28 +603,33 @@ more_colors:
 		bne more_colors
 		rts 
 
-l241C:
+draw_high_score_screen:
 		ldx #$00
 
 l241E:
-		lda high_score_screen + $1, x
+		lda high_score_screen, x
 		sta screen_ram + $50, x
 		lda high_score_table_2 + $1, x
 		sta screen_ram + $14f, x
-		lda hiscore + $c, x
+		lda high_score_screen_6 + $6, x
 		sta screen_ram + $24e, x
 		inx 
 		cpx #$ff
 		bne l241E
 		ldx #$00
-		lda hiscore + $10b, x
+
+l2437:
+		lda high_score_screen_6 + $105, x
 		sta screen_ram + $34d, x
 		inx 
-		.byte	$e0
-*=$2441
+		cpx #$4b
+		bne l2437
+l2441 = $2441
+		rts 
 
+; reset_everything calls $2441, two bytes early: the end of draw_high_score_screen
+; decodes from there as sbc $60,x, which does no harm
 draw_title_screen:
-		sbc $60, x
 		ldx #$00
 
 l2445:
@@ -548,7 +743,9 @@ l24FA:
 		cpx #$4b
 		bne l24FA
 		rts 
-*=$2508
+
+unused_2506:
+		.byte	$00, $00
 
 animate_player_chars:
 		ldx #$00
@@ -601,6 +798,8 @@ l2544:
 		cpx #$28
 		bne l2544
 		rts 
+
+unused_2572:
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $46, $00, $70, $00
 		.byte	$01, $00, $15, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
@@ -616,136 +815,98 @@ l2544:
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $4b, $00, $70, $00
 
-word_1_048e:
+; ---- the snakes: the screen cells of the head, then of the body ----
+; snake_0 and snake_4 leave a dot where their tail was; the others leave a space
+snake_0_head:
 		.word	$048e
-word_2_048e:		.word	$048e
-word_3_048e:		.word	$048e
-word_4_048e:		.word	$048e
-word_5_048e:		.word	$048e
-word_6_048e:		.word	$048e
-word_7_048e:		.word	$048e
-word_8_048e:		.word	$048e
+snake_0_body:
+		.word	$048e, $048e, $048e, $048e, $048e, $048e, $048e
+snake_1_head:		.word	$05e0
+snake_1_body:
+		.word	$05e1, $0609, $0631, $0659
+snake_2_head:		.word	$0541
+snake_2_body:
+		.word	$0519, $04f1, $04f2, $04f3
+snake_3_head:		.word	$05d3
+snake_3_body:
+		.word	$05d2, $05d1, $05d0, $05cf
+snake_4_head:		.word	$065b
+snake_4_body:
+		.word	$0683, $06ab, $06d3, $06fb
 
-snk_head_loc_lo:
-		.byte	$e0
-snk_head_loc_hi:		.byte	$05
-snake_pos_tbl_lo:		.byte	$e1
-snake_pos_tbl_hi:		.byte	$05
-
-d265C:
-		.byte	$09, $06, $31, $06, $59, $06
-d265D = $265d
-d265E = $265e
-d265F = $265f
-d2660 = $2660
-d2661 = $2661
-
-snake_pos_tbl:
-		.byte	$41
-
-d2663:
-		.byte	$05, $19, $05, $f1, $04, $f2, $04
-d2664 = $2664
-d2665 = $2665
-d2666 = $2666
-d2667 = $2667
-d2668 = $2668
-d2669 = $2669
-
-clear_snake_lo:
-		.byte	$f3
-clear_snake_hi:		.byte	$04
-
-d266C:
-		.byte	$d3, $05, $d2, $05, $d1, $05, $d0, $05, $cf, $05, $5b, $06, $83, $06, $ab, $06
-		.byte	$d3, $06, $fb, $06
-d266D = $266d
-d266E = $266e
-d266F = $266f
-d2670 = $2670
-d2671 = $2671
-d2672 = $2672
-d2673 = $2673
-d2674 = $2674
-d2675 = $2675
-d2676 = $2676
-d2677 = $2677
-d2678 = $2678
-d2679 = $2679
-d267A = $267a
-d267B = $267b
-d267C = $267c
-d267D = $267d
-d267E = $267e
-d267F = $267f
-*=$2681
-
-var7_init_0:
-		.byte	$02
+; ---- variables ----
+; the next direction a snake tries: 1 right, 2 left, 3 up, 4 down
+snake_direction:
+		.byte	$01
+; how often a snake has tried to move
+snake_tries:		.byte	$02
 level_nr:		.byte	$03
 irq_delay_counter:		.byte	$06
-bonus_guy_char:		.byte	$02
+; what the bonus guy is worth: 1 nothing, 2 10 points, 3 100 points
+bonus_value:		.byte	$02
 lives:		.byte	$00
 
-d2686:
-		.byte	$68, $07
-d2687 = $2687
+; the screen cell a snake or the bonus guy tries to move to
+move_candidate:
+		.word	$0768
 
-var2_init_with_1:
+; 1 to 4: which snakes move, and whether the bonus guy does
+difficulty:
 		.byte	$03
-some_bonus_timer:		.byte	$fa
+; the jiffy_timer start value of a game step; higher is faster
+game_speed:		.byte	$fa
 bon_gy_loc_lo:		.byte	$68
 bon_gy_loc_hi:		.byte	$07
-		.byte	$00
-
-var5_init_with_0:
-		.byte	$00
+unused_268c:		.byte	$00
+; counts down while the points of the bonus guy are shown
+points_shown_timer:		.byte	$00
 bonus_guy_char_2:		.byte	$49
-
-d268F:
-		.byte	$0a
-
-dots_eaten:
-		.byte	$00
+bonus_guy_note:		.byte	$0a
+dots_eaten:		.byte	$00
 bonus_points_char:		.byte	$4d
 note_idx:		.byte	$97
-
-d2693:
+; cleared, but never read
+unused_2693:		.byte	$00
+unused_2694:
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00
 
+; ---- texts ----
 press_fire_to_start_:
 		.enc	"screen"
 		.text	"PRESS FIRE TO START"
-*=$26c0
+
+unused_26bf:
+		.byte	$20
 
 get_ready_text:
 		.text	$87, $85, $94, $a0, $92, $85, $81, $84, $99, " "
-bonus_run_text:
+level_text:
 		.text	$8c, $85, $96, $85, $8c, $a0, $a0, $a0, $a0, " "
-bonus_text:
+bonus_run_text:
 		.text	"BONUS RUN"
-*=$26df
+
+unused_26dd:
+		.byte	$20, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $4d, $80, $28, $00, $01, $00, $0b, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-		.byte	$00, $00, $00, $00, $00, $4d, $80, $28, $00, $01, $00, $0b, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $4d
+		.byte	$00, $3e, $00, $01, $00, $0b, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $4d, $00, $3e
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $4d, $31, $3e
 		.byte	$00, $01, $00, $0b, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $4d, $31, $3e, $00, $01
-		.byte	$00, $0b, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $4d, $00, $3e, $00, $01, $00, $0b
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-		.byte	$00, $00, $00, $00, $00, $00, $00, $4d, $00, $3e, $00, $01, $00, $0b, $00, $00
-		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-		.byte	$00
-
+		.byte	$00, $00, $00
+; ---- character set ----
 charset:
 		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $3e, $7d, $63, $77, $6f, $43, $23, $63
 		.byte	$7e, $7d, $63, $76, $6e, $43, $3f, $7e, $3e, $7d, $63, $60, $60, $43, $3f, $3e
@@ -785,9 +946,12 @@ arrow_char_2:
 		.byte	$00, $c4, $c6, $ff, $ff, $c6, $c4, $00
 arrow_char_3:
 		.byte	$00, $0c, $06, $ff, $ff, $06, $0c, $00
-		.byte	$c3, $3c, $5a, $99, $bd, $ff, $66, $3c, $00, $1c, $32, $7d, $7f, $7f, $3e, $1c
+snake_head_char:
+		.byte	$c3, $3c, $5a, $99, $bd, $ff, $66, $3c
+snake_body_char:
 		.byte	$00, $1c, $32, $7d, $7f, $7f, $3e, $1c
-
+unused_char:
+		.byte	$00, $1c, $32, $7d, $7f, $7f, $3e, $1c
 dot_char:
 		.byte	$00, $00, $18, $00, $0c, $00, $00, $00
 bonus_gy_1_char_1:
@@ -798,9 +962,12 @@ bonus_gy_2_char_1:
 		.byte	$00, $18, $18, $3c, $6e, $66, $3c, $00
 bonus_gy_2_char_2:
 		.byte	$00, $ff, $18, $3c, $66, $76, $3c, $00
-		.byte	$00, $b6, $c9, $c9, $c9, $b6, $00, $ff, $00, $4e, $59, $55, $53, $4e, $00, $ff
+points_100_char:
+		.byte	$00, $b6, $c9, $c9, $c9, $b6, $00, $ff
+points_10_char:
+		.byte	$00, $4e, $59, $55, $53, $4e, $00, $ff
+no_points_char:
 		.byte	$00, $00, $4a, $52, $62, $3c, $00, $ff
-
 player_char_1:
 		.byte	$66, $99, $3c, $5a, $ff, $18, $18, $00
 player_char_2:
@@ -817,10 +984,13 @@ player_char_7:
 		.byte	$66, $99, $3c, $5a, $ff, $18, $18, $00
 player_char_8:
 		.byte	$66, $99, $3c, $5a, $ff, $18, $00, $00
+more_chars_56:
 		.byte	$87, $0f, $27, $73, $67, $77, $3e, $1c, $00, $0c, $06, $32, $26, $16, $0c, $00
 		.byte	$81, $00, $00, $00, $00, $00, $00, $81, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$ff, $06, $d5, $d3, $d5, $d6, $d6, $ff, $ff, $81, $81, $81, $81, $81, $81, $ff
 		.byte	$3c, $5a, $99, $7e, $3e, $7c, $3e, $7c, $00, $00, $00, $00, $00, $00, $00, $00
+; the reversed characters, which hold the remains of the assembler's tables
+charset_rest:
 		.byte	$28, $00, $41, $4e, $44, $49, $cd, $29, $01, $52, $4f, $4c, $c1, $2a, $00, $42
 		.byte	$49, $d4, $2c, $02, $41, $4e, $c4, $2d, $02, $52, $4f, $cc, $2e, $02, $42, $4d
 		.byte	$c9, $30, $01, $41, $4e, $44, $49, $d9, $31, $01, $41, $4e, $44, $5a, $d8, $35
@@ -903,6 +1073,8 @@ player_char_8:
 		.byte	$07, $ff, $07, $84, $b7, $07, $07, $ff, $02, $ff, $83, $ff, $07, $e7, $07, $07
 		.byte	$07, $ff, $03, $00, $00, $07, $04, $10, $00
 
+; ---- the player ----
+; A is 0 when the player can move to new_loc, otherwise new_loc is put back
 check_move_possible:
 		clc 
 		ldy #$00
@@ -991,7 +1163,7 @@ try_move:
 		sta tmp_loc_lo
 		lda new_loc_hi
 		sta tmp_loc_hi
-		lda $dc01
+		lda cia1_port_b
 		cmp player_direction
 		beq l308B
 		sta joy_dir_for_move
@@ -1016,14 +1188,17 @@ l309B:
 		lda #$ef
 		sta player_direction
 		rts 
-*=$30a2
 
+unused_30a0:
+		.byte	$00, $ec
+
+; ---- high scores ----
 sfx_hi_char_entry:
 		ldx #$0f
 
 l30A4:
-		stx $d418
-		stx $d403
+		stx sid_vol_filter
+		stx voice1_pulse_width + $1
 		lda #$fa
 		sta jiffy_timer
 
@@ -1054,6 +1229,7 @@ l30BA:
 		bne l30BA
 		rts 
 
+; lets the player enter initials when the score beats the lowest high score
 update_hi:
 		ldx #$00
 
@@ -1102,7 +1278,7 @@ l3113:
 l3120:
 		lda jiffy_timer
 		bmi l3120
-		lda $dc01
+		lda cia1_port_b
 		cmp #$f7
 		beq l3136
 		cmp #$fb
@@ -1139,7 +1315,7 @@ l315A:
 		sta screen_ram + $23e, y
 		iny 
 		stx tmp_loc_hi
-		sta $d401
+		sta voice1_frequency + $1
 		jsr sfx_hi_char_entry
 		ldx tmp_loc_hi
 		cpy #$03
@@ -1148,11 +1324,11 @@ l315A:
 
 l3179:
 		lda #$0a
-		sta $d401
+		sta voice1_frequency + $1
 		jsr sfx_hi_char_entry
 		ldx #$00
 
-l3183:
+sort_high_scores:
 		clc 
 		lda screen_ram + $242, x
 		cmp screen_ram + $1f2, x
@@ -1163,7 +1339,7 @@ l3183:
 l3190:
 		inx 
 		cpx #$05
-		bne l3183
+		bne sort_high_scores
 
 l3195:
 		jmp move_hi_from_scr_to_
@@ -1182,7 +1358,7 @@ l319A:
 		cpx #$0a
 		bne l319A
 		lda #$14
-		sta $d401
+		sta voice1_frequency + $1
 		jsr sfx_hi_char_entry
 		ldx #$00
 
@@ -1216,7 +1392,7 @@ l31CE:
 		cpx #$0a
 		bne l31CE
 		lda #$1e
-		sta $d401
+		sta voice1_frequency + $1
 		jsr sfx_hi_char_entry
 		ldx #$00
 
@@ -1250,7 +1426,7 @@ l3202:
 		cpx #$0a
 		bne l3202
 		lda #$28
-		sta $d401
+		sta voice1_frequency + $1
 		jsr sfx_hi_char_entry
 		ldx #$00
 
@@ -1285,38 +1461,38 @@ l3236:
 		bne l3236
 		ldx #$00
 
-l324B:
+copy_hi_text:
 		lda screen_ram + $102, x
 		ora #$80
 		sta hi_text, x
 		inx 
 		cpx #$05
-		bne l324B
+		bne copy_hi_text
 		jsr set_top_bottom_text
 		lda #$50
-		sta $d401
+		sta voice1_frequency + $1
 		jsr sfx_hi_char_entry
 		jmp move_hi_from_scr_to_
 
-l3266:
+game_over:
 		lda #$06
 		jsr set_top_bottom_red
-		sta $d020
+		sta border_color
 		lda #$c8
-		sta $d016
+		sta vic_control_2
 		lda #$0a
-		sta $d403
-		sta $d402
-		jsr l241C
+		sta voice1_pulse_width + $1
+		sta voice1_pulse_width
+		jsr draw_high_score_screen
 		jsr color_lines
 		lda #$41
-		sta $d404
+		sta voice1_control
 		jsr update_hi
 		lda #$0a
-		sta $d401
-		sta $d403
+		sta voice1_frequency + $1
+		sta voice1_pulse_width + $1
 		lda #$0f
-		sta $d418
+		sta sid_vol_filter
 		lda #$f6
 		sta jiffy_timer
 
@@ -1332,7 +1508,7 @@ l32A0:
 		cpx #$13
 		bne l32A0
 		lda #$1e
-		sta $d401
+		sta voice1_frequency + $1
 		lda #$f0
 		sta jiffy_timer
 
@@ -1340,90 +1516,114 @@ l32B4:
 		lda jiffy_timer
 		bmi l32B4
 		lda #$00
-		sta $d401
+		sta voice1_frequency + $1
 		lda #$02
 		jsr set_top_bottom_red
-		sta $d020
+		sta border_color
 
 l32C5:
-		lda $dc01
+		lda cia1_port_b
 		cmp #$ef
 		beq l32CF
 		jmp l32C5
 
 l32CF:
 		rts 
-*=$32d2
 
-l32D2:
-		jmp l3C93
-*=$32ef
+unused_32d0:
+		.byte	$60, $ff
 
-l32EF:
+; ---- the snakes ----
+; A is 0 when move_candidate is free for a snake
+test_candidate:
+		jmp test_cell
+
+; the original test_cell, before the jmp of test_candidate replaced its first instruction
+old_test_cell:
+		sta tmp_loc_lo
+		lda move_candidate + $1
+		sta tmp_loc_hi
+		ldy #$00
+		clc 
+		lda (tmp_loc_lo), y
+		cmp #$20
+		beq l32EC
+		cmp #$46
+		beq l32EC
+		lda #$01
+		rts 
+
+l32EC:
+		lda #$00
+		rts 
+
+; moves move_candidate in direction A, then tests it
+step_candidate:
 		cmp #$01
 		bne l3303
-		inc d2686
-		lda d2686
+		inc move_candidate
+		lda move_candidate
 		cmp #$00
 		bne l3300
-		inc d2687
+		inc move_candidate + $1
 
 l3300:
-		jmp l32D2
+		jmp test_candidate
 
 l3303:
 		cmp #$02
 		bne l3317
-		dec d2686
-		lda d2686
+		dec move_candidate
+		lda move_candidate
 		cmp #$ff
 		bne l3314
-		dec d2687
+		dec move_candidate + $1
 
 l3314:
-		jmp l32D2
+		jmp test_candidate
 
 l3317:
 		cmp #$03
 		bne l332C
 		sec 
-		lda d2686
+		lda move_candidate
 		sbc #$28
-		sta d2686
+		sta move_candidate
 		bcs l3329
-		dec d2687
+		dec move_candidate + $1
 
 l3329:
-		jmp l32D2
+		jmp test_candidate
 
 l332C:
 		clc 
-		lda d2686
+		lda move_candidate
 		adc #$28
-		sta d2686
+		sta move_candidate
 		bcc l333A
-		inc d2687
+		inc move_candidate + $1
 
 l333A:
-		jmp l32D2
+		jmp test_candidate
 
-l333D:
-		inc $2680
-		lda $2680
+next_snake_direction:
+		inc snake_direction
+		lda snake_direction
 		cmp #$05
 		bne l334C
 		lda #$01
-		sta $2680
+		sta snake_direction
 
 l334C:
 		rts 
 
-l334D:
+; each move_snake_ falls through to the next one
+move_snake_0:
 		lda #$00
-		sta var7_init_0
-		lda word_8_048e
+		sta snake_tries
+		lda snake_0_body + $c
 		sta tmp_loc_lo
-		lda word_8_048e + $1
+		lda snake_0_body + $d
 		sta tmp_loc_hi
 		lda #$46
 		ldy #$00
@@ -1431,48 +1631,48 @@ l334D:
 		ldx #$0d
 
 l3364:
-		lda word_1_048e, x
-		sta word_2_048e, x
+		lda snake_0_head, x
+		sta snake_0_body, x
 		dex 
 		cpx #$ff
 		bne l3364
 
 l336F:
-		inc var7_init_0
-		lda var7_init_0
+		inc snake_tries
+		lda snake_tries
 		cmp #$05
 		beq l33A4
-		lda word_1_048e
-		sta d2686
-		lda word_1_048e + $1
-		sta d2687
-		jsr l333D
-		lda $2680
-		jsr l32EF
+		lda snake_0_head
+		sta move_candidate
+		lda snake_0_head + $1
+		sta move_candidate + $1
+		jsr next_snake_direction
+		lda snake_direction
+		jsr step_candidate
 		cmp #$01
 		bne l3395
 		jmp l336F
 
 l3395:
-		lda d2686
-		sta word_1_048e
-		lda d2687
-		sta word_1_048e + $1
+		lda move_candidate
+		sta snake_0_head
+		lda move_candidate + $1
+		sta snake_0_head + $1
 		jmp l33AE
 
 l33A4:
 		lda #$8e
-		sta word_1_048e
+		sta snake_0_head
 		lda #$04
-		sta word_1_048e + $1
+		sta snake_0_head + $1
 
 l33AE:
 		ldx #$00
 
 l33B0:
-		lda word_2_048e, x
+		lda snake_0_body, x
 		sta tmp_loc_lo
-		lda word_2_048e + $1, x
+		lda snake_0_body + $1, x
 		sta tmp_loc_hi
 		lda #$44
 		sta (tmp_loc_lo), y
@@ -1480,19 +1680,19 @@ l33B0:
 		inx 
 		cpx #$0e
 		bne l33B0
-		lda word_1_048e
+		lda snake_0_head
 		sta tmp_loc_lo
-		lda word_1_048e + $1
+		lda snake_0_head + $1
 		sta tmp_loc_hi
 		lda #$43
 		sta (tmp_loc_lo), y
 
-l33D2:
+move_snake_1:
 		lda #$00
-		sta var7_init_0
-		lda d2660
+		sta snake_tries
+		lda snake_1_body + $6
 		sta tmp_loc_lo
-		lda d2661
+		lda snake_1_body + $7
 		sta tmp_loc_hi
 		lda #$20
 		ldy #$00
@@ -1500,117 +1700,117 @@ l33D2:
 		ldx #$07
 
 l33E9:
-		lda snk_head_loc_lo, x
-		sta snake_pos_tbl_lo, x
+		lda snake_1_head, x
+		sta snake_1_body, x
 		dex 
 		cpx #$ff
 		bne l33E9
 
 l33F4:
-		inc var7_init_0
-		lda var7_init_0
+		inc snake_tries
+		lda snake_tries
 		cmp #$05
-		beq draw_snakes
-		lda snk_head_loc_lo
-		sta d2686
-		lda snk_head_loc_hi
-		sta d2687
-		jsr l333D
-		lda $2680
-		jsr l32EF
+		beq snake_1_home
+		lda snake_1_head
+		sta move_candidate
+		lda snake_1_head + $1
+		sta move_candidate + $1
+		jsr next_snake_direction
+		lda snake_direction
+		jsr step_candidate
 		cmp #$01
 		bne l341A
 		jmp l33F4
 
 l341A:
-		lda d2686
-		sta snk_head_loc_lo
-		lda d2687
-		sta snk_head_loc_hi
-		jmp draw_snake_tail
+		lda move_candidate
+		sta snake_1_head
+		lda move_candidate + $1
+		sta snake_1_head + $1
+		jmp draw_snake_1
 
-draw_snakes:
+snake_1_home:
 		lda #$55
-		sta snk_head_loc_lo
+		sta snake_1_head
 		lda #$07
-		sta snk_head_loc_hi
+		sta snake_1_head + $1
 
-draw_snake_tail:
+draw_snake_1:
 		ldx #$00
 
-draw_snake_ball:
-		lda snake_pos_tbl_lo, x
+draw_snake_1_body:
+		lda snake_1_body, x
 		sta tmp_loc_lo
-		lda snake_pos_tbl_hi, x
+		lda snake_1_body + $1, x
 		sta tmp_loc_hi
 		lda #$44
 		sta (tmp_loc_lo), y
 		inx 
 		inx 
 		cpx #$08
-		bne draw_snake_ball
-		lda snk_head_loc_lo
+		bne draw_snake_1_body
+		lda snake_1_head
 		sta tmp_loc_lo
-		lda snk_head_loc_hi
+		lda snake_1_head + $1
 		sta tmp_loc_hi
 		lda #$43
 		sta (tmp_loc_lo), y
 
-l3457:
+move_snake_2:
 		lda #$00
-		sta var7_init_0
-		lda clear_snake_lo
+		sta snake_tries
+		lda snake_2_body + $6
 		sta tmp_loc_lo
-		lda clear_snake_hi
+		lda snake_2_body + $7
 		sta tmp_loc_hi
 		lda #$20
 		ldy #$00
 		sta (tmp_loc_lo), y
 		ldx #$07
 
-rotate_snake_pos:
-		lda snake_pos_tbl, x
-		sta d2664, x
+shift_snake_2:
+		lda snake_2_head, x
+		sta snake_2_body, x
 		dex 
 		cpx #$ff
-		bne rotate_snake_pos
+		bne shift_snake_2
 
 l3479:
-		inc var7_init_0
-		lda var7_init_0
+		inc snake_tries
+		lda snake_tries
 		cmp #$05
 		beq l34AE
-		lda snake_pos_tbl
-		sta d2686
-		lda d2663
-		sta d2687
-		jsr l333D
-		lda $2680
-		jsr l32EF
+		lda snake_2_head
+		sta move_candidate
+		lda snake_2_head + $1
+		sta move_candidate + $1
+		jsr next_snake_direction
+		lda snake_direction
+		jsr step_candidate
 		cmp #$01
 		bne l349F
 		jmp l3479
 
 l349F:
-		lda d2686
-		sta snake_pos_tbl
-		lda d2687
-		sta d2663
+		lda move_candidate
+		sta snake_2_head
+		lda move_candidate + $1
+		sta snake_2_head + $1
 		jmp l34B8
 
 l34AE:
 		lda #$cb
-		sta snake_pos_tbl
+		sta snake_2_head
 		lda #$04
-		sta d2663
+		sta snake_2_head + $1
 
 l34B8:
 		ldx #$00
 
 l34BA:
-		lda d2664, x
+		lda snake_2_body, x
 		sta tmp_loc_lo
-		lda d2665, x
+		lda snake_2_body + $1, x
 		sta tmp_loc_hi
 		lda #$44
 		sta (tmp_loc_lo), y
@@ -1618,17 +1818,19 @@ l34BA:
 		inx 
 		cpx #$08
 		bne l34BA
-		lda snake_pos_tbl
+		lda snake_2_head
 		sta tmp_loc_lo
-		lda d2663
+		lda snake_2_head + $1
 		sta tmp_loc_hi
 		lda #$43
 		sta (tmp_loc_lo), y
+
+move_snake_3:
 		lda #$00
-		sta var7_init_0
-		lda d2674
+		sta snake_tries
+		lda snake_3_body + $6
 		sta tmp_loc_lo
-		lda d2675
+		lda snake_3_body + $7
 		sta tmp_loc_hi
 		lda #$20
 		ldy #$00
@@ -1636,48 +1838,48 @@ l34BA:
 		ldx #$07
 
 l34F3:
-		lda d266C, x
-		sta d266E, x
+		lda snake_3_head, x
+		sta snake_3_body, x
 		dex 
 		cpx #$ff
 		bne l34F3
 
 l34FE:
-		inc var7_init_0
-		lda var7_init_0
+		inc snake_tries
+		lda snake_tries
 		cmp #$05
 		beq l3533
-		lda d266C
-		sta d2686
-		lda d266D
-		sta d2687
-		jsr l333D
-		lda $2680
-		jsr l32EF
+		lda snake_3_head
+		sta move_candidate
+		lda snake_3_head + $1
+		sta move_candidate + $1
+		jsr next_snake_direction
+		lda snake_direction
+		jsr step_candidate
 		cmp #$01
 		bne l3524
 		jmp l34FE
 
 l3524:
-		lda d2686
-		sta d266C
-		lda d2687
-		sta d266D
+		lda move_candidate
+		sta snake_3_head
+		lda move_candidate + $1
+		sta snake_3_head + $1
 		jmp l353D
 
 l3533:
 		lda #$75
-		sta d266C
+		sta snake_3_head
 		lda #$05
-		sta d266D
+		sta snake_3_head + $1
 
 l353D:
 		ldx #$00
 
 l353F:
-		lda d266E, x
+		lda snake_3_body, x
 		sta tmp_loc_lo
-		lda d266F, x
+		lda snake_3_body + $1, x
 		sta tmp_loc_hi
 		lda #$44
 		sta (tmp_loc_lo), y
@@ -1685,17 +1887,19 @@ l353F:
 		inx 
 		cpx #$08
 		bne l353F
-		lda d266C
+		lda snake_3_head
 		sta tmp_loc_lo
-		lda d266D
+		lda snake_3_head + $1
 		sta tmp_loc_hi
 		lda #$43
 		sta (tmp_loc_lo), y
+
+move_snake_4:
 		lda #$00
-		sta var7_init_0
-		lda d267E
+		sta snake_tries
+		lda snake_4_body + $6
 		sta tmp_loc_lo
-		lda d267F
+		lda snake_4_body + $7
 		sta tmp_loc_hi
 		lda #$46
 		ldy #$00
@@ -1703,48 +1907,48 @@ l353F:
 		ldx #$07
 
 l3578:
-		lda d2676, x
-		sta d2678, x
+		lda snake_4_head, x
+		sta snake_4_body, x
 		dex 
 		cpx #$ff
 		bne l3578
 
 l3583:
-		inc var7_init_0
-		lda var7_init_0
+		inc snake_tries
+		lda snake_tries
 		cmp #$05
 		beq l35B8
-		lda d2676
-		sta d2686
-		lda d2677
-		sta d2687
-		jsr l333D
-		lda $2680
-		jsr l32EF
+		lda snake_4_head
+		sta move_candidate
+		lda snake_4_head + $1
+		sta move_candidate + $1
+		jsr next_snake_direction
+		lda snake_direction
+		jsr step_candidate
 		cmp #$01
 		bne l35A9
 		jmp l3583
 
 l35A9:
-		lda d2686
-		sta d2676
-		lda d2687
-		sta d2677
+		lda move_candidate
+		sta snake_4_head
+		lda move_candidate + $1
+		sta snake_4_head + $1
 		jmp l35C2
 
 l35B8:
 		lda #$fb
-		sta d2676
+		sta snake_4_head
 		lda #$06
-		sta d2677
+		sta snake_4_head + $1
 
 l35C2:
 		ldx #$00
 
 l35C4:
-		lda d2678, x
+		lda snake_4_body, x
 		sta tmp_loc_lo
-		lda d2679, x
+		lda snake_4_body + $1, x
 		sta tmp_loc_hi
 		lda #$44
 		sta (tmp_loc_lo), y
@@ -1752,15 +1956,18 @@ l35C4:
 		inx 
 		cpx #$08
 		bne l35C4
-		lda d2676
+		lda snake_4_head
 		sta tmp_loc_lo
-		lda d2677
+		lda snake_4_head + $1
 		sta tmp_loc_hi
 		lda #$43
 		sta (tmp_loc_lo), y
 		rts 
+
+unused_35e7:
 		.byte	$41
 
+; ---- the game ----
 colorize_maze:
 		ldy #$01
 		ldx #$00
@@ -1860,70 +2067,70 @@ l3663:
 
 initialize_pointers:
 		lda #$8e
-		sta word_1_048e
-		sta word_2_048e
-		sta word_3_048e
-		sta word_4_048e
-		sta word_5_048e
-		sta word_6_048e
-		sta word_7_048e
-		sta word_8_048e
+		sta snake_0_head
+		sta snake_0_body
+		sta snake_0_body + $2
+		sta snake_0_body + $4
+		sta snake_0_body + $6
+		sta snake_0_body + $8
+		sta snake_0_body + $a
+		sta snake_0_body + $c
 		lda #$04
-		sta word_1_048e + $1
-		sta word_2_048e + $1
-		sta word_3_048e + $1
-		sta word_4_048e + $1
-		sta word_5_048e + $1
-		sta word_6_048e + $1
-		sta word_7_048e + $1
-		sta word_8_048e + $1
-		sta d2663
-		sta d2665
-		sta d2667
-		sta d2669
-		sta clear_snake_hi
+		sta snake_0_head + $1
+		sta snake_0_body + $1
+		sta snake_0_body + $3
+		sta snake_0_body + $5
+		sta snake_0_body + $7
+		sta snake_0_body + $9
+		sta snake_0_body + $b
+		sta snake_0_body + $d
+		sta snake_2_head + $1
+		sta snake_2_body + $1
+		sta snake_2_body + $3
+		sta snake_2_body + $5
+		sta snake_2_body + $7
 		lda #$55
-		sta snk_head_loc_lo
-		sta snake_pos_tbl_lo
-		sta d265C
-		sta d265E
-		sta d2660
+		sta snake_1_head
+		sta snake_1_body
+		sta snake_1_body + $2
+		sta snake_1_body + $4
+		sta snake_1_body + $6
 		lda #$07
-		sta snk_head_loc_hi
-		sta snake_pos_tbl_hi
-		sta d265D
-		sta d265F
-		sta d2661
+		sta snake_1_head + $1
+		sta snake_1_body + $1
+		sta snake_1_body + $3
+		sta snake_1_body + $5
+		sta snake_1_body + $7
 		lda #$cb
-		sta d2664
-		sta snake_pos_tbl
-		sta d2666
-		sta d2668
-		sta clear_snake_lo
+		sta snake_2_body
+		sta snake_2_head
+		sta snake_2_body + $2
+		sta snake_2_body + $4
+		sta snake_2_body + $6
 		lda #$75
-		sta d266C
-		sta d266E
-		sta d2670
-		sta d2672
-		sta d2674
+		sta snake_3_head
+		sta snake_3_body
+		sta snake_3_body + $2
+		sta snake_3_body + $4
+		sta snake_3_body + $6
 		lda #$05
-		sta d266D
-		sta d266F
-		sta d2671
-		sta d2673
-		sta d2675
+		sta snake_3_head + $1
+		sta snake_3_body + $1
+		sta snake_3_body + $3
+		sta snake_3_body + $5
+		sta snake_3_body + $7
 		lda #$fb
-		sta d2678
-		sta d2676
-		sta d267A
-		sta d267C
-		sta d267E
+		sta snake_4_body
+		sta snake_4_head
+		sta snake_4_body + $2
+		sta snake_4_body + $4
+		sta snake_4_body + $6
 		lda #$06
-		sta d2679
-		sta d2677
-		sta d267B
-		sta d267D
-		sta d267F
+		sta snake_4_body + $1
+		sta snake_4_head + $1
+		sta snake_4_body + $3
+		sta snake_4_body + $5
+		sta snake_4_body + $7
 		rts 
 
 inc_score_digit_x:
@@ -1943,15 +2150,15 @@ l3736:
 		rts 
 
 bonus_guy_hit_handle:
-		lda bonus_guy_char
+		lda bonus_value
 		cmp #$01
 		bne bonus_10_points
 
 no_bonus:
 		lda #$0a
-		sta $d401
+		sta voice1_frequency + $1
 		lda #$c8
-		sta var5_init_with_0
+		sta points_shown_timer
 		lda #$4d
 		sta bonus_points_char
 		rts 
@@ -1962,27 +2169,27 @@ bonus_10_points:
 		ldx #$04
 		jsr inc_score_digit_x
 		lda #$14
-		sta $d401
+		sta voice1_frequency + $1
 		lda #$4c
 		sta bonus_points_char
 		lda #$c8
-		sta var5_init_with_0
+		sta points_shown_timer
 		rts 
 
 bonus_100_points:
 		ldx #$03
 		jsr inc_score_digit_x
 		lda #$5a
-		sta $d401
+		sta voice1_frequency + $1
 		lda #$4b
 		sta bonus_points_char
 		lda #$c8
-		sta var5_init_with_0
+		sta points_shown_timer
 		rts 
 
 bonus_round:
 		lda #$07
-		sta $d020
+		sta border_color
 		jsr set_top_bottom_red
 		lda #$b9
 		sta bonus_timer_digit_1
@@ -1991,10 +2198,10 @@ bonus_round:
 burp_bonus_text:
 		lda screen_ram + $1c5, x
 		pha 
-		lda bonus_text, x
+		lda bonus_run_text, x
 		sta screen_ram + $1c5, x
 		lda #$0a
-		sta $d401
+		sta voice1_frequency + $1
 		lda #$ff
 		sta jiffy_timer
 
@@ -2002,7 +2209,7 @@ l37A2:
 		lda jiffy_timer
 		bmi l37A2
 		lda #$14
-		sta $d401
+		sta voice1_frequency + $1
 		lda #$ff
 		sta jiffy_timer
 
@@ -2015,17 +2222,17 @@ l37AF:
 		lda #$81
 		sta jiffy_timer
 		lda #$00
-		sta $d401
-		jsr l3D4B
+		sta voice1_frequency + $1
+		jsr reset_bonus_notes
 		nop 
 		ldx #$00
 
-start_next_level:
+bonus_get_ready:
 		lda get_ready_text, x
 		sta screen_ram + $1c5, x
 		inx 
 		cpx #$09
-		bne start_next_level
+		bne bonus_get_ready
 		lda #$c8
 		sta jiffy_timer
 
@@ -2042,9 +2249,9 @@ l37DC:
 		bne l37DC
 		sei 
 		lda #$27
-		sta $0314
+		sta irq_vector
 		lda #$3d
-		sta $0315
+		sta irq_vector + $1
 		cli 
 
 bonus_round_loop:
@@ -2056,7 +2263,7 @@ bonus_walk_on_44:
 		cmp #$44
 		bne bonus_walk_on_43
 		lda #$32
-		sta $d401
+		sta voice1_frequency + $1
 		ldx #$03
 		jsr inc_score_digit_x
 		jmp l382D
@@ -2065,7 +2272,7 @@ bonus_walk_on_43:
 		cmp #$43
 		bne bonus_walk_on_46
 		lda #$46
-		sta $d401
+		sta voice1_frequency + $1
 		ldx #$03
 		jsr inc_score_digit_x
 		ldx #$03
@@ -2076,7 +2283,7 @@ bonus_walk_on_46:
 		cmp #$46
 		bne l382D
 		lda #$05
-		sta $d401
+		sta voice1_frequency + $1
 		ldx #$04
 		jsr inc_score_digit_x
 
@@ -2087,7 +2294,7 @@ l382D:
 		nop 
 		nop 
 		nop 
-		lda some_bonus_timer
+		lda game_speed
 		sta jiffy_timer
 		lda player_direction
 		cmp #$ef
@@ -2111,14 +2318,14 @@ l3856:
 		lda jiffy_timer
 		bmi l384C
 		lda #$00
-		sta $d401
+		sta voice1_frequency + $1
 		jmp bonus_round_loop
 
 end_bonus_round:
 		jsr setup_irq
 		lda #$00
-		sta $d401
-		sta $d408
+		sta voice1_frequency + $1
+		sta voice2_frequency + $1
 		lda #$b0
 		sta bonus_timer_digit_1
 		sta bonus_timer_digit_2
@@ -2127,18 +2334,18 @@ end_bonus_round:
 
 end_level:
 		lda #$00
-		sta $d401
-		sta $d408
+		sta voice1_frequency + $1
+		sta voice2_frequency + $1
 		jsr bonus_round
-		inc var2_init_with_1
-		inc var_init_b1
-		lda var_init_b1
+		inc difficulty
+		inc level_ones
+		lda level_ones
 		cmp #$ba
 		bne l389B
 		lda #$b1
-		sta screen_ram + $23
+		sta level_tens
 		lda #$b0
-		sta var_init_b1
+		sta level_ones
 
 l389B:
 		lda #$00
@@ -2156,9 +2363,9 @@ l38A5:
 
 l38B2:
 		lda voice_1_notes, x
-		sta $d401
+		sta voice1_frequency + $1
 		lda voice_2_notes, x
-		sta $d408
+		sta voice2_frequency + $1
 		lda #$f6
 		sta jiffy_timer
 
@@ -2169,13 +2376,13 @@ l38C2:
 		cpx #$1e
 		bne l38B2
 		ldx #$00
-		sta $d408
+		sta voice2_frequency + $1
 
 l38D0:
-		lda bonus_run_text, x
+		lda level_text, x
 		sta screen_ram + $1c5, x
 		lda #$0a
-		sta $d401
+		sta voice1_frequency + $1
 		lda #$01
 		sta color_ram + $1c5, x
 		lda #$ff
@@ -2185,7 +2392,7 @@ l38E4:
 		lda jiffy_timer
 		bmi l38E4
 		lda #$14
-		sta $d401
+		sta voice1_frequency + $1
 		lda #$ff
 		sta jiffy_timer
 
@@ -2195,9 +2402,9 @@ l38F1:
 		inx 
 		cpx #$09
 		bne l38D0
-		lda screen_ram + $23
+		lda level_tens
 		sta screen_ram + $1cc
-		lda var_init_b1
+		lda level_ones
 		sta screen_ram + $1cd
 		jsr quiet
 		nop 
@@ -2230,12 +2437,12 @@ l3931:
 l3934:
 		jsr colorize_maze
 		lda #$02
-		sta $d020
+		sta border_color
 		jsr set_top_bottom_red
 		lda #$00
-		sta $d401
-		sta d268F
-		sta var5_init_with_0
+		sta voice1_frequency + $1
+		sta bonus_guy_note
+		sta points_shown_timer
 		lda #$fe
 		sta player_direction
 		lda #$e0
@@ -2248,9 +2455,9 @@ l3934:
 		sta bon_gy_loc_hi
 		rts 
 
-l3961:
+move_bonus_guy:
 		lda #$00
-		sta var7_init_0
+		sta snake_tries
 		lda bon_gy_loc_lo
 		sta tmp_loc_lo
 		lda bon_gy_loc_hi
@@ -2260,25 +2467,25 @@ l3961:
 		sta (tmp_loc_lo), y
 
 l3976:
-		inc var7_init_0
-		lda var7_init_0
+		inc snake_tries
+		lda snake_tries
 		cmp #$05
 		beq l39AB
 		lda bon_gy_loc_lo
-		sta d2686
+		sta move_candidate
 		lda bon_gy_loc_hi
-		sta d2687
-		jsr l333D
-		lda $2680
-		jsr l32EF
+		sta move_candidate + $1
+		jsr next_snake_direction
+		lda snake_direction
+		jsr step_candidate
 		cmp #$01
 		bne l399C
 		jmp l3976
 
 l399C:
-		lda d2686
+		lda move_candidate
 		sta bon_gy_loc_lo
-		lda d2687
+		lda move_candidate + $1
 		sta bon_gy_loc_hi
 		jmp l39B5
 
@@ -2296,36 +2503,36 @@ l39B5:
 		lda bonus_guy_char_2
 		ldy #$00
 		sta (tmp_loc_lo), y
-		inc d268F
-		lda d268F
+		inc bonus_guy_note
+		lda bonus_guy_note
 		cmp #$1e
 		bne l39D5
 		lda #$01
-		sta d268F
+		sta bonus_guy_note
 
 l39D5:
-		ldx d268F
+		ldx bonus_guy_note
 		lda voice_1_notes, x
-		sta $d408
+		sta voice2_frequency + $1
 		rts 
 
-l39DF:
-		inc bonus_guy_char
-		lda bonus_guy_char
+update_bonus_guy:
+		inc bonus_value
+		lda bonus_value
 		cmp #$04
 		bne l39EE
 		lda #$01
-		sta bonus_guy_char
+		sta bonus_value
 
 l39EE:
-		lda var5_init_with_0
+		lda points_shown_timer
 		cmp #$00
 		bne l39F8
-		jmp l3961
+		jmp move_bonus_guy
 
 l39F8:
-		dec var5_init_with_0
-		lda var5_init_with_0
+		dec points_shown_timer
+		lda points_shown_timer
 		clc 
 		cmp #$b4
 		bcc l3A15
@@ -2363,52 +2570,53 @@ l3A15:
 l3A45:
 		rts 
 
+; moves the snakes, and the bonus guy, for the difficulty
 var_2_stuff:
-		lda var2_init_with_1
+		lda difficulty
 		cmp #$01
 		bne l3A51
-		jsr l3457
+		jsr move_snake_2
 		rts 
 
 l3A51:
 		cmp #$02
 		bne l3A5C
-		jsr l3457
-		jsr l39DF
+		jsr move_snake_2
+		jsr update_bonus_guy
 		rts 
 
 l3A5C:
 		cmp #$03
 		bne l3A67
-		jsr l33D2
-		jsr l39DF
+		jsr move_snake_1
+		jsr update_bonus_guy
 		rts 
 
 l3A67:
 		cmp #$04
 		bne l3A72
-		jsr l334D
-		jsr l39DF
+		jsr move_snake_0
+		jsr update_bonus_guy
 		rts 
 
 l3A72:
-		inc some_bonus_timer
+		inc game_speed
 		lda #$01
-		sta var2_init_with_1
+		sta difficulty
 		jmp var_2_stuff
 
 life_lost_handler:
 		lda #$81
-		sta $d404
+		sta voice1_control
 		lda #$14
-		sta $d401
+		sta voice1_frequency + $1
 		lda #$20
 		ldy #$00
 		sta (new_loc_lo), y
 		sta (tmp_loc_lo), y
 
 l3A8F:
-		dec $d401
+		dec voice1_frequency + $1
 		lda (new_loc_lo), y
 		sta tmp_loc_lo
 		lda #$51
@@ -2433,10 +2641,10 @@ l3AB1:
 		cmp #$a0
 		bne l3A8F
 		lda #$41
-		sta $d404
+		sta voice1_control
 		lda #$00
-		sta $d408
-		sta $d401
+		sta voice2_frequency + $1
+		sta voice1_frequency + $1
 		lda #$e0
 		sta new_loc_lo
 		sta tmp_loc_lo
@@ -2444,24 +2652,24 @@ l3AB1:
 		sta new_loc_hi
 		sta tmp_loc_hi
 		lda #$00
-		sta $d022
-		sta $d023
+		sta multicolor_1
+		sta multicolor_2_register
 
 l3AD8:
-		inc $d022
-		inc $d023
+		inc multicolor_1
+		inc multicolor_2_register
 		lda #$ff
 		sta jiffy_timer
 
 l3AE2:
 		lda jiffy_timer
 		bmi l3AE2
-		jsr l3C8D
+		jsr multicolor_2
 		cmp #$0f
 		bne l3AD8
 		lda #$06
-		sta $d022
-		sta $d023
+		sta multicolor_1
+		sta multicolor_2_register
 		lda #$81
 		ldx lives
 		lda #$a0
@@ -2479,47 +2687,47 @@ l3B03:
 restart_to_title:
 		jsr life_lost_handler
 		lda #$00
-		sta $d401
-		sta $d408
-		jsr l3266
+		sta voice1_frequency + $1
+		sta voice2_frequency + $1
+		jsr game_over
 		jmp reset_everything
 
 entry:
 		jsr setup_irq
 		lda #$1a
-		sta $d018
+		sta vic_memory_setup
 
 reset_everything:
 		lda #$00
-		sta $d021
-		sta $d401
-		sta $d408
-		sta $d412
+		sta background_color
+		sta voice1_frequency + $1
+		sta voice2_frequency + $1
+		sta voice3_control
 		lda #$88
-		sta $d405
-		sta $d406
-		sta $d40c
-		sta $d40d
+		sta voice1_attack_decay
+		sta voice1_sustain_release
+		sta voice2_attack_decay
+		sta voice2_sustain_release
 		lda #$41
-		sta $d404
-		sta $d40b
+		sta voice1_control
+		sta voice2_control
 		lda #$0a
-		sta $d403
-		sta $d402
-		sta $d409
-		sta $d40a
+		sta voice1_pulse_width + $1
+		sta voice1_pulse_width
+		sta voice2_pulse_width
+		sta voice2_pulse_width + $1
 		lda #$0f
-		sta $d418
+		sta sid_vol_filter
 		lda #$06
-		sta $d022
-		sta $d023
+		sta multicolor_1
+		sta multicolor_2_register
 		lda #$02
-		sta $d020
+		sta border_color
 		jsr set_top_bottom_red
 		jsr set_top_bottom_text
 		lda #$c8
-		sta $d016
-		jsr draw_title_screen
+		sta vic_control_2
+		jsr $2441
 		jsr draw_screen_colors
 		jsr initialize_pointers
 		lda #$e0
@@ -2533,24 +2741,24 @@ reset_everything:
 		lda #$07
 		sta bon_gy_loc_hi
 		lda #$01
-		sta bonus_guy_char
-		sta var2_init_with_1
+		sta bonus_value
+		sta difficulty
 		lda #$03
 		sta lives
 		lda #$00
 		sta dots_eaten
-		sta var5_init_with_0
+		sta points_shown_timer
 		lda #$47
 		sta bonus_guy_char_2
 		lda #$fa
-		sta some_bonus_timer
+		sta game_speed
 		ldx #$00
 
 play_music_loop:
 		lda voice_1_notes, x
-		sta $d401
+		sta voice1_frequency + $1
 		lda voice_2_notes, x
-		sta $d408
+		sta voice2_frequency + $1
 		lda #$f6
 		sta jiffy_timer
 
@@ -2563,19 +2771,19 @@ play_music_wait_loop:
 		ldx #$00
 
 check_space:
-		lda $dc01
+		lda cia1_port_b
 		cmp #$ef
 		bne play_music_loop
 		lda #$00
-		sta $d401
-		sta $d408
+		sta voice1_frequency + $1
+		sta voice2_frequency + $1
 		lda #$d8
-		sta $d016
+		sta vic_control_2
 		jsr draw_level_1
 		lda #$01
 		sta level_nr
 		lda #$b1
-		sta var_init_b1
+		sta level_ones
 		jsr colorize_maze
 		jsr initialize_pointers
 
@@ -2592,7 +2800,7 @@ check_hit_dot:
 		jsr inc_score_digit_x
 		inc dots_eaten
 		lda dots_eaten
-		sta $d401
+		sta voice1_frequency + $1
 		cmp #$ff
 		bne nothing_hit
 		jsr end_level
@@ -2602,7 +2810,7 @@ check_hit_bonus_guy:
 		cmp bonus_guy_char_2
 		bne check_hit_snake
 		lda #$14
-		sta $d401
+		sta voice1_frequency + $1
 		jsr bonus_guy_hit_handle
 		jmp nothing_hit
 
@@ -2634,15 +2842,15 @@ nothing_hit:
 player_not_moving:
 		lda #$51
 		sta (new_loc_lo), y
-		lda some_bonus_timer
+		lda game_speed
 		sta jiffy_timer
 
 l3C5B:
 		lda jiffy_timer
 		bmi l3C5B
 		lda #$00
-		sta $d408
-		sta $d401
+		sta voice2_frequency + $1
+		sta voice1_frequency + $1
 		lda last_key_pressed
 		cmp #$04
 		bne l3C70
@@ -2653,7 +2861,7 @@ l3C70:
 
 pause:
 		lda #$00
-		sta $d418
+		sta sid_vol_filter
 		lda #$81
 		sta jiffy_timer
 
@@ -2662,22 +2870,23 @@ l3C7C:
 		bmi l3C7C
 
 l3C80:
-		lda $dc01
+		lda cia1_port_b
 		cmp #$ef
 		bne l3C80
 		lda #$0f
-		sta $d418
+		sta sid_vol_filter
 		rts 
 
-l3C8D:
-		lda $d023
+multicolor_2:
+		lda multicolor_2_register
 		and #$0f
 		rts 
 
-l3C93:
-		lda d2686
+; A is 0 when the cell at move_candidate is a space, the player or a dot
+test_cell:
+		lda move_candidate
 		sta tmp_loc_lo
-		lda d2687
+		lda move_candidate + $1
 		sta tmp_loc_hi
 		ldy #$00
 		lda (tmp_loc_lo), y
@@ -2694,6 +2903,8 @@ l3CB0:
 		lda #$00
 		rts 
 
+; ---- interrupts and sound ----
+; animates the characters every 7th interrupt, then continues in the KERNAL
 irq:
 		inc irq_delay_counter
 		lda irq_delay_counter
@@ -2735,18 +2946,29 @@ animate_charset:
 		jsr animate_player_chars
 
 skip_irq:
-		jmp lEA31
+		jmp kernal_irq
 
 setup_irq:
 		sei 
 		lda #$b3
-		sta $0314
+		sta irq_vector
 		lda #$3c
-		sta $0315
+		sta irq_vector + $1
 		cli 
 		rts 
-*=$3d27
 
+; nothing calls it
+unused_3d18:
+		nop 
+		nop 
+		nop 
+		lda voice1_pulse_width + $1
+		cmp #$10
+		bne countdown_irq
+		lda #$01
+		sta voice1_pulse_width + $1
+
+; the interrupt of the bonus run: counts the bonus timer down
 countdown_irq:
 		dec bonus_timer_digit_3
 		lda bonus_timer_digit_3
@@ -2763,9 +2985,9 @@ countdown_irq:
 		dec bonus_timer_digit_1
 
 l3D48:
-		jmp lEA31
+		jmp kernal_irq
 
-l3D4B:
+reset_bonus_notes:
 		lda #$81
 		sta jiffy_timer
 
@@ -2774,13 +2996,13 @@ l3D4F:
 		bmi l3D4F
 		lda #$00
 		sta note_idx
-		sta d2693
+		sta unused_2693
 		rts 
 
 play_next_note:
 		ldx note_idx
 		lda bonus_notes, x
-		sta $d408
+		sta voice2_frequency + $1
 		inx 
 		cpx #$ff
 		bne l3D6C
@@ -2789,12 +3011,14 @@ play_next_note:
 l3D6C:
 		stx note_idx
 		rts 
-*=$3d76
+
+unused_3d70:
+		.byte	$92, $26, $8d, $08, $d4, $60
 
 quiet:
 		lda #$00
-		sta $d408
-		sta $d401
+		sta voice2_frequency + $1
+		sta voice1_frequency + $1
 		lda #$81
 		sta jiffy_timer
 
@@ -2802,51 +3026,112 @@ l3D82:
 		lda jiffy_timer
 		bmi l3D82
 		rts 
-*=$3db8
 
+unused_3d87:
+		.byte	$41, $00, $8e, $7a, $04, $00, $00, $4e, $df, $00, $9f, $04, $ef, $00, $df, $04
+		.byte	$ff, $40, $df, $43, $ff, $4c, $ee, $49, $ef, $4c, $4f, $00, $4f, $4f, $4f, $0c
+		.byte	$2f, $2f, $2f, $02, $ed, $6c, $27, $4d, $4f, $0f, $ff, $00, $4f, $00, $ff, $00
+		.byte	$ef
+; play_next_note plays 255 of them, so it runs into voice_1_notes
 bonus_notes:
-		.byte	$0a
-		.byte	$14, $1e, $28, $32, $3c, $46, $50, $5a, $64, $c8, $14, $1e, $28, $32, $3c, $46
-		.byte	$50, $5a, $14, $1e, $28, $32, $3c, $46, $50, $5a, $1e, $28, $32, $3c, $46, $50
-		.byte	$1e, $28, $32, $3c, $46, $50, $28, $32, $3c, $46, $28, $32, $3c, $46, $32, $3c
-		.byte	$32, $3c, $32, $3c, $32, $28, $1e, $28, $1e, $14, $1e, $0a, $14, $0a, $1e, $0a
-		.byte	$1e, $0a, $1e, $0a, $1e, $0a, $1e, $0a, $1e, $0a, $1e, $0a, $1e, $0a, $1e, $0a
-		.byte	$1e, $0a, $1e, $0a, $1e, $0a, $1e, $0a, $1e, $0a, $1e, $0a, $1e, $0a, $1e, $0a
-		.byte	$1e, $0a, $14, $0a, $0b, $0c, $0d, $0e, $0f, $10, $11, $12, $13, $14, $15, $16
-		.byte	$17, $18, $19, $1a, $19, $17, $15, $13, $11, $0f, $0d, $0b, $0a, $09, $08, $09
-		.byte	$08, $07, $08, $07, $08, $06, $07, $06, $07, $05, $06, $05, $06, $04, $05, $02
-		.byte	$01, $0a, $0a, $0a, $0a, $0a, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$0a, $14, $1e, $28, $32, $3c, $46, $50, $5a, $64, $c8, $14, $1e, $28, $32, $3c
+		.byte	$46, $50, $5a, $14, $1e, $28, $32, $3c, $46, $50, $5a, $1e, $28, $32, $3c, $46
+		.byte	$50, $1e, $28, $32, $3c, $46, $50, $28, $32, $3c, $46, $28, $32, $3c, $46, $32
+		.byte	$3c, $32, $3c, $32, $3c, $32, $28, $1e, $28, $1e, $14, $1e, $0a, $14, $0a, $1e
+		.byte	$0a, $1e, $0a, $1e, $0a, $1e, $0a, $1e, $0a, $1e, $0a, $1e, $0a, $1e, $0a, $1e
+		.byte	$0a, $1e, $0a, $1e, $0a, $1e, $0a, $1e, $0a, $1e, $0a, $1e, $0a, $1e, $0a, $1e
+		.byte	$0a, $1e, $0a, $14, $0a, $0b, $0c, $0d, $0e, $0f, $10, $11, $12, $13, $14, $15
+		.byte	$16, $17, $18, $19, $1a, $19, $17, $15, $13, $11, $0f, $0d, $0b, $0a, $09, $08
+		.byte	$09, $08, $07, $08, $07, $08, $06, $07, $06, $07, $05, $06, $05, $06, $04, $05
+		.byte	$02, $01, $0a, $0a, $0a, $0a, $0a, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
-		.byte	$00, $00, $00, $00, $00, $00
-*=$3e80
-
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00
 voice_1_notes:
-		.byte	$00
-		.byte	$14, $1e, $28, $32, $3c, $46, $50, $5a, $64, $00, $00, $00, $00, $00, $00, $00
-		.byte	$00, $00, $00, $00, $00, $00, $0a, $14, $1e, $28, $32, $3c, $46, $50, $5a, $00
+		.byte	$00, $14, $1e, $28, $32, $3c, $46, $50, $5a, $64, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $0a, $14, $1e, $28, $32, $3c, $46, $50, $5a
-		.byte	$00, $00, $00, $00, $00, $00, $00, $5a, $50, $46, $3c, $32, $28, $1e, $14, $0a
-		.byte	$00, $00, $00, $00, $00, $00, $5a, $50, $46, $3c, $32, $28, $1e, $14, $0a, $00
-		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $32, $28, $1e, $14, $0a, $32, $3c, $46
-		.byte	$50, $5a, $64
-
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $0a, $14, $1e, $28, $32, $3c, $46, $50
+		.byte	$5a, $00, $00, $00, $00, $00, $00, $00, $5a, $50, $46, $3c, $32, $28, $1e, $14
+		.byte	$0a, $00, $00, $00, $00, $00, $00, $5a, $50, $46, $3c, $32, $28, $1e, $14, $0a
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $32, $28, $1e, $14, $0a, $32, $3c
+		.byte	$46, $50, $5a, $64
 voice_2_notes:
-		.byte	$0a
-		.byte	$14, $0a, $14, $0a, $14, $0a, $14, $0a, $14, $0a, $14, $0a, $14, $0a, $14, $0a
-		.byte	$14, $0a, $14, $0a, $14, $0a, $14, $0a, $14, $0a, $14, $1e, $14, $1e, $14, $1e
-		.byte	$14, $1e, $14, $1e, $14, $1e, $14, $1e, $28, $1e, $28, $1e, $28, $1e, $28, $1e
-		.byte	$28, $1e, $28, $1e, $28, $1e, $28, $1e, $32, $28, $32, $28, $32, $28, $32, $28
-		.byte	$32, $28, $32, $28, $32, $28, $32, $28, $32, $28, $32, $28, $32, $28, $32, $28
-		.byte	$32, $28, $3c, $32, $3c, $32, $3c, $32, $3c, $32, $3c, $32, $3c, $32, $3c, $32
-		.byte	$3c
+		.byte	$0a, $14, $0a, $14, $0a, $14, $0a, $14, $0a, $14, $0a, $14, $0a, $14, $0a, $14
+		.byte	$0a, $14, $0a, $14, $0a, $14, $0a, $14, $0a, $14, $0a, $14, $1e, $14, $1e, $14
+		.byte	$1e, $14, $1e, $14, $1e, $14, $1e, $14, $1e, $28, $1e, $28, $1e, $28, $1e, $28
+		.byte	$1e, $28, $1e, $28, $1e, $28, $1e, $28, $1e, $32, $28, $32, $28, $32, $28, $32
+		.byte	$28, $32, $28, $32, $28, $32, $28, $32, $28, $32, $28, $32, $28, $32, $28, $32
+		.byte	$28, $32, $28, $3c, $32, $3c, $32, $3c, $32, $3c, $32, $3c, $32, $3c, $32, $3c
+		.byte	$32, $3c, $32, $3c
+unused_3f48:		.byte	$25
 
-.virtual $d800
+.virtual $3f49
+untouched_3f49:
+		.fill	24759
+; ---- BASIC ROM; RAMTAS left $55 in the RAM under it ----
+basic_rom:
+		.fill	8192
+untouched_c000:
+		.fill	4096
+; ---- VIC-II ----
+vic_sprite_coords:
+		.fill	16
+vic_sprite_x_high_bits:		.byte	?
+vic_control:
+		.fill	5
+vic_control_2:		.byte	?
+vic_sprite_double_height:		.byte	?
+vic_memory_setup:		.byte	?
+vic_registers:
+		.fill	7
+border_color:		.byte	?
+background_color:		.byte	?
+multicolor_1:		.byte	?
+multicolor_2_register:		.byte	?
+vic_colors:
+		.fill	3
+vic_sprite_colors:
+		.fill	8
+vic_rest:
+		.fill	977
+; ---- SID ----
+voice1_frequency:		.word	?
+voice1_pulse_width:		.word	?
+voice1_control:		.byte	?
+voice1_attack_decay:		.byte	?
+voice1_sustain_release:		.byte	?
+voice2_frequency:		.word	?
+voice2_pulse_width:		.word	?
+voice2_control:		.byte	?
+voice2_attack_decay:		.byte	?
+voice2_sustain_release:		.byte	?
+voice3_frequency:		.word	?
+voice3_pulse_width:		.word	?
+voice3_control:		.byte	?
+voice3_attack_decay:		.byte	?
+voice3_sustain_release:		.byte	?
+filter_cutoff:		.word	?
+filter_control:		.byte	?
+sid_vol_filter:		.byte	?
+sid_mirrors:
+		.fill	999
 color_ram:
 		.fill	1000
+unused_color_ram:
+		.fill	24
+; ---- CIAs ----
+cia1_port_a:		.byte	?
+; joystick port 1
+cia1_port_b:		.byte	?
+cia1_rest:
+		.fill	254
+cia2:
+		.fill	256
+io_expansion:
+		.fill	512
+; ---- KERNAL, in ROM ----
+kernal_rom:
+		.fill	2609
+kernal_irq:
+		.fill	5583
 .endv
-
-*=$ea31
-
-lEA31:
-		brk 

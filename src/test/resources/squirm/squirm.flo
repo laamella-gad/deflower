@@ -1,106 +1,182 @@
 deflower squirm.vsf
+; Squirm, taken while the game runs. The player walks a maze and eats the dots that
+; some of the snakes leave behind; touching a snake costs a life. After every level
+; there is a bonus run, in which the player eats the snakes instead.
+; The program sits at $0801-$3f48, started by a BASIC SYS line. The memory between
+; the BASIC line and the screens still holds the remains of an assembler's BASIC
+; program, and the upper half of the character set holds its tables. Memory marked
+; untouched still has VICE's power-on pattern.
 
-$d800 virtual byte[1000] color_ram
+; ---- zero page ----
+$00 virtual byte cpu_port_direction
+$01 virtual byte cpu_port
+$02-$57 virtual byte basic_zero_page
+; the joystick direction the player keeps walking in, $ef when standing still
+$57 virtual byte player_direction
+$58 virtual byte joy_dir_for_move
+$59-$a0 virtual byte basic_kernal_zero_page
+$a0 virtual byte[2] jiffy_clock
+; the game waits by setting this negative and waiting until it counts up past 0
+$a2 virtual byte jiffy_timer
+$a3-$c5 virtual byte kernal_zero_page
+$c5 virtual byte last_key_pressed
+$c6-$fb virtual byte kernal_zero_page2
+; the screen cell of the player
+$fb virtual byte new_loc_lo
+$fc virtual byte new_loc_hi
+; the previous screen cell of the player, also a scratch pointer
+$fd virtual byte tmp_loc_lo
+$fe virtual byte tmp_loc_hi
+$ff virtual byte unused_00ff
+
+; ---- stack and KERNAL workspace ----
+$0100-$0200 virtual byte stack
+$0200-$0314 virtual byte kernal_workspace
+$0314 virtual addr irq_vector
+$0316-$0400 virtual byte kernal_vectors
+
+; ---- screen ----
 $0400 virtual byte[1000] screen_ram
+$07e8-$0800 virtual byte unused_07e8
+; the level number on the top line
+$0423 level_tens
+$0424 level_ones
+; the home position of snake_1 and of the bonus guy
+$0755 bonus_guy_2_start
+$07de bonus_timer_digit_1
+$07df bonus_timer_digit_2
+$07e0 bonus_timer_digit_3
 
-$2800-$2ff9
-$0fa0-$23f3
-$23f9-$23fa
-$243e-$243f byte
-$2572-$2680
-$3e81-$3ee3
-$3ee3-$3f46
-$3db8-$3e7f
-$35e7-$35e8
-$2682-$26ac
-$26df-$2800
+; ---- BASIC: 10 SYS15133 ----
+$0800 byte basic_start
+$0801 addr basic_next_line
+$0803 word basic_line_number
+$0805 byte basic_sys_token
+$0806 char[5] basic_sys_address
+$080b byte basic_line_end
+$080c word basic_program_end
+; the remains of an assembler's BASIC program
+$080e-$0fa0 byte unused_080e
 
-; 3b20 screen 0400 charset 2800
-
-$0057 virtual byte player_direction
-$0058 virtual byte joy_dir_for_move
-$00a2 virtual byte jiffy_timer
-$00c5 virtual byte last_key_pressed
-$00fb virtual byte new_loc_lo
-$00fc virtual byte new_loc_hi
-$00fd virtual byte tmp_loc_lo
-$00fe virtual byte tmp_loc_hi
-$0424 virtual byte var_init_b1
-$0755 virtual byte bonus_guy_2_start
-$07de virtual byte bonus_timer_digit_1
-$07df virtual byte bonus_timer_digit_2
-$07e0 virtual byte bonus_timer_digit_3
+; ---- texts and screens, in screen codes ----
+; the top two lines of the screen
 $0fa0 byte[4] top_line
-$0fa4 byte[77] hi_text
+$0fa4 byte[6] hi_text
+$0faa byte[70] top_line_rest
+$0ff0 byte unused_0ff0
+; the bottom two lines of the screen
 $0ff1 byte[40] empty_line
 $1019 byte[40] bottom_line
-$1041 byte[175] high_score_screen
-$10f0 byte[80] high_score_table_1
-$1140 byte[80] high_score_table_2
-$1190 byte[80] high_score_table_3
-$11e0 byte[80] high_score_table_4
-$1230 byte[4] high_score_table_5
-$1234 byte[342] hiscore
-; title screen is 40*21 bytes; rest_of_title is its last 75
+$1041 byte unused_1041
+; the high score screen is 40*21 bytes, with the 5 entries of 10 bytes in it
+$1042 byte[174] high_score_screen
+$10f0 byte[10] high_score_table_1
+$10fa byte[70] high_score_screen_2
+$1140 byte[10] high_score_table_2
+$114a byte[70] high_score_screen_3
+$1190 byte[10] high_score_table_3
+$119a byte[70] high_score_screen_4
+$11e0 byte[10] high_score_table_4
+$11ea byte[70] high_score_screen_5
+$1230 byte[10] high_score_table_5
+$123a byte[336] high_score_screen_6
+; the digits of the lowest high score
+$1234 hiscore
+; the title screen is 40*21 bytes; rest_of_title is its last 75
 $138a byte[765] title
 $1687 byte[75] rest_of_title
 $16d2 byte[40*21] level_1
 $1a1a byte[40*21] level_2
 $1d62 byte[40*21] level_3
+$20aa byte unused_20aa
 $20ab byte[40*21] title_screen_colors
+$23f3-$23fa byte unused_23f3
+
+; ---- drawing ----
 $23fa code set_top_bottom_text
 $23fc code more_chars
 $240e code set_top_bottom_red
 $2410 code more_colors
-$2441 code draw_title_screen
+$241c code draw_high_score_screen
+; reset_everything calls $2441, two bytes early: the end of draw_high_score_screen
+; decodes from there as sbc $60,x, which does no harm
+$2443 code draw_title_screen
 $246a code draw_level_1
 $2491 code draw_level_2
 $24b8 code draw_level_3
 $24df code draw_screen_colors
+$2506 byte[2] unused_2506
 $2508 code animate_player_chars
 $2542 code color_lines
-$2648 word word_1_048e
-$264a word word_2_048e
-$264c word word_3_048e
-$264e word word_4_048e
-$2650 word word_5_048e
-$2652 word word_6_048e
-$2654 word word_7_048e
-$2656 word word_8_048e
-$2658 byte snk_head_loc_lo
-$2659 byte snk_head_loc_hi
-$265a byte snake_pos_tbl_lo
-$265b byte snake_pos_tbl_hi
-$2662 byte snake_pos_tbl
-$266a byte clear_snake_lo
-$266b byte clear_snake_hi
-$2681 byte var7_init_0
+$2572-$2648 byte unused_2572
+
+; ---- the snakes: the screen cells of the head, then of the body ----
+; snake_0 and snake_4 leave a dot where their tail was; the others leave a space
+$2648 word snake_0_head
+$264a word[7] snake_0_body
+$2658 word snake_1_head
+$265a word[4] snake_1_body
+$2662 word snake_2_head
+$2664 word[4] snake_2_body
+$266c word snake_3_head
+$266e word[4] snake_3_body
+$2676 word snake_4_head
+$2678 word[4] snake_4_body
+
+; ---- variables ----
+; the next direction a snake tries: 1 right, 2 left, 3 up, 4 down
+$2680 byte snake_direction
+; how often a snake has tried to move
+$2681 byte snake_tries
 $2682 byte level_nr
 $2683 byte irq_delay_counter
-$2684 byte bonus_guy_char
+; what the bonus guy is worth: 1 nothing, 2 10 points, 3 100 points
+$2684 byte bonus_value
 $2685 byte lives
-$2688 byte var2_init_with_1
-$2689 byte some_bonus_timer
+; the screen cell a snake or the bonus guy tries to move to
+$2686 word move_candidate
+; 1 to 4: which snakes move, and whether the bonus guy does
+$2688 byte difficulty
+; the jiffy_timer start value of a game step; higher is faster
+$2689 byte game_speed
 $268a byte bon_gy_loc_lo
 $268b byte bon_gy_loc_hi
-$268d byte var5_init_with_0
+$268c byte unused_268c
+; counts down while the points of the bonus guy are shown
+$268d byte points_shown_timer
 $268e byte bonus_guy_char_2
+$268f byte bonus_guy_note
 $2690 byte dots_eaten
 $2691 byte bonus_points_char
 $2692 byte note_idx
+; cleared, but never read
+$2693 byte unused_2693
+$2694-$26ac byte unused_2694
+
+; ---- texts ----
 $26ac char[19] press_fire_to_start_
+$26bf byte unused_26bf
 $26c0 char[10] get_ready_text
-$26ca char[10] bonus_run_text
-$26d4 char[9] bonus_text
+$26ca char[10] level_text
+$26d4 char[9] bonus_run_text
+$26dd-$2800 byte unused_26dd
+
+; ---- character set ----
 $2800 byte[8*64] charset
 $2a00 byte[8] arrow_char_1
 $2a08 byte[8] arrow_char_2
 $2a10 byte[8] arrow_char_3
+$2a18 byte[8] snake_head_char
+$2a20 byte[8] snake_body_char
+$2a28 byte[8] unused_char
 $2a30 byte[8] dot_char
 $2a38 byte[8] bonus_gy_1_char_1
 $2a40 byte[8] bonus_gy_1_char_2
 $2a48 byte[8] bonus_gy_2_char_1
 $2a50 byte[8] bonus_gy_2_char_2
+$2a58 byte[8] points_100_char
+$2a60 byte[8] points_10_char
+$2a68 byte[8] no_points_char
 $2a70 byte[8] player_char_1
 $2a78 byte[8] player_char_2
 $2a80 byte[8] player_char_3
@@ -109,6 +185,12 @@ $2a90 byte[8] player_char_5
 $2a98 byte[8] player_char_6
 $2aa0 byte[8] player_char_7
 $2aa8 byte[8] player_char_8
+$2ab0 byte[8*8] more_chars_56
+; the reversed characters, which hold the remains of the assembler's tables
+$2af0-$2ff9 byte charset_rest
+
+; ---- the player ----
+; A is 0 when the player can move to new_loc, otherwise new_loc is put back
 $2ff9 code check_move_possible
 $3011 code move_is_possible
 $3014 code check_move_up
@@ -117,13 +199,39 @@ $303c code check_move_right
 $304e code check_move_left
 $3060 code check_fire
 $306e code try_move
+$30a0 byte[2] unused_30a0
+
+; ---- high scores ----
 $30a2 code sfx_hi_char_entry
 $30b8 code move_hi_from_scr_to_
+; lets the player enter initials when the score beats the lowest high score
 $30de code update_hi
-$3429 code draw_snakes
-$3433 code draw_snake_tail
-$3435 code draw_snake_ball
-$346e code rotate_snake_pos
+$3183 code sort_high_scores
+$324b code copy_hi_text
+$3266 code game_over
+$32d0 byte[2] unused_32d0
+
+; ---- the snakes ----
+; A is 0 when move_candidate is free for a snake
+$32d2 code test_candidate
+; the original test_cell, before the jmp of test_candidate replaced its first instruction
+$32d5 code old_test_cell
+; moves move_candidate in direction A, then tests it
+$32ef code step_candidate
+$333d code next_snake_direction
+; each move_snake_ falls through to the next one
+$334d code move_snake_0
+$33d2 code move_snake_1
+$3429 code snake_1_home
+$3433 code draw_snake_1
+$3435 code draw_snake_1_body
+$3457 code move_snake_2
+$346e code shift_snake_2
+$34dc code move_snake_3
+$3561 code move_snake_4
+$35e7 byte unused_35e7
+
+; ---- the game ----
 $35e8 code colorize_maze
 $360b code colorize_maze_2
 $362a code colorize_maze_3
@@ -136,13 +244,16 @@ $3752 code bonus_10_points
 $376b code bonus_100_points
 $3780 code bonus_round
 $378f code burp_bonus_text
-$37c7 code start_next_level
+$37c7 code bonus_get_ready
 $37f1 code bonus_round_loop
 $37f8 code bonus_walk_on_44
 $3809 code bonus_walk_on_43
 $381f code bonus_walk_on_46
 $3862 code end_bonus_round
 $3879 code end_level
+$3961 code move_bonus_guy
+$39df code update_bonus_guy
+; moves the snakes, and the bonus guy, for the difficulty
 $3a46 code var_2_stuff
 $3a7d code life_lost_handler
 $3b0c code restart_to_title
@@ -160,14 +271,90 @@ $3c41 code life_lost
 $3c44 code nothing_hit
 $3c52 code player_not_moving
 $3c73 code pause
+$3c8d code multicolor_2
+; A is 0 when the cell at move_candidate is a space, the player or a dot
+$3c93 code test_cell
+
+; ---- interrupts and sound ----
+; animates the characters every 7th interrupt, then continues in the KERNAL
 $3cb3 code irq
 $3cc4 code animate_charset
 $3d08 code skip_irq
 $3d0b code setup_irq
+; nothing calls it
+$3d18 code unused_3d18
+; the interrupt of the bonus run: counts the bonus timer down
 $3d27 code countdown_irq
-$3d4b code
+$3d4b code reset_bonus_notes
 $3d5c code play_next_note
+$3d70 byte[6] unused_3d70
 $3d76 code quiet
-$3db8 byte bonus_notes
-$3e80 byte voice_1_notes
-$3ee4 byte voice_2_notes
+$3d87-$3db8 byte unused_3d87
+; play_next_note plays 255 of them, so it runs into voice_1_notes
+$3db8 byte[200] bonus_notes
+$3e80 byte[100] voice_1_notes
+$3ee4 byte[100] voice_2_notes
+$3f48 byte unused_3f48
+$3f49-$a000 virtual byte untouched_3f49
+
+; ---- BASIC ROM; RAMTAS left $55 in the RAM under it ----
+$a000-$c000 virtual byte basic_rom
+$c000-$d000 virtual byte untouched_c000
+
+; ---- VIC-II ----
+$d000 virtual {
+    $00 byte[16] vic_sprite_coords
+    $10 byte vic_sprite_x_high_bits
+    $11-$16 byte vic_control
+    $16 byte vic_control_2
+    $17 byte vic_sprite_double_height
+    $18 byte vic_memory_setup
+    $19-$20 byte vic_registers
+    $20 byte border_color
+    $21 byte background_color
+    $22 byte multicolor_1
+    $23 byte multicolor_2_register
+    $24-$27 byte vic_colors
+    $27 byte[8] vic_sprite_colors
+    $2f-$400 byte vic_rest
+}
+
+; ---- SID ----
+$d400 virtual {
+    $00 word voice1_frequency
+    $02 word voice1_pulse_width
+    $04 byte voice1_control
+    $05 byte voice1_attack_decay
+    $06 byte voice1_sustain_release
+    $07 word voice2_frequency
+    $09 word voice2_pulse_width
+    $0b byte voice2_control
+    $0c byte voice2_attack_decay
+    $0d byte voice2_sustain_release
+    $0e word voice3_frequency
+    $10 word voice3_pulse_width
+    $12 byte voice3_control
+    $13 byte voice3_attack_decay
+    $14 byte voice3_sustain_release
+    $15 word filter_cutoff
+    $17 byte filter_control
+    $18 byte sid_vol_filter
+    $19-$400 byte sid_mirrors
+}
+
+$d800 virtual byte[1000] color_ram
+$dbe8-$dc00 virtual byte unused_color_ram
+
+; ---- CIAs ----
+$dc00 virtual {
+    $00 byte cia1_port_a
+    ; joystick port 1
+    $01 byte cia1_port_b
+    $02-$100 byte cia1_rest
+}
+$dd00-$de00 virtual byte cia2
+$de00-$e000 virtual byte io_expansion
+
+; ---- KERNAL, in ROM ----
+$e000-$10000 virtual byte kernal_rom
+$ea31 kernal_irq
