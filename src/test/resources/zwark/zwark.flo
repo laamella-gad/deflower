@@ -1,8 +1,86 @@
 deflower zwark.vsf
+; Zwark (C) 1982 Robert Wentworth, cracked by Manik, taken while the game runs.
+; The cracked PRG was crunched: the decruncher still sits in the stack page and its
+; source and the remains of the packed data at $0900-$12e4. Memory marked untouched
+; still has VICE's power-on pattern.
 
+; ---- zero page ----
+$00 virtual byte cpu_port_direction
+$01 virtual byte cpu_port
+$02 virtual byte decrunch_count
+$03 virtual byte decrunch_bits
+$04-$2d virtual byte basic_zero_page
+; the end of the BASIC program; the protection check expects $0844
+$2d virtual word basic_end
+$2f-$50 virtual byte basic_zero_page2
+$50 virtual word clear_pointer
+$52-$57 virtual byte basic_zero_page3
+$57 virtual word sprite_source
+$59 virtual word sprite_destination
+$5b-$73 virtual byte basic_zero_page4
+; BASIC's CHRGET, patched by init_game to jump to actual_start_game
+$73 virtual byte[3] chrget
+$76-$ae virtual byte basic_kernal_zero_page
+$ae virtual word decrunch_output
+$b0-$fb virtual byte kernal_zero_page
+$fb virtual byte decrunch_byte
+$fc virtual word decrunch_input
+$fe virtual word decrunch_end
+
+; ---- decruncher, copied from decruncher_source ----
+$0100 code decrunch
+$01cd byte[4] decrunch_table
+$01d1-$01ef byte unused_stack
+$01ef-$0200 byte stack
+
+; ---- KERNAL workspace ----
+$0200-$0314 virtual byte kernal_workspace
+$0314 virtual addr irq_vector
+$0316 virtual addr brk_vector
+$0318 virtual addr nmi_vector
+$031a-$033c virtual byte kernal_vectors
+$033c-$0340 virtual byte tape_buffer
+$ea31 kernal_irq
+$fe66 kernal_brk
+$fe47 kernal_nmi
+
+; ---- sprite images, copied there by copy_sprite ----
+; pointer $0d
+$0340 byte[63] player_image
+$037f byte unused_037f
+; pointer $0e
+$0380 byte[63] bullet_image
+$03bf byte unused_03bf
+; pointer $0f, for sprites 2 and 7
+$03c0 byte[63] enemy_image_2
+$03ff byte unused_03ff
+
+$0400 virtual byte[1000] vic_screen
+$07e8-$07f8 virtual byte unused_07e8
+$07f8 virtual byte[8] sprite_pointers
+
+; pointers $20-$23, for sprites 3-6; the BASIC stub was here
+$0800 byte[63] enemy_image_3
+$083f byte unused_083f
+$0840 byte[63] enemy_image_4
+$087f byte unused_087f
+$0880 byte[63] enemy_image_5
+$08bf byte unused_08bf
+$08c0 byte[63] enemy_image_6
+$08ff byte unused_08ff
+; the remains of the packed data, behind what the decruncher overwrote
+$0900-$1217 byte packed_data
+$1217-$12e4 byte decruncher_source
+$12e4-$9000 virtual byte untouched_12e4
+
+; ---- the game ----
 $9000 code start_game
+$9003 char[3] signature
+$9006 byte[3] unused_9006
 $9009 code actual_start_game
 $9010 code main_loop
+; what move_player returned: 0 while alive, 1 after losing a life, $ff when game over
+$9049 byte player_state
 
 $904a byte[63] player_sprite
 $9089 byte[63] bullet_sprite
@@ -11,62 +89,243 @@ $9107 byte[63] explosion_sprite_1
 $9146 byte[63] explosion_sprite_2
 $9185 byte[63] explosion_sprite_3
 
+; moves the player with the joystick, and handles it being hit
+$91c4 code move_player
+; the trainer turns this dec into a bit, so lives never go down
+$91dc lose_life
 $9201 code check_joystick
 $9205 code check_right
 $9216 code check_left
+; fires and moves the bullet
+$9226 code move_bullet
 $924e code fire_pressed
-
-$93B6 code flash_sprite
-
+$92f9 byte bullet_hit
+; explodes the selected sprite in three steps, scoring a point for an enemy
+$92fa code explode
+$93b6 code flash_sprite
+; Z set when the selected sprite is hit or already exploding
+$93d8 code check_hit
+; move the selected sprite X pixels right, left, up or down; A = 1 at the edge
+$93f9 code move_right
+$944d code move_left
+$9486 code move_up
+$94bd code move_down
+; copies a sprite image from X/Y (low/high) to the sprite pointer in A
+$94de code copy_sprite
+; makes the sprite with the mask in A the selected one
+$94fd code select_sprite
+; unreferenced: clears the screen, turns sprites and sound off
+$9530 code reset_screen
+$9541 code sound_off
 $9549 code update_vic_sprite_positions
-
+; waits delay_outer times delay_inner loops
+$9563 code delay
+; moves the enemies in their directions, adding one more as the score grows
+$9570 code move_enemies
+$96b5 code init_game
 $9753 code sid_clear_loop
+; picks a random direction for an enemy when its timer runs out
+$9773 code update_directions
+$978b code draw_scores
 $9803 code draw_turns
 $9819 code show_top_score_line
-$982D code show_copyright
+$982d code show_copyright
 $9841 code make_scores_red
 $984a char[34] robert_copyright
 $986c char[40] top_score_line
 $9894 char[8] turns_text
-
+; A: 1 starts the shot sound, 2 sweeps it, $ff stops it, 5 starts the explosion, $fe stops it
+$989c code play_sound
+$993c code update_high_score
 $9985 code hi_score_draw
-
+; after move_player: next turn, game over, or the title screen with A = $fe
+$999a code next_turn
+$99bd code title_screen
+; plays the game by itself, steering with an enemy's random direction
+$9a4b code demo
 $9ab7 char[20] f1_1_player_text
 $9acb char[20] f3_2_player_text
-
+$9adf code show_game_over
+; shows whose turn it is, and waits for a key or a while
+$9af7 code show_player
 $9b02 code show_top_score_row_14
-
+$9b41 byte show_player_countdown
 $9b42 char[11] game_over_text
-$9bcc draw_logo
-$9C45 logo0
-$9c61 logo1
-$9c7d logo2
-$9C98 logo3
-$9CB7 logo4
-$9DA4 init_sprite_coords
-$9D3A byte[16] init_sprite_ptrs
-$9D4A byte[16] sprite_ptrs
-$9D5A byte sprite_x_high_bits
+; in a two player game, saves the sprites of one player and restores the other's
+$9b4d code switch_player
+$9bcc code draw_logo
+; draw_logo reads 28 bytes from each row, but from $9c98 and $9cb7 for the last two
+$9c45 byte[28] logo0
+$9c61 byte[28] logo1
+$9c7d byte[27] logo2
+$9c98 byte[31] logo3
+$9cb7 byte[30] logo4
+; wipes all memory from $0800 unless the crack's start ran, or CHRGET is patched
+$9cd5 code check_protection
+$9d0c code nothing_just_rts
+; turns the BCD byte in A into screen code digits: X the low one, Y the high one
+$9d0d code to_digits
+$9d2a byte[8] sprite_images_lo
+$9d32 byte[8] sprite_images_hi
+$9d3a byte[8] sprite_pointer_values
+; counts down while a sprite explodes
+$9d42 byte[8] explosion_timers
+; x/y per sprite, copied to the VIC each frame
+$9d4a byte[16] sprite_coords
+$9d5a byte sprite_x_high_bits
+$9d5b byte sprite_enable
+; per sprite, its color for player 1 and player 2
+$9d5c byte[8*2] saved_sprite_colors
+$9d6c byte[2] saved_sprite_enable
+; per sprite, bits 1-3 say down, right, left; from the CIA timer
+$9d6e byte[8] enemy_directions
+$9d76 byte[8] direction_timers
+$9d7e byte[8] explosion_steps
+$9d86 byte exploding
+; bit 0: the bullet is flying, bit 1: fire was released
+$9d87 byte fire_state
+$9d88 byte joystick_state
+$9d89 byte sprite_coll_state
+$9d8a byte[2] lives
+$9d8c byte current_player
+; BCD
+$9d8d byte[2] score_lo
+$9d8f byte[2] score_hi
+$9d91 byte high_score_lo
+$9d92 byte high_score_hi
+$9d93 byte two_players
+$9d94 byte delay_outer
+$9d95 byte delay_inner
+$9d96 byte copy_source_lo
+$9d97 byte copy_index
+$9d98 byte sprite_mask
+$9d99 byte sprite_index
+$9d9a byte sprite_coord_index
+$9d9b byte move_result
+$9d9c byte move_count
+; only increased by unreachable code
+$9d9d byte unused_9d9d
+$9d9e byte digit
+$9d9f byte score_player
+$9da0 byte score_column
+$9da1 byte unused_9da1
+$9da2 byte title_countdown_lo
+$9da3 byte title_countdown_hi
+; copied to $d000-$d02e: sprite positions, enable at +$15, colors at +$27
+$9da4 byte[47] vic_init
+$9dd3 byte shot_attack_decay
+$9dd4 byte shot_sustain_release
+$9dd5 byte shot_frequency_hi
+$9dd6 byte shot_frequency_lo
+$9dd7 byte shot_sweep_hi
+$9dd8 byte shot_sweep_lo
+$9dd9 byte explosion_attack_decay
+$9dda byte explosion_sustain_release
+$9ddb-$9e00 byte unused_9ddb
 
-$9D88 joystick_state
-$9D89 sprite_coll_state
-$9D0C code nothing_just_rts
-$9D76 byte[8] table_with_timers
-$9D6E byte[8] table_with_timed_stuff
-$9E00 code start
-$9E2C code no_trainer
-$9f1c code install_trainer
-$9E40 char[105] crack_trainer_msg
+; ---- the crack ----
+$9e00 code start
+$9e2c code no_trainer
+$9e34-$9e40 byte unused_9e34
+$9e40 char[105] crack_trainer_msg
+$9ea9-$9eab byte unused_9ea9
+$9eab-$d000 virtual byte untouched_9eab
 
-$0400 virtual byte[1000] vic_screen
-$07f8 virtual byte[8] sprite_pointers
-$d015 virtual byte vic_sprite_enable
-$d01e virtual byte vic_sprite_coll
+; ---- VIC-II ----
+$d000 virtual {
+    $00 byte[16] vic_sprite_coords
+    $10 byte vic_sprite_x_high_bits
+    $11-$15 byte vic_control
+    $15 byte vic_sprite_enable
+    $16-$1e byte vic_registers
+    $1e byte vic_sprite_coll
+    $1f byte vic_background_coll
+    $20 byte border_color
+    $21 byte background_color
+    $22-$27 byte vic_colors
+    $27 byte[8] vic_sprite_colors
+    $2f-$400 byte vic_rest
+}
+
+; ---- SID ----
+$d400 virtual {
+    $00 word voice1_frequency
+    $02 word voice1_pulse_width
+    $04 byte voice1_control
+    $05 byte voice1_attack_decay
+    $06 byte voice1_sustain_release
+    $07 word voice2_frequency
+    $09 word voice2_pulse_width
+    $0b byte voice2_control
+    $0c byte voice2_attack_decay
+    $0d byte voice2_sustain_release
+    $0e word voice3_frequency
+    $10 word voice3_pulse_width
+    $12 byte voice3_control
+    $13 byte voice3_attack_decay
+    $14 byte voice3_sustain_release
+    $15 word filter_cutoff
+    $17 byte filter_control
+    $18 byte sid_vol_filter
+    $19-$400 byte sid_mirrors
+}
+
 $d800 virtual byte[1000] vic_color_ram
-$D000 virtual byte[16] vic_sprite_coords
-$D010 virtual byte vic_sprite_x_high_bits
-$D027 virtual byte[8] vic_sprite_colors
-$DC01 virtual byte vic_joystick1
-$DC04 virtual byte vic_timer_a
-$d400 virtual byte sid_base
-$d418 virtual byte sid_vol_filter
+$dbe8-$dc00 virtual byte unused_color_ram
+
+; ---- CIAs ----
+$dc00 virtual {
+    $00 byte cia1_port_a
+    $01 byte vic_joystick1
+    $02-$04 byte cia1_directions
+    $04 byte vic_timer_a
+    $05-$100 byte cia1_rest
+}
+$dd00-$de00 virtual byte cia2
+$de00-$e000 virtual byte io_expansion
+
+; ---- KERNAL, in ROM; the RAM under it is untouched ----
+$e000-$ff81 virtual byte untouched_e000
+$e544 kernal_clear_screen
+$ff00 virtual {
+    $81 byte[3] cint
+    $84 byte[3] ioinit
+    $87 byte[3] ramtas
+    $8a byte[3] restor
+    $8d byte[3] vector
+    $90 byte[3] setmsg
+    $93 byte[3] second
+    $96 byte[3] tksa
+    $99 byte[3] memtop
+    $9c byte[3] membot
+    $9f byte[3] scnkey
+    $a2 byte[3] settmo
+    $a5 byte[3] acptr
+    $a8 byte[3] ciout
+    $ab byte[3] untlk
+    $ae byte[3] unlsn
+    $b1 byte[3] listen
+    $b4 byte[3] talk
+    $b7 byte[3] readst
+    $ba byte[3] setlfs
+    $bd byte[3] setnam
+    $c0 byte[3] open
+    $c3 byte[3] close
+    $c6 byte[3] chkin
+    $c9 byte[3] chkout
+    $cc byte[3] clrchn
+    $cf byte[3] chrin
+    $d2 byte[3] chrout
+    $d5 byte[3] load
+    $d8 byte[3] save
+    $db byte[3] settim
+    $de byte[3] rdtim
+    $e1 byte[3] stop
+    $e4 byte[3] getin
+    $e7 byte[3] clall
+    $ea byte[3] udtim
+    $ed byte[3] screen_size
+    $f0 byte[3] plot
+    $f3 byte[3] iobase
+}
+$fff6-$10000 virtual byte untouched_fff6

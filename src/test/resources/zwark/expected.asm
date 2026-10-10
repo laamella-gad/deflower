@@ -1,53 +1,490 @@
 
+.virtual $0000
+; Zwark (C) 1982 Robert Wentworth, cracked by Manik, taken while the game runs.
+; The cracked PRG was crunched: the decruncher still sits in the stack page and its
+; source and the remains of the packed data at $0900-$12e4. Memory marked untouched
+; still has VICE's power-on pattern.
+; ---- zero page ----
+cpu_port_direction:		.byte	?
+cpu_port:		.byte	?
+decrunch_count:		.byte	?
+decrunch_bits:		.byte	?
+basic_zero_page:
+		.fill	41
+; the end of the BASIC program; the protection check expects $0844
+basic_end:		.word	?
+basic_zero_page2:
+		.fill	33
+clear_pointer:		.word	?
+basic_zero_page3:
+		.fill	5
+sprite_source:		.word	?
+sprite_destination:		.word	?
+basic_zero_page4:
+		.fill	24
+; BASIC's CHRGET, patched by init_game to jump to actual_start_game
+chrget:
+		.fill	3
+basic_kernal_zero_page:
+		.fill	56
+decrunch_output:		.word	?
+kernal_zero_page:
+		.fill	75
+decrunch_byte:		.byte	?
+decrunch_input:		.word	?
+decrunch_end:		.word	?
+.endv
+
+*=$0100
+
+; ---- decruncher, copied from decruncher_source ----
+decrunch:
+		lda (decrunch_input), y
+		sta vic_screen + $31c, y
+		iny 
+		bne decrunch
+
+l0108:
+		tya 
+		sta decrunch_bits
+
+l010B:
+		jsr l019F
+		rol 
+		rol decrunch_bits
+		bne l0117
+		cmp decrunch_bits
+		beq l012C
+
+l0117:
+		jsr l019F
+		bcs l010B
+		tax 
+
+l011D:
+		jsr l01AD
+		jsr l01C5
+		dex 
+		bne l011D
+		dec decrunch_bits
+		bpl l011D
+		sty decrunch_bits
+
+l012C:
+		tya 
+		sty decrunch_output
+		sty decrunch_output + $1
+
+l0131:
+		jsr l019F
+		rol 
+		bcs l0197
+		beq l013E
+		jsr l019F
+		bcs l0131
+
+l013E:
+		sta decrunch_count
+		beq $0147
+		cmp #$01
+		beq l0191
+		bit kernal_workspace + $e6
+l0147 = $0147
+		jsr l019F
+		rol decrunch_bits
+		jsr l019F
+		rol decrunch_bits
+		bcc l015B
+
+l0155:
+		inc decrunch_output
+		bne l015B
+		inc decrunch_output + $1
+
+l015B:
+		ldx decrunch_bits
+		lda decrunch_table + $3, x
+		tax 
+
+l0161:
+		jsr l019F
+		rol decrunch_output
+		rol decrunch_output + $1
+		dex 
+		bne l0161
+		dec decrunch_bits
+		bpl l0155
+		lda decrunch_end
+		clc 
+		adc decrunch_output
+		tax 
+		lda decrunch_end + $1
+		adc decrunch_output + $1
+		sta decrunch_output + $1
+		txa 
+		sec 
+		adc decrunch_count
+		bcc l0183
+		inc decrunch_output + $1
+
+l0183:
+		sta decrunch_output
+		inc decrunch_count
+
+l0187:
+		jsr l01B8
+		dec decrunch_count
+		bne l0187
+		jmp l0108
+
+l0191:
+		sty decrunch_count
+		ldx #$04
+		bne l0161
+
+l0197:
+		lda #$37
+		sta cpu_port
+		cli 
+		jmp start
+
+l019F:
+		asl decrunch_byte
+		bne l01AC
+		pha 
+		jsr l01AD
+		sec 
+		rol 
+		sta decrunch_byte
+		pla 
+
+l01AC:
+		rts 
+
+l01AD:
+		lda (decrunch_input), y
+		cpy decrunch_input
+		bne l01B5
+		dec decrunch_input + $1
+
+l01B5:
+		dec decrunch_input
+		rts 
+
+l01B8:
+		lda (decrunch_output), y
+		inc vic_screen
+		cpy decrunch_output
+		bne l01C3
+		dec decrunch_output + $1
+
+l01C3:
+		dec decrunch_output
+
+l01C5:
+		sta (decrunch_end), y
+		cpy decrunch_end
+		bne decrunch_table
+		dec decrunch_end + $1
+
+decrunch_table:
+		.byte	$c6, $fe, $60, $04
+unused_stack:
+		.byte	$02, $02, $03, $ff, $ff, $00, $00, $00, $00, $ff, $ff, $ff, $ff, $00, $00, $00
+		.byte	$00, $ff, $7d, $ea, $12, $04, $7d, $ea, $7d, $ea, $04, $02, $ff, $a0
+stack:
+		.byte	$ce, $91, $8c, $9a, $e7, $99, $1c, $90, $00, $00, $00, $ff, $a7, $79, $a6, $9c
+		.byte	$e3
+
+.virtual $0200
+; ---- KERNAL workspace ----
+kernal_workspace:
+		.fill	276
+irq_vector:		.addr	?
+brk_vector:		.addr	?
+nmi_vector:		.addr	?
+kernal_vectors:
+		.fill	34
+tape_buffer:
+		.fill	4
+.endv
+
+*=$0340
+
+; ---- sprite images, copied there by copy_sprite ----
+; pointer $0d
+player_image:
+		.byte	$00, $30, $00, $00, $30, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00, $00
+		.byte	$fc, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc
+		.byte	$00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00
+		.byte	$15, $55, $50, $55, $55, $54, $00, $a8, $00, $00, $a8, $00, $02, $aa, $00
+unused_037f:		.byte	$00
+; pointer $0e
+bullet_image:
+		.byte	$00, $00, $00, $00, $30, $00, $00, $fc, $00, $00, $30, $00, $00, $48, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+unused_03bf:		.byte	$02
+; pointer $0f, for sprites 2 and 7
+enemy_image_2:
+		.byte	$02, $00, $20, $00, $80, $80, $00, $2a, $00, $08, $b3, $88, $22, $88, $a2, $2f
+		.byte	$ea, $fe, $2f, $e2, $fe, $2f, $80, $be, $08, $80, $88, $08, $80, $88, $08, $22
+		.byte	$08, $08, $22, $08, $02, $22, $20, $02, $22, $20, $08, $22, $08, $08, $80, $88
+		.byte	$20, $00, $02, $20, $00, $02, $20, $00, $02, $20, $00, $02, $20, $00, $02
+unused_03ff:		.byte	$00
+
 .virtual $0400
 vic_screen:
 		.fill	1000
-.endv
-
-.virtual $07f8
+unused_07e8:
+		.fill	16
 sprite_pointers:
 		.fill	8
 .endv
 
+*=$0800
+
+; pointers $20-$23, for sprites 3-6; the BASIC stub was here
+enemy_image_3:
+		.byte	$02, $00, $20, $00, $80, $80, $00, $2a, $00, $08, $b3, $88, $22, $88, $a2, $2f
+		.byte	$ea, $fe, $2f, $e2, $fe, $2f, $80, $be, $08, $80, $88, $08, $80, $88, $08, $22
+		.byte	$08, $08, $22, $08, $02, $22, $20, $02, $22, $20, $08, $22, $08, $08, $80, $88
+		.byte	$20, $00, $02, $20, $00, $02, $20, $00, $02, $20, $00, $02, $20, $00, $02
+unused_083f:		.byte	$00
+enemy_image_4:
+		.byte	$02, $00, $20, $00, $80, $80, $00, $2a, $00, $08, $b3, $88, $22, $88, $a2, $2f
+		.byte	$ea, $fe, $2f, $e2, $fe, $2f, $80, $be, $08, $80, $88, $08, $80, $88, $08, $22
+		.byte	$08, $08, $22, $08, $02, $22, $20, $02, $22, $20, $08, $22, $08, $08, $80, $88
+		.byte	$20, $00, $02, $20, $00, $02, $20, $00, $02, $20, $00, $02, $20, $00, $02
+unused_087f:		.byte	$00
+enemy_image_5:
+		.byte	$02, $00, $20, $00, $80, $80, $00, $2a, $00, $08, $b3, $88, $22, $88, $a2, $2f
+		.byte	$ea, $fe, $2f, $e2, $fe, $2f, $80, $be, $08, $80, $88, $08, $80, $88, $08, $22
+		.byte	$08, $08, $22, $08, $02, $22, $20, $02, $22, $20, $08, $22, $08, $08, $80, $88
+		.byte	$20, $00, $02, $20, $00, $02, $20, $00, $02, $20, $00, $02, $20, $00, $02
+unused_08bf:		.byte	$00
+enemy_image_6:
+		.byte	$02, $00, $20, $00, $80, $80, $00, $2a, $00, $08, $b3, $88, $22, $88, $a2, $2f
+		.byte	$ea, $fe, $2f, $e2, $fe, $2f, $80, $be, $08, $80, $88, $08, $80, $88, $08, $22
+		.byte	$08, $08, $22, $08, $02, $22, $20, $02, $22, $20, $08, $22, $08, $08, $80, $88
+		.byte	$20, $00, $02, $20, $00, $02, $20, $00, $02, $20, $00, $02, $20, $00, $02
+unused_08ff:		.byte	$00
+; the remains of the packed data, behind what the decruncher overwrote
+packed_data:
+		.byte	$ee, $17, $2f, $64, $60, $da, $0b, $8f, $f8, $ea, $da, $98, $94, $06, $45, $9a
+		.byte	$99, $84, $e6, $28, $68, $93, $35, $66, $d8, $2c, $24, $8e, $27, $ac, $6a, $76
+		.byte	$05, $f8, $ab, $08, $a3, $11, $4e, $cc, $67, $66, $64, $9b, $99, $53, $cd, $90
+		.byte	$cc, $cd, $e0, $cd, $26, $08, $f2, $63, $f8, $12, $e9, $d9, $a9, $9c, $e2, $31
+		.byte	$de, $90, $36, $32, $8e, $d5, $93, $fe, $d9, $03, $7e, $4c, $ef, $32, $3b, $6c
+		.byte	$2a, $85, $65, $15, $e1, $0c, $a1, $46, $55, $58, $c9, $03, $d8, $a9, $64, $89
+		.byte	$a2, $85, $a0, $91, $d0, $4b, $f9, $1e, $4d, $d9, $2b, $cd, $02, $a4, $16, $bb
+		.byte	$fa, $cc, $0e, $e8, $b3, $1b, $cf, $f8, $67, $d6, $c5, $fe, $20, $9c, $48, $1f
+		.byte	$d5, $2d, $31, $43, $17, $52, $41, $32, $db, $d2, $39, $34, $c9, $98, $0d, $1e
+		.byte	$fe, $b1, $bd, $01, $a5, $29, $0f, $3c, $4e, $f6, $9d, $e8, $36, $89, $f0, $0d
+		.byte	$8e, $8f, $b3, $db, $c6, $1e, $6c, $7b, $66, $16, $9e, $91, $04, $34, $ed, $98
+		.byte	$c1, $10, $35, $fc, $25, $18, $09, $2a, $03, $2c, $ca, $f1, $9c, $31, $8e, $6a
+		.byte	$5f, $ff, $b3, $cc, $01, $e8, $32, $d6, $f1, $3c, $90, $73, $1f, $8f, $14, $74
+		.byte	$4d, $e6, $c0, $c9, $c1, $d6, $0e, $ce, $74, $47, $a4, $86, $c5, $04, $5b, $85
+		.byte	$c9, $90, $2f, $69, $aa, $6c, $39, $e0, $74, $cf, $de, $ca, $b0, $19, $3b, $63
+		.byte	$6c, $cc, $65, $0c, $46, $76, $b0, $08, $f1, $c3, $2c, $0a, $f0, $c0, $61, $30
+		.byte	$56, $d5, $dd, $59, $85, $6c, $66, $d2, $5a, $63, $a2, $c7, $25, $21, $63, $ad
+		.byte	$a8, $32, $56, $68, $de, $f3, $cb, $a7, $9f, $29, $cd, $cc, $43, $14, $84, $bc
+		.byte	$5c, $24, $f6, $ad, $9b, $70, $88, $cc, $66, $ea, $88, $8e, $58, $27, $8a, $a2
+		.byte	$9b, $ee, $4f, $07, $b3, $30, $c9, $fa, $b0, $d2, $fe, $b2, $6d, $26, $43, $ee
+		.byte	$90, $df, $86, $57, $84, $58, $cc, $8f, $4e, $65, $85, $2c, $bd, $66, $06, $aa
+		.byte	$26, $5a, $9c, $f9, $22, $67, $b1, $57, $91, $59, $45, $73, $74, $14, $30, $21
+		.byte	$62, $b6, $1a, $d9, $27, $96, $4a, $c7, $65, $b9, $c5, $b0, $b4, $8e, $aa, $8a
+		.byte	$0b, $49, $31, $09, $64, $92, $25, $46, $28, $88, $14, $8d, $06, $f0, $b1, $0a
+		.byte	$ac, $59, $05, $81, $c1, $b4, $06, $2c, $12, $66, $0b, $6a, $21, $0a, $48, $45
+		.byte	$7b, $cc, $8a, $68, $60, $ad, $31, $57, $90, $ad, $4e, $88, $d9, $35, $61, $57
+		.byte	$ce, $69, $a6, $9c, $8d, $d5, $df, $b0, $ac, $46, $61, $ae, $4e, $61, $ca, $8a
+		.byte	$88, $4e, $f7, $5b, $93, $04, $31, $fd, $94, $4b, $26, $d8, $93, $d0, $3b, $9c
+		.byte	$8e, $20, $fa, $92, $f0, $03, $4c, $0f, $96, $62, $6a, $86, $e8, $a9, $28, $3d
+		.byte	$61, $54, $bd, $ec, $ae, $9a, $16, $06, $e5, $c9, $17, $ce, $5e, $9a, $85, $49
+		.byte	$ff, $2d, $fd, $a0, $4c, $b8, $79, $73, $f3, $0d, $c5, $49, $ce, $50, $30, $70
+		.byte	$e0, $6c, $73, $1a, $26, $10, $46, $0b, $ae, $7f, $2a, $10, $43, $d8, $74, $3e
+		.byte	$e6, $80, $1d, $c9, $01, $53, $d8, $02, $4d, $a0, $01, $7c, $76, $ff, $20, $79
+		.byte	$19, $13, $c7, $41, $f9, $93, $ae, $99, $4f, $87, $cb, $3d, $ae, $60, $f0, $0a
+		.byte	$ad, $ae, $a2, $01, $60, $02, $4c, $a6, $94, $66, $b4, $08, $51, $15, $ef, $89
+		.byte	$ec, $44, $c5, $43, $f5, $60, $08, $b1, $42, $d4, $40, $90, $5c, $bb, $01, $15
+		.byte	$8f, $74, $e5, $10, $5e, $24, $b9, $56, $19, $b4, $53, $b0, $07, $3e, $7f, $cb
+		.byte	$c9, $80, $90, $31, $b4, $41, $13, $8f, $14, $c5, $82, $cd, $a5, $12, $e6, $1d
+		.byte	$0a, $2c, $f5, $87, $79, $ac, $ce, $1b, $29, $95, $ad, $62, $84, $3a, $0d, $06
+		.byte	$03, $a6, $b4, $40, $7b, $72, $5a, $bc, $01, $f0, $6c, $4c, $74, $73, $74, $09
+		.byte	$74, $74, $a9, $e4, $85, $75, $96, $15, $46, $c4, $f8, $07, $ca, $75, $2e, $40
+		.byte	$23, $b6, $ed, $37, $b4, $6d, $7b, $82, $b4, $b0, $03, $71, $cf, $a6, $2f, $0d
+		.byte	$16, $d6, $cc, $ed, $0d, $32, $42, $6e, $48, $f8, $0b, $32, $c7, $8e, $6c, $80
+		.byte	$39, $90, $66, $ed, $b5, $13, $d9, $6c, $63, $bb, $8b, $8d, $ec, $46, $d4, $25
+		.byte	$ab, $d2, $83, $03, $98, $58, $2d, $ad, $b9, $33, $83, $6b, $e7, $97, $99, $e8
+		.byte	$c0, $5c, $cd, $d4, $60, $15, $ca, $19, $4f, $5e, $fa, $30, $d1, $8d, $3a, $f1
+		.byte	$33, $5b, $e2, $8c, $6f, $13, $47, $c0, $99, $96, $6a, $fe, $36, $33, $f0, $62
+		.byte	$8f, $de, $ec, $d0, $0b, $82, $6b, $30, $0b, $a9, $66, $72, $32, $76, $a1, $b9
+		.byte	$9a, $39, $6a, $eb, $72, $65, $57, $21, $02, $5b, $21, $13, $72, $55, $b4, $61
+		.byte	$6b, $50, $2c, $8a, $ac, $7d, $b9, $98, $84, $f1, $c2, $8e, $ac, $12, $6c, $d8
+		.byte	$0c, $ae, $19, $bc, $8c, $2e, $98, $33, $6c, $ac, $0b, $46, $e3, $ad, $4c, $d9
+		.byte	$39, $5c, $98, $1e, $02, $8a, $76, $7d, $35, $dd, $a2, $9b, $51, $2c, $06, $53
+		.byte	$30, $ba, $e1, $c7, $9f, $ac, $32, $8d, $a0, $66, $c6, $c3, $f4, $63, $3c, $99
+		.byte	$5c, $a7, $94, $5d, $20, $47, $9a, $d3, $96, $6e, $10, $bb, $d2, $00, $b9, $ca
+		.byte	$ec, $3c, $b9, $08, $fb, $c9, $99, $92, $ee, $bb, $a0, $4a, $98, $99, $07, $07
+		.byte	$3a, $69, $c0, $db, $66, $21, $85, $4d, $da, $a9, $02, $9d, $7d, $24, $a4, $d9
+		.byte	$16, $60, $1a, $17, $01, $66, $ba, $e5, $ca, $28, $03, $29, $d9, $31, $39, $38
+		.byte	$32, $49, $fa, $8d, $91, $02, $ea, $45, $86, $94, $1a, $05, $0e, $19, $23, $12
+		.byte	$14, $08, $20, $33, $7d, $c4, $73, $4e, $4d, $6c, $49, $47, $48, $a2, $97, $53
+		.byte	$43, $4f, $be, $4a, $15, $73, $50, $4c, $41, $59, $45, $da, $36, $2e, $15, $57
+		.byte	$4f, $54, $55, $52, $4e, $53, $3d, $a9, $bb, $31, $23, $3c, $56, $c9, $8c, $d0
+		.byte	$36, $53, $5e, $d5, $0d, $08, $a3, $d6, $36, $e0, $cb, $87, $d3, $7a, $80, $20
+		.byte	$0c, $a5, $53, $8c, $94, $40, $10, $0d, $52, $03, $6d, $7f, $2c, $8a, $61, $c9
+		.byte	$02, $d1, $b3, $ce, $37, $03, $d7, $50, $0f, $a6, $28, $08, $bd, $d8, $e2, $15
+		.byte	$a8, $07, $84, $69, $45, $6c, $1b, $4b, $97, $7d, $c9, $05, $d0, $30, $ad, $04
+		.byte	$dc, $f1, $0b, $10, $0e, $4a, $ae, $0f, $e8, $01, $c1, $d9, $83, $13, $07, $0f
+		.byte	$05, $ee, $da, $ca, $32, $14, $02, $06, $cb, $11, $81, $0e, $5b, $81, $95, $95
+		.byte	$81, $60, $3e, $fe, $d0, $37, $d6, $15, $52, $61, $95, $0d, $63, $76, $c4, $52
+		.byte	$48, $a4, $18, $d0, $0a, $7e, $cd, $b0, $90, $0e, $08, $7e, $c4, $94, $42, $04
+		.byte	$49, $bd, $8f, $f8, $4a, $02, $ad, $2e, $f1, $8a, $b0, $0f, $2b, $11, $72, $8d
+		.byte	$ad, $91, $98, $85, $0d, $e4, $98, $c9, $30, $e9, $09, $ac, $92, $9d, $c0, $00
+		.byte	$d0, $02, $26, $35, $86, $a0, $12, $38, $8a, $70, $05, $a9, $30, $e7, $80, $c8
+		.byte	$99, $28, $04, $e9, $6f, $cc, $6e, $c9, $fe, $90, $54, $64, $fa, $3e, $f3, $24
+		.byte	$4c, $ba, $99, $bb, $55, $9a, $e6, $12, $07, $76, $eb, $c9, $65, $95, $35, $ad
+		.byte	$22, $24, $94, $32, $25, $38, $65, $49, $03, $ec, $92, $77, $b6, $4e, $67, $b2
+		.byte	$4e, $6a, $b2, $5d, $8c, $e4, $1a, $e9, $ce, $a3, $38, $4b, $00, $83, $4b, $9a
+		.byte	$4c, $bd, $99, $da, $5a, $58, $71, $c5, $b2, $f8, $5c, $4d, $9b, $91, $8b, $45
+		.byte	$77, $f7, $9a, $c4, $f0, $aa, $08, $4b, $d0, $fd, $08, $b6, $0a, $b6, $7d, $a9
+		.byte	$20, $cc, $3b, $22, $f2, $9d, $93, $99, $02, $82, $28, $09, $82, $a2, $0f, $71
+		.byte	$8b, $ac, $40, $c6, $30, $02, $11, $04, $0d, $0b, $28, $2a, $12, $d4, $f9, $85
+		.byte	$80, $59, $af, $0c, $4b, $01, $ba, $6e, $25, $60, $60, $b5, $96, $20, $cc, $9b
+		.byte	$45, $9b, $1d, $34, $5a, $c6, $82, $21, $2a, $1d, $0c, $48, $2b, $d0, $a9, $0e
+		.byte	$8d, $da, $7f, $9c, $e9, $3a, $96, $69, $33, $8b, $26, $2f, $8b, $26, $2b, $7b
+		.byte	$6e, $4a, $49, $08, $72, $88, $a9, $a0, $1e, $7c, $d1, $89, $24, $73, $97, $12
+		.byte	$97, $c4, $91, $8d, $de, $20, $26, $92, $b2, $70, $68, $00, $b8, $c4, $c8, $ad
+		.byte	$49, $3c, $6a, $03, $2d, $90, $c1, $39, $0d, $18, $d4, $92, $1d, $4f, $15, $d0
+		.byte	$45, $26, $55, $a2, $0a, $8e, $95, $9d, $60, $06, $31, $89, $3a, $88, $13, $09
+		.byte	$0e, $07, $e9, $91, $8c, $28, $3c, $06, $33, $91, $2d, $43, $14, $17, $47, $c6
+		.byte	$c8, $10, $0c, $b8, $19, $d4, $43, $36, $a1, $23, $72, $00, $bd, $42, $9b, $7b
+		.byte	$bc, $6c, $89, $e1, $4b, $88, $e0, $09, $90, $ec, $68, $6e, $0f, $ad, $99, $0b
+		.byte	$f0, $02, $a2, $1e, $44, $83, $98, $29, $bf, $c8, $b1, $08, $75, $b5, $a5, $c0
+		.byte	$19, $90, $ed, $a9, $ed, $95, $68, $09, $27, $86, $9f, $95, $49, $e1, $4a, $32
+		.byte	$1b, $1d, $cd, $0d, $ee, $14, $e8, $85, $28, $4c, $c9, $86, $f0, $0c, $ce, $41
+		.byte	$9b, $d0, $e4, $66, $4d, $32, $8d, $94, $9d, $d2, $5a, $60, $00, $07, $01, $0d
+		.byte	$ec, $11, $0f, $a9, $80, $12, $66, $0d, $93, $66, $85, $37, $ae, $c4, $49, $60
+		.byte	$c8, $42, $4a, $34, $b9, $11, $8a, $90, $12, $48, $a9, $01, $38, $ed, $3c, $1d
+		.byte	$60, $8c, $3a, $aa, $7a, $6c, $2a, $c5, $1d, $32, $18, $5c, $57, $99, $27, $d0
+		.byte	$d7, $41, $c8, $c0, $08, $ad, $b3, $f3, $16, $a4, $b1, $a0, $4a, $d0, $2b, $10
+		.byte	$90, $e6, $9f, $0c, $46, $5a, $66, $86, $40, $87, $83, $24, $2c, $2a, $56, $8d
+		.byte	$54, $bc, $32, $c1, $bd, $3a, $22, $8b, $8e, $1e, $94, $96, $06, $de, $94, $ae
+		.byte	$97, $a1, $4f, $4c, $07, $90, $e3, $ad, $e8, $29, $fd, $8d, $5b, $01, $9d, $20
+		.byte	$49, $95, $60, $d2, $0f, $45, $0b, $04, $c9, $c8, $71, $13, $61, $6a, $81, $20
+		.byte	$6d, $63, $80, $28, $d8, $55, $7d, $7c, $81, $20, $39, $18, $6e, $42, $98, $2d
+		.byte	$10, $24, $c7, $40, $55, $7c, $42, $9c, $1c, $68, $a9, $06, $9d, $68, $d9, $6d
+		.byte	$26, $1c, $90, $f0, $a2, $34, $a1, $10, $b7, $24, $50, $05, $bd, $cb, $9a, $69
+		.byte	$06, $a9, $04, $83, $8b, $d9, $99, $30, $da, $c8, $e8, $e0, $14, $90, $e6, $60
+		.byte	$5f, $4c, $7a, $0f, $dd, $81, $cc, $c8, $16, $6a, $72, $25, $3a, $87, $09, $51
+		.byte	$2b, $e2, $a5, $0e, $74, $62, $34, $25, $5b, $11, $ad, $71, $65, $3c, $52, $e1
+		.byte	$80, $98, $c0, $c1, $c6, $d8, $10, $13, $82, $89, $87, $01, $b4, $c0, $39, $8c
+		.byte	$e9, $88, $00, $a0, $94, $10, $03, $48, $69, $6d, $00, $00, $00, $a0, $68, $5f
+		.byte	$df, $45, $5e, $c1, $ad, $ec, $01, $a6, $9e, $f0, $30, $f4, $73, $d2, $4c, $d2
+		.byte	$12, $d2, $74, $d2, $09, $d2, $0c, $d2, $2d, $d2, $44, $d0, $06, $a5, $2e, $c9
+		.byte	$92, $3f, $f0, $18, $d9, $60, $94, $1a, $08, $85, $79, $95, $c5, $8a, $91, $0c
+		.byte	$8d, $50, $8e, $fa, $e6, $51, $d0, $f6, $b6, $98, $60, $a8, $29, $0f, $68, $c3
+		.byte	$aa, $98, $67, $00, $10, $c9, $0a, $90, $02, $4b, $87, $06, $69, $30, $a8, $f4
+		.byte	$a1, $60, $4a, $89, $1c, $60, $20, $c8, $50, $c0, $01, $80, $90, $0d, $0e, $4e
+		.byte	$20, $21, $22, $23, $0f, $da, $45, $74, $ad, $f0, $20, $40, $60, $80, $a0, $b7
+		.byte	$01, $ab, $29, $e9, $6d, $48, $0a, $de, $26, $d8, $a0, $d4, $42, $07, $40, $30
+		.byte	$39, $d0, $34, $70, $34, $d4, $0a, $80, $10, $d9, $1b, $34, $22, $56, $05, $c8
+		.byte	$a4, $15, $7f, $f0, $47, $0f, $59, $8a, $87, $0e, $00, $64, $12, $81, $07, $92
+		.byte	$08, $0a, $0c, $02, $27, $f0, $64, $27, $47, $1f, $40, $88, $f0, $40, $35, $c0
+		.byte	$07, $38, $c0, $99, $01, $ff, $a9, $f2, $4b, $44, $12, $8d, $21, $d0, $20, $44
+		.byte	$e5, $a2, $68, $bd, $40, $9e, $bd, $07, $04, $a9, $0f, $9d, $00, $d8, $ca, $10
+		.byte	$f2, $58, $20, $e4, $ff, $f6, $4e, $f0, $09, $c9, $59, $d0, $f5, $a3, $4f, $2c
+		.byte	$4a, $dc, $91, $a9, $9e, $8d, $05, $08, $4c, $52, $87, $90, $02, $36, $80, $81
+		.byte	$00, $40, $12, $45, $03, $53, $55, $7f, $02, $19, $cc, $0d, $01, $0e, $09, $0b
+		.byte	$a5, $0d, $e4, $37, $c0, $07, $38, $00, $63, $50, $c0, $1b, $60, $03, $18, $08
+		.byte	$94, $15, $0e, $b2, $0d, $c1, $14, $d2, $04, $20, $0c, $09, $16, $05, $13, $d2
+		.byte	$07, $00, $81, $2e, $1b, $19, $2f, $0e, $1d, $00, $57, $d4, $ff, $ff, $4c, $09
+		.byte	$90, $42, $54, $b6, $16, $c6, $5d, $d5, $9c, $4c, $96, $c4, $a8, $62, $e1, $4c
+		.byte	$35, $08, $f0, $f2, $31, $17, $41, $65, $9a, $99, $c2, $01, $dc, $25, $97, $2a
+		.byte	$31, $4a, $9a, $a1, $ca, $34, $73, $a2, $40, $c4, $91, $8d, $1c, $08, $26, $92
+		.byte	$91, $70, $45, $03, $50, $a5, $d7, $ce, $20, $63, $cc, $c1, $49, $39, $d0, $d4
+		.byte	$b2, $ba, $66, $6d, $b4, $34, $1b, $60, $35, $80, $5a, $40, $3b, $72, $46, $15
+		.byte	$0c, $50, $05, $55, $54, $19, $60, $a8, $a1, $70, $aa, $54, $68, $03, $fc, $6b
+		.byte	$26, $0b, $a0, $95, $01, $7c, $03, $bc, $a5, $48, $ed, $8d, $b1, $c1, $05, $80
+		.byte	$68, $2a, $28, $9d, $b3, $0c, $22, $65, $a2, $15, $ea, $0d, $e2, $fe, $2f, $b8
+		.byte	$be, $28, $c0, $1e, $86, $b8, $03, $80, $a9, $ee, $24, $22, $14, $08, $80, $88
+		.byte	$74, $c0, $06, $30, $80, $15, $c1, $c5, $c0, $8c, $68, $0f, $da, $90, $91, $33
+		.byte	$a6, $5f, $2b, $d8, $66, $d8, $36, $4c, $26, $2c, $23, $ea, $05, $1b, $6c, $cb
+		.byte	$c6, $01, $44, $39, $44, $41, $40, $e4, $80, $b9, $01, $38, $80, $33, $5a, $30
+		.byte	$8c, $02, $19, $6f, $88, $e3, $15, $6b, $03, $6e, $10, $6d, $80, $04, $52, $2c
+		.byte	$44, $20, $7f, $32, $26, $0b, $02, $28, $29, $6d, $24, $8a, $6a, $40, $63, $1b
+		.byte	$a8, $36, $0a, $42, $50, $db, $18, $b5, $21, $a0, $46, $53, $4d, $30, $83, $01
+		.byte	$f1, $20, $40, $0b, $0c, $c6, $50, $80, $0d, $15, $37, $80, $0b, $11, $aa, $9e
+		.byte	$b1, $fc, $99, $1c, $07, $c8, $d0
+decruncher_source:
+		.byte	$f8, $98, $85, $03, $20, $9f, $01, $2a, $26, $03, $d0, $04, $c5, $03, $f0, $15
+		.byte	$20, $9f, $01, $b0, $ef, $aa, $20, $ad, $01, $20, $c5, $01, $ca, $d0, $f7, $c6
+		.byte	$03, $10, $f3, $84, $03, $98, $84, $ae, $84, $af, $20, $9f, $01, $2a, $b0, $60
+		.byte	$f0, $05, $20, $9f, $01, $b0, $f3, $85, $02, $f0, $05, $c9, $01, $f0, $4b, $2c
+		.byte	$e6, $02, $20, $9f, $01, $26, $03, $20, $9f, $01, $26, $03, $90, $06, $e6, $ae
+		.byte	$d0, $02, $e6, $af, $a6, $03, $bd, $d0, $01, $aa, $20, $9f, $01, $26, $ae, $26
+		.byte	$af, $ca, $d0, $f6, $c6, $03, $10, $e6, $a5, $fe, $18, $65, $ae, $aa, $a5, $ff
+		.byte	$65, $af, $85, $af, $8a, $38, $65, $02, $90, $02, $e6, $af, $85, $ae, $e6, $02
+		.byte	$20, $b8, $01, $c6, $02, $d0, $f9, $4c, $08, $01, $84, $02, $a2, $04, $d0, $ca
+		.byte	$a9, $37, $85, $01, $58, $4c, $00, $9e, $06, $fb, $d0, $09, $48, $20, $ad, $01
+		.byte	$38, $2a, $85, $fb, $68, $60, $b1, $fc, $c4, $fc, $d0, $02, $c6, $fd, $c6, $fc
+		.byte	$60, $b1, $ae, $ee, $00, $04, $c4, $ae, $d0, $02, $c6, $af, $c6, $ae, $91, $fe
+		.byte	$c4, $fe, $d0, $02, $c6, $ff, $c6, $fe, $60, $04, $02, $02, $03
+
+.virtual $12e4
+untouched_12e4:
+		.fill	32028
+.endv
+
 *=$9000
 
+; ---- the game ----
 start_game:
 		jmp actual_start_game
-*=$9009
+
+signature:
+		.text	"BTD"
+
+unused_9006:
+		.byte	$01, $04, $00
 
 actual_start_game:
-		jsr l9CD5
+		jsr check_protection
 		lda #$fe
 		bne l901A
 
 main_loop:
-		jsr lFFE1
+		jsr stop
 		bne l901D
 		beq actual_start_game
-		jsr l9541
+		jsr sound_off
 
 l901A:
-		jsr l999A
+		jsr next_turn
 
 l901D:
 		lda vic_joystick1
 		sta joystick_state
 		lda vic_sprite_coll
 		sta sprite_coll_state
-		jsr l9773
-		jsr l91C4
-		sta $9049
-		jsr l9226
-		jsr l9570
+		jsr update_directions
+		jsr move_player
+		sta player_state
+		jsr move_bullet
+		jsr move_enemies
 		jsr update_vic_sprite_positions
-		jsr l978B
-		jsr l9563
-		lda $9049
+		jsr draw_scores
+		jsr delay
+		lda player_state
 		bne l901A
 		clc 
 		bcc main_loop
-		brk 
 
+; what move_player returned: 0 while alive, 1 after losing a life, $ff when game over
+player_state:
+		.byte	$00
 player_sprite:
 		.byte	$00, $30, $00, $00, $30, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00, $00
 		.byte	$fc, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc
@@ -79,26 +516,28 @@ explosion_sprite_3:
 		.byte	$43, $8b, $02, $0a, $00, $44, $08, $20, $0c, $00, $08, $00, $44, $01, $12, $00
 		.byte	$10, $41, $09, $00, $22, $20, $10, $10, $02, $04, $41, $00, $00, $04, $00
 
-l91C4:
+; moves the player with the joystick, and handles it being hit
+move_player:
 		lda #$01
-		jsr l94FD
-		lda $9d98
-		jsr l93D8
+		jsr select_sprite
+		lda sprite_mask
+		jsr check_hit
 		bne check_joystick
-		lda $9d98
-		jsr l92FA
+		lda sprite_mask
+		jsr explode
 		bne l9223
-		ldx $9d8c
+		ldx current_player
 
-d91DC:
-		dec $9d8a, x
+; the trainer turns this dec into a bit, so lives never go down
+lose_life:
+		dec lives, x
 		bmi l91FD
 		ldx #$00
-		lda init_sprite_coords, x
-		sta sprite_ptrs, x
+		lda vic_init, x
+		sta sprite_coords, x
 		inx 
-		lda init_sprite_coords, x
-		sta sprite_ptrs, x
+		lda vic_init, x
+		sta sprite_coords, x
 		lda #$fe
 		and sprite_x_high_bits
 		sta sprite_x_high_bits
@@ -118,8 +557,8 @@ check_right:
 		lda #$08
 		bit joystick_state
 		bne check_left
-		lda $9d98
-		jsr l93F9
+		lda sprite_mask
+		jsr move_right
 		ldx #$01
 		ldy #$00
 
@@ -127,8 +566,8 @@ check_left:
 		lda #$04
 		bit joystick_state
 		bne l9223
-		lda $9d98
-		jsr l944D
+		lda sprite_mask
+		jsr move_left
 
 l9223:
 		lda #$00
@@ -136,22 +575,23 @@ l9223:
 l9225:
 		rts 
 
-l9226:
+; fires and moves the bullet
+move_bullet:
 		lda #$02
-		jsr l94FD
-		lda $9d98
-		jsr l93D8
+		jsr select_sprite
+		lda sprite_mask
+		jsr check_hit
 		bne l9240
 		lda #$01
 		eor #$ff
-		and $9d87
-		sta $9d87
+		and fire_state
+		sta fire_state
 		clc 
 		bcc l92B6
 
 l9240:
 		lda #$01
-		bit $9d87
+		bit fire_state
 		bne l9286
 		lda #$10
 		bit joystick_state
@@ -159,71 +599,71 @@ l9240:
 
 fire_pressed:
 		lda #$02
-		bit $9d87
+		bit fire_state
 		beq l92B6
 		lda #$01
-		jsr l94FD
+		jsr select_sprite
 		lda #$01
-		jsr l93D8
-		sta $92f9
+		jsr check_hit
+		sta bullet_hit
 		lda #$02
-		jsr l94FD
-		lda $92f9
+		jsr select_sprite
+		lda bullet_hit
 		beq l92B6
-		ora $9d87
+		ora fire_state
 		lda #$01
-		ora $9d87
-		sta $9d87
+		ora fire_state
+		sta fire_state
 		lda #$02
 		eor #$ff
-		and $9d87
-		sta $9d87
+		and fire_state
+		sta fire_state
 		lda #$01
-		jsr l989C
+		jsr play_sound
 
 l9286:
 		lda #$02
-		ora $9d5b
-		sta $9d5b
-		lda $9d98
+		ora sprite_enable
+		sta sprite_enable
+		lda sprite_mask
 		ldx #$ff
 		ldy #$02
-		jsr l9486
+		jsr move_up
 		lda #$02
-		jsr l989C
+		jsr play_sound
 		cpy #$0a
 		bcs l92F8
 		lda #$01
 		eor #$ff
-		and $9d87
-		sta $9d87
+		and fire_state
+		sta fire_state
 		clc 
 		bcc l92F8
 
 l92AE:
 		lda #$02
-		ora $9d87
-		sta $9d87
+		ora fire_state
+		sta fire_state
 
 l92B6:
 		lda #$fd
-		and $9d5b
-		sta $9d5b
+		and sprite_enable
+		sta sprite_enable
 		ldx #$00
-		lda sprite_ptrs, x
+		lda sprite_coords, x
 		ldx #$02
-		sta sprite_ptrs, x
+		sta sprite_coords, x
 		dex 
-		ldy sprite_ptrs, x
+		ldy sprite_coords, x
 		dey 
 		dey 
 		dey 
 		dey 
 		tya 
 		ldx #$03
-		sta sprite_ptrs, x
+		sta sprite_coords, x
 		lda #$ff
-		jsr l989C
+		jsr play_sound
 		lda #$01
 		bit sprite_x_high_bits
 		bne l92EA
@@ -240,40 +680,43 @@ l92EF:
 		sta sprite_x_high_bits
 		clc 
 		bcc l92F8
-		inc $9d9d
+		inc unused_9d9d
 
 l92F8:
 		rts 
-*=$92fa
 
-l92FA:
-		ldx $9d99
-		lda $9d98
-		bit $9d86
+bullet_hit:
+		.byte	$00
+
+; explodes the selected sprite in three steps, scoring a point for an enemy
+explode:
+		ldx sprite_index
+		lda sprite_mask
+		bit exploding
 		bne l9345
-		ora $9d86
-		sta $9d86
+		ora exploding
+		sta exploding
 		lda #$00
-		sta $9d7e, x
+		sta explosion_steps, x
 		lda #$01
-		sta init_sprite_ptrs + $8, x
+		sta explosion_timers, x
 		ldx #$01
 		lda #$01
-		bit $9d98
+		bit sprite_mask
 		bne l9345
 
 l931E:
-		ldy $9d8c
-		lda $9d8d, y
+		ldy current_player
+		lda score_lo, y
 		clc 
 		sed 
 		adc #$01
-		sta $9d8d, y
+		sta score_lo, y
 		bcc l9338
-		lda $9d8f, y
+		lda score_hi, y
 		clc 
 		adc #$01
-		sta $9d8f, y
+		sta score_hi, y
 		bcc l9338
 
 l9338:
@@ -282,19 +725,19 @@ l9338:
 		bne l9345
 		inx 
 		lda #$f8
-		bit $9d86
+		bit exploding
 		bne l931E
 
 l9345:
 		lda #$05
-		jsr l989C
-		dec init_sprite_ptrs + $8, x
+		jsr play_sound
+		dec explosion_timers, x
 		beq l9352
 		jmp l93D5
 
 l9352:
-		inc $9d7e, x
-		lda $9d7e, x
+		inc explosion_steps, x
+		lda explosion_steps, x
 		cmp #$01
 		bne l9365
 		lda sprite_pointers, x
@@ -319,26 +762,26 @@ l9372:
 		bne l93CA
 
 l937F:
-		lda $9d98
-		eor $9d86
-		sta $9d86
-		ldx $9d99
-		lda $9d2a, x
-		sta $9d97
-		ldy $9d32, x
+		lda sprite_mask
+		eor exploding
+		sta exploding
+		ldx sprite_index
+		lda sprite_images_lo, x
+		sta copy_index
+		ldy sprite_images_hi, x
 		lda sprite_pointers, x
-		ldx $9d97
-		jsr l94DE
+		ldx copy_index
+		jsr copy_sprite
 		lda #$fe
-		jsr l989C
+		jsr play_sound
 		lda #$03
-		and $9d98
+		and sprite_mask
 		bne l93C0
-		ldy $9d8c
+		ldy current_player
 		lda #$0f
-		and $9d8d, y
+		and score_lo, y
 		bne l93C0
-		ldx $9d99
+		ldx sprite_index
 
 flash_sprite:
 		inc vic_sprite_colors, x
@@ -353,10 +796,10 @@ l93C0:
 		beq l93D7
 
 l93CA:
-		jsr l94DE
-		ldx $9d99
+		jsr copy_sprite
+		ldx sprite_index
 		lda #$1e
-		sta init_sprite_ptrs + $8, x
+		sta explosion_timers, x
 
 l93D5:
 		lda #$01
@@ -364,8 +807,9 @@ l93D5:
 l93D7:
 		rts 
 
-l93D8:
-		bit $9d86
+; Z set when the selected sprite is hit or already exploding
+check_hit:
+		bit exploding
 		bne l93F6
 		bit sprite_coll_state
 		beq l93F2
@@ -387,32 +831,33 @@ l93F6:
 l93F8:
 		rts 
 
-l93F9:
+; move the selected sprite X pixels right, left, up or down; A = 1 at the edge
+move_right:
 		cpx #$00
 		beq l942F
 		dex 
-		stx $9d9c
-		ldx $9d9a
-		lda sprite_ptrs, x
+		stx move_count
+		ldx sprite_coord_index
+		lda sprite_coords, x
 		cpy #$ff
 		beq l9417
 		cmp #$3c
 		bcc l9417
-		lda $9d98
+		lda sprite_mask
 		bit sprite_x_high_bits
 		bne l942B
 
 l9417:
-		inc sprite_ptrs, x
+		inc sprite_coords, x
 		bne l9425
-		lda $9d98
+		lda sprite_mask
 		ora sprite_x_high_bits
 		sta sprite_x_high_bits
 
 l9425:
-		ldx $9d9c
+		ldx move_count
 		clc 
-		bcc l93F9
+		bcc move_right
 
 l942B:
 		lda #$01
@@ -422,8 +867,8 @@ l942F:
 		lda #$00
 
 l9431:
-		sta $9d9b
-		lda $9d98
+		sta move_result
+		lda sprite_mask
 		bit sprite_x_high_bits
 		beq l9440
 		ldy #$01
@@ -433,61 +878,61 @@ l9440:
 		ldy #$00
 
 l9442:
-		ldx $9d9a
-		lda sprite_ptrs, x
+		ldx sprite_coord_index
+		lda sprite_coords, x
 		tax 
-		lda $9d9b
+		lda move_result
 		rts 
 
-l944D:
+move_left:
 		cpx #$00
 		beq l942F
 		dex 
-		stx $9d9c
-		ldx $9d9a
-		lda sprite_ptrs, x
+		stx move_count
+		ldx sprite_coord_index
+		lda sprite_coords, x
 		cpy #$ff
 		beq l946B
 		cmp #$17
 		bcs l946B
-		lda $9d98
+		lda sprite_mask
 		bit sprite_x_high_bits
 		beq l942B
 
 l946B:
-		dec sprite_ptrs, x
+		dec sprite_coords, x
 		lda #$ff
-		cmp sprite_ptrs, x
+		cmp sprite_coords, x
 		bne l9480
-		lda $9d98
+		lda sprite_mask
 		eor #$ff
 		and sprite_x_high_bits
 		sta sprite_x_high_bits
 
 l9480:
-		ldx $9d9c
+		ldx move_count
 		clc 
-		bcc l944D
+		bcc move_left
 
-l9486:
+move_up:
 		cpy #$00
 		beq l94AB
 		dey 
-		stx $9d9c
+		stx move_count
 		txa 
-		ldx $9d9a
+		ldx sprite_coord_index
 		inx 
 		cmp #$ff
 		beq l949E
-		lda sprite_ptrs, x
+		lda sprite_coords, x
 		cmp #$32
 		bcc l94A7
 
 l949E:
-		dec sprite_ptrs, x
-		ldx $9d9c
+		dec sprite_coords, x
+		ldx move_count
 		clc 
-		bcc l9486
+		bcc move_up
 
 l94A7:
 		lda #$01
@@ -497,61 +942,63 @@ l94AB:
 		lda #$00
 
 l94AD:
-		sta $9d9b
-		ldx $9d9a
+		sta move_result
+		ldx sprite_coord_index
 		inx 
-		ldy sprite_ptrs, x
+		ldy sprite_coords, x
 		ldx #$00
-		lda $9d9b
+		lda move_result
 		rts 
 
-l94BD:
+move_down:
 		cpy #$00
 		beq l94AB
 		dey 
-		stx $9d9c
+		stx move_count
 		txa 
-		ldx $9d9a
+		ldx sprite_coord_index
 		inx 
 		cmp #$ff
 		beq l94D5
-		lda sprite_ptrs, x
+		lda sprite_coords, x
 		cmp #$fa
 		bcs l94A7
 
 l94D5:
-		inc sprite_ptrs, x
-		ldx $9d9c
+		inc sprite_coords, x
+		ldx move_count
 		clc 
-		bcc l94BD
+		bcc move_down
 
-l94DE:
-		stx $57
-		sty $58
-		sta $59
+; copies a sprite image from X/Y (low/high) to the sprite pointer in A
+copy_sprite:
+		stx sprite_source
+		sty sprite_source + $1
+		sta sprite_destination
 		lda #$00
-		sta $5a
+		sta sprite_destination + $1
 		ldx #$06
 
 l94EA:
-		asl $59
-		rol $5a
+		asl sprite_destination
+		rol sprite_destination + $1
 		dex 
 		bne l94EA
 		ldy #$00
 
 l94F3:
-		lda ($57), y
-		sta ($59), y
+		lda (sprite_source), y
+		sta (sprite_destination), y
 		iny 
 		cpy #$40
 		bcc l94F3
 		rts 
 
-l94FD:
+; makes the sprite with the mask in A the selected one
+select_sprite:
 		cmp #$00
 		beq l951B
-		sta $9d98
+		sta sprite_mask
 		ldx #$00
 
 l9506:
@@ -563,27 +1010,36 @@ l9506:
 		bcs l951B
 
 l9510:
-		stx $9d99
+		stx sprite_index
 		txa 
 		asl 
-		sta $9d9a
+		sta sprite_coord_index
 		clc 
 		bcc l9526
 
 l951B:
 		lda #$00
-		sta $9d99
-		sta $9d9a
-		sta $9d98
+		sta sprite_index
+		sta sprite_coord_index
+		sta sprite_mask
 
 l9526:
-		lda $9d98
-		ldx $9d99
-		ldy $9d9a
+		lda sprite_mask
+		ldx sprite_index
+		ldy sprite_coord_index
 		rts 
-*=$9541
 
-l9541:
+; unreferenced: clears the screen, turns sprites and sound off
+reset_screen:
+		jsr kernal_clear_screen
+		lda #$00
+		sta vic_sprite_enable
+		sta sid_vol_filter
+		lda #$0b
+		sta background_color
+		rts 
+
+sound_off:
 		pha 
 		lda #$00
 		sta sid_vol_filter
@@ -596,20 +1052,21 @@ update_vic_sprite_positions:
 		ldx #$00
 
 l9551:
-		lda sprite_ptrs, x
+		lda sprite_coords, x
 		sta vic_sprite_coords, x
 		inx 
 		cpx #$10
 		bcc l9551
-		lda $9d5b
+		lda sprite_enable
 		sta vic_sprite_enable
 		rts 
 
-l9563:
-		ldy $9d94
+; waits delay_outer times delay_inner loops
+delay:
+		ldy delay_outer
 
 l9566:
-		ldx $9d95
+		ldx delay_inner
 
 l9569:
 		dex 
@@ -618,106 +1075,107 @@ l9569:
 		bne l9566
 		rts 
 
-l9570:
+; moves the enemies in their directions, adding one more as the score grows
+move_enemies:
 		lda #$04
 
 l9572:
-		jsr l94FD
-		lda $9d98
-		jsr l93D8
+		jsr select_sprite
+		lda sprite_mask
+		jsr check_hit
 		bne l95B8
-		lda $9d98
-		jsr l92FA
+		lda sprite_mask
+		jsr explode
 		beq l9588
 		jmp l960F
 
 l9588:
-		ldx $9d9a
+		ldx sprite_coord_index
 		inx 
 		lda #$28
-		sta sprite_ptrs, x
-		ldx $9d99
-		lda table_with_timed_stuff, x
-		ldx $9d9a
-		sta sprite_ptrs, x
+		sta sprite_coords, x
+		ldx sprite_index
+		lda enemy_directions, x
+		ldx sprite_coord_index
+		sta sprite_coords, x
 		cmp #$17
 		bcc l95AF
-		lda $9d98
+		lda sprite_mask
 		eor #$ff
 		and sprite_x_high_bits
 		sta sprite_x_high_bits
 		jmp l95B8
 
 l95AF:
-		lda $9d98
+		lda sprite_mask
 		ora sprite_x_high_bits
 		sta sprite_x_high_bits
 
 l95B8:
-		ldx $9d99
+		ldx sprite_index
 		cpx #$02
 		bne l95D9
 		lda #$80
-		and table_with_timed_stuff, x
+		and enemy_directions, x
 		beq l95D1
 		lda #$7f
-		and table_with_timed_stuff, x
-		sta table_with_timed_stuff, x
+		and enemy_directions, x
+		sta enemy_directions, x
 		clc 
 		bcc l960F
 
 l95D1:
 		lda #$80
-		ora table_with_timed_stuff, x
-		sta table_with_timed_stuff, x
+		ora enemy_directions, x
+		sta enemy_directions, x
 
 l95D9:
 		lda #$02
-		and table_with_timed_stuff, x
+		and enemy_directions, x
 		beq l95EA
-		lda $9d98
+		lda sprite_mask
 		ldy #$01
 		ldx #$ff
-		jsr l94BD
+		jsr move_down
 
 l95EA:
 		lda #$08
-		and table_with_timed_stuff, x
+		and enemy_directions, x
 		beq l95FB
-		lda $9d98
+		lda sprite_mask
 		ldx #$01
 		ldy #$00
-		jsr l93F9
+		jsr move_right
 
 l95FB:
-		ldx $9d99
+		ldx sprite_index
 		lda #$04
-		and table_with_timed_stuff, x
+		and enemy_directions, x
 		beq l960F
-		lda $9d98
+		lda sprite_mask
 		ldx #$01
 		ldy #$00
-		jsr l944D
+		jsr move_left
 
 l960F:
 		lda #$04
-		cmp $9d98
+		cmp sprite_mask
 		bcc l963A
 		asl 
-		bit $9d5b
+		bit sprite_enable
 		bne l9635
-		ldy $9d8c
-		lda $9d8f, y
+		ldy current_player
+		lda score_hi, y
 		cmp #$01
 		bcs l962D
-		lda $9d8d, y
+		lda score_lo, y
 		cmp #$15
 		bcc l963A
 
 l962D:
 		lda #$08
-		ora $9d5b
-		sta $9d5b
+		ora sprite_enable
+		sta sprite_enable
 
 l9635:
 		lda #$08
@@ -725,23 +1183,23 @@ l9635:
 
 l963A:
 		lda #$08
-		cmp $9d98
+		cmp sprite_mask
 		bcc l9665
 		asl 
-		bit $9d5b
+		bit sprite_enable
 		bne l9660
-		ldy $9d8c
-		lda $9d8f, y
+		ldy current_player
+		lda score_hi, y
 		cmp #$01
 		bcs l9658
-		lda $9d8d, y
+		lda score_lo, y
 		cmp #$40
 		bcc l96B4
 
 l9658:
 		lda #$10
-		ora $9d5b
-		sta $9d5b
+		ora sprite_enable
+		sta sprite_enable
 
 l9660:
 		lda #$10
@@ -749,23 +1207,23 @@ l9660:
 
 l9665:
 		lda #$10
-		cmp $9d98
+		cmp sprite_mask
 		bcc l9690
 		asl 
-		bit $9d5b
+		bit sprite_enable
 		bne l968B
-		ldy $9d8c
-		lda $9d8f, y
+		ldy current_player
+		lda score_hi, y
 		cmp #$01
 		bcs l9683
-		lda $9d8d, y
+		lda score_lo, y
 		cmp #$80
 		bcc l96B4
 
 l9683:
 		lda #$20
-		ora $9d5b
-		sta $9d5b
+		ora sprite_enable
+		sta sprite_enable
 
 l968B:
 		lda #$20
@@ -773,18 +1231,18 @@ l968B:
 
 l9690:
 		lda #$20
-		cmp $9d98
+		cmp sprite_mask
 		bcc l96B4
 		asl 
-		bit $9d5b
+		bit sprite_enable
 		bne l96AF
-		ldy $9d8c
-		lda $9d8f, y
+		ldy current_player
+		lda score_hi, y
 		cmp #$01
 		bcc l96B4
 		lda #$40
-		ora $9d5b
-		sta $9d5b
+		ora sprite_enable
+		sta sprite_enable
 
 l96AF:
 		lda #$40
@@ -793,18 +1251,18 @@ l96AF:
 l96B4:
 		rts 
 
-l96B5:
-		jsr lE544
+init_game:
+		jsr kernal_clear_screen
 		lda #$4c
-		sta $73
+		sta chrget
 		lda #$09
-		sta $74
+		sta chrget + $1
 		lda #$90
-		sta $75
+		sta chrget + $2
 		ldx #$00
 
 l96C6:
-		lda init_sprite_ptrs, x
+		lda sprite_pointer_values, x
 		sta sprite_pointers, x
 		inx 
 		cpx #$08
@@ -812,67 +1270,67 @@ l96C6:
 		ldx #$00
 
 l96D3:
-		lda $9d2a, x
-		sta $9d96
-		ldy $9d32, x
-		lda init_sprite_ptrs, x
-		stx $9d97
-		ldx $9d96
-		jsr l94DE
-		ldx $9d97
+		lda sprite_images_lo, x
+		sta copy_source_lo
+		ldy sprite_images_hi, x
+		lda sprite_pointer_values, x
+		stx copy_index
+		ldx copy_source_lo
+		jsr copy_sprite
+		ldx copy_index
 		inx 
 		cpx #$07
 		bcc l96D3
 		ldx #$00
 
 l96F2:
-		lda init_sprite_coords, x
+		lda vic_init, x
 		sta vic_sprite_coords, x
 		cpx #$10
 		bcs l96FF
-		sta sprite_ptrs, x
+		sta sprite_coords, x
 
 l96FF:
 		inx 
 		cpx #$2f
 		bcc l96F2
 		lda #$32
-		sta $9d94
+		sta delay_outer
 		lda #$0a
-		sta $9d95
+		sta delay_inner
 		lda #$00
 		ldx #$00
 
 l9712:
-		sta init_sprite_ptrs + $8, x
+		sta explosion_timers, x
 		inx 
 		cpx #$08
 		bcc l9712
-		sta $9d8d
-		sta $9d8e
-		sta $9d8f
-		sta $9d90
-		sta $9d8c
-		sta $9d87
-		sta $9d86
+		sta score_lo
+		sta score_lo + $1
+		sta score_hi
+		sta score_hi + $1
+		sta current_player
+		sta fire_state
+		sta exploding
 		sta sprite_x_high_bits
 		lda #$04
-		sta $9d8a
-		sta $9d8b
+		sta lives
+		sta lives + $1
 		jsr draw_turns
-		jsr l978B
-		lda $9db9
-		sta $9d5b
+		jsr draw_scores
+		lda vic_init + $15
+		sta sprite_enable
 		ldx #$00
-		sta $9d6c, x
+		sta saved_sprite_enable, x
 		inx 
-		sta $9d6c, x
+		sta saved_sprite_enable, x
 		lda #$00
 		ldx #$15
 
 sid_clear_loop:
 		dex 
-		sta sid_base, x
+		sta voice1_frequency, x
 		bne sid_clear_loop
 		lda #$0f
 		sta sid_vol_filter
@@ -880,26 +1338,27 @@ sid_clear_loop:
 		ldy #$00
 
 l9762:
-		lda $9dcb, x
-		sta $9d5c, y
+		lda vic_init + $27, x
+		sta saved_sprite_colors, y
 		iny 
-		sta $9d5c, y
+		sta saved_sprite_colors, y
 		iny 
 		inx 
 		cpx #$08
 		bcc l9762
 		rts 
 
-l9773:
+; picks a random direction for an enemy when its timer runs out
+update_directions:
 		ldx #$00
 
 l9775:
-		dec table_with_timers, x
+		dec direction_timers, x
 		bne l9785
 		lda vic_timer_a
-		sta table_with_timed_stuff, x
+		sta enemy_directions, x
 		lda #$32
-		sta table_with_timers, x
+		sta direction_timers, x
 
 l9785:
 		inx 
@@ -907,65 +1366,65 @@ l9785:
 		bcc l9775
 		rts 
 
-l978B:
+draw_scores:
 		lda #$00
-		sta $9d9f
+		sta score_player
 		lda #$02
-		sta $9da0
+		sta score_column
 
 l9795:
-		ldy $9d9f
-		lda $9d8f, y
-		jsr l9D0D
+		ldy score_player
+		lda score_hi, y
+		jsr to_digits
 		txa 
 		cmp #$30
 		bne l97A5
 		lda #$20
 
 l97A5:
-		ldy $9da0
+		ldy score_column
 		sta vic_screen + $28, y
-		ldy $9d9f
-		lda $9d8d, y
-		jsr l9D0D
-		stx $9d9e
+		ldy score_player
+		lda score_lo, y
+		jsr to_digits
+		stx digit
 		tya 
 		cmp #$30
 		bne l97C8
-		ldx $9d9f
-		ldy $9d8f, x
+		ldx score_player
+		ldy score_hi, x
 		cpy #$00
 		bne l97C8
 		lda #$20
 
 l97C8:
-		ldy $9da0
+		ldy score_column
 		iny 
 		sta vic_screen + $28, y
 		iny 
-		lda $9d9e
+		lda digit
 		sta vic_screen + $28, y
 		iny 
 		lda #$30
 		sta vic_screen + $28, y
 		iny 
 		sta vic_screen + $28, y
-		ldx $9d8c
-		lda $9d8a, x
+		ldx current_player
+		lda lives, x
 		clc 
 		adc #$30
 		ldx #$06
 		sta vic_screen + $96, x
-		lda $9d9f
+		lda score_player
 		bne l97FF
 		lda #$01
-		sta $9d9f
+		sta score_player
 		lda #$20
-		sta $9da0
+		sta score_column
 		bne l9795
 
 l97FF:
-		jsr l993C
+		jsr update_high_score
 		rts 
 
 draw_turns:
@@ -1022,69 +1481,70 @@ top_score_line:
 turns_text:
 		.text	"TURNS=  "
 
-l989C:
+; A: 1 starts the shot sound, 2 sweeps it, $ff stops it, 5 starts the explosion, $fe stops it
+play_sound:
 		cmp #$ff
 		beq l98F6
 		cmp #$01
 		bne l98DA
-		lda $9dd5
-		sta $9dd7
-		sta $d401
-		sta $d408
-		lda $9dd6
-		sta $9dd8
-		sta sid_base
-		sta $d407
-		lda $9dd3
-		sta $d405
-		sta $d40c
-		lda $9dd4
-		sta $d406
-		sta $d40d
+		lda shot_frequency_hi
+		sta shot_sweep_hi
+		sta voice1_frequency + $1
+		sta voice2_frequency + $1
+		lda shot_frequency_lo
+		sta shot_sweep_lo
+		sta voice1_frequency
+		sta voice2_frequency
+		lda shot_attack_decay
+		sta voice1_attack_decay
+		sta voice2_attack_decay
+		lda shot_sustain_release
+		sta voice1_sustain_release
+		sta voice2_sustain_release
 		lda #$81
-		sta $d404
+		sta voice1_control
 		lda #$11
-		sta $d40b
+		sta voice2_control
 		bne l993B
 
 l98DA:
 		cmp #$02
 		bne l98FE
-		dec $9dd7
-		lda $9dd7
-		sta $d401
-		sta $d408
-		lda $9dd8
-		sta sid_base
-		sta $d407
+		dec shot_sweep_hi
+		lda shot_sweep_hi
+		sta voice1_frequency + $1
+		sta voice2_frequency + $1
+		lda shot_sweep_lo
+		sta voice1_frequency
+		sta voice2_frequency
 		clc 
 		bcc l993B
 
 l98F6:
 		lda #$00
-		sta $d40b
-		sta $d404
+		sta voice2_control
+		sta voice1_control
 
 l98FE:
 		cmp #$05
 		bne l9932
 		lda vic_timer_a
 		lsr 
-		sta $d410
-		sta $d401
+		sta voice3_pulse_width
+		sta voice1_frequency + $1
 		lsr 
-		sta $d40f
-		sta $d401
-		lda $9dd9
-		sta $d413
-		sta $d405
-		lda $9dda
-		sta $d414
-		sta $d406
+		sta voice3_frequency + $1
+		sta voice1_frequency + $1
+		lda explosion_attack_decay
+		sta voice3_attack_decay
+		sta voice1_attack_decay
+		lda explosion_sustain_release
+		sta voice3_sustain_release
+		sta voice1_sustain_release
 		lda #$11
-		sta $d412
+		sta voice3_control
 		lda #$81
-		sta $d404
+		sta voice1_control
 		clc 
 		bcc l993B
 
@@ -1092,31 +1552,31 @@ l9932:
 		cmp #$fe
 		bne l993B
 		lda #$00
-		sta $d412
+		sta voice3_control
 
 l993B:
 		rts 
 
-l993C:
-		ldx $9d8c
-		lda $9d8f, x
-		cmp $9d92
+update_high_score:
+		ldx current_player
+		lda score_hi, x
+		cmp high_score_hi
 		bcc l995F
 		bne l9953
-		lda $9d8d, x
-		cmp $9d91
+		lda score_lo, x
+		cmp high_score_lo
 		bcc l995F
 		beq l995F
 
 l9953:
-		lda $9d8d, x
-		sta $9d91
-		lda $9d8f, x
-		sta $9d92
+		lda score_lo, x
+		sta high_score_lo
+		lda score_hi, x
+		sta high_score_hi
 
 l995F:
-		lda $9d92
-		jsr l9D0D
+		lda high_score_hi
+		jsr to_digits
 		txa 
 		cmp #$30
 		bne l996C
@@ -1125,12 +1585,12 @@ l995F:
 l996C:
 		ldy #$11
 		sta vic_screen + $28, y
-		lda $9d91
-		jsr l9D0D
+		lda high_score_lo
+		jsr to_digits
 		tya 
 		cmp #$30
 		bne hi_score_draw
-		ldy $9d92
+		ldy high_score_hi
 		cpy #$00
 		bne hi_score_draw
 		lda #$20
@@ -1148,35 +1608,36 @@ hi_score_draw:
 		sta vic_screen + $28, y
 		rts 
 
-l999A:
+; after move_player: next turn, game over, or the title screen with A = $fe
+next_turn:
 		ldx #$00
 		stx sid_vol_filter
 		cmp #$fe
 		bcc l99F7
 		bne l99AB
-		jsr l96B5
+		jsr init_game
 		jmp l99BA
 
 l99AB:
-		jsr l9ADF
-		lda $9d93
+		jsr show_game_over
+		lda two_players
 		beq l99BA
-		lda $9d8c
+		lda current_player
 		cmp #$00
 		beq l99EB
 
 l99BA:
 		jsr draw_logo
 
-l99BD:
+title_screen:
 		ldx #$00
-		stx $9da2
+		stx title_countdown_lo
 		ldx #$0a
-		stx $9da3
+		stx title_countdown_hi
 		bne l99CC
 
 l99C9:
-		jsr lFFE4
+		jsr getin
 
 l99CC:
 		cmp #$0d
@@ -1185,13 +1646,13 @@ l99CC:
 		beq l9A3B
 		cmp #$86
 		beq l9A42
-		jsr l9563
-		dec $9da2
+		jsr delay
+		dec title_countdown_lo
 		bne l99C9
-		dec $9da3
+		dec title_countdown_hi
 		bne l99C9
-		jsr l9A4B
-		jmp l99BD
+		jsr demo
+		jmp title_screen
 
 l99EB:
 		ldx #$00
@@ -1204,17 +1665,17 @@ l99EF:
 		bcc l99EF
 
 l99F7:
-		jsr l9B4D
-		jsr l978B
-		jsr l9AF7
+		jsr switch_player
+		jsr draw_scores
+		jsr show_player
 		lda #$f0
-		sta $9d94
-		sta $9d95
-		jsr l9563
+		sta delay_outer
+		sta delay_inner
+		jsr delay
 		lda #$32
-		sta $9d94
+		sta delay_outer
 		lda #$0a
-		sta $9d95
+		sta delay_inner
 		lda #$20
 		ldx #$00
 
@@ -1229,59 +1690,60 @@ l9A19:
 		lda vic_sprite_coll
 		lda #$00
 		sta sprite_coll_state
-		sta $d404
-		sta $d40b
-		sta $d412
+		sta voice1_control
+		sta voice2_control
+		sta voice3_control
 		rts 
 
 l9A3B:
 		lda #$00
-		sta $9d93
+		sta two_players
 		beq l9A47
 
 l9A42:
 		lda #$01
-		sta $9d93
+		sta two_players
 
 l9A47:
-		jsr l96B5
+		jsr init_game
 		rts 
 
-l9A4B:
-		jsr l96B5
+; plays the game by itself, steering with an enemy's random direction
+demo:
+		jsr init_game
 		jsr draw_logo
 		lda #$1d
-		sta $9d5b
+		sta sprite_enable
 		lda #$06
 		sta vic_sprite_colors + $3
 		lda #$0c
 		sta vic_sprite_colors + $4
 		lda #$0e
-		sta $9d95
+		sta delay_inner
 
 l9A65:
-		jsr lFFE1
+		jsr stop
 		beq l9AA4
-		jsr lFFE4
+		jsr getin
 		cmp #$0d
 		beq l9AA4
 		cmp #$85
 		beq l9AA4
 		cmp #$86
 		beq l9AA4
-		lda table_with_timed_stuff
+		lda enemy_directions
 		eor #$08
 		sta joystick_state
 		lda vic_sprite_coll
 		sta sprite_coll_state
-		jsr l9773
-		jsr l91C4
-		sta $9049
-		jsr l9226
-		jsr l9570
+		jsr update_directions
+		jsr move_player
+		sta player_state
+		jsr move_bullet
+		jsr move_enemies
 		jsr update_vic_sprite_positions
-		jsr l9563
-		lda $9049
+		jsr delay
+		lda player_state
 		bne l9AA4
 		clc 
 		bcc l9A65
@@ -1291,9 +1753,9 @@ l9AA4:
 		stx sid_vol_filter
 		ldx #$1d
 		stx vic_sprite_enable
-		stx $9d5b
+		stx sprite_enable
 		ldx #$0a
-		stx $9d95
+		stx delay_inner
 		rts 
 
 f1_1_player_text:
@@ -1302,7 +1764,7 @@ f1_1_player_text:
 f3_2_player_text:
 		.text	"F3 - TWO PLAYER GAME"
 
-l9ADF:
+show_game_over:
 		ldx #$00
 		ldy #$0f
 
@@ -1317,10 +1779,11 @@ l9AE3:
 		cpx #$09
 		bcc l9AE3
 
-l9AF7:
+; shows whose turn it is, and waits for a key or a while
+show_player:
 		ldx #$00
 		ldy #$0f
-		lda $9d8c
+		lda current_player
 		beq show_top_score_row_14
 		ldx #$1e
 
@@ -1335,44 +1798,47 @@ show_top_score_row_14:
 		cpy #$19
 		bcc show_top_score_row_14
 		lda #$ff
-		sta $9b41
-		sta $9d94
+		sta show_player_countdown
+		sta delay_outer
 
 l9B1D:
-		jsr l9563
-		jsr lFFE1
+		jsr delay
+		jsr stop
 		beq l9B40
-		jsr lFFE4
+		jsr getin
 		cmp #$0d
 		beq l9B40
 		cmp #$85
 		beq l9B40
 		cmp #$86
 		beq l9B40
-		dec $9b41
+		dec show_player_countdown
 		bne l9B1D
 		lda #$32
-		sta $9d94
+		sta delay_outer
 		lda #$01
 
 l9B40:
 		rts 
-*=$9b42
+
+show_player_countdown:
+		.byte	$00
 
 game_over_text:
 		.text	"GAME OVER  "
 
-l9B4D:
-		lda $9d93
+; in a two player game, saves the sprites of one player and restores the other's
+switch_player:
+		lda two_players
 		beq l9B89
-		ldx $9d8c
-		lda $9d5b
-		sta $9d6c, x
+		ldx current_player
+		lda sprite_enable
+		sta saved_sprite_enable, x
 		ldy #$00
 
 l9B5D:
 		lda vic_sprite_colors, y
-		sta $9d5c, x
+		sta saved_sprite_colors, x
 		inx 
 		inx 
 		iny 
@@ -1380,15 +1846,15 @@ l9B5D:
 		bcc l9B5D
 		lda #$01
 		sec 
-		sbc $9d8c
-		sta $9d8c
+		sbc current_player
+		sta current_player
 		tax 
-		lda $9d6c, x
-		sta $9d5b
+		lda saved_sprite_enable, x
+		sta sprite_enable
 		ldy #$00
 
 l9B7C:
-		lda $9d5c, x
+		lda saved_sprite_colors, x
 		sta vic_sprite_colors, y
 		inx 
 		inx 
@@ -1400,32 +1866,32 @@ l9B89:
 		ldx #$00
 
 l9B8B:
-		lda init_sprite_coords, x
-		sta sprite_ptrs, x
+		lda vic_init, x
+		sta sprite_coords, x
 		inx 
 		cpx #$10
 		bcc l9B8B
 		lda #$00
 		sta sprite_x_high_bits
-		sta $9d86
-		sta $9d87
+		sta exploding
+		sta fire_state
 		ldx #$00
 
 l9BA3:
-		lda $9d2a, x
-		sta $9d96
-		ldy $9d32, x
-		lda init_sprite_ptrs, x
-		stx $9d97
-		ldx $9d96
-		jsr l94DE
-		ldx $9d97
+		lda sprite_images_lo, x
+		sta copy_source_lo
+		ldy sprite_images_hi, x
+		lda sprite_pointer_values, x
+		stx copy_index
+		ldx copy_source_lo
+		jsr copy_sprite
+		ldx copy_index
 		inx 
 		cpx #$07
 		bcc l9BA3
-		lda $9d5b
+		lda sprite_enable
 		and #$fd
-		sta $9d5b
+		sta sprite_enable
 		jsr update_vic_sprite_positions
 		rts 
 
@@ -1496,50 +1962,63 @@ l9C2A:
 		cpx #$14
 		bcc l9C2A
 		rts 
-logo0 = $9c45
-logo1 = $9c61
-logo2 = $9c7d
-logo3 = $9c98
-logo4 = $9cb7
-*=$9cd5
 
-l9CD5:
-		lda $0805
+; draw_logo reads 28 bytes from each row, but from $9c98 and $9cb7 for the last two
+logo0:
+		.byte	$5f, $a0, $a0, $a0, $a0, $69, $20, $a0, $20, $20, $20, $20, $a0, $20, $20, $df
+		.byte	$20, $20, $a0, $df, $20, $20, $20, $a0, $20, $e9, $69, $20
+logo1:
+		.byte	$20, $20, $20, $e9, $69, $20, $20, $a0, $20, $20, $20, $20, $a0, $20, $e9, $5f
+		.byte	$df, $20, $a0, $5f, $df, $20, $20, $a0, $e9, $69, $20, $20
+logo2:
+		.byte	$20, $20, $e9, $69, $20, $20, $20, $a0, $20, $20, $20, $20, $a0, $20, $a0, $20
+		.byte	$a0, $20, $a0, $e9, $69, $20, $20, $a0, $a0, $20, $20
+logo3:
+		.byte	$20, $e9, $69, $20, $20, $20, $20, $5f, $df, $e9, $df, $e9, $69, $20, $a0, $a0
+		.byte	$a0, $20, $a0, $5f, $df, $20, $20, $a0, $5f, $df, $20, $20, $a0, $5f, $df
+logo4:
+		.byte	$e9, $a0, $a0, $a0, $a0, $df, $20, $20, $5f, $69, $5f, $69, $20, $20, $a0, $20
+		.byte	$a0, $20, $a0, $20, $5f, $df, $20, $a0, $20, $5f, $df, $20, $20, $20
+
+; wipes all memory from $0800 unless the crack's start ran, or CHRGET is patched
+check_protection:
+		lda enemy_image_3 + $5
 		cmp #$9e
 		beq nothing_just_rts
-		lda $73
+		lda chrget
 		cmp #$4c
 		bne l9CF4
-		lda $74
+		lda chrget + $1
 		cmp #$09
 		bne l9CF4
-		lda $2d
+		lda basic_end
 		cmp #$44
 		bne l9CF4
-		lda $2e
+		lda basic_end + $1
 		cmp #$08
 		beq nothing_just_rts
 
 l9CF4:
 		lda #$00
-		sta $50
+		sta clear_pointer
 		lda #$08
-		sta $51
+		sta clear_pointer + $1
 		lda #$00
 		ldy #$00
 
 l9D00:
-		sta ($50), y
-		inc $50
+		sta (clear_pointer), y
+		inc clear_pointer
 		bne l9D00
-		inc $51
+		inc clear_pointer + $1
 		bne l9D00
 		beq nothing_just_rts
 
 nothing_just_rts:
 		rts 
 
-l9D0D:
+; turns the BCD byte in A into screen code digits: X the low one, Y the high one
+to_digits:
 		tay 
 		and #$0f
 		cmp #$0a
@@ -1563,29 +2042,90 @@ l9D24:
 		tay 
 		lda #$00
 		rts 
-*=$9d3a
 
-init_sprite_ptrs:
-		.byte	$0d, $0e, $0f, $20, $21, $22, $23, $0f, $00, $00, $00, $00, $00, $00, $00, $00
-sprite_ptrs:
+sprite_images_lo:
+		.byte	$4a, $89, $c8, $c8, $c8, $c8, $c8, $c8
+sprite_images_hi:
+		.byte	$90, $90, $90, $90, $90, $90, $90, $90
+sprite_pointer_values:
+		.byte	$0d, $0e, $0f, $20, $21, $22, $23, $0f
+; counts down while a sprite explodes
+explosion_timers:
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00
+; x/y per sprite, copied to the VIC each frame
+sprite_coords:
 		.byte	$16, $d8, $16, $d4, $16, $8b, $52, $4e, $ec, $a6, $70, $10, $f0, $10, $80, $10
 sprite_x_high_bits:		.byte	$00
-*=$9d6e
-
-table_with_timed_stuff:
+sprite_enable:		.byte	$1d
+; per sprite, its color for player 1 and player 2
+saved_sprite_colors:
+		.byte	$07, $07, $07, $07, $02, $02, $08, $08, $0a, $0a, $0c, $0c, $09, $09, $02, $02
+saved_sprite_enable:
+		.byte	$05, $05
+; per sprite, bits 1-3 say down, right, left; from the CIA timer
+enemy_directions:
 		.byte	$76, $fa, $ea, $92, $01, $c8, $c8, $a3
-table_with_timers:
+direction_timers:
 		.byte	$2a, $12, $32, $20, $0e, $2e, $2a, $2a
-joystick_state = $9d88
-sprite_coll_state = $9d89
-init_sprite_coords = $9da4
-*=$9e00
+explosion_steps:
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00
+exploding:		.byte	$00
+; bit 0: the bullet is flying, bit 1: fire was released
+fire_state:		.byte	$02
+joystick_state:		.byte	$7e
+sprite_coll_state:		.byte	$00
+lives:
+		.byte	$04, $04
+current_player:		.byte	$00
+; BCD
+score_lo:
+		.byte	$00, $00
+score_hi:
+		.byte	$00, $00
+high_score_lo:		.byte	$00
+high_score_hi:		.byte	$00
+two_players:		.byte	$00
+delay_outer:		.byte	$32
+delay_inner:		.byte	$0e
+copy_source_lo:		.byte	$c8
+copy_index:		.byte	$06
+sprite_mask:		.byte	$01
+sprite_index:		.byte	$00
+sprite_coord_index:		.byte	$00
+move_result:		.byte	$00
+move_count:		.byte	$ff
+; only increased by unreachable code
+unused_9d9d:		.byte	$00
+digit:		.byte	$30
+score_player:		.byte	$01
+score_column:		.byte	$20
+unused_9da1:		.byte	$0a
+title_countdown_lo:		.byte	$00
+title_countdown_hi:		.byte	$00
+; copied to $d000-$d02e: sprite positions, enable at +$15, colors at +$27
+vic_init:
+		.byte	$a0, $d8, $a0, $d4, $40, $40, $30, $10, $d0, $10, $70, $10, $f0, $10, $80, $10
+		.byte	$00, $1b, $56, $22, $56, $05, $c8, $00, $15, $7f, $f0, $00, $1d, $00, $00, $00
+		.byte	$00, $00, $0c, $0c, $0c, $0c, $02, $07, $07, $02, $08, $0a, $0c, $09, $02
+shot_attack_decay:		.byte	$00
+shot_sustain_release:		.byte	$f0
+shot_frequency_hi:		.byte	$64
+shot_frequency_lo:		.byte	$27
+shot_sweep_hi:		.byte	$00
+shot_sweep_lo:		.byte	$00
+explosion_attack_decay:		.byte	$40
+explosion_sustain_release:		.byte	$88
+unused_9ddb:
+		.byte	$ff, $00, $00, $ff, $ff, $00, $00, $ff, $ff, $00, $00, $ff, $ff, $00, $00, $ff
+		.byte	$ff, $00, $00, $ff, $ff, $00, $00, $ff, $ff, $00, $00, $ff, $ff, $00, $00, $ff
+		.byte	$ff, $00, $00, $ff, $ff
 
+; ---- the crack ----
 start:
 		lda #$00
-		sta $d020
-		sta $d021
-		jsr lE544
+		sta border_color
+		sta background_color
+		jsr kernal_clear_screen
 		ldx #$68
 
 l9E0D:
@@ -1598,79 +2138,179 @@ l9E0D:
 		cli 
 
 l9E1C:
-		jsr lFFE4
+		jsr getin
 		cmp #$4e
 		beq no_trainer
 		cmp #$59
 		bne l9E1C
 		lda #$2c
-		sta d91DC
+		sta lose_life
 
 no_trainer:
 		lda #$9e
-		sta $0805
+		sta enemy_image_3 + $5
 		jmp start_game
-*=$9e40
+
+unused_9e34:
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
 crack_trainer_msg:
 		.text	"CRACKED BY MANIK                "
 		.text	"        ", $63, $63, $63, $63, $63, $63, $63, $63, $63, $63, $63, $63, $63, $63, $63, $63, "        "
 		.text	"                UNLIMITED LIVES."
 		.text	"....[Y/N]"
-*=$9f1c
 
-install_trainer:
-		isc @w $00ff, x
-		brk 
+unused_9ea9:
+		.byte	$00, $57
 
-.virtual $d000
+.virtual $9eab
+untouched_9eab:
+		.fill	12629
+; ---- VIC-II ----
 vic_sprite_coords:
 		.fill	16
 vic_sprite_x_high_bits:		.byte	?
-.endv
-
-.virtual $d015
+vic_control:
+		.fill	4
 vic_sprite_enable:		.byte	?
-.endv
-
-.virtual $d01e
+vic_registers:
+		.fill	8
 vic_sprite_coll:		.byte	?
-.endv
-
-.virtual $d027
+vic_background_coll:		.byte	?
+border_color:		.byte	?
+background_color:		.byte	?
+vic_colors:
+		.fill	5
 vic_sprite_colors:
 		.fill	8
-.endv
-
-.virtual $d400
-sid_base:		.byte	?
-.endv
-
-.virtual $d418
+vic_rest:
+		.fill	977
+; ---- SID ----
+voice1_frequency:		.word	?
+voice1_pulse_width:		.word	?
+voice1_control:		.byte	?
+voice1_attack_decay:		.byte	?
+voice1_sustain_release:		.byte	?
+voice2_frequency:		.word	?
+voice2_pulse_width:		.word	?
+voice2_control:		.byte	?
+voice2_attack_decay:		.byte	?
+voice2_sustain_release:		.byte	?
+voice3_frequency:		.word	?
+voice3_pulse_width:		.word	?
+voice3_control:		.byte	?
+voice3_attack_decay:		.byte	?
+voice3_sustain_release:		.byte	?
+filter_cutoff:		.word	?
+filter_control:		.byte	?
 sid_vol_filter:		.byte	?
-.endv
-
-.virtual $d800
+sid_mirrors:
+		.fill	999
 vic_color_ram:
 		.fill	1000
-.endv
-
-.virtual $dc01
+unused_color_ram:
+		.fill	24
+; ---- CIAs ----
+cia1_port_a:		.byte	?
 vic_joystick1:		.byte	?
-.endv
-
-.virtual $dc04
+cia1_directions:
+		.fill	2
 vic_timer_a:		.byte	?
+cia1_rest:
+		.fill	251
+cia2:
+		.fill	256
+io_expansion:
+		.fill	512
+; ---- KERNAL, in ROM; the RAM under it is untouched ----
+untouched_e000:
+		.fill	1348
+kernal_clear_screen:
+		.fill	1261
+kernal_irq:
+		.fill	5142
+kernal_nmi:
+		.fill	31
+kernal_brk:
+		.fill	283
+cint:
+		.fill	3
+ioinit:
+		.fill	3
+ramtas:
+		.fill	3
+restor:
+		.fill	3
+vector:
+		.fill	3
+setmsg:
+		.fill	3
+second:
+		.fill	3
+tksa:
+		.fill	3
+memtop:
+		.fill	3
+membot:
+		.fill	3
+scnkey:
+		.fill	3
+settmo:
+		.fill	3
+acptr:
+		.fill	3
+ciout:
+		.fill	3
+untlk:
+		.fill	3
+unlsn:
+		.fill	3
+listen:
+		.fill	3
+talk:
+		.fill	3
+readst:
+		.fill	3
+setlfs:
+		.fill	3
+setnam:
+		.fill	3
+open:
+		.fill	3
+close:
+		.fill	3
+chkin:
+		.fill	3
+chkout:
+		.fill	3
+clrchn:
+		.fill	3
+chrin:
+		.fill	3
+chrout:
+		.fill	3
+load:
+		.fill	3
+save:
+		.fill	3
+settim:
+		.fill	3
+rdtim:
+		.fill	3
+stop:
+		.fill	3
+getin:
+		.fill	3
+clall:
+		.fill	3
+udtim:
+		.fill	3
+screen_size:
+		.fill	3
+plot:
+		.fill	3
+iobase:
+		.fill	3
+untouched_fff6:
+		.fill	10
 .endv
-
-*=$e544
-
-lE544:
-		brk 
-*=$ffe1
-
-lFFE1:
-		isc @w $0000, x
-
-lFFE4:
-		brk 
