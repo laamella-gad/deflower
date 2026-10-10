@@ -1,9 +1,9 @@
 
-*=$C000
+*=$c000
 
 entry:
-		LDA greeting, X
-		RTS 
+		lda greeting, x
+		rts 
 
 greeting:
 		.enc	"screen"

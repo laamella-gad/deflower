@@ -1,24 +1,24 @@
 
-.virtual $00FB
+.virtual $00fb
 ptr:		.word	?
 .endv
 
-*=$C000
+*=$c000
 
 entry:
-		LDA #$00
-		STA border_color
-		STA color_ram + $2
-		STA $D400
-		STA ptr
-		RTS 
+		lda #$00
+		sta border_color
+		sta color_ram + $2
+		sta $d400
+		sta ptr
+		rts 
 
-.virtual $D020
+.virtual $d020
 ; VIC-II border colour
 border_color:		.byte	?
 .endv
 
-.virtual $D800
+.virtual $d800
 color_ram:		.byte	?
 second_color:
 		.fill	3

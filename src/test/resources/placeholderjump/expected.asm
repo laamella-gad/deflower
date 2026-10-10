@@ -1,11 +1,11 @@
 
-*=$C000
+*=$c000
 
 entry:
-		JSR blob
-		RTS 
+		jsr blob
+		rts 
 
 blob:
-		LDA #$01
-		RTS 
+		lda #$01
+		rts 
 		.byte	$11, $22

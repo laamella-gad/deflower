@@ -1,5 +1,5 @@
 
-*=$C000
+*=$c000
 
 ; a lone comment
 val:
@@ -8,5 +8,5 @@ val:
 ; entry point
 ; second line of same comment
 entry_point:
-		LDA #$01
-		RTS 
+		lda #$01
+		rts 

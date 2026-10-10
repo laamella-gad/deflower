@@ -97,6 +97,6 @@ class DataArea extends Area {
         if (offset == 0) {
             return arrayLabel;
         }
-        return String.format("%s + $%X", arrayLabel, offset);
+        return String.format("%s + $%x", arrayLabel, offset);
     }
 }

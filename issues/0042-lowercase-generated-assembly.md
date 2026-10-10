@@ -1,7 +1,6 @@
 ---
 title: Generate lowercase assembly output (except user labels/comments)
-status: open
-priority: low
+status: done
 labels: enhancement
 ---
 
@@ -23,3 +22,14 @@ Done when: a fresh fixture run shows lowercase opcodes (`lda`, `sta`, `rts`, ...
 ## Decisions
 
 - **Everything generated becomes lowercase except labels:** mnemonics (`lda`), index suffixes (`, x`/`, y`) and hex digits (`$c0a2`, `.byte $4a`; 64tass reads hex digits in either case). User labels, comments and auto-labels (`lC0A2`, `dC0A2`) stay as they are.
+
+## Closing note
+
+Lowercased as decided:
+- mnemonics: `printInstruction` prints `opcode.name().toLowerCase()`;
+- index suffixes: `, x`/`, y` in the operand switch;
+- hex digits: `Printing`'s helpers and the operand, `.addr` and `label + $offset` formats use `%x`, so `*=$c000`, `.virtual $00a2`, `.byte $4a`, `#$0f`, `label = $d020`, `@w $00ff`.
+
+Auto-labels keep their uppercase digits (`lC0A2`, `dC0A2`, `aC010`), as do user labels and comments. `Printing` is also used by the error messages, so those print lowercase hex too (`Area conflict at $c001`, `run past $ffff`); the tests asserting them follow. CLAUDE.md and 0062's example follow.
+
+Verification: all 21 `expected.asm` files regenerated; each differs from its old version only in letter case (compared case-folded). `mvn -o test`: 48 tests green. 64tass checks: the small fixtures that round-trip to their `.prg` still do; blockoffset, indirectjmp, narrowplaceholder, partialoverlap and tcmine don't (untraced bytes are skipped with `*=`), but reassemble to the same bytes as their old expectations; squirm and zwark (with `-i`) match their RAM images with 0 differing bytes.

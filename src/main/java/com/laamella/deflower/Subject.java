@@ -42,7 +42,7 @@ class Subject {
      */
     void storeAt(int startAddress, byte[] bytes, Path source) {
         assertState(startAddress + bytes.length <= memory.length,
-                "%s: %d bytes loaded at %s run past $FFFF", source, bytes.length, asHexWord(startAddress));
+                "%s: %d bytes loaded at %s run past $ffff", source, bytes.length, asHexWord(startAddress));
         for (int i = 0; i < bytes.length; i++) {
             memory[startAddress+i] = new MemoryLocation(startAddress + i, bytes[i] & 0xff);
         }

@@ -52,7 +52,7 @@ The pipeline is: **flow file → parse → memory image + annotations → code-f
   - Analysis stops at addresses already covered by a non-placeholder area, and won't decode an instruction whose bytes run into one. That is how it avoids loops and detects jumps into data ("Jumping into non-code area").
 - **`Area`** is the common base for `DataArea` and `InstructionArea`. Each address belongs to at most one area, and `registerArea` writes that link into `Subject.memory`. Address ownership is the main signal the analyser uses, so an overlapping `.flo` declaration changes the output.
 - **`Deflower`** runs the pipeline. It clears and recreates `<basePath>/out` once per `.flo` file, then for each subject analyses and, if there are no errors, opens `out/<binary>.asm` and hands the writer to `ResultWriter`.
-- **`ResultWriter`** walks 0x0000–0xFFFF and drives `AssemblyFileFormat`, which owns the layout and the per-type printing (64tass syntax):
+- **`ResultWriter`** walks 0x0000–0xFFFF and drives `AssemblyFileFormat`, which owns the layout and the per-type printing (64tass syntax, all lowercase except labels and comments):
   - `*=` origins at gaps;
   - blank-line separators and label placement inside data runs;
   - `.byte`/`.word`/`.dword`/`.addr` tables;

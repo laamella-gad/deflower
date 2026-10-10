@@ -13,8 +13,8 @@ class PrintingTest {
     @Test
     void asAddressFormatsValidValues() {
         assertThat(asAddress(0)).isEqualTo("$0000");
-        assertThat(asAddress(0xFF)).isEqualTo("$00FF");
-        assertThat(asAddress(0xFFFF)).isEqualTo("$FFFF");
+        assertThat(asAddress(0xFF)).isEqualTo("$00ff");
+        assertThat(asAddress(0xFFFF)).isEqualTo("$ffff");
     }
 
     @Test
@@ -30,8 +30,8 @@ class PrintingTest {
     @Test
     void asHexByteFormatsValidValues() {
         assertThat(asHexByte(0)).isEqualTo("$00");
-        assertThat(asHexByte(0x7F)).isEqualTo("$7F");
-        assertThat(asHexByte(0xFF)).isEqualTo("$FF");
+        assertThat(asHexByte(0x7F)).isEqualTo("$7f");
+        assertThat(asHexByte(0xFF)).isEqualTo("$ff");
     }
 
     @Test
@@ -47,8 +47,8 @@ class PrintingTest {
     @Test
     void asHexWordFormatsValidValues() {
         assertThat(asHexWord(0)).isEqualTo("$0000");
-        assertThat(asHexWord(0xFF)).isEqualTo("$00FF");
-        assertThat(asHexWord(0xFFFF)).isEqualTo("$FFFF");
+        assertThat(asHexWord(0xFF)).isEqualTo("$00ff");
+        assertThat(asHexWord(0xFFFF)).isEqualTo("$ffff");
     }
 
     @Test
@@ -65,7 +65,7 @@ class PrintingTest {
     void asHexDwordFormatsValidValues() {
         assertThat(asHexDword(0)).isEqualTo("$00000000");
         assertThat(asHexDword(0x12345678)).isEqualTo("$12345678");
-        assertThat(asHexDword(0x7FFFFFFF)).isEqualTo("$7FFFFFFF");
+        assertThat(asHexDword(0x7FFFFFFF)).isEqualTo("$7fffffff");
     }
 
     @Test

@@ -1,11 +1,11 @@
 
-*=$C000
+*=$c000
 
 vectors:
-		.addr	first, second, $D020
+		.addr	first, second, $d020
 
 first:
-		RTS 
+		rts 
 
 second:
-		RTS 
+		rts 

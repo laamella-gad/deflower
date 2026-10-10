@@ -1,84 +1,84 @@
 
-*=$C000
+*=$c000
 
 xx_1:
-		LDA #$40
-		STA $FB
-		LDA #$04
-		STA $FD
-		LDA #$00
-		JSR lC40E
-		NOP 
-		STA $FE
-		STA $FF
-		LDX $033F
+		lda #$40
+		sta $fb
+		lda #$04
+		sta $fd
+		lda #$00
+		jsr lC40E
+		nop 
+		sta $fe
+		sta $ff
+		ldx $033f
 
 lC015:
-		BEQ lC028
-		LDA $FA
-		CLC 
-		ADC #$59
-		STA $FA
-		LDA $FB
-		ADC #$01
-		STA $FB
-		DEX 
-		JMP lC015
+		beq lC028
+		lda $fa
+		clc 
+		adc #$59
+		sta $fa
+		lda $fb
+		adc #$01
+		sta $fb
+		dex 
+		jmp lC015
 
 lC028:
-		LDX #$00
+		ldx #$00
 
 lC02A:
-		LDY #$00
-		LDA ($FA), Y
-		LSR 
-		LSR 
-		LSR 
-		LSR 
-		TAY 
-		LDA $C076, Y
-		LDY $FE
-		STA ($FC), Y
-		LDY #$00
-		LDA ($FA), Y
-		AND #$0F
-		TAY 
-		LDA $C080, Y
-		INC $FE
-		LDY $FE
-		STA ($FC), Y
-		INC $FE
-		INX 
-		LDA $FA
-		CLC 
-		ADC #$01
-		STA $FA
-		BCC lC058
-		INC $FB
+		ldy #$00
+		lda ($fa), y
+		lsr 
+		lsr 
+		lsr 
+		lsr 
+		tay 
+		lda $c076, y
+		ldy $fe
+		sta ($fc), y
+		ldy #$00
+		lda ($fa), y
+		and #$0f
+		tay 
+		lda $c080, y
+		inc $fe
+		ldy $fe
+		sta ($fc), y
+		inc $fe
+		inx 
+		lda $fa
+		clc 
+		adc #$01
+		sta $fa
+		bcc lC058
+		inc $fb
 
 lC058:
-		CPX #$0E
-		BCC lC02A
-		INC $FF
-		LDA $FC
-		CLC 
-		ADC #$28
-		STA $FC
-		BCC lC069
-		INC $FD
+		cpx #$0e
+		bcc lC02A
+		inc $ff
+		lda $fc
+		clc 
+		adc #$28
+		sta $fc
+		bcc lC069
+		inc $fd
 
 lC069:
-		LDX #$00
-		STX $FE
-		LDX $FF
-		CPX #$18
-		BCC lC028
-		RTS 
-*=$C40E
+		ldx #$00
+		stx $fe
+		ldx $ff
+		cpx #$18
+		bcc lC028
+		rts 
+*=$c40e
 
 lC40E:
-		LDA #$29
-		STA $FC
-		LDA #$00
-		STA $FA
-		RTS 
+		lda #$29
+		sta $fc
+		lda #$00
+		sta $fa
+		rts 

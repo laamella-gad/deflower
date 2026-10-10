@@ -5,18 +5,18 @@ pair:
 		.fill	2
 .endv
 
-*=$C000
+*=$c000
 
 entry:
-		LDA @w counter
-		STA @w $00FF, X
-		LDX @w $0020, Y
-		LDA counter
-		STA $FF, X
-		LDX $20, Y
-		LDA ($30, X)
-		LDA ($40), Y
-		LDA pair
-		LDA pair + $1
-		LDA @w pair + $1
-		JMP entry
+		lda @w counter
+		sta @w $00ff, x
+		ldx @w $0020, y
+		lda counter
+		sta $ff, x
+		ldx $20, y
+		lda ($30, x)
+		lda ($40), y
+		lda pair
+		lda pair + $1
+		lda @w pair + $1
+		jmp entry

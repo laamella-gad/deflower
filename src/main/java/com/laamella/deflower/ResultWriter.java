@@ -212,7 +212,7 @@ class AssemblyFileFormat {
                 // 64tass's .addr is specifically "a 16-bit address constant"
                 // (issue 0036) - more precise than .WORD for a value that's
                 // always an address, not an arbitrary 16-bit number.
-                tabularPrint(".addr", nameForAddress(subject.wordAt(address), "$%04X", subject));
+                tabularPrint(".addr", nameForAddress(subject.wordAt(address), "$%04x", subject));
                 break;
         }
         lastArea = area;
@@ -338,22 +338,22 @@ class AssemblyFileFormat {
         int byte2 = subject.memory[area.address + 2].data;
         int word = word(byte1, byte2);
         String operand = switch (instruction.addressingMode) {
-            case IND_X -> format("(%s, X)", nameForAddress(byte1, "$%02X", subject));
-            case IND_Y -> format("(%s), Y", nameForAddress(byte1, "$%02X", subject));
-            case RELATIVE -> format("%s", nameForAddress(area.address + toSignedByte(byte1) + 2, "$%04X", subject));
-            case INDIRECT -> format("(%s)", nameForAddress(word, "$%04X", subject));
+            case IND_X -> format("(%s, x)", nameForAddress(byte1, "$%02x", subject));
+            case IND_Y -> format("(%s), y", nameForAddress(byte1, "$%02x", subject));
+            case RELATIVE -> format("%s", nameForAddress(area.address + toSignedByte(byte1) + 2, "$%04x", subject));
+            case INDIRECT -> format("(%s)", nameForAddress(word, "$%04x", subject));
             case ABSOLUTE -> format("%s", nameForAbsoluteAddress(word, subject));
-            case ABSOLUTE_X -> format("%s, X", nameForAbsoluteAddress(word, subject));
-            case ABSOLUTE_Y -> format("%s, Y", nameForAbsoluteAddress(word, subject));
-            case IMMEDIATE -> format("#$%02X", byte1);
-            case ZERO_PAGE -> format("%s", nameForAddress(byte1, "$%02X", subject));
-            case ZERO_PAGE_X -> format("%s, X", nameForAddress(byte1, "$%02X", subject));
-            case ZERO_PAGE_Y -> format("%s, Y", nameForAddress(byte1, "$%02X", subject));
+            case ABSOLUTE_X -> format("%s, x", nameForAbsoluteAddress(word, subject));
+            case ABSOLUTE_Y -> format("%s, y", nameForAbsoluteAddress(word, subject));
+            case IMMEDIATE -> format("#$%02x", byte1);
+            case ZERO_PAGE -> format("%s", nameForAddress(byte1, "$%02x", subject));
+            case ZERO_PAGE_X -> format("%s, x", nameForAddress(byte1, "$%02x", subject));
+            case ZERO_PAGE_Y -> format("%s, y", nameForAddress(byte1, "$%02x", subject));
             case JAM, ACCUMULATOR, NONE -> "";
         };
         out.newLine();
         out.indent();
-        out.print(instruction.opcode.name());
+        out.print(instruction.opcode.name().toLowerCase());
         out.print(" ");
         out.print(operand);
 
@@ -366,7 +366,7 @@ class AssemblyFileFormat {
      * one (issue 0053).
      */
     private String nameForAbsoluteAddress(int address, Subject subject) {
-        String name = nameForAddress(address, "$%04X", subject);
+        String name = nameForAddress(address, "$%04x", subject);
         return address < 0x100 ? "@w " + name : name;
     }
 

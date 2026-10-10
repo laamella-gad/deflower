@@ -62,12 +62,12 @@ Writing out/test.asm
 counter:		.byte	?
 .endv
 
-*=$C000
+*=$c000
 
 entry:
-		LDA @w counter
-		STA counter
-		RTS
+		lda @w counter
+		sta counter
+		rts
 vvv
 ```
 
@@ -83,7 +83,7 @@ $c000 word value
 $c001 byte inside
 ^^^
 …
-Area conflict at $C001: … overwrites …
+Area conflict at $c001: … overwrites …
 ~~~
 vvv
 ```

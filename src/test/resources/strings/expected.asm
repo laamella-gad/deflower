@@ -1,9 +1,9 @@
 
-*=$C000
+*=$c000
 
 entry:
-		LDA plain, X
-		RTS 
+		lda plain, x
+		rts 
 
 plain:
 		.text	"HELLO"
@@ -12,7 +12,7 @@ nulled:
 counted:
 		.text	$03, "ABC"
 mixed:
-		.text	"HI", $0D, $22, "Q", $22
+		.text	"HI", $0d, $22, "Q", $22
 long_nulled:
 		.text	"THE QUICK BROWN FOX JUMPS OVER T"
 		.text	"HE LAZY ", $00

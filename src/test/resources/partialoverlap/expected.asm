@@ -1,5 +1,5 @@
-entry = $C000
-*=$C002
+entry = $c000
+*=$c002
 
 guard:
 		.byte	$42

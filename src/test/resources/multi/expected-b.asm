@@ -1,23 +1,23 @@
 
-*=$C000
+*=$c000
 
 entry_b:
-		LDA #$40
-		STA $FB
-		LDA #$04
-		STA $FD
-		LDA #$00
-		JSR lC40E
-		NOP 
-		STA $FE
+		lda #$40
+		sta $fb
+		lda #$04
+		sta $fd
+		lda #$00
+		jsr lC40E
+		nop 
+		sta $fe
 
 marker_b:
-		.byte	$85, $FF, $AE, $3F
-*=$C40E
+		.byte	$85, $ff, $ae, $3f
+*=$c40e
 
 lC40E:
-		LDA #$29
-		STA $FC
-		LDA #$00
-		STA $FA
-		RTS 
+		lda #$29
+		sta $fc
+		lda #$00
+		sta $fa
+		rts 

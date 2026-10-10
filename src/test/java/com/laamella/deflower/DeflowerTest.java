@@ -101,7 +101,7 @@ class DeflowerTest {
             System.setErr(originalErr);
         }
         assertThat(capturedErr.toString())
-                .contains("Area conflict at $C001")
+                .contains("Area conflict at $c001")
                 .contains("byte", "word")
                 .contains("Errors detected");
         assertThat(isEmpty(outDir(flowerFile))).as("output directory for a subject with an area conflict").isTrue();
@@ -124,7 +124,7 @@ class DeflowerTest {
             System.setErr(originalErr);
         }
         assertThat(capturedErr.toString())
-                .contains("Duplicate label twin at $C001, already defined at $C000")
+                .contains("Duplicate label twin at $c001, already defined at $c000")
                 .contains("Errors detected");
         assertThat(isEmpty(outDir(flowerFile))).as("output directory for a subject with a duplicate label").isTrue();
     }
@@ -145,7 +145,7 @@ class DeflowerTest {
             System.setErr(originalErr);
         }
         assertThat(capturedErr.toString())
-                .contains("Virtual address $D020 needs a type or a range")
+                .contains("Virtual address $d020 needs a type or a range")
                 .contains("Errors detected");
         assertThat(isEmpty(outDir(flowerFile))).as("output directory for a subject with a virtual plain address").isTrue();
     }
@@ -167,7 +167,7 @@ class DeflowerTest {
             System.setErr(originalErr);
         }
         assertThat(capturedErr.toString())
-                .contains("toolong.prg: 32 bytes loaded at $FFF0 run past $FFFF");
+                .contains("toolong.prg: 32 bytes loaded at $fff0 run past $ffff");
         assertThat(isEmpty(outDir(flowerFile))).as("output directory for an oversized prg").isTrue();
     }
 
@@ -363,8 +363,8 @@ class DeflowerTest {
             System.setErr(originalErr);
         }
         assertThat(capturedErr.toString())
-                .contains("Zero-size byte at $C000")
-                .contains("Zero-size word at $C006")
+                .contains("Zero-size byte at $c000")
+                .contains("Zero-size word at $c006")
                 .contains("Errors detected");
         assertThat(isEmpty(outDir(flowerFile))).as("output directory for a subject with a zero size").isTrue();
     }

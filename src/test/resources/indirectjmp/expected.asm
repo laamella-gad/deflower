@@ -1,14 +1,14 @@
 
-*=$C000
+*=$c000
 
 entry:
-		JMP (aC010)
-*=$C010
+		jmp (aC010)
+*=$c010
 
 aC010:
 		.addr	lC020
-*=$C020
+*=$c020
 
 lC020:
-		LDA #$42
-		RTS 
+		lda #$42
+		rts 
