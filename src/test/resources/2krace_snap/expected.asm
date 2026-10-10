@@ -1,62 +1,125 @@
 
-*=$0850
+.virtual $0002
+; ---- zero page ----
+; the road map row at the top of the screen; counts down as the road scrolls
+road_row:		.byte	?
+.endv
 
-l0850:
-		jsr l0B77
-		jsr l0A73
-		jsr l0A7E
-		jsr l0A57
-		jsr l0CC2
-		jsr l0BB5
+.virtual $0004
+; the screen's fine scroll, 0-7
+fine_scroll:		.byte	?
+; scroll speed in eighths of a row per frame
+speed:		.byte	?
+max_speed:		.byte	?
+; 0 = in the left lane, 1 = in the right lane, 2 = moving left, 3 = moving right
+car_state:		.byte	?
+; index into car_x while the car changes lanes
+car_step:		.byte	?
+; the current stage's index into the wall tables
+difficulty:		.byte	?
+.endv
+
+.virtual $00d0
+music_pointer:		.word	?
+.endv
+
+.virtual $00fb
+draw_pointer:		.word	?
+draw_pointer2:		.word	?
+.endv
+
+*=$0801
+
+; ---- start-up ----
+; BASIC stub: SYS 2061
+basic_stub:
+		.byte	$0b, $08, $14, $00, $9e, $32, $30, $36, $31, $00, $00, $00
+; the decruncher's start, still in memory but no longer used
+decruncher_leftover:
+		.byte	$a0, $00, $ba, $bd, $75, $11, $9d, $fc, $00, $ca, $d0, $f7, $4c, $40, $11, $80
+		.byte	$00, $78, $2d
+
+; where the decruncher jumps to
+start:
+		sei 
+		lda #$35
+		sta $01
+		lda #$7f
+		sta cia1_interrupt_control
+		sta cia2_interrupt_control
+		lda cia1_interrupt_control
+		lda cia2_interrupt_control
+		lda #$01
+		sta vic_irq_enable
+		lsr vic_irq_status
+		lda #$f9
+		sta raster
+		lda #$db
+		sta irq_vector
+		lda #$09
+		sta irq_vector + $1
+		lda #$1b
+		sta vic_control1
+		cli 
+
+; ---- game ----
+new_game:
+		jsr clear_screen
+		jsr wait_frame
+		jsr init_video
+		jsr init_road
+		jsr init_walls
+		jsr reset_score
 		lda #$00
-		sta l087B + 1
-		sta $08
+		sta game_loop + 1
+		sta car_step
 		lda #$03
-		sta $07
+		sta car_state
 		lda #$01
-		sta $0b66
-		jsr l1000
-		lda $d01f
-		jsr l0C61
+		sta stage
+		jsr music_init
+		lda sprite_background_collision
+		jsr title
 
-l087B:
+; waits until irq_bottom sets the operand of the lda to 1
+game_loop:
 		lda #$01
-		beq l087B
-		lda $05
+		beq game_loop
+		lda speed
 		clc 
-		adc $04
+		adc fine_scroll
 		tax 
 		and #$07
-		sta $04
+		sta fine_scroll
 		txa 
 		lsr 
 		lsr 
 		lsr 
-		sta $0c06
+		sta score_add + $4
 		beq l08BE
 
 l0892:
 		pha 
-		dec $02
-		ldx $09
-		jsr l0CD9
-		ldx $02
+		dec road_row
+		ldx difficulty
+		jsr next_row
+		ldx road_row
 		lda #$00
-		ldy $0c98
+		ldy left_wall
 		cpy #$01
 		bmi l08A7
 		lda #$01
 
 l08A7:
-		sta $8000, x
+		sta left_road, x
 		lda #$00
-		ldy $0c99
+		ldy right_wall
 		cpy #$01
 		bmi l08B5
 		lda #$01
 
 l08B5:
-		sta $8100, x
+		sta right_road, x
 		pla 
 		sec 
 		sbc #$01
@@ -67,296 +130,318 @@ l08BE:
 		inc l08BE + 1
 		and #$3f
 		bne l08CF
-		lda $05
-		cmp $06
+		lda speed
+		cmp max_speed
 		bcs l08CF
-		inc $05
+		inc speed
 
 l08CF:
-		lda $04
+		lda fine_scroll
 		clc 
 		adc #$05
 		sta $0a0b
-		lda $04
+		lda fine_scroll
 		clc 
 		adc #$f6
 		sta $0a32
-		lda $02
+		lda road_row
 		sta l0B93 + 1
 		lda #$80
 		sta l0B93 + 2
 		lda #$43
-		sta $fb
+		sta draw_pointer
 		lda #$40
-		sta $fc
-		jsr l0B8F
-		lda $02
+		sta draw_pointer + $1
+		jsr draw_road_sprite
+		lda road_row
 		sta l0B93 + 1
 		lda #$81
 		sta l0B93 + 2
 		lda #$85
-		sta $fb
+		sta draw_pointer
 		lda #$40
-		sta $fc
-		jsr l0B8F
-		lda $02
+		sta draw_pointer + $1
+		jsr draw_road_sprite
+		lda road_row
 		clc 
 		adc #$05
 		sta l0926 + 1
 		sta $092c
 		lda #$08
-		sta $fb
+		sta draw_pointer
 		lda #$44
 
 ; where the CPU was when the snapshot was taken
 snapshot_pc:
-		sta $fc
-		sta $fe
+		sta draw_pointer + $1
+		sta draw_pointer2 + $1
 		lda #$1f
-		sta $fd
+		sta draw_pointer2
 		ldx #$19
 		ldy #$00
 
 l0926:
-		lda $80fd
-d0927 = $0927
-		sta ($fb), y
-		lda $81fd
-d092C = $092c
-		sta ($fd), y
+		lda left_road + $fd
+; operands the game loop changes to step down the road map
+left_road_source = $0927
+		sta (draw_pointer), y
+		lda right_road + $fd
+right_road_source = $092c
+		sta (draw_pointer2), y
 		tya 
 		clc 
 		adc #$28
 		tay 
 		bcc l093B
-		inc $fc
-		inc $fe
+		inc draw_pointer + $1
+		inc draw_pointer2 + $1
 
 l093B:
 		inc l0926 + 1
 		inc $092c
 		dex 
 		bne l0926
-		lda $02
+		lda road_row
 		clc 
 		adc #$1e
 		sta l0B93 + 1
 		lda #$80
 		sta l0B93 + 2
 		lda #$c0
-		sta $fb
+		sta draw_pointer
 		lda #$40
-		sta $fc
-		jsr l0B8F
-		lda $02
+		sta draw_pointer + $1
+		jsr draw_road_sprite
+		lda road_row
 		clc 
 		adc #$1e
 		sta l0B93 + 1
 		lda #$81
 		sta l0B93 + 2
 		lda #$02
-		sta $fb
+		sta draw_pointer
 		lda #$41
-		sta $fc
-		jsr l0B8F
-		lda $d01f
+		sta draw_pointer + $1
+		jsr draw_road_sprite
+		lda sprite_background_collision
 		and #$01
-		bne l099F
-		lda $07
+		bne steer
+		lda car_state
 		cmp #$02
-		bcs l099F
+		bcs steer
 		lda #$00
-		sta $d418
+		sta volume_filter_mode
 		ldy #$04
 
 l0988:
 		ldx #$1f
 
 l098A:
-		lda $0c41, x
-		sta $d027
-		jsr l0A73
+		lda flash_colors, x
+		sta sprite0_color
+		jsr wait_frame
 		dex 
 		bpl l098A
 		dey 
 		bpl l0988
-		jsr l0C11
-		jmp l0850
+		jsr update_high_score
+		jmp new_game
 
-l099F:
-		jsr l0B0F
-		ldx $08
-		lda $07
+steer:
+		jsr read_joystick
+		ldx car_step
+		lda car_state
 		cmp #$02
-		bcc l09C4
+		bcc position_car
 		bne l09B9
-		dec $08
-		bne l09C4
+		dec car_step
+		bne position_car
 		ldx #$00
-		stx $08
-		stx $07
-		jmp l09C4
+		stx car_step
+		stx car_state
+		jmp position_car
 
 l09B9:
 		inx 
-		stx $08
+		stx car_step
 		cpx #$0f
-		bne l09C4
+		bne position_car
 		lda #$01
-		sta $07
+		sta car_state
 
-l09C4:
-		lda $0d90, x
-		sta $d000
-		jsr l0BC7
-		jsr l0B3C
-		jsr l1003
+position_car:
+		lda car_x, x
+		sta sprite0_x
+		jsr add_score
+		jsr check_stage
+		jsr music_play
 		lda #$00
-		sta l087B + 1
-		jmp l087B
-*=$09fd
+		sta game_loop + 1
+		jmp game_loop
+
+irq_bottom:
+		pha 
+		lda vic_control1
+		and #$77
+		sta vic_control1
+		lda #$01
+		sta game_loop + 1
+		lsr vic_irq_status
+		lda #$02
+		sta raster
+		lda #$fd
+		sta irq_vector
+		lda #$09
+		sta irq_vector + $1
+		pla 
+		rti 
 
 irq:
 		pha 
-		lda $d011
+		lda vic_control1
 		and #$78
-		ora $04
+		ora fine_scroll
 		ora #$08
-		sta $d011
+		sta vic_control1
 		lda #$07
-		sta $d003
-		sta $d005
+; the road sprites' y in each half of the screen, set from fine_scroll
+upper_road_y = $0a0b
+		sta sprite1_y
+		sta sprite2_y
 		lda #$01
-		sta $47f9
+		sta sprite_pointers + $1
 		lda #$02
-		sta $47fa
+		sta sprite_pointers + $2
 		lda #$c0
-		sta $d012
+		sta raster
 		lda #$30
 		sta irq_vector
 		lda #$0a
 		sta irq_vector + $1
-		lsr $d019
+		lsr vic_irq_status
 		pla 
 		rti 
+
+irq_lower:
 		pha 
 		lda #$f8
-		sta $d003
-		sta $d005
+lower_road_y = $0a32
+		sta sprite1_y
+		sta sprite2_y
 		lda #$03
-		sta $47f9
+		sta sprite_pointers + $1
 		lda #$04
-		sta $47fa
+		sta sprite_pointers + $2
 		lda #$f9
-		sta $d012
+		sta raster
 		lda #$db
 		sta irq_vector
 		lda #$09
 		sta irq_vector + $1
-		lsr $d019
+		lsr vic_irq_status
 		pla 
 		rti 
 
-l0A57:
+init_road:
 		ldx #$00
-		stx $02
-		stx $04
+		stx road_row
+		stx fine_scroll
 		lda #$01
 
 l0A5F:
-		sta $8000, x
-		sta $8100, x
+		sta left_road, x
+		sta right_road, x
 		inx 
 		bne l0A5F
-		stx $05
+		stx speed
 		lda #$05
-		sta $06
+		sta max_speed
 		lda #$00
-		sta $09
+		sta difficulty
 		rts 
 
-l0A73:
-		bit $d011
-		bmi l0A73
+wait_frame:
+		bit vic_control1
+		bmi wait_frame
 
 l0A78:
-		bit $d011
+		bit vic_control1
 		bpl l0A78
 		rts 
 
-l0A7E:
+init_video:
 		lda #$00
-		sta $7fff
+		sta idle_byte
 		lda #$06
-		sta $d020
-		sta $d021
+		sta border_color
+		sta background_color
 		lda #$01
-		sta $d027
-		sta $d02a
-		sta $d02b
-		sta $d02c
-		sta $d02d
-		sta $d02e
+		sta sprite0_color
+		sta sprite3_color
+		sta sprite4_color
+		sta sprite5_color
+		sta sprite6_color
+		sta sprite7_color
 		ldx #$00
 		lda #$0f
-		sta $d028
-		sta $d029
+		sta sprite1_color
+		sta sprite2_color
 
 l0AA9:
-		sta $d800, x
-		sta $d900, x
-		sta $da00, x
-		sta $db00, x
+		sta color_ram, x
+		sta color_ram + $100, x
+		sta color_ram + $200, x
+		sta color_ram + $300, x
 		dex 
 		bne l0AA9
 		lda #$02
-		sta $dd00
+		sta cia2_port_a
 		lda #$1e
-		sta $d018
+		sta vic_memory
 		lda #$1b
-		sta $d011
+		sta vic_control1
 		lda #$ff
-		sta $d015
+		sta sprite_enable
 		lda #$01
-		sta $d01b
+		sta sprite_priority
 		lda #$06
-		sta $d017
+		sta sprite_expand_y
 		lda #$08
-		sta $47f8
+		sta sprite_pointers
 		lda #$d2
 		ldx #$08
 
 l0ADF:
-		sta $d006, x
+		sta sprite3_x, x
 		sec 
 		sbc #$10
 		dex 
 		dex 
 		bpl l0ADF
 		lda #$ff
-		sta $d007
-		sta $d009
-		sta $d00b
-		sta $d00d
-		sta $d00f
+		sta sprite3_y
+		sta sprite4_y
+		sta sprite5_y
+		sta sprite6_y
+		sta sprite7_y
 		lda #$04
-		sta $d010
+		sta sprites_x_msb
 		lda #$58
-		sta $d002
+		sta sprite1_x
 		lda #$00
-		sta $d004
+		sta sprite2_x
 		lda #$e0
-		sta $d001
+		sta sprite0_y
 		rts 
 
-l0B0F:
-		ldx $07
+read_joystick:
+		ldx car_state
 		cpx #$02
 		bcc l0B16
 		rts 
 
 l0B16:
-		lda $dc00
+		lda cia1_port_a
 		and #$0c
 		cmp #$04
 		bne l0B2D
@@ -366,9 +451,9 @@ l0B16:
 
 l0B24:
 		ldx #$03
-		stx $07
+		stx car_state
 		lda #$00
-		sta $08
+		sta car_step
 
 l0B2C:
 		rts 
@@ -378,71 +463,83 @@ l0B2D:
 		bne l0B2C
 		cpx #$01
 		bne l0B2C
-		inc $07
+		inc car_state
 		lda #$0f
-		sta $08
+		sta car_step
 		rts 
 
-l0B3C:
-		lda $0bfe
+; moves to the next stage when the score is high enough
+check_stage:
+		lda score + $1
 		lsr 
-		cmp $0b66
+		cmp stage
 		bcc l0B65
-		ldx $0b66
-		inc $0b66
+		ldx stage
+		inc stage
 		dex 
-		lda $0b67, x
-		sta $d021
-		sta $d020
-		lda $0b6b, x
-		sta $06
-		lda $0b6f, x
-		sta $09
-		lda $0b73, x
-		sta $47f8
+		lda stage_color, x
+		sta background_color
+		sta border_color
+		lda stage_max_speed, x
+		sta max_speed
+		lda stage_difficulty, x
+		sta difficulty
+		lda stage_car_sprite, x
+		sta sprite_pointers
 
 l0B65:
 		rts 
-*=$0b77
 
-l0B77:
+stage:
+		.byte	$01
+stage_color:
+		.byte	$02, $04, $0b, $00
+stage_max_speed:
+		.byte	$06, $07, $08, $08
+stage_difficulty:
+		.byte	$00, $00, $00, $01
+stage_car_sprite:
+		.byte	$07, $06, $05, $05
+
+clear_screen:
 		lax #$00
 
 l0B79:
-		sta $4400, x
-		sta $4500, x
-		sta $4600, x
-		sta $46e8, x
-		sta $4040, x
+		sta screen, x
+		sta screen + $100, x
+		sta screen + $200, x
+		sta screen + $2e8, x
+		sta road_sprites, x
 		dex 
 		bne l0B79
-		sta $d000
+		sta sprite0_x
 		rts 
 
-l0B8F:
+; draws one road sprite's column of walls from the road map
+draw_road_sprite:
 		ldy #$00
 		ldx #$04
 
 l0B93:
-		lda $81fd
+		lda right_road + $fd
 d0B94 = $0b94
 		beq l0B9A
 		lda #$ff
 
 l0B9A:
-		sta ($fb), y
+		sta (draw_pointer), y
 		iny 
 		iny 
 		iny 
-		sta ($fb), y
+		sta (draw_pointer), y
 		iny 
 		iny 
 		iny 
-		sta ($fb), y
+		sta (draw_pointer), y
 		iny 
 		iny 
 		iny 
-		sta ($fb), y
+		sta (draw_pointer), y
 		iny 
 		iny 
 		iny 
@@ -451,58 +548,68 @@ l0B9A:
 		bpl l0B93
 		rts 
 
-l0BB5:
+reset_score:
 		lda #$00
-		sta $0bfd
-		sta $0bfe
-		sta $0bff
-		sta $0c00
-		sta $0c01
+		sta score
+		sta score + $1
+		sta score + $2
+		sta score + $3
+		sta score + $4
 		rts 
 
-l0BC7:
+; adds score_add to score, one decimal digit per byte
+add_score:
 		ldx #$04
 		lda #$00
 
 l0BCB:
-		sta $0c07, x
+		sta score_carry, x
 		dex 
 		bpl l0BCB
 		ldx #$04
 
 l0BD3:
-		lda $0bfd, x
+		lda score, x
 		clc 
-		adc $0c02, x
-		adc $0c07, x
+		adc score_add, x
+		adc score_carry, x
 		and #$0f
 		cmp #$0a
 		bcc l0BE9
-		inc $0c06, x
+		inc score_add + $4, x
 		sec 
 		sbc #$0a
 
 l0BE9:
-		sta $0bfd, x
+		sta score, x
 		dex 
 		bpl l0BD3
 		ldx #$04
 
 l0BF1:
-		lda $0bfd, x
+		lda score, x
 		ora #$20
-		sta $47fb, x
+		sta sprite_pointers + $3, x
 		dex 
 		bpl l0BF1
 		rts 
-*=$0c11
 
-l0C11:
+score:
+		.byte	$00, $00, $00, $00, $08
+; the last digit is the number of rows scrolled this frame
+score_add:
+		.byte	$00, $00, $00, $00, $00
+score_carry:
+		.byte	$00, $00, $00, $00, $00
+high_score:
+		.byte	$00, $00, $00, $00, $00
+
+update_high_score:
 		ldx #$00
 
 l0C13:
-		lda $0c0c, x
-		cmp $0bfd, x
+		lda high_score, x
+		cmp score, x
 		bcc l0C28
 		beq l0C20
 		jmp l0C33
@@ -517,8 +624,8 @@ l0C28:
 		ldx #$04
 
 l0C2A:
-		lda $0bfd, x
-		sta $0c0c, x
+		lda score, x
+		sta high_score, x
 		dex 
 		bpl l0C2A
 
@@ -526,168 +633,207 @@ l0C33:
 		ldx #$04
 
 l0C35:
-		lda $0c0c, x
+		lda high_score, x
 		ora #$20
-		sta $47fb, x
+		sta sprite_pointers + $3, x
 		dex 
 		bpl l0C35
 		rts 
-*=$0c61
 
-l0C61:
+flash_colors:
+		.byte	$00, $09, $0b, $08, $0c, $0c, $0f, $0f, $0f, $07, $07, $07, $07, $01, $01, $01
+		.byte	$01, $01, $01, $01, $07, $07, $07, $07, $0f, $0f, $0f, $0c, $0c, $08, $0b, $09
+
+; the title: shows the logo and flashes it until fire is pressed
+title:
 		ldx #$0b
 
 l0C63:
 		txa 
-		sta $45ed, x
+		sta screen + $1ed, x
 		clc 
 		adc #$0a
-		sta $4615, x
+		sta screen + $215, x
 		dex 
 		cpx #$01
 		bne l0C63
-		jsr l0C11
+		jsr update_high_score
 		ldx #$1f
 
 l0C77:
-		jsr l0A73
+		jsr wait_frame
 		ldy #$09
-		lda $0c41, x
+		lda flash_colors, x
 
 l0C7F:
-		sta $d9ef, y
-		sta $da17, y
+		sta color_ram + $1ef, y
+		sta color_ram + $217, y
 		dey 
 		bpl l0C7F
 		dex 
 		txa 
 		and #$1f
 		tax 
-		lda $dc00
+		lda cia1_port_a
 		and #$10
 		bne l0C77
-		jsr l0B77
+		jsr clear_screen
 		rts 
-*=$0cc2
 
-l0CC2:
+; the length of the current wall on each side; 0 = no wall
+left_wall:
+		.byte	$09
+right_wall:		.byte	$09
+; per difficulty
+wall_switch_length:
+		.byte	$03, $03, $04, $04, $04, $04, $05, $05, $05, $06
+wall_max_length:
+		.byte	$10, $0f, $0f, $0e, $0e, $0d, $0d, $0c, $0c, $0c
+wall_end_chance:
+		.byte	$19, $23, $2d, $38, $42, $4c, $56, $60, $6b, $75
+wall_start_chance:
+		.byte	$0c, $11, $16, $1c, $21, $26, $2b, $30, $35, $3a
+
+init_walls:
 		lda #$01
-		sta $0c98
-		sta $0c99
+		sta left_wall
+		sta right_wall
 		lda #$ff
-		sta $0d7f
-		sta $0d80
-		sta $0d81
-		sta $0d82
+		sta random_seed
+		sta random_seed + $1
+		sta random_seed + $2
+		sta random_seed + $3
 		rts 
 
-l0CD9:
-		lda $0c98
+; builds the next row of the road map
+next_row:
+		lda left_wall
 		beq l0CE1
-		inc $0c98
+		inc left_wall
 
 l0CE1:
-		lda $0c99
+		lda right_wall
 		beq l0CE9
-		inc $0c99
+		inc right_wall
 
 l0CE9:
-		jsr l0D4D
-		lda $0c98
-		cmp $0ca4, x
+		jsr random
+		lda left_wall
+		cmp wall_max_length, x
 		bcc l0D0A
-		lda $0d7f
-		cmp $0cae, x
+		lda random_seed
+		cmp wall_end_chance, x
 		bcs l0D1C
 		lda #$fe
-		sta $0c98
-		lda $0c9a, x
-		sta $0c99
+		sta left_wall
+		lda wall_switch_length, x
+		sta right_wall
 		jmp l0D1C
 
 l0D0A:
-		lda $0c98
+		lda left_wall
 		bne l0D1C
-		lda $0d81
-		cmp $0cb8, x
+		lda random_seed + $2
+		cmp wall_start_chance, x
 		bcs l0D1C
 		lda #$01
-		sta $0c98
+		sta left_wall
 
 l0D1C:
-		lda $0c99
-		cmp $0ca4, x
+		lda right_wall
+		cmp wall_max_length, x
 		bcc l0D3A
-		lda $0d80
-		cmp $0cae, x
+		lda random_seed + $1
+		cmp wall_end_chance, x
 		bcs l0D4C
 		lda #$fe
-		sta $0c99
-		lda $0c9a, x
-		sta $0c98
+		sta right_wall
+		lda wall_switch_length, x
+		sta left_wall
 		jmp l0D4C
 
 l0D3A:
-		lda $0c99
+		lda right_wall
 		bne l0D4C
-		lda $0d82
-		cmp $0cb8, x
+		lda random_seed + $3
+		cmp wall_start_chance, x
 		bcs l0D4C
 		lda #$01
-		sta $0c99
+		sta right_wall
 
 l0D4C:
 		rts 
 
-l0D4D:
-		asl $0d7f
-		rol $0d80
-		rol $0d81
-		rol $0d82
+; a 32-bit Galois LFSR; returns its low byte
+random:
+		asl random_seed
+		rol random_seed + $1
+		rol random_seed + $2
+		rol random_seed + $3
 		bcc l0D7B
-		lda $0d7f
+		lda random_seed
 		eor #$b7
-		sta $0d7f
-		lda $0d80
+		sta random_seed
+		lda random_seed + $1
 		eor #$1d
-		sta $0d80
-		lda $0d81
+		sta random_seed + $1
+		lda random_seed + $2
 		eor #$c1
-		sta $0d81
-		lda $0d82
+		sta random_seed + $2
+		lda random_seed + $3
 		eor #$04
-		sta $0d82
+		sta random_seed + $3
 
 l0D7B:
-		lda $0d7f
+		lda random_seed
 		rts 
+
+random_seed:
+		.dword	$4e08bfb4
+
+unused_0d83:
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; sprite 0's x for each car_step, easing between the lanes
+car_x:
+		.byte	$56, $57, $5d, $66, $71, $80, $90, $a1, $b2, $c3, $d4, $e2, $ed, $f6, $fc, $fe
 *=$1000
 
-l1000:
+; ---- music player ----
+music_init:
 		jmp l100C
 
-l1003:
+music_play:
 		jmp l1014
-*=$100c
+
+music_set_volume:
+		jmp l1010
+
+; unused jump table entry
+
+		jmp l1173
 
 l100C:
 		sta $1017
 		rts 
-*=$1014
+
+l1010:
+		sta $10a0
+		rts 
 
 l1014:
 		ldx #$00
 		ldy #$ff
-d1017 = $1017
+; operands the player changes
+init_flag = $1017
 		bmi l104A
 		txa 
 		ldx #$29
 
 l101D:
-		sta $1248, x
+		sta order_position, x
 		dex 
 		bpl l101D
-		sta $d415
+		sta filter_cutoff
 		sta $1099
 		sta l104A + 1
 		stx $1017
@@ -699,31 +845,31 @@ l101D:
 
 l103A:
 		lda #$05
-		sta $1274, x
+		sta tempo, x
 		lda #$01
-		sta $1275, x
-		sta $1277, x
+		sta tick, x
+		sta instrument, x
 		jmp l123E
 
 l104A:
 		ldy #$01
 		beq l1093
 		lda #$00
-d104F = $104f
+filter_steps = $104f
 		bne l1075
-		lda $143f, y
+		lda filter_left, y
 		beq l1069
 		bpl l1072
 		asl 
 		sta $109e
-		lda $1442, y
+		lda filter_right, y
 		sta $1099
-		lda $1440, y
+		lda filter_left + $1, y
 		bne l1087
 		iny 
 
 l1069:
-		lda $1442, y
+		lda filter_right, y
 		sta l1093 + 1
 		jmp l1084
 
@@ -731,7 +877,7 @@ l1072:
 		sta $104f
 
 l1075:
-		lda $1442, y
+		lda filter_right, y
 		clc 
 		adc l1093 + 1
 		sta l1093 + 1
@@ -739,14 +885,14 @@ l1075:
 		bne l1095
 
 l1084:
-		lda $1440, y
+		lda filter_left + $1, y
 
 l1087:
 		cmp #$ff
 		iny 
 		tya 
 		bcc l1090
-		lda $1442, y
+		lda filter_right, y
 
 l1090:
 		sta l104A + 1
@@ -755,240 +901,585 @@ l1093:
 		lda #$05
 
 l1095:
-		sta $d416
+		sta filter_cutoff + $1
 		lda #$f1
-		sta $d417
+filter_resonance = $1099
+		sta filter_control
 		lda #$10
+filter_type = $109e
 		ora #$0f
-		sta $d418
+master_volume = $10a0
+		sta volume_filter_mode
 		jsr l10AE
 		ldx #$07
 		jsr l10AE
 		ldx #$0e
 
 l10AE:
-		dec $1275, x
+		dec tick, x
 		beq l10BE
 		bpl l10BB
-		lda $1274, x
-		sta $1275, x
+		lda tempo, x
+		sta tick, x
 
 l10BB:
 		jmp l113D
 
 l10BE:
-		lda $124b, x
+		lda pattern_position, x
 		bne l10F3
-		ldy $1272, x
-		lda $1371, y
-		sta $d0
-		lda $1374, y
-		sta $d1
-		ldy $1248, x
-		lda ($d0), y
+		ldy order_list_index, x
+		lda order_list_lo, y
+		sta music_pointer
+		lda order_list_hi, y
+		sta music_pointer + $1
+		ldy order_position, x
+		lda (music_pointer), y
 		cmp #$ff
 		bcc l10DF
 		iny 
-		lda ($d0), y
+		lda (music_pointer), y
 		tay 
-		lda ($d0), y
+		lda (music_pointer), y
 
 l10DF:
 		cmp #$e0
 		bcc l10EB
 		sbc #$f0
-		sta $1249, x
+		sta transpose, x
 		iny 
-		lda ($d0), y
+		lda (music_pointer), y
 
 l10EB:
-		sta $1273, x
+		sta pattern_number, x
 		iny 
 		tya 
-		sta $1248, x
+		sta order_position, x
 
 l10F3:
-		ldy $1277, x
-		lda $125f, x
+		ldy instrument, x
+		lda new_note, x
 		beq l113D
 		sec 
 		sbc #$60
-		sta $1276, x
+		sta note, x
 		lda #$00
-		sta $125f, x
+		sta new_note, x
 		lda #$09
-		sta $1261, x
-		inc $1278, x
-		lda $13ad, y
+		sta waveform, x
+		inc gate, x
+		lda instrument_pulse, y
 		beq l111B
-		sta $1262, x
+		sta pulse_position, x
 		lda #$00
-		sta $1263, x
+		sta pulse_timer, x
 
 l111B:
-		lda $13b8, y
+		lda instrument_filter, y
 		beq l1128
 		sta l104A + 1
 		lda #$00
 		sta $104f
 
 l1128:
-		lda $13a2, y
-		sta $1260, x
-		lda $1397, y
-		sta $129d, x
-		lda $138c, y
-		sta $129c, x
+		lda instrument_wave, y
+		sta wave_position, x
+		lda instrument_sustain_release, y
+		sta sustain_release, x
+		lda instrument_attack_decay, y
+		sta attack_decay, x
 		jmp l121A
 
 l113D:
-		ldy $1260, x
+		ldy wave_position, x
 		beq l1173
-		lda $13c3, y
+		lda wave_left, y
 		beq l114A
-		sta $1261, x
+		sta waveform, x
 
 l114A:
-		lda $13c4, y
+		lda wave_left + $1, y
 		cmp #$ff
 		iny 
 		tya 
 		bcc l1157
 		clc 
-		lda $13fb, y
+		lda wave_right + $1, y
 
 l1157:
-		sta $1260, x
-		lda $13fa, y
+		sta wave_position, x
+		lda wave_right, y
 		beq l1173
 		bpl l1166
-		adc $1276, x
+		adc note, x
 		and #$7f
 
 l1166:
 		tay 
-		lda $12b1, y
-		sta $128a, x
-		lda $1311, y
-		sta $128b, x
+		lda frequency_lo, y
+		sta frequency, x
+		lda frequency_hi, y
+		sta frequency + $1, x
 
 l1173:
-		lda $1275, x
+		lda tick, x
 		cmp #$02
 		beq l11C8
-		ldy $1262, x
+		ldy pulse_position, x
 		beq l11C5
-		ora $124b, x
+		ora pattern_position, x
 		beq l11C5
-		lda $1263, x
+		lda pulse_timer, x
 		bne l119D
-		lda $1433, y
+		lda pulse_left, y
 		bpl l119A
-		sta $128d, x
-		lda $1439, y
-		sta $128c, x
+		sta pulse_width + $1, x
+		lda pulse_right, y
+		sta pulse_width, x
 		jmp l11B6
 
 l119A:
-		sta $1263, x
+		sta pulse_timer, x
 
 l119D:
-		lda $1439, y
+		lda pulse_right, y
 		clc 
 		bpl l11A6
-		dec $128d, x
+		dec pulse_width + $1, x
 
 l11A6:
-		adc $128c, x
-		sta $128c, x
+		adc pulse_width, x
+		sta pulse_width, x
 		bcc l11B1
-		inc $128d, x
+		inc pulse_width + $1, x
 
 l11B1:
-		dec $1263, x
+		dec pulse_timer, x
 		bne l11C5
 
 l11B6:
-		lda $1434, y
+		lda pulse_left + $1, y
 		cmp #$ff
 		iny 
 		tya 
 		bcc l11C2
-		lda $1439, y
+		lda pulse_right, y
 
 l11C2:
-		sta $1262, x
+		sta pulse_position, x
 
 l11C5:
 		jmp l121A
 
 l11C8:
-		ldy $1273, x
-		lda $1377, y
-		sta $d0
-		lda $1382, y
-		sta $d1
-		ldy $124b, x
-		lda ($d0), y
+		ldy pattern_number, x
+		lda pattern_lo, y
+		sta music_pointer
+		lda pattern_hi, y
+		sta music_pointer + $1
+		ldy pattern_position, x
+		lda (music_pointer), y
 		cmp #$40
 		bcc l11F2
 		cmp #$c0
 		bcc l11F8
-		lda $124c, x
+		lda note_delay, x
 		bne l11E9
-		lda ($d0), y
+		lda (music_pointer), y
 
 l11E9:
 		adc #$00
-		sta $124c, x
+		sta note_delay, x
 		beq l1211
 		bne l121A
 
 l11F2:
-		sta $1277, x
+		sta instrument, x
 		iny 
-		lda ($d0), y
+		lda (music_pointer), y
 
 l11F8:
 		cmp #$bd
 		beq l1211
-		adc $1249, x
-		sta $125f, x
+		adc transpose, x
+		sta new_note, x
 		lda #$00
-		sta $129d, x
+		sta sustain_release, x
 		lda #$0f
-		sta $129c, x
+		sta attack_decay, x
 		lda #$fe
-		sta $1278, x
+		sta gate, x
 
 l1211:
 		iny 
-		lda ($d0), y
+		lda (music_pointer), y
 		beq l1217
 		tya 
 
 l1217:
-		sta $124b, x
+		sta pattern_position, x
 
 l121A:
-		lda $129c, x
-		sta $d405, x
-		lda $129d, x
-		sta $d406, x
-		lda $128c, x
-		sta $d402, x
-		lda $128d, x
-		sta $d403, x
-		lda $128a, x
-		sta $d400, x
-		lda $128b, x
-		sta $d401, x
+		lda attack_decay, x
+		sta voice1_attack_decay, x
+		lda sustain_release, x
+		sta voice1_sustain_release, x
+		lda pulse_width, x
+		sta voice1_pulse_width, x
+		lda pulse_width + $1, x
+		sta voice1_pulse_width + $1, x
+		lda frequency, x
+		sta voice1_frequency, x
+		lda frequency + $1, x
+		sta voice1_frequency + $1, x
 
 l123E:
-		lda $1261, x
-		and $1278, x
-		sta $d404, x
+		lda waveform, x
+		and gate, x
+		sta voice1_control, x
 		rts 
+
+; per-channel state, 7 bytes apart for channels 1, 2 and 3
+order_position:
+		.byte	$02
+transpose:		.byte	$00
+		.byte	$00
+
+pattern_position:
+		.byte	$16
+note_delay:		.byte	$00
+		.byte	$00, $00, $02, $00, $00, $01, $fd, $00, $00, $02, $00, $00, $01, $fd, $00, $00
+		.byte	$00, $00
+
+new_note:
+		.byte	$00
+wave_position:		.byte	$01
+waveform:		.byte	$09
+pulse_position:		.byte	$01
+pulse_timer:		.byte	$00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+
+order_list_index:
+		.byte	$00
+pattern_number:		.byte	$00
+tempo:		.byte	$05
+tick:		.byte	$00
+note:		.byte	$13
+instrument:		.byte	$01
+gate:		.byte	$ff
+		.byte	$01, $02, $05, $00, $00, $01, $fe, $02, $02, $05, $00, $00, $01, $fe, $00, $00
+		.byte	$00
+
+frequency:
+		.word	$0343
+pulse_width:		.word	$8d00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+
+attack_decay:
+		.byte	$00
+sustain_release:		.byte	$fa
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00
+
+frequency_lo:
+		.byte	$17, $27, $39, $4b, $5f, $74, $8a, $a1, $ba, $d4, $f0, $0e, $2d, $4e, $71, $96
+		.byte	$be, $e8, $14, $43, $74, $a9, $e1, $1c, $5a, $9c, $e2, $2d, $7c, $cf, $28, $85
+		.byte	$e8, $52, $c1, $37, $b4, $39, $c5, $5a, $f7, $9e, $4f, $0a, $d1, $a3, $82, $6e
+		.byte	$68, $71, $8a, $b3, $ee, $3c, $9e, $15, $a2, $46, $04, $dc, $d0, $e2, $14, $67
+		.byte	$dd, $79, $3c, $29, $44, $8d, $08, $b8, $a1, $c5, $28, $cd, $ba, $f1, $78, $53
+		.byte	$87, $1a, $10, $71, $42, $89, $4f, $9b, $74, $e2, $f0, $a6, $0e, $33, $20, $ff
+frequency_hi:
+		.byte	$01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $02, $02, $02, $02, $02
+		.byte	$02, $02, $03, $03, $03, $03, $03, $04, $04, $04, $04, $05, $05, $05, $06, $06
+		.byte	$06, $07, $07, $08, $08, $09, $09, $0a, $0a, $0b, $0c, $0d, $0d, $0e, $0f, $10
+		.byte	$11, $12, $13, $14, $15, $17, $18, $1a, $1b, $1d, $1f, $20, $22, $24, $27, $29
+		.byte	$2b, $2e, $31, $34, $37, $3a, $3e, $41, $45, $49, $4e, $52, $57, $5c, $62, $68
+		.byte	$6e, $75, $7c, $83, $8b, $93, $9c, $a5, $af, $b9, $c4, $d0, $dd, $ea, $f8, $ff
+order_list_lo:
+		.byte	$46, $57, $68
+order_list_hi:
+		.byte	$14, $14, $14
+pattern_lo:
+		.byte	$79, $93, $bf, $c2, $d5, $ef, $04, $1e, $4a, $5f, $78
+pattern_hi:
+		.byte	$14, $14, $14, $14, $14, $14, $15, $15, $15, $15
+; the tables below are indexed from 1: entry n is at label + n
+instrument_attack_decay:
+		.byte	$15, $00, $00, $00, $70, $00, $50, $00, $00, $00, $00
+instrument_sustain_release:
+		.byte	$00, $fa, $f7, $f7, $f4, $f9, $fa, $f9, $f9, $f9, $f9
+instrument_wave:
+		.byte	$f9, $01, $03, $08, $0c, $0e, $01, $15, $1c, $23, $2a
+instrument_pulse:
+		.byte	$32, $01, $00, $00, $00, $00, $03, $00, $00, $00, $00
+instrument_filter:
+		.byte	$00, $01, $00, $00, $00, $00, $00, $00, $00, $00, $00
+wave_left:
+		.byte	$00, $40, $ff, $81, $10, $10, $10, $ff, $81, $10, $10, $10, $80, $ff, $20, $20
+		.byte	$20, $20, $20, $20, $ff, $20, $20, $20, $20, $20, $20, $ff, $20, $20, $20, $20
+		.byte	$20, $20, $ff, $20, $20, $20, $20, $20, $20, $ff, $81, $10, $10, $10, $10, $10
+		.byte	$10, $ff, $20, $20, $20, $20, $20
+wave_right:
+		.byte	$20, $ff, $80, $00, $5f, $21, $20, $1f, $00, $5f, $2d, $2c, $2b, $5f, $00, $80
+		.byte	$80, $83, $83, $87, $87, $0e, $f8, $f8, $fb, $fb, $80, $80, $15, $fb, $fb, $80
+		.byte	$80, $84, $84, $1c, $fb, $fb, $80, $80, $85, $85, $23, $5f, $80, $fe, $fc, $f9
+		.byte	$f5, $f0, $00, $80, $80, $84, $84, $87, $87
+pulse_left:
+		.byte	$32, $8d, $ff, $8e, $20, $20
+pulse_right:
+		.byte	$ff, $00, $00, $00, $fa, $06
+filter_left:
+		.byte	$04, $88, $00
+filter_right:
+		.byte	$ff, $f1, $05, $00
+order_list1:
+		.byte	$f0, $00, $00, $00, $00, $f0, $00, $00, $04, $06, $f4, $00, $00, $04, $0a, $ff
+		.byte	$05
+order_list2:
+		.byte	$f0, $02, $02, $01, $01, $f0, $01, $01, $01, $07, $f4, $01, $01, $01, $07, $ff
+		.byte	$05
+order_list3:
+		.byte	$f0, $02, $02, $02, $02, $f0, $03, $03, $05, $08, $f4, $03, $03, $05, $09, $ff
+		.byte	$05
+pattern0:
+		.byte	$01, $75, $75, $75, $73, $75, $75, $75, $75, $75, $73, $75, $75, $75, $75, $75
+		.byte	$73, $75, $75, $73, $73, $73, $70, $70, $73, $00
+pattern1:
+		.byte	$02, $84, $04, $bb, $02, $84, $03, $87, $02, $b4, $04, $bb, $02, $84, $84, $04
+		.byte	$bb, $03, $87, $04, $bb, $bb, $02, $84, $04, $bb, $02, $84, $03, $87, $87, $04
+		.byte	$bb, $02, $84, $04, $bb, $02, $84, $03, $87, $87, $87, $00
+pattern2:
+		.byte	$bd, $e9, $00
+pattern3:
+		.byte	$05, $99, $fb, $06, $aa, $ac, $fc, $aa, $a8, $aa, $a8, $a7, $a3, $a5, $bd, $0b
+		.byte	$97, $fd, $00
+pattern4:
+		.byte	$01, $7d, $7d, $7d, $7c, $7d, $7d, $7d, $7d, $7d, $7c, $7d, $7d, $7c, $7c, $7c
+		.byte	$7a, $7c, $7c, $7c, $7c, $7c, $7a, $7c, $7c, $00
+pattern5:
+		.byte	$07, $a1, $fb, $06, $ad, $ac, $ad, $ac, $aa, $a8, $07, $a0, $fb, $06, $ac, $aa
+		.byte	$ac, $aa, $ac, $ad, $00
+pattern6:
+		.byte	$01, $7d, $7d, $7d, $7c, $7d, $7d, $7d, $7d, $7d, $7c, $7d, $7d, $77, $77, $77
+		.byte	$72, $77, $77, $77, $77, $77, $72, $77, $77, $00
+pattern7:
+		.byte	$02, $84, $04, $bb, $02, $84, $03, $87, $02, $b4, $04, $bb, $02, $84, $84, $04
+		.byte	$bb, $03, $87, $04, $bb, $bb, $0a, $8d, $04, $bb, $0a, $8d, $03, $87, $0a, $8b
+		.byte	$04, $bb, $0a, $8b, $04, $bb, $0a, $8b, $89, $89, $89, $00
+pattern8:
+		.byte	$07, $a1, $fb, $06, $ad, $ac, $ad, $ac, $aa, $a8, $09, $9b, $bd, $9b, $bd, $9b
+		.byte	$bd, $08, $9b, $fb, $00
+pattern9:
+		.byte	$07, $a1, $fb, $06, $ad, $ac, $ad, $ac, $aa, $a8, $09, $9b, $bd, $9b, $bd, $9b
+		.byte	$bd, $07, $9f, $bd, $9f, $bd, $9f, $bd, $00
+pattern10:
+		.byte	$01, $7d, $7d, $7d, $7c, $7d, $7d, $7d, $7d, $7d, $7c, $7d, $7d, $77, $77, $77
+		.byte	$72, $77, $77, $7b, $7b, $7b, $76, $7b, $7b, $00
+
+.virtual $4040
+; ---- video bank 1 ($4000-$7fff) ----
+; four sprites the game draws the road walls into
+road_sprites:
+		.fill	256
+.endv
+
+*=$4140
+
+car_sprites:
+		.byte	$00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00
+		.byte	$7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00
+		.byte	$7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f
+		.byte	$e0, $00, $7f, $e0, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00
+		.byte	$7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f
+		.byte	$e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00
+		.byte	$7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f
+		.byte	$e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0
+		.byte	$00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $00, $00, $00
+
+.virtual $4400
+screen:
+		.fill	1000
+.endv
+
+.virtual $47f8
+sprite_pointers:
+		.fill	8
+.endv
+
+*=$4800
+
+; the score's digits, one sprite each
+digit_sprites:
+		.byte	$0f, $e0, $00, $3f, $f8, $00, $7f, $fc, $00, $7c, $7c, $00, $f8, $3e, $00, $f8
+		.byte	$3e, $00, $f8, $3e, $00, $f8, $3e, $00, $f8, $3e, $00, $f8, $3e, $00, $f8, $3e
+		.byte	$00, $7c, $7c, $00, $7f, $fc, $00, $3f, $f8, $00, $0f, $e0, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$1f, $80, $00, $3f, $80, $00, $7f, $80, $00, $7f, $80, $00, $7f, $80, $00, $6f
+		.byte	$80, $00, $4f, $80, $00, $0f, $80, $00, $0f, $80, $00, $0f, $80, $00, $0f, $80
+		.byte	$00, $0f, $80, $00, $3f, $e0, $00, $3f, $e0, $00, $3f, $e0, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$1f, $e0, $00, $1f, $f8, $00, $1f, $fc, $00, $00, $7e, $00, $00, $3e, $00, $00
+		.byte	$7e, $00, $0f, $fc, $00, $3f, $f8, $00, $7f, $e0, $00, $7c, $00, $00, $f8, $00
+		.byte	$00, $f8, $00, $00, $ff, $fe, $00, $ff, $fe, $00, $ff, $fe, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$1f, $e0, $00, $1f, $f8, $00, $1f, $fc, $00, $00, $7e, $00, $00, $3e, $00, $00
+		.byte	$7c, $00, $1f, $fc, $00, $1f, $f8, $00, $1f, $fc, $00, $00, $7c, $00, $00, $3e
+		.byte	$00, $00, $7e, $00, $ff, $fc, $00, $ff, $f8, $00, $ff, $e0, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$f8, $3e, $00, $f8, $3e, $00, $f8, $3e, $00, $f8, $3e, $00, $f8, $3e, $00, $7c
+		.byte	$3e, $00, $7f, $fe, $00, $3f, $fe, $00, $0f, $fe, $00, $00, $3e, $00, $00, $3e
+		.byte	$00, $00, $3e, $00, $00, $3e, $00, $00, $3e, $00, $00, $3e, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$ff, $f0, $00, $ff, $f0, $00, $ff, $f0, $00, $f8, $00, $00, $f8, $00, $00, $7c
+		.byte	$00, $00, $7f, $e0, $00, $3f, $f8, $00, $0f, $fc, $00, $00, $7e, $00, $00, $3e
+		.byte	$00, $00, $7e, $00, $ff, $fc, $00, $ff, $f8, $00, $ff, $e0, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$0f, $f0, $00, $3f, $f0, $00, $7f, $f0, $00, $7c, $00, $00, $f8, $00, $00, $f8
+		.byte	$00, $00, $ff, $e0, $00, $ff, $f8, $00, $ff, $fc, $00, $f8, $7e, $00, $f8, $3e
+		.byte	$00, $7c, $7e, $00, $7f, $fc, $00, $3f, $f8, $00, $0f, $e0, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$ff, $e0, $00, $ff, $f8, $00, $ff, $fc, $00, $00, $7c, $00, $00, $3e, $00, $00
+		.byte	$3e, $00, $1f, $fe, $00, $1f, $fe, $00, $1f, $fe, $00, $00, $3e, $00, $00, $3e
+		.byte	$00, $00, $3e, $00, $00, $3e, $00, $00, $3e, $00, $00, $3e, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$0f, $e0, $00, $3f, $f8, $00, $7f, $fc, $00, $fc, $7e, $00, $f8, $3e, $00, $fc
+		.byte	$7e, $00, $7f, $fc, $00, $3f, $f8, $00, $7f, $fc, $00, $fc, $7e, $00, $f8, $3e
+		.byte	$00, $fc, $7e, $00, $7f, $fc, $00, $3f, $f8, $00, $0f, $e0, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$0f, $e0, $00, $3f, $f8, $00, $7f, $fc, $00, $fc, $7c, $00, $f8, $3e, $00, $fc
+		.byte	$3e, $00, $7f, $fe, $00, $3f, $fe, $00, $0f, $fe, $00, $00, $3e, $00, $00, $3e
+		.byte	$00, $00, $7c, $00, $1f, $fc, $00, $1f, $f8, $00, $1f, $e0, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+*=$7800
+
+charset:
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+		.byte	$00, $0f, $3f, $3f, $7f, $79, $79, $7b, $00, $07, $c7, $c7, $e7, $e7, $e7, $e7
+		.byte	$00, $87, $8f, $8f, $9f, $9e, $bc, $bc, $00, $c0, $80, $00, $00, $00, $00, $00
+		.byte	$00, $ff, $ff, $ff, $ff, $f1, $f1, $f7, $00, $00, $c0, $c0, $e0, $e0, $e3, $e3
+		.byte	$00, $00, $00, $00, $00, $f0, $fc, $fc, $00, $00, $00, $00, $00, $0f, $3f, $3f
+		.byte	$00, $00, $00, $00, $00, $00, $c3, $e3, $00, $00, $00, $00, $00, $f0, $fc, $fc
+		.byte	$33, $17, $07, $0f, $1f, $1f, $3f, $00, $c7, $c7, $87, $e7, $e7, $e7, $e7, $00
+		.byte	$bc, $9e, $9e, $9f, $8f, $8f, $87, $00, $00, $00, $00, $00, $00, $80, $c0, $00
+		.byte	$f7, $f7, $f7, $f7, $f3, $f3, $f1, $00, $c7, $87, $87, $c7, $c3, $e3, $e0, $00
+		.byte	$fe, $9e, $9e, $fe, $fe, $fe, $fe, $00, $7f, $78, $79, $7f, $3f, $3f, $0f, $00
+		.byte	$e7, $07, $e7, $e7, $e3, $c3, $00, $00, $9e, $fe, $fe, $e0, $f0, $f8, $f8, $00
+
+.virtual $7fff
+; the VIC shows the bank's last byte in the open border
+idle_byte:		.byte	?
+; ---- road map, built at run time ----
+; one byte per row: 1 = wall
+left_road:
+		.fill	256
+right_road:
+		.fill	256
+.endv
+
+.virtual $d000
+; ---- VIC-II ----
+sprite0_x:		.byte	?
+sprite0_y:		.byte	?
+sprite1_x:		.byte	?
+sprite1_y:		.byte	?
+sprite2_x:		.byte	?
+sprite2_y:		.byte	?
+sprite3_x:		.byte	?
+sprite3_y:		.byte	?
+sprite4_x:		.byte	?
+sprite4_y:		.byte	?
+sprite5_x:		.byte	?
+sprite5_y:		.byte	?
+sprite6_x:		.byte	?
+sprite6_y:		.byte	?
+sprite7_x:		.byte	?
+sprite7_y:		.byte	?
+sprites_x_msb:		.byte	?
+vic_control1:		.byte	?
+raster:		.byte	?
+light_pen_x:		.byte	?
+light_pen_y:		.byte	?
+sprite_enable:		.byte	?
+vic_control2:		.byte	?
+sprite_expand_y:		.byte	?
+vic_memory:		.byte	?
+vic_irq_status:		.byte	?
+vic_irq_enable:		.byte	?
+sprite_priority:		.byte	?
+sprite_multicolor:		.byte	?
+sprite_expand_x:		.byte	?
+sprite_sprite_collision:		.byte	?
+sprite_background_collision:		.byte	?
+border_color:		.byte	?
+background_color:		.byte	?
+background_color1:		.byte	?
+background_color2:		.byte	?
+background_color3:		.byte	?
+sprite_multicolor0:		.byte	?
+sprite_multicolor1:		.byte	?
+sprite0_color:		.byte	?
+sprite1_color:		.byte	?
+sprite2_color:		.byte	?
+sprite3_color:		.byte	?
+sprite4_color:		.byte	?
+sprite5_color:		.byte	?
+sprite6_color:		.byte	?
+sprite7_color:		.byte	?
+.endv
+
+.virtual $d400
+; ---- SID ----
+voice1_frequency:		.word	?
+voice1_pulse_width:		.word	?
+voice1_control:		.byte	?
+voice1_attack_decay:		.byte	?
+voice1_sustain_release:		.byte	?
+voice2_frequency:		.word	?
+voice2_pulse_width:		.word	?
+voice2_control:		.byte	?
+voice2_attack_decay:		.byte	?
+voice2_sustain_release:		.byte	?
+voice3_frequency:		.word	?
+voice3_pulse_width:		.word	?
+voice3_control:		.byte	?
+voice3_attack_decay:		.byte	?
+voice3_sustain_release:		.byte	?
+filter_cutoff:		.word	?
+filter_control:		.byte	?
+volume_filter_mode:		.byte	?
+.endv
+
+.virtual $d800
+; ---- color RAM ----
+color_ram:
+		.fill	1000
+.endv
+
+.virtual $dc00
+; ---- CIAs ----
+cia1_port_a:		.byte	?
+cia1_port_b:		.byte	?
+.endv
+
+.virtual $dc0d
+cia1_interrupt_control:		.byte	?
+.endv
+
+.virtual $dd00
+cia2_port_a:		.byte	?
+.endv
+
+.virtual $dd0d
+cia2_interrupt_control:		.byte	?
+.endv
+
 *=$fffe
 
 ; the hardware IRQ vector ($01 = $35: KERNAL banked out, so it's RAM)

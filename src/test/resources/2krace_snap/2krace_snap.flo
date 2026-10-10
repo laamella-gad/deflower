@@ -1,6 +1,262 @@
 deflower 2krace_snap.vsf
-; the hardware IRQ vector ($01 = $35: KERNAL banked out, so it's RAM)
-$fffe addr irq_vector
-$09fd code irq
+
+; ---- zero page ----
+; the road map row at the top of the screen; counts down as the road scrolls
+$02 virtual byte road_row
+; the screen's fine scroll, 0-7
+$04 virtual byte fine_scroll
+; scroll speed in eighths of a row per frame
+$05 virtual byte speed
+$06 virtual byte max_speed
+; 0 = in the left lane, 1 = in the right lane, 2 = moving left, 3 = moving right
+$07 virtual byte car_state
+; index into car_x while the car changes lanes
+$08 virtual byte car_step
+; the current stage's index into the wall tables
+$09 virtual byte difficulty
+$d0 virtual word music_pointer
+$fb virtual word draw_pointer
+$fd virtual word draw_pointer2
+
+; ---- start-up ----
+; BASIC stub: SYS 2061
+$0801-$080d byte basic_stub
+; the decruncher's start, still in memory but no longer used
+$080d-$0820 byte decruncher_leftover
+; where the decruncher jumps to
+$0820 code start
+
+; ---- game ----
+$0850 code new_game
+; waits until irq_bottom sets the operand of the lda to 1
+$087b code game_loop
 ; where the CPU was when the snapshot was taken
 $091a code snapshot_pc
+; operands the game loop changes to step down the road map
+$0927 left_road_source
+$092c right_road_source
+$099f code steer
+$09c4 code position_car
+$09db code irq_bottom
+$09fd code irq
+$0a30 code irq_lower
+; the road sprites' y in each half of the screen, set from fine_scroll
+$0a0b upper_road_y
+$0a32 lower_road_y
+$0a57 code init_road
+$0a73 code wait_frame
+$0a7e code init_video
+$0b0f code read_joystick
+; moves to the next stage when the score is high enough
+$0b3c code check_stage
+$0b66 byte stage
+$0b67 byte[4] stage_color
+$0b6b byte[4] stage_max_speed
+$0b6f byte[4] stage_difficulty
+$0b73 byte[4] stage_car_sprite
+$0b77 code clear_screen
+; draws one road sprite's column of walls from the road map
+$0b8f code draw_road_sprite
+$0bb5 code reset_score
+; adds score_add to score, one decimal digit per byte
+$0bc7 code add_score
+$0bfd byte[5] score
+; the last digit is the number of rows scrolled this frame
+$0c02 byte[5] score_add
+$0c07 byte[5] score_carry
+$0c0c byte[5] high_score
+$0c11 code update_high_score
+$0c41 byte[32] flash_colors
+; the title: shows the logo and flashes it until fire is pressed
+$0c61 code title
+; the length of the current wall on each side; 0 = no wall
+$0c98 byte left_wall
+$0c99 byte right_wall
+; per difficulty
+$0c9a byte[10] wall_switch_length
+$0ca4 byte[10] wall_max_length
+$0cae byte[10] wall_end_chance
+$0cb8 byte[10] wall_start_chance
+$0cc2 code init_walls
+; builds the next row of the road map
+$0cd9 code next_row
+; a 32-bit Galois LFSR; returns its low byte
+$0d4d code random
+$0d7f dword random_seed
+$0d83 byte[13] unused_0d83
+; sprite 0's x for each car_step, easing between the lanes
+$0d90 byte[16] car_x
+
+; ---- music player ----
+$1000 code music_init
+$1003 code music_play
+$1006 code music_set_volume
+; unused jump table entry
+$1009 code
+; operands the player changes
+$1017 init_flag
+$104f filter_steps
+$1099 filter_resonance
+$109e filter_type
+$10a0 master_volume
+; per-channel state, 7 bytes apart for channels 1, 2 and 3
+$1248-$12b1
+$1248 byte order_position
+$1249 byte transpose
+$124b byte pattern_position
+$124c byte note_delay
+$125f byte new_note
+$1260 byte wave_position
+$1261 byte waveform
+$1262 byte pulse_position
+$1263 byte pulse_timer
+$1272 byte order_list_index
+$1273 byte pattern_number
+$1274 byte tempo
+$1275 byte tick
+$1276 byte note
+$1277 byte instrument
+$1278 byte gate
+$128a word frequency
+$128c word pulse_width
+$129c byte attack_decay
+$129d byte sustain_release
+$12b1 byte[96] frequency_lo
+$1311 byte[96] frequency_hi
+$1371 byte[3] order_list_lo
+$1374 byte[3] order_list_hi
+$1377 byte[11] pattern_lo
+$1382 byte[11] pattern_hi
+; the tables below are indexed from 1: entry n is at label + n
+$138c byte[11] instrument_attack_decay
+$1397 byte[11] instrument_sustain_release
+$13a2 byte[11] instrument_wave
+$13ad byte[11] instrument_pulse
+$13b8 byte[11] instrument_filter
+$13c3 byte[55] wave_left
+$13fa byte[57] wave_right
+$1433 byte[6] pulse_left
+$1439 byte[6] pulse_right
+$143f byte[3] filter_left
+$1442 byte[4] filter_right
+$1446 byte[17] order_list1
+$1457 byte[17] order_list2
+$1468 byte[17] order_list3
+$1479 byte[26] pattern0
+$1493 byte[44] pattern1
+$14bf byte[3] pattern2
+$14c2 byte[19] pattern3
+$14d5 byte[26] pattern4
+$14ef byte[21] pattern5
+$1504 byte[26] pattern6
+$151e byte[44] pattern7
+$154a byte[21] pattern8
+$155f byte[25] pattern9
+$1578 byte[26] pattern10
+
+; ---- video bank 1 ($4000-$7fff) ----
+; four sprites the game draws the road walls into
+$4040 virtual byte[64*4] road_sprites
+$4140 byte[64*4] car_sprites
+$4400-$47e8 virtual byte screen
+$47f8 virtual byte[8] sprite_pointers
+; the score's digits, one sprite each
+$4800 byte[64*10] digit_sprites
+$7800 byte[8*22] charset
+; the VIC shows the bank's last byte in the open border
+$7fff virtual byte idle_byte
+
+; ---- road map, built at run time ----
+; one byte per row: 1 = wall
+$8000 virtual byte[256] left_road
+$8100 virtual byte[256] right_road
+
+; ---- VIC-II ----
+$d000 virtual {
+    $00 byte sprite0_x
+    $01 byte sprite0_y
+    $02 byte sprite1_x
+    $03 byte sprite1_y
+    $04 byte sprite2_x
+    $05 byte sprite2_y
+    $06 byte sprite3_x
+    $07 byte sprite3_y
+    $08 byte sprite4_x
+    $09 byte sprite4_y
+    $0a byte sprite5_x
+    $0b byte sprite5_y
+    $0c byte sprite6_x
+    $0d byte sprite6_y
+    $0e byte sprite7_x
+    $0f byte sprite7_y
+    $10 byte sprites_x_msb
+    $11 byte vic_control1
+    $12 byte raster
+    $13 byte light_pen_x
+    $14 byte light_pen_y
+    $15 byte sprite_enable
+    $16 byte vic_control2
+    $17 byte sprite_expand_y
+    $18 byte vic_memory
+    $19 byte vic_irq_status
+    $1a byte vic_irq_enable
+    $1b byte sprite_priority
+    $1c byte sprite_multicolor
+    $1d byte sprite_expand_x
+    $1e byte sprite_sprite_collision
+    $1f byte sprite_background_collision
+    $20 byte border_color
+    $21 byte background_color
+    $22 byte background_color1
+    $23 byte background_color2
+    $24 byte background_color3
+    $25 byte sprite_multicolor0
+    $26 byte sprite_multicolor1
+    $27 byte sprite0_color
+    $28 byte sprite1_color
+    $29 byte sprite2_color
+    $2a byte sprite3_color
+    $2b byte sprite4_color
+    $2c byte sprite5_color
+    $2d byte sprite6_color
+    $2e byte sprite7_color
+}
+
+; ---- SID ----
+$d400 virtual {
+    $00 word voice1_frequency
+    $02 word voice1_pulse_width
+    $04 byte voice1_control
+    $05 byte voice1_attack_decay
+    $06 byte voice1_sustain_release
+    $07 word voice2_frequency
+    $09 word voice2_pulse_width
+    $0b byte voice2_control
+    $0c byte voice2_attack_decay
+    $0d byte voice2_sustain_release
+    $0e word voice3_frequency
+    $10 word voice3_pulse_width
+    $12 byte voice3_control
+    $13 byte voice3_attack_decay
+    $14 byte voice3_sustain_release
+    $15 word filter_cutoff
+    $17 byte filter_control
+    $18 byte volume_filter_mode
+}
+
+; ---- color RAM ----
+$d800-$dbe8 virtual byte color_ram
+
+; ---- CIAs ----
+$dc00 virtual {
+    $00 byte cia1_port_a
+    $01 byte cia1_port_b
+    $0d byte cia1_interrupt_control
+}
+$dd00 virtual {
+    $00 byte cia2_port_a
+    $0d byte cia2_interrupt_control
+}
+
+; the hardware IRQ vector ($01 = $35: KERNAL banked out, so it's RAM)
+$fffe addr irq_vector

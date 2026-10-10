@@ -25,6 +25,16 @@ Open questions:
 
 Related: [0057](0057-watch-mode.md) should also rewrite the included files. `Deflower` clears `out/` per `.flo` file, so the extra files are cleaned up along with the main one.
 
+## Example: 2krace's music player
+
+Fixture `2krace_snap` has a good candidate. Its music player, `$1000-$1592`, is standalone. It has a jump table (`music_init`, `music_play`, `music_set_volume`), its own code, channel state, frequency tables, instruments, order lists and patterns. The game calls only `music_init` and `music_play`. Outside its own region, the player touches only the SID registers and the zero-page `music_pointer` (`$d0`). Both are declared in the main file, so labels would cross the file boundary in both directions. Gaps of unused memory lie on both sides of it (`$0da0-$0fff` before, `$1592-` after), so no instruction or element crosses its edges. With this feature, the line would be:
+
+```
+$1000-$1592 export music.asm
+```
+
+`out/2krace_snap.asm` would then hold `.include "music.asm"` where the player is now. Through the shared symbol table, the game's `jsr music_init` would resolve to the included file, and the player's `sta voice1_control` to the main file. A fixture made from this would cover a code region with traced code, data tables and self-modified operands (`init_flag`, `filter_steps`, ...) all inside one exported file.
+
 Done when: a region marked in the `.flo` file is written to its own `.asm` file, the main file includes it at the right place, and a fixture shows that the main file assembles with 64tass to the same bytes as without the split.
 
 ## Decisions
