@@ -71,6 +71,15 @@ class DeflowerTest {
     }
 
     /**
+     * Issue 0041: an addr line prints .addr with the label of the address
+     * each element holds, or the hex address when it has none.
+     */
+    @Test
+    void emitsUserDeclaredAddrWithLabels() throws IOException, URISyntaxException {
+        assertDeflowered("addrtype");
+    }
+
+    /**
      * registerBlock collects an error when one area overwrites a genuinely
      * different one (Subject.errors), and Deflower refuses to write an
      * (illegal) asm file for a subject that has any (issue 0018).

@@ -22,8 +22,9 @@
  *       the same line is ignored.
  *     - virtual: memory the program uses but doesn't contain (I/O,
  *       zero page, screen). Output as a .virtual reservation, not as data.
- *     - type: char (text), byte, word, dword, or code (an entry point to
- *       trace from; any [size] is ignored). A range without a type is a
+ *     - type: char (text), byte, word, dword, addr (a 16-bit address,
+ *       printed as .addr with the label of the address it holds), or code
+ *       (an entry point to trace from; any [size] is ignored). A range without a type is a
  *       placeholder: printed as bytes, but a later, more specific line
  *       may narrow part of it without a conflict. A single address
  *       without a type only names (or comments) that address and covers
@@ -36,7 +37,7 @@
  *       for one element) is an error.
  *     - label: a name for the address, from [A-Za-z0-9._?]. It can't be
  *       a reserved word: deflower, virtual, export, char, byte, word,
- *       dword, code.
+ *       dword, addr, code.
  *     - export <id> and the { ... } block (a '}' on its own line) parse,
  *       but have no effect yet.
  *     Two lines may only cover the same memory if the earlier one is a
@@ -65,7 +66,7 @@ setVirtual: 'virtual';
 setLabel: ID;
 export: 'export' ID;
 
-datatype: (CHAR|BYTE|WORD|DWORD|CODE) ( '[' arraySize? ']')?;
+datatype: (CHAR|BYTE|WORD|DWORD|ADDR|CODE) ( '[' arraySize? ']')?;
 // The element count of an array: a number, or * and + over numbers, with
 // * binding tighter.
 arraySize: arraySize '*' arraySize  # arraySizeMul
@@ -78,6 +79,7 @@ CHAR: 'char';
 BYTE: 'byte';
 WORD: 'word';
 DWORD: 'dword';
+ADDR: 'addr';
 CODE: 'code';
 COMMENT: (';'| '#')  ~[\r\n]*;
 WS: [ \t]+ -> skip;

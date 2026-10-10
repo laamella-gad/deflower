@@ -33,7 +33,7 @@ The pipeline is: **flow file → parse → memory image + annotations → code-f
   - `deflower <file>` starts a run: it loads a `.vsf` VICE snapshot or a `.prg`, relative to the `.flo` file. Each run is independent and writes `out/<file without extension>.asm`.
   - An annotation line is `<address or start-end> [virtual] [<type>[<size>]] [<label>] [export <id>] [{]`, with the parts in exactly that order and each at most once. Anything else is a parse error.
     - The range end is exclusive.
-    - Types are `char`, `byte`, `word`, `dword` and `code` (an entry point). A range with no type is an `UNKNOWN` placeholder, which a later line may narrow without an area conflict. A single address with no type is only a label/comment and registers no area.
+    - Types are `char`, `byte`, `word`, `dword`, `addr` (a 16-bit address, printed as `.addr` with its target's label) and `code` (an entry point). A range with no type is an `UNKNOWN` placeholder, which a later line may narrow without an area conflict. A single address with no type is only a label/comment and registers no area.
     - The size is a number or `*`/`+` over numbers (`byte[40*21]`, `byte[$af]`). A size of 0 is an error.
     - The reserved words can't be labels.
     - `export` and `{ }` parse but do nothing yet.

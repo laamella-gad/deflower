@@ -62,7 +62,7 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
 | [0038](0038-rta-return-address-table-detection.md) | open | low | Detect and support 64tass's `.rta` return-address-table idiom |
 | [0039](0039-text-string-directive-detection.md) | done |  | Detect runs of printable characters and emit 64tass's `.text`/`.null`/`.ptext` |
 | [0040](0040-text-encoding-screen-code-vs-ascii.md) | done |  | Support 64tass text encodings (`.enc`/screen code) for CHAR output |
-| [0041](0041-user-declarable-address-pointer-type.md) | open | high | Allow annotating a `.flo` line with type `address`/`pointer` |
+| [0041](0041-user-declarable-address-pointer-type.md) | done |  | Allow annotating a `.flo` line with type `address`/`pointer` |
 | [0042](0042-lowercase-generated-assembly.md) | open | high | Generate lowercase assembly output (except user labels/comments) |
 | [0043](0043-error-on-duplicate-label-definition.md) | done |  | Report an error when the same label is defined at two addresses |
 | [0044](0044-array-size-arithmetic-and-hex.md) | done |  | Allow hex values and `*`/`+` arithmetic inside `[n]` array sizes |

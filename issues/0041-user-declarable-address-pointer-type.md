@@ -1,7 +1,6 @@
 ---
 title: Allow annotating a `.flo` line with type `address`/`pointer`
-status: open
-priority: medium
+status: done
 labels: enhancement
 ---
 
@@ -19,3 +18,11 @@ Done when: a `.flo` line like `$2000 address jump_table[4]` registers a `POINTER
 ## Decisions
 
 - **Keyword `addr`**, matching 64tass's `.addr` and as short as `byte`/`word`: `$2000 addr[4] jump_table`. It maps to `DataType.POINTER` and becomes a reserved word.
+
+## Closing note
+
+Added the `addr` keyword: an `ADDR` token in `Flo.g4` (so it is a reserved word), `LineType.ADDR_BLOCK` mapped to `DataType.POINTER` in `FloReader`, and `ADDR_BLOCK` in `Subject.annotate`'s data-block case. `ResultWriter` needed no change. The grammar's format comment and CLAUDE.md list the new type.
+
+Each element prints the label at the address it holds, or the hex address when there is none; targets are not auto-labelled or traced (tracing is [0038](0038-rta-return-address-table-detection.md)'s `rta`).
+
+New fixture `addrtype` (`$c000 addr[3] vectors`, two entries pointing at labelled code, one at unlabelled `$D020`) prints `.addr first, second, $D020`; test `emitsUserDeclaredAddrWithLabels`. `mvn -o test`: 48 tests green. Its `expected.asm` reassembles with 64tass to the `.prg` minus its header.

@@ -102,6 +102,8 @@ class FloReader {
                 type = WORD_BLOCK;
             } else if (ctx.DWORD() != null) {
                 type = DWORD_BLOCK;
+            } else if (ctx.ADDR() != null) {
+                type = ADDR_BLOCK;
             } else if (ctx.CODE() != null) {
                 type = CODE_ENTRY;
             }
