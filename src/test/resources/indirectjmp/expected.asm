@@ -2,10 +2,10 @@
 *=$C000
 
 entry:
-		JMP (pC010)
+		JMP (aC010)
 *=$C010
 
-pC010:
+aC010:
 		.addr	lC020
 *=$C020
 

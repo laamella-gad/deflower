@@ -172,7 +172,7 @@ class AssemblyFileFormat {
             case BYTE, UNKNOWN, CHAR -> ".byte";
             case WORD -> ".word";
             case DWORD -> ".dword";
-            case POINTER -> ".addr";
+            case ADDR -> ".addr";
         };
     }
 
@@ -186,7 +186,7 @@ class AssemblyFileFormat {
     }
 
     public void print(DataArea block, int address, Subject subject) throws IOException {
-        // A multi-byte area (WORD, DWORD, POINTER) owns several consecutive
+        // A multi-byte area (WORD, DWORD, ADDR) owns several consecutive
         // addresses but is one value: print it once, at its first address.
         if (address != block.address) {
             return;
@@ -208,7 +208,7 @@ class AssemblyFileFormat {
             case DWORD:
                 tabularPrint(".dword", asHexDword(subject.dwordAt(address)));
                 break;
-            case POINTER:
+            case ADDR:
                 // 64tass's .addr is specifically "a 16-bit address constant"
                 // (issue 0036) - more precise than .WORD for a value that's
                 // always an address, not an arbitrary 16-bit number.

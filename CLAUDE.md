@@ -43,12 +43,12 @@ The pipeline is: **flow file → parse → memory image + annotations → code-f
   - **Apply:** for each run, `SubjectConfigurer` creates a `Subject`, loads the image (`ViceSnapshotReader` or `PrgReader`, picked by extension), and calls `Subject.annotate` for each annotation. Data lines register one `DataArea` per element; `code` lines push an entry point onto `potentialCodeLocations`.
   - To add `.flo` syntax, change the grammar, `FloReader` and `Annotation`/`Subject.annotate`.
 - **`Subject`** holds:
-  - the 64K `MemoryLocation[]` (each cell has the byte, an `Area` pointer, a label and a comment);
+  - the 64K `MemoryLocation[]` (each location has the byte, an `Area` reference, a label and a comment);
   - the `potentialCodeLocations` stack and the output path;
   - the `errors` list. `registerBlock` reports one area overwriting a different, non-placeholder one, and `Deflower` skips writing output for a subject with errors.
   - It also answers memory questions used by the output: run and array boundaries (`continuesRun`, `endOfRun`, `endOfArray`), annotations (`isAnnotated`), and the ASCII/screen-code guess (`likelyTextEncoding`).
 - **`FlowAnalyser`** pops entry points and follows 6502 control flow using `mpu6502`'s `Instruction` table.
-  - It registers an `InstructionArea` for each decoded instruction, follows fall-through and branch/jump/JSR targets (including `JMP (indirect)` through its pointer), and auto-labels targets (`lXXXX`, `dXXXX`, `pXXXX`).
+  - It registers an `InstructionArea` for each decoded instruction, follows fall-through and branch/jump/JSR targets (including `JMP (indirect)` through the address it reads), and auto-labels targets (`lXXXX`, `dXXXX`, `aXXXX`).
   - Analysis stops at addresses already covered by a non-placeholder area, and won't decode an instruction whose bytes run into one. That is how it avoids loops and detects jumps into data ("Jumping into non-code area").
 - **`Area`** is the common base for `DataArea` and `InstructionArea`. Each address belongs to at most one area, and `registerBlock` writes that link into `Subject.memory`. Address ownership is the main signal the analyser uses, so an overlapping `.flo` declaration changes the output.
 - **`Deflower`** runs the pipeline. It clears and recreates `<basePath>/out` once per `.flo` file, then for each subject analyses and, if there are no errors, opens `out/<binary>.asm` and hands the writer to `ResultWriter`.

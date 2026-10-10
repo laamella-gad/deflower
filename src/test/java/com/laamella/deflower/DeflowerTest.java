@@ -49,10 +49,11 @@ class DeflowerTest {
     }
 
     /**
-     * JMP (indirect)'s operand is a pointer, not the destination (issue
+     * JMP (indirect)'s operand is where the destination address is
+     * stored, not the destination (issue
      * 0011): the fixture's entry does JMP ($C010), where $C010-$C011 holds
      * $C020, the real target. The analyser must follow $C020 (and decode
-     * the LDA/RTS there), not try to decode the pointer bytes as code.
+     * the LDA/RTS there), not try to decode the stored address as code.
      */
     @Test
     void followsIndirectJmpTarget() throws IOException, URISyntaxException {

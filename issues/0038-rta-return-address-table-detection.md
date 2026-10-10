@@ -13,7 +13,7 @@ Deflower has no way to express this today. A `.flo` author marking up a return-a
 
 Scope:
 
-- A way to mark a word (or array of words) as an `.rta`-style table in the `.flo` grammar - most likely a new `DataType`/keyword (`rta`?) alongside `word`/`pointer`.
+- A way to mark a word (or array of words) as an `.rta`-style table in the `.flo` grammar - most likely a new `DataType`/keyword (`rta`?) alongside `word`/`addr`.
 - Output: print under `.rta` with the label resolved to the *actual* target (`label`, not `label - 1`) - i.e. `nameForAddress` needs to look up `address + 1` instead of `address` for this type, mirroring what the directive itself means.
 - Possibly: `FlowAnalyser` could treat an `.rta` table as containing code entry points too (each entry is a real place execution continues, same as a jump table) - worth considering alongside issue 0031's placeholder-carving workflow, though that may be its own follow-up rather than part of this one.
 

@@ -48,12 +48,13 @@ class FlowAnalyser {
                 subject.addPotentialCodeLocation(address + instruction.addressingMode.totalBytes, false, address);
             case JMP:
                 if (instruction.addressingMode == AddressingMode.INDIRECT) {
-                    // The operand is a pointer, not the destination: label the
-                    // pointer cell as data and follow the address stored there.
-                    int pointerAddress = getAbsoluteAddressOperand(address, subject);
-                    subject.ensureLabelled(pointerAddress, "p", address);
-                    subject.registerBlock(new DataArea(pointerAddress, DataType.POINTER, false, null, 0));
-                    subject.addPotentialCodeLocation(subject.wordAt(pointerAddress), true, address);
+                    // The operand is where the destination address is stored,
+                    // not the destination: mark that location as an addr and follow
+                    // the address stored there.
+                    int addrLocation = getAbsoluteAddressOperand(address, subject);
+                    subject.ensureLabelled(addrLocation, "a", address);
+                    subject.registerBlock(new DataArea(addrLocation, DataType.ADDR, false, null, 0));
+                    subject.addPotentialCodeLocation(subject.wordAt(addrLocation), true, address);
                 } else {
                     subject.addPotentialCodeLocation(getAbsoluteAddressOperand(address, subject), true, address);
                 }
