@@ -11,7 +11,6 @@ basic_stub:
 start:
 		ldy #$1e
 		tsx 
-
 ; jumped to by: start
 l0810:
 		lda $248d, x
@@ -27,7 +26,6 @@ l2452:
 		sta $07fd, y
 		dey 
 		bne l2452
-
 ; jumped to by: $2487
 l245B:
 		inx 
@@ -37,7 +35,6 @@ l245B:
 		txa 
 		lsr 
 		ldx $0333, y
-
 ; jumped to by: $246a
 l2466:
 		rol 
@@ -48,7 +45,6 @@ l2466:
 		tax 
 		lda $9f
 		adc $039b, y
-
 ; jumped to by: $245f
 l2475:
 		sta $039c, y

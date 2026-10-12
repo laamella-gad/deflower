@@ -9,11 +9,11 @@ entry:
 plain:
 		.text	"HELLO"
 nulled:
-		.text	"BYE", $00
+		.null	"BYE"
 counted:
-		.text	$03, "ABC"
+		.ptext	"ABC"
 mixed:
 		.text	"HI", $0d, $22, "Q", $22
 long_nulled:
 		.text	"THE QUICK BROWN FOX JUMPS OVER T"
-		.text	"HE LAZY ", $00
+		.null	"HE LAZY "

@@ -25,7 +25,6 @@ lC109:
 		bmi lC123
 		ldx $c0a4
 		stx $d404
-
 ; jumped to by: lC100
 lC123:
 		dec $c0c0
@@ -34,7 +33,6 @@ lC123:
 ; jumped to by: lC100
 lC127:
 		jsr lC1CA
-
 ; jumped to by: lC100
 lC12A:
 		jsr lC1D8
@@ -54,7 +52,6 @@ lC137:
 		sta $e7e0
 		clc 
 		bcc lC192
-
 ; jumped to by: lC100
 lC14E:
 		cmp #$ff
@@ -68,18 +65,15 @@ lC14E:
 		sty $e7e2
 		clc 
 		bcc lC175
-
 ; jumped to by: lC100
 lC168:
 		lda $c0c2
 		bmi lC16F
 		bne lC18D
-
 ; jumped to by: lC100
 lC16F:
 		jsr lC1DF
 		sta $c0c2
-
 ; jumped to by: lC100
 lC175:
 		jsr lC1CA
@@ -91,18 +85,15 @@ lC175:
 		ldy $c0c3
 		clc 
 		bcc lC12A
-
 ; jumped to by: lC100
 lC18D:
 		dec $c0c2
 		bne lC175
-
 ; jumped to by: lC100
 lC192:
 		jsr lC1CA
 		clc 
 		bcc lC127
-
 ; jumped to by: lC100
 lC198:
 		cmp #$7f
@@ -115,7 +106,6 @@ lC198:
 		ldx $c0a4
 		inx 
 		stx $d404
-
 ; jumped to by: lC100
 lC1B0:
 		jsr lC1DF
@@ -142,7 +132,6 @@ lC1CA:
 		bne lC1D7
 		inc $c0c4
 		bne lC1BB
-
 ; jumped to by: lC1CA
 lC1D7:
 		rts 
@@ -193,7 +182,6 @@ lC209:
 		bmi lC223
 		ldx $c0ab
 		stx $d40b
-
 ; jumped to by: lC200
 lC223:
 		dec $c0c5
@@ -202,7 +190,6 @@ lC223:
 ; jumped to by: lC200
 lC227:
 		jsr lC2CA
-
 ; jumped to by: lC200
 lC22A:
 		jsr lC2D8
@@ -222,7 +209,6 @@ lC237:
 		sta $a7e0
 		clc 
 		bcc lC292
-
 ; jumped to by: lC200
 lC24E:
 		cmp #$ff
@@ -236,18 +222,15 @@ lC24E:
 		sty $a7e2
 		clc 
 		bcc lC275
-
 ; jumped to by: lC200
 lC268:
 		lda $c0c7
 		bmi lC26F
 		bne lC28D
-
 ; jumped to by: lC200
 lC26F:
 		jsr lC2DF
 		sta $c0c7
-
 ; jumped to by: lC200
 lC275:
 		jsr lC2CA
@@ -259,18 +242,15 @@ lC275:
 		ldy $c0c8
 		clc 
 		bcc lC22A
-
 ; jumped to by: lC200
 lC28D:
 		dec $c0c7
 		bne lC275
-
 ; jumped to by: lC200
 lC292:
 		jsr lC2CA
 		clc 
 		bcc lC227
-
 ; jumped to by: lC200
 lC298:
 		cmp #$7f
@@ -283,7 +263,6 @@ lC298:
 		ldx $c0ab
 		inx 
 		stx $d40b
-
 ; jumped to by: lC200
 lC2B0:
 		jsr lC2DF
@@ -310,7 +289,6 @@ lC2CA:
 		bne lC2D7
 		inc $c0c9
 		bne lC2BB
-
 ; jumped to by: lC2CA
 lC2D7:
 		rts 
@@ -361,7 +339,6 @@ lC309:
 		bmi lC323
 		ldx $c0b2
 		stx $d412
-
 ; jumped to by: lC300
 lC323:
 		dec $c0ca
@@ -370,7 +347,6 @@ lC323:
 ; jumped to by: lC300
 lC327:
 		jsr lC3CA
-
 ; jumped to by: lC300
 lC32A:
 		jsr lC3D8
@@ -390,7 +366,6 @@ lC337:
 		sta $b7e0
 		clc 
 		bcc lC392
-
 ; jumped to by: lC300
 lC34E:
 		cmp #$ff
@@ -404,18 +379,15 @@ lC34E:
 		sty $b7e2
 		clc 
 		bcc lC375
-
 ; jumped to by: lC300
 lC368:
 		lda $c0cc
 		bmi lC36F
 		bne lC38D
-
 ; jumped to by: lC300
 lC36F:
 		jsr lC3DF
 		sta $c0cc
-
 ; jumped to by: lC300
 lC375:
 		jsr lC3CA
@@ -427,18 +399,15 @@ lC375:
 		ldy $c0cd
 		clc 
 		bcc lC32A
-
 ; jumped to by: lC300
 lC38D:
 		dec $c0cc
 		bne lC375
-
 ; jumped to by: lC300
 lC392:
 		jsr lC3CA
 		clc 
 		bcc lC327
-
 ; jumped to by: lC300
 lC398:
 		cmp #$7f
@@ -451,7 +420,6 @@ lC398:
 		ldx $c0b2
 		inx 
 		stx $d412
-
 ; jumped to by: lC300
 lC3B0:
 		jsr lC3DF
@@ -478,7 +446,6 @@ lC3CA:
 		bne lC3D7
 		inc $c0ce
 		bne lC3BB
-
 ; jumped to by: lC3CA
 lC3D7:
 		rts 
@@ -533,7 +500,6 @@ irq:
 		beq lC566
 		lsr 
 		pha 
-
 ; where the CPU was when the snapshot was taken
 snapshot_pc:
 		bcc lC555
@@ -541,7 +507,6 @@ snapshot_pc:
 		nop 
 		nop 
 		nop 
-
 ; jumped to by: snapshot_pc
 lC555:
 		pla 
@@ -549,7 +514,6 @@ lC555:
 		pha 
 		bcc lC55D
 		jsr lC200
-
 ; jumped to by: snapshot_pc
 lC55D:
 		pla 
@@ -558,7 +522,6 @@ lC55D:
 		nop 
 		nop 
 		jsr lC300
-
 ; jumped to by: irq, snapshot_pc
 lC566:
 		jsr lC494

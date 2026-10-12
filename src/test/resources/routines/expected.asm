@@ -3,7 +3,6 @@
 
 entry:
 		ldx #$03
-
 ; jumped to by: entry
 lC002:
 		jsr lC016
@@ -13,7 +12,6 @@ lC002:
 		lda #$00
 		beq lC00F
 		nop 
-
 ; jumped to by: entry
 lC00F:
 		sta value
@@ -23,7 +21,6 @@ lC00F:
 ; called by: entry
 lC016:
 		ldy #$00
-
 ; jumped to by: lC016
 lC018:
 		lda value
@@ -35,7 +32,6 @@ lC018:
 ; jumped to by: entry
 lC021:
 		inc value
-
 ; jumped to by: lC016
 lC024:
 		rts 

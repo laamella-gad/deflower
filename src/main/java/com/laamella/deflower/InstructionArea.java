@@ -30,6 +30,19 @@ public class InstructionArea extends Area {
     }
 
     /**
+     * True when execution can't fall through to the next instruction:
+     * jmp, rts, rti and brk (issue 0073).
+     */
+    boolean endsFlow() {
+        switch (instruction.opcode) {
+            case JMP, RTS, RTI, BRK:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
      * A label on `address` itself, such as one on an operand that
      * self-modifying code writes to, wins over "label + offset" from the
      * label on the instruction's first byte (issue 0067).

@@ -87,7 +87,6 @@ start:
 		lda #$1b
 		sta vic_control1
 		cli 
-
 ; ---- game ----
 ; jumped to by: snapshot_pc
 new_game:
@@ -107,7 +106,6 @@ new_game:
 		jsr music_init
 		lda sprite_background_collision
 		jsr title
-
 ; waits until irq_bottom sets the operand of the lda to 1
 ; jumped to by: position_car
 ; written by: new_game, position_car, irq_bottom
@@ -126,7 +124,6 @@ game_loop:
 		lsr 
 		sta score_add + $4
 		beq l08BE
-
 ; jumped to by: game_loop
 l0892:
 		pha 
@@ -139,7 +136,6 @@ l0892:
 		cpy #$01
 		bmi l08A7
 		lda #$01
-
 ; jumped to by: game_loop
 l08A7:
 		sta left_road, x
@@ -148,7 +144,6 @@ l08A7:
 		cpy #$01
 		bmi l08B5
 		lda #$01
-
 ; jumped to by: game_loop
 l08B5:
 		sta right_road, x
@@ -156,7 +151,6 @@ l08B5:
 		sec 
 		sbc #$01
 		bne l0892
-
 ; jumped to by: game_loop
 ; modified by: game_loop
 l08BE:
@@ -168,7 +162,6 @@ l08BE:
 		cmp max_speed
 		bcs l08CF
 		inc speed
-
 ; jumped to by: game_loop
 l08CF:
 		lda fine_scroll
@@ -205,7 +198,6 @@ l08CF:
 		lda #$08
 		sta draw_pointer
 		lda #$44
-
 ; where the CPU was when the snapshot was taken
 snapshot_pc:
 		sta draw_pointer + $1
@@ -214,7 +206,6 @@ snapshot_pc:
 		sta draw_pointer2
 		ldx #$19
 		ldy #$00
-
 ; jumped to by: snapshot_pc
 l0926:
 		lda left_road + $fd
@@ -235,7 +226,6 @@ right_road_source = $092c
 		bcc l093B
 		inc draw_pointer + $1
 		inc draw_pointer2 + $1
-
 ; jumped to by: snapshot_pc
 l093B:
 		inc left_road_source
@@ -273,11 +263,9 @@ l093B:
 		lda #$00
 		sta volume_filter_mode
 		ldy #$04
-
 ; jumped to by: snapshot_pc
 l0988:
 		ldx #$1f
-
 ; jumped to by: snapshot_pc
 l098A:
 		lda flash_colors, x
@@ -313,7 +301,6 @@ l09B9:
 		bne position_car
 		lda #$01
 		sta car_state
-
 ; jumped to by: steer
 position_car:
 		lda car_x, x
@@ -396,7 +383,6 @@ init_road:
 		stx road_row
 		stx fine_scroll
 		lda #$01
-
 ; jumped to by: init_road
 l0A5F:
 		sta left_road, x
@@ -414,7 +400,6 @@ l0A5F:
 wait_frame:
 		bit vic_control1
 		bmi wait_frame
-
 ; jumped to by: wait_frame
 l0A78:
 		bit vic_control1
@@ -439,7 +424,6 @@ init_video:
 		lda #$0f
 		sta sprite1_color
 		sta sprite2_color
-
 ; jumped to by: init_video
 l0AA9:
 		sta color_ram, x
@@ -464,7 +448,6 @@ l0AA9:
 		sta sprite_pointers
 		lda #$d2
 		ldx #$08
-
 ; jumped to by: init_video
 l0ADF:
 		sta sprite3_x, x
@@ -512,7 +495,6 @@ l0B24:
 		stx car_state
 		lda #$00
 		sta car_step
-
 ; jumped to by: read_joystick
 l0B2C:
 		rts 
@@ -547,7 +529,6 @@ check_stage:
 		sta difficulty
 		lda stage_car_sprite, x
 		sta sprite_pointers
-
 ; jumped to by: check_stage
 l0B65:
 		rts 
@@ -573,7 +554,6 @@ stage_car_sprite:
 ; called by: new_game, title
 clear_screen:
 		lax #$00
-
 ; jumped to by: clear_screen
 l0B79:
 		sta screen, x
@@ -591,7 +571,6 @@ l0B79:
 draw_road_sprite:
 		ldy #$00
 		ldx #$04
-
 ; jumped to by: draw_road_sprite
 ; written by: game_loop, snapshot_pc
 l0B93:
@@ -601,7 +580,6 @@ l0B93:
 d0B94 = $0b94
 		beq l0B9A
 		lda #$ff
-
 ; jumped to by: draw_road_sprite
 l0B9A:
 		sta (draw_pointer), y
@@ -640,14 +618,12 @@ reset_score:
 add_score:
 		ldx #$04
 		lda #$00
-
 ; jumped to by: add_score
 l0BCB:
 		sta score_carry, x
 		dex 
 		bpl l0BCB
 		ldx #$04
-
 ; jumped to by: add_score
 l0BD3:
 		lda score, x
@@ -660,14 +636,12 @@ l0BD3:
 		inc score_add + $4, x
 		sec 
 		sbc #$0a
-
 ; jumped to by: add_score
 l0BE9:
 		sta score, x
 		dex 
 		bpl l0BD3
 		ldx #$04
-
 ; jumped to by: add_score
 l0BF1:
 		lda score, x
@@ -699,7 +673,6 @@ high_score:
 ; called by: snapshot_pc, title
 update_high_score:
 		ldx #$00
-
 ; jumped to by: update_high_score
 l0C13:
 		lda high_score, x
@@ -718,18 +691,15 @@ l0C20:
 ; jumped to by: update_high_score
 l0C28:
 		ldx #$04
-
 ; jumped to by: update_high_score
 l0C2A:
 		lda score, x
 		sta high_score, x
 		dex 
 		bpl l0C2A
-
 ; jumped to by: update_high_score
 l0C33:
 		ldx #$04
-
 ; jumped to by: update_high_score
 l0C35:
 		lda high_score, x
@@ -748,7 +718,6 @@ flash_colors:
 ; called by: new_game
 title:
 		ldx #$0b
-
 ; jumped to by: title
 l0C63:
 		txa 
@@ -761,13 +730,11 @@ l0C63:
 		bne l0C63
 		jsr update_high_score
 		ldx #$1f
-
 ; jumped to by: title
 l0C77:
 		jsr wait_frame
 		ldy #$09
 		lda flash_colors, x
-
 ; jumped to by: title
 l0C7F:
 		sta color_ram + $1ef, y
@@ -826,13 +793,11 @@ next_row:
 		lda left_wall
 		beq l0CE1
 		inc left_wall
-
 ; jumped to by: next_row
 l0CE1:
 		lda right_wall
 		beq l0CE9
 		inc right_wall
-
 ; jumped to by: next_row
 l0CE9:
 		jsr random
@@ -857,7 +822,6 @@ l0D0A:
 		bcs l0D1C
 		lda #$01
 		sta left_wall
-
 ; jumped to by: next_row
 l0D1C:
 		lda right_wall
@@ -881,7 +845,6 @@ l0D3A:
 		bcs l0D4C
 		lda #$01
 		sta right_wall
-
 ; jumped to by: next_row
 l0D4C:
 		rts 
@@ -906,7 +869,6 @@ random:
 		lda random_seed + $3
 		eor #$04
 		sta random_seed + $3
-
 ; jumped to by: random
 l0D7B:
 		lda random_seed
@@ -939,7 +901,6 @@ music_set_volume:
 		jmp l1010
 
 ; unused jump table entry
-
 		jmp l1173
 
 ; jumped to by: music_init
@@ -962,7 +923,6 @@ init_flag = $1017
 		bmi l104A
 		txa 
 		ldx #$29
-
 ; jumped to by: music_set_volume
 l101D:
 		sta order_position, x
@@ -977,7 +937,6 @@ l101D:
 		ldx #$07
 		jsr l103A
 		ldx #$0e
-
 ; called by: music_set_volume
 l103A:
 		lda #$05
@@ -1007,7 +966,6 @@ filter_steps = $104f
 		lda filter_left + $1, y
 		bne l1087
 		iny 
-
 ; jumped to by: l103A
 l1069:
 		lda filter_right, y
@@ -1017,7 +975,6 @@ l1069:
 ; jumped to by: l103A
 l1072:
 		sta filter_steps
-
 ; jumped to by: l103A
 l1075:
 		lda filter_right, y
@@ -1026,11 +983,9 @@ l1075:
 		sta l1093 + 1
 		dec filter_steps
 		bne l1095
-
 ; jumped to by: l103A
 l1084:
 		lda filter_left + $1, y
-
 ; jumped to by: l103A
 l1087:
 		cmp #$ff
@@ -1038,17 +993,14 @@ l1087:
 		tya 
 		bcc l1090
 		lda filter_right, y
-
 ; jumped to by: l103A
 l1090:
 		sta l104A + 1
-
 ; jumped to by: l103A
 ; read by: l103A
 ; written by: l103A
 l1093:
 		lda #$05
-
 ; jumped to by: l103A
 l1095:
 		sta filter_cutoff + $1
@@ -1067,7 +1019,6 @@ master_volume = $10a0
 		ldx #$07
 		jsr l10AE
 		ldx #$0e
-
 ; called by: l103A
 l10AE:
 		dec tick, x
@@ -1075,7 +1026,6 @@ l10AE:
 		bpl l10BB
 		lda tempo, x
 		sta tick, x
-
 ; jumped to by: l10AE
 l10BB:
 		jmp l113D
@@ -1097,7 +1047,6 @@ l10BE:
 		lda (music_pointer), y
 		tay 
 		lda (music_pointer), y
-
 ; jumped to by: l10AE
 l10DF:
 		cmp #$e0
@@ -1106,14 +1055,12 @@ l10DF:
 		sta transpose, x
 		iny 
 		lda (music_pointer), y
-
 ; jumped to by: l10AE
 l10EB:
 		sta pattern_number, x
 		iny 
 		tya 
 		sta order_position, x
-
 ; jumped to by: l10AE
 l10F3:
 		ldy instrument, x
@@ -1132,7 +1079,6 @@ l10F3:
 		sta pulse_position, x
 		lda #$00
 		sta pulse_timer, x
-
 ; jumped to by: l10AE
 l111B:
 		lda instrument_filter, y
@@ -1140,7 +1086,6 @@ l111B:
 		sta l104A + 1
 		lda #$00
 		sta filter_steps
-
 ; jumped to by: l10AE
 l1128:
 		lda instrument_wave, y
@@ -1158,7 +1103,6 @@ l113D:
 		lda wave_left, y
 		beq l114A
 		sta waveform, x
-
 ; jumped to by: l10AE
 l114A:
 		lda wave_left + $1, y
@@ -1168,7 +1112,6 @@ l114A:
 		bcc l1157
 		clc 
 		lda wave_right + $1, y
-
 ; jumped to by: l10AE
 l1157:
 		sta wave_position, x
@@ -1177,7 +1120,6 @@ l1157:
 		bpl l1166
 		adc note, x
 		and #$7f
-
 ; jumped to by: l10AE
 l1166:
 		tay 
@@ -1185,7 +1127,6 @@ l1166:
 		sta frequency, x
 		lda frequency_hi, y
 		sta frequency + $1, x
-
 ; jumped to by: music_set_volume, l10AE
 l1173:
 		lda tick, x
@@ -1207,26 +1148,22 @@ l1173:
 ; jumped to by: l10AE
 l119A:
 		sta pulse_timer, x
-
 ; jumped to by: l10AE
 l119D:
 		lda pulse_right, y
 		clc 
 		bpl l11A6
 		dec pulse_width + $1, x
-
 ; jumped to by: l10AE
 l11A6:
 		adc pulse_width, x
 		sta pulse_width, x
 		bcc l11B1
 		inc pulse_width + $1, x
-
 ; jumped to by: l10AE
 l11B1:
 		dec pulse_timer, x
 		bne l11C5
-
 ; jumped to by: l10AE
 l11B6:
 		lda pulse_left + $1, y
@@ -1235,11 +1172,9 @@ l11B6:
 		tya 
 		bcc l11C2
 		lda pulse_right, y
-
 ; jumped to by: l10AE
 l11C2:
 		sta pulse_position, x
-
 ; jumped to by: l10AE
 l11C5:
 		jmp l121A
@@ -1260,20 +1195,17 @@ l11C8:
 		lda note_delay, x
 		bne l11E9
 		lda (music_pointer), y
-
 ; jumped to by: l10AE
 l11E9:
 		adc #$00
 		sta note_delay, x
 		beq l1211
 		bne l121A
-
 ; jumped to by: l10AE
 l11F2:
 		sta instrument, x
 		iny 
 		lda (music_pointer), y
-
 ; jumped to by: l10AE
 l11F8:
 		cmp #$bd
@@ -1286,18 +1218,15 @@ l11F8:
 		sta attack_decay, x
 		lda #$fe
 		sta gate, x
-
 ; jumped to by: l10AE
 l1211:
 		iny 
 		lda (music_pointer), y
 		beq l1217
 		tya 
-
 ; jumped to by: l10AE
 l1217:
 		sta pattern_position, x
-
 ; jumped to by: l10AE
 l121A:
 		lda attack_decay, x
@@ -1312,7 +1241,6 @@ l121A:
 		sta voice1_frequency, x
 		lda frequency + $1, x
 		sta voice1_frequency + $1, x
-
 ; jumped to by: l103A
 l123E:
 		lda waveform, x

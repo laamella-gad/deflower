@@ -3,7 +3,6 @@
 
 entry:
 		ldx #$07
-
 ; jumped to by: entry
 lC002:
 		lda glyph_b, x

@@ -1,7 +1,6 @@
 ---
 title: Tell routine labels apart from local labels inside a routine
-status: open
-priority: high
+status: done
 labels: enhancement
 ---
 

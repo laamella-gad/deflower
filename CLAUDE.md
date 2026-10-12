@@ -58,7 +58,8 @@ The pipeline is: **flow file → parse → memory image + annotations → code-f
   - `*=` origins at gaps;
   - blank-line separators and label placement inside data runs;
   - `.byte`/`.word`/`.long`/`.dword`/`.addr`/`.char`/`.sint`/`.lint`/`.dint` tables;
-  - `.text` strings, with `.enc "screen"`/`"none"` switches chosen per char array;
+  - `.text` strings, with `.enc "screen"`/`"none"` switches chosen per char array, and `.null`/`.ptext` for null-terminated and length-prefixed ones;
+  - a blank line above a label only where the instruction before it ends the flow (`jmp`, `rts`, `rti`, `brk`), and after such an instruction even without a label;
   - `.virtual` blocks;
   - instructions with operands resolved to labels (`label + $offset` inside arrays), and `@w` on absolute operands below `$100` so they don't reassemble as zero page;
   - labels inside an array, a multi-byte element or an instruction printed as `label = $XXXX` defines after it, and labels on uncovered memory as defines in place;

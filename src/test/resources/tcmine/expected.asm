@@ -132,7 +132,6 @@ draw_level:
 		sta draw_column
 		sta draw_row
 		ldx level
-
 ; jumped to by: draw_level
 lC015:
 		beq lC028
@@ -149,7 +148,6 @@ lC015:
 ; jumped to by: draw_level
 lC028:
 		ldx #$00
-
 ; jumped to by: draw_level
 lC02A:
 		ldy #$00
@@ -178,7 +176,6 @@ lC02A:
 		sta level_pointer
 		bcc lC058
 		inc level_pointer + $1
-
 ; jumped to by: draw_level
 lC058:
 		cpx #$0e
@@ -190,7 +187,6 @@ lC058:
 		sta screen_pointer
 		bcc lC069
 		inc screen_pointer + $1
-
 ; jumped to by: draw_level
 lC069:
 		ldx #$00
@@ -217,7 +213,6 @@ unused_c08a:
 		lda #$40
 		sta level_pointer + $1
 		ldx level
-
 ; jumped to by: unused_c08a
 lC095:
 		beq lC0A8
@@ -234,12 +229,10 @@ lC095:
 ; jumped to by: unused_c08a
 lC0A8:
 		adc #$01
-
 ; jumped to by: unused_c0b0
 lC0AA:
 		sta level_pointer + $1
 		dex 
-
 ; jumped to by: unused_c0b0
 lC0AD:
 		jmp lC095
@@ -254,7 +247,6 @@ unused_c0b0:
 		sta level_pointer
 		bcc lC0C0
 		inc level_pointer + $1
-
 ; jumped to by: unused_c0b0
 lC0C0:
 		cpx #$19
@@ -326,7 +318,6 @@ irq:
 		sta animated_chars + $7
 		sta animated_chars + $8
 		sta animated_chars + $9
-
 ; jumped to by: irq
 lC14F:
 		jmp move_enemies
@@ -387,11 +378,9 @@ lC19C:
 		lda controls
 		sec 
 		sbc #$08
-
 ; jumped to by: read_controls
 lC1B5:
 		sta controls
-
 ; jumped to by: read_controls
 lC1B8:
 		lda #$bf
@@ -403,7 +392,6 @@ lC1B8:
 		clc 
 		adc #$10
 		sta controls
-
 ; jumped to by: read_controls
 lC1CD:
 		rts 
@@ -433,7 +421,6 @@ find_player_cell:
 		lsr 
 		sta screen_pointer
 		ldx screen_pointer
-
 ; jumped to by: find_player_cell
 lC1EF:
 		beq lC200
@@ -443,7 +430,6 @@ lC1EF:
 		sta level_pointer
 		bcc lC1FC
 		inc level_pointer + $1
-
 ; jumped to by: find_player_cell
 lC1FC:
 		dex 
@@ -480,7 +466,6 @@ walk:
 		dec vic_sprite_coords
 		jsr check_walls
 		inc vic_sprite_coords
-
 ; jumped to by: walk
 lC220:
 		lda controls
@@ -489,7 +474,6 @@ lC220:
 		inc vic_sprite_coords
 		jsr check_walls
 		dec vic_sprite_coords
-
 ; jumped to by: walk
 lC230:
 		jmp continue_walk
@@ -537,11 +521,9 @@ lC25F:
 		bcs lC26E
 		clc 
 		adc #$01
-
 ; jumped to by: unused_c25e
 lC26C:
 		sta (level_pointer), y
-
 ; jumped to by: unused_c25e
 lC26E:
 		jmp not_falling
@@ -571,7 +553,6 @@ animate_player:
 lC294:
 		lda #$80
 		sta sprite_pointers
-
 ; jumped to by: animate_player
 lC299:
 		lda controls
@@ -589,7 +570,6 @@ lC299:
 lC2B1:
 		lda #$87
 		sta sprite_pointers
-
 ; jumped to by: animate_player
 lC2B6:
 		lda vic_sprite_coords + $1
@@ -599,7 +579,6 @@ lC2B6:
 		lda #$ff
 		sta controls
 		inc vic_sprite_coords + $1
-
 ; jumped to by: animate_player
 lC2C7:
 		rts 
@@ -623,7 +602,6 @@ start_jump:
 		sta jump_step
 		lda controls
 		sta jump_direction
-
 ; jumped to by: start_jump
 lC2DC:
 		rts 
@@ -644,7 +622,6 @@ next_jump_step:
 		lda jump_table, x
 		beq lC2FA
 		jsr jump_sideways
-
 ; jumped to by: next_jump_step
 lC2FA:
 		inc jump_step
@@ -654,7 +631,6 @@ lC2FA:
 		bcc lC30C
 		lda #$00
 		sta jump_step
-
 ; jumped to by: next_jump_step
 lC30C:
 		rts 
@@ -665,14 +641,12 @@ jump_sideways:
 		and #$08
 		bne lC317
 		inc vic_sprite_coords
-
 ; jumped to by: jump_sideways
 lC317:
 		lda controls
 		and #$04
 		bne lC321
 		dec vic_sprite_coords
-
 ; jumped to by: jump_sideways
 lC321:
 		rts 
@@ -707,7 +681,6 @@ unused_c349:
 ; jumped to by: play_level, check_enemy_collision
 main_loop:
 		jsr read_controls
-
 ; jumped to by: main_loop
 lC353:
 		lda vic_raster
@@ -730,14 +703,12 @@ lC36E:
 		and #$08
 		bne lC378
 		inc vic_sprite_coords
-
 ; jumped to by: main_loop
 lC378:
 		lda controls
 		and #$04
 		bne lC382
 		dec vic_sprite_coords
-
 ; jumped to by: main_loop
 lC382:
 		jmp tick_music
@@ -779,7 +750,6 @@ jump_sideways_checked:
 		dec vic_sprite_coords
 		jsr check_walls
 		inc vic_sprite_coords
-
 ; jumped to by: jump_sideways_checked
 lC3B0:
 		lda controls
@@ -788,7 +758,6 @@ lC3B0:
 		inc vic_sprite_coords
 		jsr check_walls
 		dec vic_sprite_coords
-
 ; jumped to by: jump_sideways_checked
 lC3C0:
 		rts 
@@ -831,7 +800,6 @@ lC400:
 		clc 
 		adc jump_table + $1, x
 		sta vic_sprite_coords + $1
-
 ; jumped to by: jump_height
 lC40A:
 		lda vic_sprite_coords + $1
@@ -865,13 +833,11 @@ check_conveyor:
 		cmp #$47
 		bne lC433
 		dec vic_sprite_coords
-
 ; jumped to by: check_conveyor
 lC433:
 		cmp #$48
 		bne lC43A
 		inc vic_sprite_coords
-
 ; jumped to by: check_conveyor
 lC43A:
 		rts 
@@ -896,7 +862,6 @@ unused_c451:
 		cmp #$05
 		beq lC458
 		dec vic_sprite_coords + $1
-
 ; jumped to by: unused_c451
 lC458:
 		rts 
@@ -917,7 +882,6 @@ tick_music:
 		lda #$00
 		sta music_divider
 		jsr play_music
-
 ; jumped to by: tick_music
 lC46E:
 		jmp check_pickups
@@ -954,7 +918,6 @@ play_music:
 		sta voice2_music
 		bcc lC4B4
 		inc voice2_music + $1
-
 ; jumped to by: play_music
 lC4B4:
 		dec voice1_duration
@@ -980,7 +943,6 @@ lC4B4:
 		sta voice1_music
 		bcc lC4E4
 		inc voice1_music + $1
-
 ; jumped to by: play_music
 lC4E4:
 		lda voice2_music + $1
@@ -990,7 +952,6 @@ lC4E4:
 		cmp #$84
 		bne lC4F3
 		jsr init_music
-
 ; jumped to by: play_music
 lC4F3:
 		rts 
@@ -1072,7 +1033,6 @@ play_level:
 		lda #$60
 		sta (air_pointer), y
 		ldx #$00
-
 ; jumped to by: play_level
 lC563:
 		lda air_pointer
@@ -1081,7 +1041,6 @@ lC563:
 		sta air_pointer
 		bcc lC56E
 		inc air_pointer + $1
-
 ; jumped to by: play_level
 lC56E:
 		lda #$56
@@ -1109,7 +1068,6 @@ drain_air:
 		lda air_divider
 		cmp #$14
 		bcc animate_portal
-
 ; loads itself, but does nothing with it
 ; read by: drain_air_once
 drain_air_step:
@@ -1127,11 +1085,9 @@ drain_air_step:
 		sta air_pointer
 		bcc lC5AC
 		inc air_pointer + $1
-
 ; jumped to by: drain_air_step
 lC5AC:
 		lda drain_air_step
-
 ; jumped to by: drain_air_step
 lC5AF:
 		lda air_pointer + $1
@@ -1156,11 +1112,9 @@ animate_portal:
 		cmp #$88
 		bcs lC5D4
 		lda #$8b
-
 ; jumped to by: animate_portal
 lC5D4:
 		sta sprite_pointers + $1
-
 ; jumped to by: animate_portal
 lC5D7:
 		jmp check_collisions
@@ -1173,11 +1127,9 @@ sprite_collisions:
 ; called by: collect_item
 add_score:
 		ldy #$00
-
 ; jumped to by: add_score
 lC5DD:
 		ldx #$04
-
 ; jumped to by: add_score
 lC5DF:
 		lda screen_ram + $6f, x
@@ -1190,7 +1142,6 @@ lC5DF:
 		sta screen_ram + $6f, x
 		dex 
 		bne lC5DF
-
 ; jumped to by: add_score
 lC5F4:
 		iny 
@@ -1224,32 +1175,27 @@ level_done:
 move_enemies:
 		ldx #$00
 		ldy #$00
-
 ; jumped to by: move_enemies
 lC61E:
 		lda enemies + $2, y
 		cmp #$01
 		bne lC628
 		inc vic_sprite_coords + $4, x
-
 ; jumped to by: move_enemies
 lC628:
 		cmp #$02
 		bne lC62F
 		dec vic_sprite_coords + $5, x
-
 ; jumped to by: move_enemies
 lC62F:
 		cmp #$03
 		bne lC636
 		dec vic_sprite_coords + $4, x
-
 ; jumped to by: move_enemies
 lC636:
 		cmp #$00
 		bne lC63D
 		inc vic_sprite_coords + $5, x
-
 ; jumped to by: move_enemies
 lC63D:
 		inc enemy_steps, x
@@ -1263,7 +1209,6 @@ lC63D:
 		sta enemies + $2, y
 		lda #$00
 		sta enemy_steps, x
-
 ; jumped to by: move_enemies
 lC658:
 		inx 
@@ -1283,7 +1228,6 @@ init_enemies:
 		lda #$25
 		sta level_pointer + $1
 		ldx level
-
 ; jumped to by: init_enemies
 lC671:
 		beq lC67E
@@ -1297,7 +1241,6 @@ lC671:
 lC67E:
 		sei 
 		ldy #$00
-
 ; jumped to by: init_enemies
 lC681:
 		lda (level_pointer), y
@@ -1318,7 +1261,6 @@ lC681:
 		lda enemies + $6
 		sta vic_sprite_coords + $7
 		ldy #$0a
-
 ; jumped to by: init_enemies
 lC6B1:
 		lda (level_pointer), y
@@ -1327,7 +1269,6 @@ lC6B1:
 		cpy #$12
 		bne lC6B1
 		ldy #$00
-
 ; jumped to by: init_enemies
 lC6BD:
 		lda #$95
@@ -1357,7 +1298,6 @@ animate_enemies:
 		sta animation_divider
 		ldx #$00
 		ldy #$00
-
 ; jumped to by: animate_enemies
 lC6E5:
 		inc sprite_pointers + $2, x
@@ -1368,7 +1308,6 @@ lC6E5:
 		bcs lC6F9
 		lda enemies + $3, y
 		sta sprite_pointers + $2, x
-
 ; jumped to by: animate_enemies
 lC6F9:
 		inx 
@@ -1379,7 +1318,6 @@ lC6F9:
 		tay 
 		cpx #$02
 		bcc lC6E5
-
 ; jumped to by: animate_enemies
 lC704:
 		jmp kernal_irq
@@ -1419,11 +1357,9 @@ drain_air_once:
 		sta air_pointer
 		bcc lC735
 		inc air_pointer + $1
-
 ; jumped to by: drain_air_once
 lC735:
 		lda drain_air_step
-
 ; jumped to by: drain_air_once
 lC738:
 		lda air_pointer + $1
@@ -1437,7 +1373,6 @@ lC738:
 		bne lC74F
 		lda #$01
 		sta air_empty
-
 ; jumped to by: drain_air_once
 lC74F:
 		rts 
@@ -1446,12 +1381,10 @@ lC74F:
 count_air_bonus:
 		lda #$00
 		sta air_empty
-
 ; jumped to by: count_air_bonus
 lC755:
 		jsr drain_air_once
 		ldx #$05
-
 ; jumped to by: count_air_bonus
 lC75A:
 		lda screen_ram + $6f, x
@@ -1464,7 +1397,6 @@ lC75A:
 		sta screen_ram + $6f, x
 		dex 
 		bne lC75A
-
 ; jumped to by: count_air_bonus
 lC76F:
 		lda vic_raster
@@ -1508,7 +1440,6 @@ add_to_level_pointer:
 		sta level_pointer
 		bcc lC7B7
 		inc level_pointer + $1
-
 ; jumped to by: add_to_level_pointer
 lC7B7:
 		dex 

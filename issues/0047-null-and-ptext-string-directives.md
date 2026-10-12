@@ -1,7 +1,6 @@
 ---
 title: Emit `.null`/`.ptext` for null-terminated and length-prefixed strings
-status: open
-priority: low
+status: done
 labels: enhancement
 ---
 
@@ -30,3 +29,8 @@ Done when: the `strings` fixture's `nulled` and `counted` print as `.null "BYE"`
 ## Decisions
 
 - **Detect, no `.flo` syntax.** When a char array opens, look at its shape and pick `.null` (ends in its only `$00`) or `.ptext` (first byte is the length of the rest). A wrong guess still assembles to the same bytes, because the directive only adds back the byte it left out, so detection is safe. This matches the existing encoding guess (`likelyTextEncoding`).
+- **Long strings:** a null-terminated string longer than a line wraps as `.text` lines, with `.null` on the last one, since it only appends the $00. `.ptext` has to hold the whole string, so it is only used when the string fits on one line; otherwise it stays `.text`.
+
+## Closing note
+
+`AssemblyFileFormat.textDirectiveFor` picks the directive whenever a line of a char array opens: `.null` when the array's only $00 is its last byte and the rest of it fits on the line, `.ptext` at the array's start when its first byte is the length of the rest and that fits on one line, else `.text`. A comment inside the rest of the array breaks the line, so it rules both out. The terminator and the length byte then print as nothing. When both shapes fit, `.null` wins. Fixture `strings` now prints `.null "BYE"`, `.ptext "ABC"`, and `long_nulled` wraps with `.null` on its last line; it reassembles to the `.prg`. No other fixture changed.

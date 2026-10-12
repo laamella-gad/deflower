@@ -629,7 +629,6 @@ unused_23f3:
 ; called by: copy_hi_text, reset_everything
 set_top_bottom_text:
 		ldx #$00
-
 more_chars:
 		lda top_line, x
 		sta screen_ram, x
@@ -643,7 +642,6 @@ more_chars:
 ; called by: game_over, bonus_round, end_level, reset_everything
 set_top_bottom_red:
 		ldx #$00
-
 more_colors:
 		sta color_ram, x
 		sta color_ram + $398, x
@@ -655,7 +653,6 @@ more_colors:
 ; called by: game_over
 draw_high_score_screen:
 		ldx #$00
-
 ; jumped to by: draw_high_score_screen
 l241E:
 		lda high_score_screen, x
@@ -668,7 +665,6 @@ l241E:
 		cpx #$ff
 		bne l241E
 		ldx #$00
-
 ; jumped to by: draw_high_score_screen
 l2437:
 		lda high_score_screen_6 + $105, x
@@ -684,7 +680,6 @@ l2441 = $2441
 ; decodes from there as sbc $60,x, which does no harm
 draw_title_screen:
 		ldx #$00
-
 ; jumped to by: draw_title_screen
 l2445:
 		lda title, x
@@ -697,7 +692,6 @@ l2445:
 		cpx #$ff
 		bne l2445
 		ldx #$00
-
 ; jumped to by: draw_title_screen
 l245E:
 		lda rest_of_title, x
@@ -710,7 +704,6 @@ l245E:
 ; called by: end_level, check_space
 draw_level_1:
 		ldx #$00
-
 ; jumped to by: draw_level_1
 l246C:
 		lda level_1, x
@@ -723,7 +716,6 @@ l246C:
 		cpx #$ff
 		bne l246C
 		ldx #$00
-
 ; jumped to by: draw_level_1
 l2485:
 		lda level_1 + $2fd, x
@@ -736,7 +728,6 @@ l2485:
 ; called by: end_level
 draw_level_2:
 		ldx #$00
-
 ; jumped to by: draw_level_2
 l2493:
 		lda level_2, x
@@ -749,7 +740,6 @@ l2493:
 		cpx #$ff
 		bne l2493
 		ldx #$00
-
 ; jumped to by: draw_level_2
 l24AC:
 		lda level_2 + $2fd, x
@@ -762,7 +752,6 @@ l24AC:
 ; called by: end_level
 draw_level_3:
 		ldx #$00
-
 ; jumped to by: draw_level_3
 l24BA:
 		lda level_3, x
@@ -775,7 +764,6 @@ l24BA:
 		cpx #$ff
 		bne l24BA
 		ldx #$00
-
 ; jumped to by: draw_level_3
 l24D3:
 		lda level_3 + $2fd, x
@@ -788,7 +776,6 @@ l24D3:
 ; called by: reset_everything
 draw_screen_colors:
 		ldx #$00
-
 ; jumped to by: draw_screen_colors
 l24E1:
 		lda title_screen_colors, x
@@ -801,7 +788,6 @@ l24E1:
 		cpx #$ff
 		bne l24E1
 		ldx #$00
-
 ; jumped to by: draw_screen_colors
 l24FA:
 		lda title_screen_colors + $2fd, x
@@ -817,7 +803,6 @@ unused_2506:
 ; called by: animate_charset
 animate_player_chars:
 		ldx #$00
-
 ; jumped to by: animate_player_chars
 l250A:
 		lda player_char_1, x
@@ -846,7 +831,6 @@ l250A:
 ; called by: game_over
 color_lines:
 		ldx #$00
-
 ; jumped to by: color_lines
 l2544:
 		lda #$04
@@ -1283,7 +1267,6 @@ check_move_up:
 		sta new_loc_lo
 		bcs l3025
 		dec new_loc_hi
-
 ; jumped to by: check_move_up
 l3025:
 		jmp check_move_possible
@@ -1311,7 +1294,6 @@ check_move_right:
 		cmp #$00
 		bne l304B
 		inc new_loc_hi
-
 ; jumped to by: check_move_right
 l304B:
 		jmp check_move_possible
@@ -1326,7 +1308,6 @@ check_move_left:
 		cmp #$ff
 		bne l305D
 		dec new_loc_hi
-
 ; jumped to by: check_move_left
 l305D:
 		jmp check_move_possible
@@ -1386,14 +1367,12 @@ unused_30a0:
 ; called by: update_hi, sort_high_scores, copy_hi_text
 sfx_hi_char_entry:
 		ldx #$0f
-
 ; jumped to by: sfx_hi_char_entry
 l30A4:
 		stx sid_vol_filter
 		stx voice1_pulse_width + $1
 		lda #$fa
 		sta jiffy_timer
-
 ; jumped to by: sfx_hi_char_entry
 l30AE:
 		lda jiffy_timer
@@ -1406,7 +1385,6 @@ l30AE:
 ; jumped to by: sort_high_scores, copy_hi_text
 move_hi_from_scr_to_:
 		ldx #$00
-
 ; jumped to by: move_hi_from_scr_to_
 l30BA:
 		lda screen_ram + $fe, x
@@ -1428,7 +1406,6 @@ l30BA:
 ; called by: game_over
 update_hi:
 		ldx #$00
-
 ; jumped to by: update_hi
 l30E0:
 		lda screen_ram + $14, x
@@ -1438,13 +1415,11 @@ l30E0:
 		beq l30EF
 		bcs l30F5
 		bcc l30F4
-
 ; jumped to by: update_hi
 l30EF:
 		inx 
 		cpx #$05
 		bne l30E0
-
 ; jumped to by: update_hi
 l30F4:
 		rts 
@@ -1452,7 +1427,6 @@ l30F4:
 ; jumped to by: update_hi
 l30F5:
 		ldx #$00
-
 ; jumped to by: update_hi
 l30F7:
 		lda screen_ram + $14, x
@@ -1467,7 +1441,6 @@ l30F7:
 		sta screen_ram + $240
 		ldy #$00
 		ldx #$00
-
 ; jumped to by: update_hi
 l3113:
 		lda screen_ram + $2d5, x
@@ -1476,7 +1449,6 @@ l3113:
 		sta screen_ram + $2d5, x
 		lda #$f6
 		sta jiffy_timer
-
 ; jumped to by: update_hi
 l3120:
 		lda jiffy_timer
@@ -1534,7 +1506,6 @@ l3179:
 		sta voice1_frequency + $1
 		jsr sfx_hi_char_entry
 		ldx #$00
-
 sort_high_scores:
 		clc 
 		lda screen_ram + $242, x
@@ -1542,13 +1513,11 @@ sort_high_scores:
 		beq l3190
 		bcs l3198
 		bcc l3195
-
 ; jumped to by: sort_high_scores
 l3190:
 		inx 
 		cpx #$05
 		bne sort_high_scores
-
 ; jumped to by: sort_high_scores
 l3195:
 		jmp move_hi_from_scr_to_
@@ -1556,7 +1525,6 @@ l3195:
 ; jumped to by: sort_high_scores
 l3198:
 		ldx #$00
-
 ; jumped to by: sort_high_scores
 l319A:
 		lda screen_ram + $1ee, x
@@ -1572,7 +1540,6 @@ l319A:
 		sta voice1_frequency + $1
 		jsr sfx_hi_char_entry
 		ldx #$00
-
 ; jumped to by: sort_high_scores
 l31B7:
 		clc 
@@ -1581,13 +1548,11 @@ l31B7:
 		beq l31C4
 		bcs l31CC
 		bcc l31C9
-
 ; jumped to by: sort_high_scores
 l31C4:
 		inx 
 		cpx #$05
 		bne l31B7
-
 ; jumped to by: sort_high_scores
 l31C9:
 		jmp move_hi_from_scr_to_
@@ -1595,7 +1560,6 @@ l31C9:
 ; jumped to by: sort_high_scores
 l31CC:
 		ldx #$00
-
 ; jumped to by: sort_high_scores
 l31CE:
 		lda screen_ram + $19e, x
@@ -1611,7 +1575,6 @@ l31CE:
 		sta voice1_frequency + $1
 		jsr sfx_hi_char_entry
 		ldx #$00
-
 ; jumped to by: sort_high_scores
 l31EB:
 		clc 
@@ -1620,13 +1583,11 @@ l31EB:
 		beq l31F8
 		bcs l3200
 		bcc l31FD
-
 ; jumped to by: sort_high_scores
 l31F8:
 		inx 
 		cpx #$05
 		bne l31EB
-
 ; jumped to by: sort_high_scores
 l31FD:
 		jmp move_hi_from_scr_to_
@@ -1634,7 +1595,6 @@ l31FD:
 ; jumped to by: sort_high_scores
 l3200:
 		ldx #$00
-
 ; jumped to by: sort_high_scores
 l3202:
 		lda screen_ram + $14e, x
@@ -1650,7 +1610,6 @@ l3202:
 		sta voice1_frequency + $1
 		jsr sfx_hi_char_entry
 		ldx #$00
-
 ; jumped to by: sort_high_scores
 l321F:
 		clc 
@@ -1659,13 +1618,11 @@ l321F:
 		beq l322C
 		bcs l3234
 		bcc l3231
-
 ; jumped to by: sort_high_scores
 l322C:
 		inx 
 		cpx #$05
 		bne l321F
-
 ; jumped to by: sort_high_scores
 l3231:
 		jmp move_hi_from_scr_to_
@@ -1673,7 +1630,6 @@ l3231:
 ; jumped to by: sort_high_scores
 l3234:
 		ldx #$00
-
 ; jumped to by: sort_high_scores
 l3236:
 		lda screen_ram + $fe, x
@@ -1686,7 +1642,6 @@ l3236:
 		cpx #$0a
 		bne l3236
 		ldx #$00
-
 copy_hi_text:
 		lda screen_ram + $102, x
 		ora #$80
@@ -1722,13 +1677,11 @@ game_over:
 		sta sid_vol_filter
 		lda #$f6
 		sta jiffy_timer
-
 ; jumped to by: game_over
 l329A:
 		lda jiffy_timer
 		bmi l329A
 		ldx #$00
-
 ; jumped to by: game_over
 l32A0:
 		lda press_fire_to_start_, x
@@ -1740,7 +1693,6 @@ l32A0:
 		sta voice1_frequency + $1
 		lda #$f0
 		sta jiffy_timer
-
 ; jumped to by: game_over
 l32B4:
 		lda jiffy_timer
@@ -1750,7 +1702,6 @@ l32B4:
 		lda #$02
 		jsr set_top_bottom_red
 		sta border_color
-
 ; jumped to by: game_over
 l32C5:
 		lda cia1_port_b
@@ -1801,7 +1752,6 @@ step_candidate:
 		cmp #$00
 		bne l3300
 		inc move_candidate + $1
-
 ; jumped to by: step_candidate
 l3300:
 		jmp test_candidate
@@ -1815,7 +1765,6 @@ l3303:
 		cmp #$ff
 		bne l3314
 		dec move_candidate + $1
-
 ; jumped to by: step_candidate
 l3314:
 		jmp test_candidate
@@ -1830,7 +1779,6 @@ l3317:
 		sta move_candidate
 		bcs l3329
 		dec move_candidate + $1
-
 ; jumped to by: step_candidate
 l3329:
 		jmp test_candidate
@@ -1843,7 +1791,6 @@ l332C:
 		sta move_candidate
 		bcc l333A
 		inc move_candidate + $1
-
 ; jumped to by: step_candidate
 l333A:
 		jmp test_candidate
@@ -1856,7 +1803,6 @@ next_snake_direction:
 		bne l334C
 		lda #$01
 		sta snake_direction
-
 ; jumped to by: next_snake_direction
 l334C:
 		rts 
@@ -1874,7 +1820,6 @@ move_snake_0:
 		ldy #$00
 		sta (tmp_loc_lo), y
 		ldx #$0d
-
 ; jumped to by: move_snake_0
 l3364:
 		lda snake_0_head, x
@@ -1882,7 +1827,6 @@ l3364:
 		dex 
 		cpx #$ff
 		bne l3364
-
 ; jumped to by: move_snake_0
 l336F:
 		inc snake_tries
@@ -1914,11 +1858,9 @@ l33A4:
 		sta snake_0_head
 		lda #$04
 		sta snake_0_head + $1
-
 ; jumped to by: move_snake_0
 l33AE:
 		ldx #$00
-
 ; jumped to by: move_snake_0
 l33B0:
 		lda snake_0_body, x
@@ -1937,7 +1879,6 @@ l33B0:
 		sta tmp_loc_hi
 		lda #$43
 		sta (tmp_loc_lo), y
-
 ; called by: var_2_stuff
 move_snake_1:
 		lda #$00
@@ -1950,7 +1891,6 @@ move_snake_1:
 		ldy #$00
 		sta (tmp_loc_lo), y
 		ldx #$07
-
 ; jumped to by: move_snake_1
 l33E9:
 		lda snake_1_head, x
@@ -1958,7 +1898,6 @@ l33E9:
 		dex 
 		cpx #$ff
 		bne l33E9
-
 ; jumped to by: move_snake_1
 l33F4:
 		inc snake_tries
@@ -1990,11 +1929,9 @@ snake_1_home:
 		sta snake_1_head
 		lda #$07
 		sta snake_1_head + $1
-
 ; jumped to by: move_snake_1
 draw_snake_1:
 		ldx #$00
-
 draw_snake_1_body:
 		lda snake_1_body, x
 		sta tmp_loc_lo
@@ -2012,7 +1949,6 @@ draw_snake_1_body:
 		sta tmp_loc_hi
 		lda #$43
 		sta (tmp_loc_lo), y
-
 ; called by: var_2_stuff
 move_snake_2:
 		lda #$00
@@ -2025,14 +1961,12 @@ move_snake_2:
 		ldy #$00
 		sta (tmp_loc_lo), y
 		ldx #$07
-
 shift_snake_2:
 		lda snake_2_head, x
 		sta snake_2_body, x
 		dex 
 		cpx #$ff
 		bne shift_snake_2
-
 ; jumped to by: shift_snake_2
 l3479:
 		inc snake_tries
@@ -2064,11 +1998,9 @@ l34AE:
 		sta snake_2_head
 		lda #$04
 		sta snake_2_head + $1
-
 ; jumped to by: shift_snake_2
 l34B8:
 		ldx #$00
-
 ; jumped to by: shift_snake_2
 l34BA:
 		lda snake_2_body, x
@@ -2087,7 +2019,6 @@ l34BA:
 		sta tmp_loc_hi
 		lda #$43
 		sta (tmp_loc_lo), y
-
 move_snake_3:
 		lda #$00
 		sta snake_tries
@@ -2099,7 +2030,6 @@ move_snake_3:
 		ldy #$00
 		sta (tmp_loc_lo), y
 		ldx #$07
-
 ; jumped to by: move_snake_3
 l34F3:
 		lda snake_3_head, x
@@ -2107,7 +2037,6 @@ l34F3:
 		dex 
 		cpx #$ff
 		bne l34F3
-
 ; jumped to by: move_snake_3
 l34FE:
 		inc snake_tries
@@ -2139,11 +2068,9 @@ l3533:
 		sta snake_3_head
 		lda #$05
 		sta snake_3_head + $1
-
 ; jumped to by: move_snake_3
 l353D:
 		ldx #$00
-
 ; jumped to by: move_snake_3
 l353F:
 		lda snake_3_body, x
@@ -2162,7 +2089,6 @@ l353F:
 		sta tmp_loc_hi
 		lda #$43
 		sta (tmp_loc_lo), y
-
 move_snake_4:
 		lda #$00
 		sta snake_tries
@@ -2174,7 +2100,6 @@ move_snake_4:
 		ldy #$00
 		sta (tmp_loc_lo), y
 		ldx #$07
-
 ; jumped to by: move_snake_4
 l3578:
 		lda snake_4_head, x
@@ -2182,7 +2107,6 @@ l3578:
 		dex 
 		cpx #$ff
 		bne l3578
-
 ; jumped to by: move_snake_4
 l3583:
 		inc snake_tries
@@ -2214,11 +2138,9 @@ l35B8:
 		sta snake_4_head
 		lda #$06
 		sta snake_4_head + $1
-
 ; jumped to by: move_snake_4
 l35C2:
 		ldx #$00
-
 ; jumped to by: move_snake_4
 l35C4:
 		lda snake_4_body, x
@@ -2247,7 +2169,6 @@ unused_35e7:
 colorize_maze:
 		ldy #$01
 		ldx #$00
-
 ; jumped to by: colorize_maze
 l35EC:
 		lda screen_ram + $50, x
@@ -2261,20 +2182,17 @@ l35EC:
 l35FB:
 		tya 
 		sta color_ram + $50, x
-
 ; jumped to by: colorize_maze
 l35FF:
 		iny 
 		cpy #$08
 		bne l3606
 		ldy #$01
-
 ; jumped to by: colorize_maze
 l3606:
 		inx 
 		cpx #$ff
 		bne l35EC
-
 colorize_maze_2:
 		lda screen_ram + $14f, x
 		cmp #$20
@@ -2287,20 +2205,17 @@ colorize_maze_2:
 l361A:
 		tya 
 		sta color_ram + $14f, x
-
 ; jumped to by: colorize_maze_2
 l361E:
 		iny 
 		cpy #$08
 		bne l3625
 		ldy #$01
-
 ; jumped to by: colorize_maze_2
 l3625:
 		inx 
 		cpx #$ff
 		bne colorize_maze_2
-
 colorize_maze_3:
 		lda screen_ram + $24e, x
 		cmp #$20
@@ -2313,20 +2228,17 @@ colorize_maze_3:
 l3639:
 		tya 
 		sta color_ram + $24e, x
-
 ; jumped to by: colorize_maze_3
 l363D:
 		iny 
 		cpy #$08
 		bne l3644
 		ldy #$01
-
 ; jumped to by: colorize_maze_3
 l3644:
 		inx 
 		cpx #$ff
 		bne colorize_maze_3
-
 colorize_maze_4:
 		lda screen_ram + $34d, x
 		cmp #$20
@@ -2339,14 +2251,12 @@ colorize_maze_4:
 l3658:
 		tya 
 		sta color_ram + $34d, x
-
 ; jumped to by: colorize_maze_4
 l365C:
 		iny 
 		cpy #$08
 		bne l3663
 		ldy #$01
-
 ; jumped to by: colorize_maze_4
 l3663:
 		inx 
@@ -2446,7 +2356,6 @@ bonus_guy_hit_handle:
 		lda bonus_value
 		cmp #$01
 		bne bonus_10_points
-
 no_bonus:
 		lda #$0a
 		sta voice1_frequency + $1
@@ -2490,7 +2399,6 @@ bonus_round:
 		lda #$b9
 		sta bonus_timer_digit_1
 		ldx #$00
-
 burp_bonus_text:
 		lda screen_ram + $1c5, x
 		pha 
@@ -2500,7 +2408,6 @@ burp_bonus_text:
 		sta voice1_frequency + $1
 		lda #$ff
 		sta jiffy_timer
-
 ; jumped to by: burp_bonus_text
 l37A2:
 		lda jiffy_timer
@@ -2509,7 +2416,6 @@ l37A2:
 		sta voice1_frequency + $1
 		lda #$ff
 		sta jiffy_timer
-
 ; jumped to by: burp_bonus_text
 l37AF:
 		lda jiffy_timer
@@ -2524,7 +2430,6 @@ l37AF:
 		jsr reset_bonus_notes
 		nop 
 		ldx #$00
-
 bonus_get_ready:
 		lda get_ready_text, x
 		sta screen_ram + $1c5, x
@@ -2533,13 +2438,11 @@ bonus_get_ready:
 		bne bonus_get_ready
 		lda #$c8
 		sta jiffy_timer
-
 ; jumped to by: bonus_get_ready
 l37D6:
 		lda jiffy_timer
 		bmi l37D6
 		ldx #$08
-
 ; jumped to by: bonus_get_ready
 l37DC:
 		pla 
@@ -2553,13 +2456,11 @@ l37DC:
 		lda #$3d
 		sta irq_vector + $1
 		cli 
-
 ; jumped to by: bonus_walk_on_46
 bonus_round_loop:
 		jsr try_move
 		ldy #$00
 		lda (new_loc_lo), y
-
 bonus_walk_on_44:
 		cmp #$44
 		bne bonus_walk_on_43
@@ -2589,7 +2490,6 @@ bonus_walk_on_46:
 		sta voice1_frequency + $1
 		ldx #$04
 		jsr inc_score_digit_x
-
 ; jumped to by: bonus_walk_on_44, bonus_walk_on_43, bonus_walk_on_46
 l382D:
 		jsr play_next_note
@@ -2606,13 +2506,11 @@ l382D:
 		ldy #$00
 		lda #$00
 		sta (tmp_loc_lo), y
-
 ; jumped to by: bonus_walk_on_46
 l3846:
 		ldy #$00
 		lda #$51
 		sta (new_loc_lo), y
-
 ; jumped to by: bonus_walk_on_46
 l384C:
 		lda bonus_timer_digit_1
@@ -2655,14 +2553,12 @@ end_level:
 		sta level_tens
 		lda #$b0
 		sta level_ones
-
 ; jumped to by: end_level
 l389B:
 		lda #$00
 		sta dots_eaten
 		jsr initialize_pointers
 		ldx #$00
-
 ; jumped to by: end_level
 l38A5:
 		lda get_ready_text, x
@@ -2671,7 +2567,6 @@ l38A5:
 		cpx #$09
 		bne l38A5
 		ldx #$00
-
 ; jumped to by: end_level
 l38B2:
 		lda voice_1_notes, x
@@ -2680,7 +2575,6 @@ l38B2:
 		sta voice2_frequency + $1
 		lda #$f6
 		sta jiffy_timer
-
 ; jumped to by: end_level
 l38C2:
 		lda jiffy_timer
@@ -2690,7 +2584,6 @@ l38C2:
 		bne l38B2
 		ldx #$00
 		sta voice2_frequency + $1
-
 ; jumped to by: end_level
 l38D0:
 		lda level_text, x
@@ -2701,7 +2594,6 @@ l38D0:
 		sta color_ram + $1c5, x
 		lda #$ff
 		sta jiffy_timer
-
 ; jumped to by: end_level
 l38E4:
 		lda jiffy_timer
@@ -2710,7 +2602,6 @@ l38E4:
 		sta voice1_frequency + $1
 		lda #$ff
 		sta jiffy_timer
-
 ; jumped to by: end_level
 l38F1:
 		lda jiffy_timer
@@ -2734,7 +2625,6 @@ l38F1:
 		bne l391D
 		lda #$01
 		sta level_nr
-
 ; jumped to by: end_level
 l391D:
 		cmp #$01
@@ -2752,7 +2642,6 @@ l3927:
 ; jumped to by: end_level
 l3931:
 		jsr draw_level_3
-
 ; jumped to by: end_level
 l3934:
 		jsr colorize_maze
@@ -2786,7 +2675,6 @@ move_bonus_guy:
 		lda #$20
 		ldy #$00
 		sta (tmp_loc_lo), y
-
 ; jumped to by: move_bonus_guy
 l3976:
 		inc snake_tries
@@ -2818,7 +2706,6 @@ l39AB:
 		sta bon_gy_loc_lo
 		lda #$07
 		sta bon_gy_loc_hi
-
 ; jumped to by: move_bonus_guy
 l39B5:
 		lda bon_gy_loc_lo
@@ -2834,7 +2721,6 @@ l39B5:
 		bne l39D5
 		lda #$01
 		sta bonus_guy_note
-
 ; jumped to by: move_bonus_guy
 l39D5:
 		ldx bonus_guy_note
@@ -2850,7 +2736,6 @@ update_bonus_guy:
 		bne l39EE
 		lda #$01
 		sta bonus_value
-
 ; jumped to by: update_bonus_guy
 l39EE:
 		lda points_shown_timer
@@ -2896,7 +2781,6 @@ l3A15:
 		bne l3A45
 		lda #$47
 		sta bonus_guy_char_2
-
 ; jumped to by: update_bonus_guy
 l3A45:
 		rts 
@@ -2951,7 +2835,6 @@ life_lost_handler:
 		ldy #$00
 		sta (new_loc_lo), y
 		sta (tmp_loc_lo), y
-
 ; jumped to by: life_lost_handler
 l3A8F:
 		dec voice1_frequency + $1
@@ -2961,7 +2844,6 @@ l3A8F:
 		sta (new_loc_lo), y
 		lda #$fd
 		sta jiffy_timer
-
 ; jumped to by: life_lost_handler
 l3A9E:
 		lda jiffy_timer
@@ -2974,7 +2856,6 @@ l3A9E:
 		sta new_loc_lo
 		bcc l3AB1
 		inc new_loc_hi
-
 ; jumped to by: life_lost_handler
 l3AB1:
 		lda (new_loc_lo), y
@@ -2994,14 +2875,12 @@ l3AB1:
 		lda #$00
 		sta background_color_1
 		sta background_color_2
-
 ; jumped to by: life_lost_handler
 l3AD8:
 		inc background_color_1
 		inc background_color_2
 		lda #$ff
 		sta jiffy_timer
-
 ; jumped to by: life_lost_handler
 l3AE2:
 		lda jiffy_timer
@@ -3018,7 +2897,6 @@ l3AE2:
 		sta screen_ram + $3c8, x
 		lda #$81
 		sta jiffy_timer
-
 ; jumped to by: life_lost_handler
 l3B03:
 		lda jiffy_timer
@@ -3040,7 +2918,6 @@ entry:
 		jsr setup_irq
 		lda #$1a
 		sta vic_memory_setup
-
 ; jumped to by: restart_to_title
 reset_everything:
 		lda #$00
@@ -3098,7 +2975,6 @@ reset_everything:
 		lda #$fa
 		sta game_speed
 		ldx #$00
-
 ; jumped to by: check_space
 play_music_loop:
 		lda voice_1_notes, x
@@ -3107,7 +2983,6 @@ play_music_loop:
 		sta voice2_frequency + $1
 		lda #$f6
 		sta jiffy_timer
-
 play_music_wait_loop:
 		lda jiffy_timer
 		bmi play_music_wait_loop
@@ -3115,7 +2990,6 @@ play_music_wait_loop:
 		cpx #$64
 		bne check_space
 		ldx #$00
-
 ; jumped to by: play_music_wait_loop
 check_space:
 		lda cia1_port_b
@@ -3133,14 +3007,12 @@ check_space:
 		sta level_ones
 		jsr colorize_maze
 		jsr initialize_pointers
-
 ; jumped to by: player_not_moving
 game_loop:
 		jsr var_2_stuff
 		jsr try_move
 		ldy #$00
 		lda (new_loc_lo), y
-
 check_hit_dot:
 		cmp #$46
 		bne check_hit_bonus_guy
@@ -3169,7 +3041,6 @@ check_hit_snake:
 		beq hit_snake
 		cmp #$43
 		bne nothing_hit
-
 ; jumped to by: check_hit_snake
 hit_snake:
 		dec lives
@@ -3181,7 +3052,6 @@ hit_snake:
 ; jumped to by: hit_snake
 life_lost:
 		jsr life_lost_handler
-
 ; jumped to by: check_hit_dot, check_hit_bonus_guy, check_hit_snake
 nothing_hit:
 		ldy #$00
@@ -3191,14 +3061,12 @@ nothing_hit:
 		lda #$20
 		ldy #$00
 		sta (tmp_loc_lo), y
-
 ; jumped to by: nothing_hit
 player_not_moving:
 		lda #$51
 		sta (new_loc_lo), y
 		lda game_speed
 		sta jiffy_timer
-
 ; jumped to by: player_not_moving
 l3C5B:
 		lda jiffy_timer
@@ -3210,7 +3078,6 @@ l3C5B:
 		cmp #$04
 		bne l3C70
 		jsr pause
-
 ; jumped to by: player_not_moving
 l3C70:
 		jmp game_loop
@@ -3221,12 +3088,10 @@ pause:
 		sta sid_vol_filter
 		lda #$81
 		sta jiffy_timer
-
 ; jumped to by: pause
 l3C7C:
 		lda jiffy_timer
 		bmi l3C7C
-
 ; jumped to by: pause
 l3C80:
 		lda cia1_port_b
@@ -3275,7 +3140,6 @@ irq:
 		lda #$00
 		sta irq_delay_counter
 		ldx #$00
-
 animate_charset:
 		lda arrow_char_1, x
 		pha 
@@ -3306,7 +3170,6 @@ animate_charset:
 		cpx #$08
 		bne animate_charset
 		jsr animate_player_chars
-
 ; jumped to by: irq
 skip_irq:
 		jmp kernal_irq
@@ -3331,7 +3194,6 @@ unused_3d18:
 		bne countdown_irq
 		lda #$01
 		sta voice1_pulse_width + $1
-
 ; the interrupt of the bonus run: counts the bonus timer down
 ; jumped to by: unused_3d18
 countdown_irq:
@@ -3348,7 +3210,6 @@ countdown_irq:
 		lda #$b9
 		sta bonus_timer_digit_2
 		dec bonus_timer_digit_1
-
 ; jumped to by: countdown_irq
 l3D48:
 		jmp kernal_irq
@@ -3357,7 +3218,6 @@ l3D48:
 reset_bonus_notes:
 		lda #$81
 		sta jiffy_timer
-
 ; jumped to by: reset_bonus_notes
 l3D4F:
 		lda jiffy_timer
@@ -3376,7 +3236,6 @@ play_next_note:
 		cpx #$ff
 		bne l3D6C
 		ldx #$00
-
 ; jumped to by: play_next_note
 l3D6C:
 		stx note_idx
@@ -3392,7 +3251,6 @@ quiet:
 		sta voice1_frequency + $1
 		lda #$81
 		sta jiffy_timer
-
 ; jumped to by: quiet
 l3D82:
 		lda jiffy_timer

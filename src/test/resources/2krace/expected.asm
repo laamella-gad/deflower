@@ -11,7 +11,6 @@ basic_stub:
 start:
 		ldy #$00
 		tsx 
-
 ; jumped to by: start
 l0810:
 		lda $1175, x
@@ -30,7 +29,6 @@ l1140:
 		txa 
 		lsr 
 		ldx $0333, y
-
 ; jumped to by: $114f
 l114B:
 		rol 
@@ -41,7 +39,6 @@ l114B:
 		tax 
 		lda $9f
 		adc $039b, y
-
 ; jumped to by: $1144
 l115A:
 		sta $039c, y

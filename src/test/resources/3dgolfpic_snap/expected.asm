@@ -50,7 +50,6 @@ output_pointer = $00fa
 		inc output_pointer
 		bne l0102
 		inc store_byte + 2
-
 ; jumped to by: store_byte
 l0102:
 		dex 
@@ -64,14 +63,12 @@ new_escape_code:
 		jsr l022F
 		sta escape_code
 		tya 
-
 ; reads 6 more bits after the 2 in A, and stores the 8 as a literal byte
 ; jumped to by: decrunch_loop
 store_literal:
 		ldx #$06
 		jsr l022F
 		jsr @w store_byte
-
 ; jumped to by: decrunch
 decrunch_loop:
 		ldy #$00
@@ -100,7 +97,6 @@ decrunch_loop:
 		sta decrunch_pointer
 		jsr get_gamma
 		tay 
-
 ; jumped to by: decrunch_loop
 l014B:
 		jsr get_gamma
@@ -111,23 +107,19 @@ l014B:
 		txa 
 		ldx #$03
 		jsr get_bits
-
 ; jumped to by: decrunch_loop
 l015C:
 		ldx decrunch_pointer
 		inx 
-
 ; jumped to by: decrunch_loop
 l015F:
 		jsr @w store_byte
 		bne l015F
 		dey 
 		bne l015F
-
 ; jumped to by: decrunch_loop
 l0167:
 		beq decrunch_loop
-
 ; jumped to by: decrunch_loop
 l0169:
 		jsr get_gamma
@@ -136,7 +128,6 @@ l0169:
 		sbc #$00
 		ldx #$00
 		jsr l022F
-
 ; jumped to by: decrunch_loop
 l0177:
 		sta decrunch_pointer + $1
@@ -148,7 +139,6 @@ l0177:
 		sbc decrunch_pointer + $1
 		sta decrunch_pointer + $1
 		inx 
-
 ; jumped to by: decrunch_loop
 l0189:
 		lda (decrunch_pointer), y
@@ -156,7 +146,6 @@ l0189:
 		jsr @w store_byte
 		bne l0189
 		beq l0167
-
 ; jumped to by: decrunch_loop
 decrunch_done:
 		lda #$37
@@ -198,7 +187,6 @@ d0203 = $0203
 		inc input_pointer
 		bne l020F
 		inc d0203
-
 ; jumped to by: decrunch_get_byte
 l020F:
 		pla 
@@ -210,13 +198,11 @@ l020F:
 get_gamma:
 		inx 
 		txa 
-
 ; jumped to by: get_gamma
 l0213:
 		asl bit_buffer
 		bne l021A
 		jsr decrunch_get_byte
-
 ; jumped to by: get_gamma
 l021A:
 		bcc l022E
@@ -224,15 +210,12 @@ l021A:
 		cpx #$08
 		bne l0213
 		beq l022E
-
 ; called by: decrunch_loop
 get_8_bits:
 		ldx #$07
-
 ; called by: decrunch_loop
 l0225:
 		inx 
-
 ; reads X bits into A
 ; called by: decrunch_loop
 ; jumped to by: l022F
@@ -240,15 +223,12 @@ get_bits:
 		asl bit_buffer
 		bne l022D
 		jsr decrunch_get_byte
-
 ; jumped to by: get_bits
 l022D:
 		rol 
-
 ; jumped to by: get_gamma
 l022E:
 		dex 
-
 ; called by: new_escape_code, store_literal, decrunch_loop
 l022F:
 		bne get_bits
@@ -290,7 +270,6 @@ decrunch:
 d0812 = $0812
 		sta cpu_port
 		ldx #$34
-
 ; jumped to by: decrunch
 l0817:
 		lda $0842, x
@@ -298,7 +277,6 @@ l0817:
 		dex 
 		bne l0817
 		ldx #$cf
-
 ; jumped to by: decrunch
 l0822:
 		lda get_byte_source + $32, x
@@ -306,7 +284,6 @@ l0822:
 		dex 
 		bne l0822
 		ldy #$11
-
 ; jumped to by: decrunch
 l082D:
 		dex 
@@ -1281,7 +1258,6 @@ show_picture:
 		lda #$f0
 		sta background_color
 		ldx #$00
-
 ; jumped to by: show_picture
 l7F65:
 		lda picture_colors, x
@@ -1294,12 +1270,10 @@ l7F65:
 		sta color_ram + $300, x
 		dex 
 		bne l7F65
-
 ; jumped to by: snapshot_pc
 wait_for_space:
 		lda kernal_lstx
 		cmp #$3c
-
 ; where the CPU was when the snapshot was taken
 snapshot_pc:
 		bne wait_for_space

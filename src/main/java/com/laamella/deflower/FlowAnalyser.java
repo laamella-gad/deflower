@@ -48,6 +48,7 @@ class FlowAnalyser {
         subject.registerArea(instructionArea);
         switch (instruction.opcode) {
             case RTS:
+            case RTI:
             case BRK:
                 break;
             case JSR:

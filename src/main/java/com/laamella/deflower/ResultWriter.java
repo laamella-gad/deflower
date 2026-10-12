@@ -45,6 +45,7 @@ class AssemblyFileFormat {
      * tabular dump underneath stays readable.
      */
     void printAnnotation(int address, String label, Area currentArea, Subject subject) throws IOException {
+        boolean afterOrigin = needsToReOrg;
         considerReOrg(address);
         // Same kind of data as whatever was printed right before this
         // address: print(DataArea, ...) below won't insert its own
@@ -55,7 +56,12 @@ class AssemblyFileFormat {
                 && lastArea instanceof DataArea
                 && ((DataArea) lastArea).type == ((DataArea) currentArea).type;
         boolean continuesRun = sameKindAsPrevious && lastArea.lastOccupiedAddress == address - 1;
-        if (continuesRun) {
+        // Issue 0073: execution falls through from the instruction before
+        // into the code at this label, so no blank line suggests a break
+        // in the flow. A label on data keeps its blank line.
+        boolean fallsThrough = !afterOrigin && currentArea instanceof InstructionArea
+                && lastArea instanceof InstructionArea && !((InstructionArea) lastArea).endsFlow();
+        if (continuesRun || fallsThrough) {
             out.finishLine();
         } else {
             // finishLine() closes whatever line is still dangling (if
@@ -80,6 +86,11 @@ class AssemblyFileFormat {
                 // the newline.
                 out.newLine();
             }
+        }
+        if (lastArea instanceof InstructionArea) {
+            // The instruction after this label isn't right after a flow
+            // end anymore: printInstruction needs no blank line of its own.
+            lastArea = null;
         }
     }
 
@@ -288,6 +299,12 @@ class AssemblyFileFormat {
     private int encodingArrayEnd = -1;
     private String arrayEncoding = "none";
 
+    // The directive of the .text, .null or .ptext line being printed.
+    private String textDirective = ".text";
+    // True right after a .ptext line was opened on its length byte, which
+    // prints nothing: the next character goes onto that same line.
+    private boolean ptextOpened = false;
+
     /**
      * Prints one CHAR value as an item of a 64tass {@code .text} line
      * (issue 0039), the string counterpart of tabularPrint: consecutive
@@ -300,21 +317,36 @@ class AssemblyFileFormat {
      * A line opening under a different encoding than the one in effect
      * first switches it with {@code .enc}, so the output reassembles to the
      * same bytes; an array changing encoding mid-line starts a new line.
+     * <p>
+     * A null-terminated string's last line is a {@code .null}, and a
+     * length-prefixed string that fits on one line a {@code .ptext}
+     * (issue 0047, {@link #textDirectiveFor}); the terminator and the
+     * length byte then print as nothing.
      */
     private void textPrint(DataArea area, int value, Subject subject) throws IOException {
         String valueEncoding = encodingFor(area, subject);
+        boolean continuesPtext = ptextOpened;
+        ptextOpened = false;
         if (out.column() == TEXT_BYTES_PER_LINE || (out.column() != 0 && !valueEncoding.equals(encoding))) {
             out.newLine();
         }
-        if (out.column() == 0) {
+        if (out.column() == 0 && !continuesPtext) {
             if (!valueEncoding.equals(encoding)) {
                 out.indent();
                 out.print(".enc\t\"" + valueEncoding + "\"");
                 out.newLine();
                 encoding = valueEncoding;
             }
+            textDirective = textDirectiveFor(area.address, subject);
             out.indent();
-            out.print(".text\t");
+            out.print(textDirective + "\t");
+            if (textDirective.equals(".ptext")) {
+                ptextOpened = true;
+                return;
+            }
+        }
+        if (textDirective.equals(".null") && area.address == encodingArrayEnd - 1) {
+            return;
         }
         int character = characterFor(valueEncoding, value);
         if (character != -1) {
@@ -337,6 +369,49 @@ class AssemblyFileFormat {
             arrayEncoding = subject.likelyTextEncoding(encodingArrayStart, encodingArrayEnd, encoding);
         }
         return arrayEncoding;
+    }
+
+    /**
+     * The directive for a line of the current char array opening at
+     * `address`: {@code .ptext} at the start of an array whose first byte
+     * is the length of the rest, when the rest fits on the line;
+     * {@code .null} for the line that ends an array whose only $00 is its
+     * last byte, when the rest of the array fits on the line; else
+     * {@code .text}. A comment inside the rest of the array would break
+     * the line, so it rules both out.
+     */
+    private String textDirectiveFor(int address, Subject subject) {
+        int start = encodingArrayStart;
+        int end = encodingArrayEnd;
+        for (int inside = address + 1; inside < end; inside++) {
+            if (!subject.memory[inside].comment.isEmpty() && subject.memory[inside].label == null) {
+                return ".text";
+            }
+        }
+        if (isNullTerminated(start, end, subject)) {
+            return end - 1 - address <= TEXT_BYTES_PER_LINE ? ".null" : ".text";
+        }
+        int length = end - start - 1;
+        if (address == start && length >= 1 && length <= TEXT_BYTES_PER_LINE && subject.byteAt(start) == length) {
+            return ".ptext";
+        }
+        return ".text";
+    }
+
+    /**
+     * True when the char array from `start` to `end` (exclusive) holds
+     * at least one character before a $00 at its end, and no other $00.
+     */
+    private static boolean isNullTerminated(int start, int end, Subject subject) {
+        if (end - start < 2 || subject.byteAt(end - 1) != 0) {
+            return false;
+        }
+        for (int address = start; address < end - 1; address++) {
+            if (subject.byteAt(address) == 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -387,9 +462,16 @@ class AssemblyFileFormat {
     }
 
     public void printInstruction(InstructionArea area, Subject subject) throws IOException {
+        boolean afterOrigin = needsToReOrg;
         considerReOrg(area.address);
         if (Objects.equals(area, lastArea)) {
             return;
+        }
+        if (!afterOrigin && lastArea instanceof InstructionArea && ((InstructionArea) lastArea).endsFlow()) {
+            // Issue 0073: code right after a jmp, rts, rti or brk is only
+            // reached some other way, so set it apart like a label there.
+            out.finishLine();
+            out.newLine();
         }
         Instruction instruction = area.instruction;
         int byte1 = subject.memory[area.address + 1].data;
@@ -409,7 +491,8 @@ class AssemblyFileFormat {
             case ZERO_PAGE_Y -> format("%s, y", nameForAddress(byte1, "$%02x", subject));
             case JAM, ACCUMULATOR, NONE -> "";
         };
-        out.newLine();
+        // A comment or label right above has already closed its line.
+        out.finishLine();
         out.indent();
         out.print(instruction.opcode.name().toLowerCase());
         out.print(" ");

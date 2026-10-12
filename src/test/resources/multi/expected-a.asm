@@ -12,7 +12,6 @@ entry_a:
 		sta $fe
 		sta $ff
 		ldx $033f
-
 ; jumped to by: entry_a
 lC015:
 		beq lC028
@@ -29,7 +28,6 @@ lC015:
 ; jumped to by: entry_a
 lC028:
 		ldx #$00
-
 ; jumped to by: entry_a
 lC02A:
 		ldy #$00
@@ -58,7 +56,6 @@ lC02A:
 		sta $fa
 		bcc lC058
 		inc $fb
-
 ; jumped to by: entry_a
 lC058:
 		cpx #$0e
@@ -70,7 +67,6 @@ lC058:
 		sta $fc
 		bcc lC069
 		inc $fd
-
 ; jumped to by: entry_a
 lC069:
 		ldx #$00

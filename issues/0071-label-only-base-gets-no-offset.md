@@ -1,7 +1,6 @@
 ---
 title: A label-only address gives no "label + offset" for the bytes after it
-status: open
-priority: low
+status: rejected
 labels: enhancement
 ---
 
@@ -39,3 +38,7 @@ Options:
 3. **Prefer a nearby label over the covering area**: an operand within a few bytes after a label-only address uses that label. Automatic, but guesses.
 
 Done when: `3dgolf_snap`'s loads from `$93f4,x` and `$942c-$942e,x` print relative to the base label (or the table), and the way to ask for it is documented in `Flo.g4`'s format comment if it involves the `.flo` file.
+
+## Closing note
+
+Rejected: not an issue. A label-only line names one address and nothing more. To get `hole_shapes_base + $1`, declare an area at the base, so the operands resolve through it as for any array.

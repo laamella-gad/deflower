@@ -26,7 +26,6 @@ lC009:
 		sta (pointer), y
 		sta border
 		jsr chrout
-
 ; jumped to by: entry
 lC01F:
 		dex 
@@ -56,7 +55,6 @@ table:
 		.byte	$01, $02, $03, $04
 
 ; reached from no label: listed by address
-
 		sta value
 		rts 
 ; written by: entry

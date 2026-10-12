@@ -431,8 +431,9 @@ class DeflowerTest {
     /**
      * Issue 0039: consecutive CHAR values print as `.text` lines, printable
      * characters sharing a double-quoted literal and anything else
-     * (control codes, double quotes, a $00 terminator, a length byte) as
-     * hex items, wrapping every 32 values. `.null`/`.ptext` are issue 0047.
+     * (control codes, double quotes) as hex items, wrapping every 32
+     * values. Issue 0047: a null-terminated string ends with a `.null`
+     * line, and a length-prefixed one prints as `.ptext`.
      */
     @Test
     void charRunsBecomeTextStrings() throws IOException, URISyntaxException {

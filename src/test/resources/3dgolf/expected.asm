@@ -12,7 +12,6 @@ start:
 		lda #$38
 		sta $01
 		ldx #$34
-
 ; jumped to by: start
 l0817:
 		lda $0842, x
@@ -20,7 +19,6 @@ l0817:
 		dex 
 		bne l0817
 		ldx #$cf
-
 ; jumped to by: start
 l0822:
 		lda $0875, x
@@ -28,7 +26,6 @@ l0822:
 		dex 
 		bne l0822
 		ldy #$69
-
 ; jumped to by: start
 l082D:
 		dex 

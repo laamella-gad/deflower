@@ -3,7 +3,11 @@ deflower 3dgolf_snap.vsf
 $0314 addr irq_vector
 $0318 addr nmi_vector
 $a56b code irq
+; after irq's rti, unreached: a leftover exit to the KERNAL's handler
+$a587 code
 $a5e9 code nmi
+; $ff while nmi runs, so a nested NMI returns at once
+$a687 byte nmi_active
 ; where the CPU was when the snapshot was taken
 $2ef7 code snapshot_pc
 $2cd0 code start

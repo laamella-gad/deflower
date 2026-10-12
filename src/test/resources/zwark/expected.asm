@@ -76,12 +76,10 @@ decrunch:
 		sta screen_ram + $31c, y
 		iny 
 		bne decrunch
-
 ; jumped to by: decrunch
 l0108:
 		tya 
 		sta decrunch_bits
-
 ; jumped to by: decrunch
 l010B:
 		jsr l019F
@@ -90,13 +88,11 @@ l010B:
 		bne l0117
 		cmp decrunch_bits
 		beq l012C
-
 ; jumped to by: decrunch
 l0117:
 		jsr l019F
 		bcs l010B
 		tax 
-
 ; jumped to by: decrunch
 l011D:
 		jsr l01AD
@@ -106,13 +102,11 @@ l011D:
 		dec decrunch_bits
 		bpl l011D
 		sty decrunch_bits
-
 ; jumped to by: decrunch
 l012C:
 		tya 
 		sty decrunch_output
 		sty decrunch_output + $1
-
 ; jumped to by: decrunch
 l0131:
 		jsr l019F
@@ -121,7 +115,6 @@ l0131:
 		beq l013E
 		jsr l019F
 		bcs l0131
-
 ; jumped to by: decrunch
 l013E:
 		sta decrunch_count
@@ -136,19 +129,16 @@ l0147 = $0147
 		jsr l019F
 		rol decrunch_bits
 		bcc l015B
-
 ; jumped to by: decrunch
 l0155:
 		inc decrunch_output
 		bne l015B
 		inc decrunch_output + $1
-
 ; jumped to by: decrunch
 l015B:
 		ldx decrunch_bits
 		lda decrunch_table + $3, x
 		tax 
-
 ; jumped to by: decrunch
 l0161:
 		jsr l019F
@@ -170,12 +160,10 @@ l0161:
 		adc decrunch_count
 		bcc l0183
 		inc decrunch_output + $1
-
 ; jumped to by: decrunch
 l0183:
 		sta decrunch_output
 		inc decrunch_count
-
 ; jumped to by: decrunch
 l0187:
 		jsr l01B8
@@ -188,7 +176,6 @@ l0191:
 		sty decrunch_count
 		ldx #$04
 		bne l0161
-
 ; jumped to by: decrunch
 l0197:
 		lda #$37
@@ -206,7 +193,6 @@ l019F:
 		rol 
 		sta decrunch_byte
 		pla 
-
 ; jumped to by: l019F
 l01AC:
 		rts 
@@ -217,7 +203,6 @@ l01AD:
 		cpy decrunch_input
 		bne l01B5
 		dec decrunch_input + $1
-
 ; jumped to by: l01AD
 l01B5:
 		dec decrunch_input
@@ -230,11 +215,9 @@ l01B8:
 		cpy decrunch_output
 		bne l01C3
 		dec decrunch_output + $1
-
 ; jumped to by: l01B8
 l01C3:
 		dec decrunch_output
-
 ; called by: decrunch
 l01C5:
 		sta (decrunch_end), y
@@ -506,17 +489,14 @@ actual_start_game:
 		jsr check_protection
 		lda #$fe
 		bne l901A
-
 main_loop:
 		jsr stop
 		bne l901D
 		beq actual_start_game
 		jsr sound_off
-
 ; jumped to by: actual_start_game, main_loop
 l901A:
 		jsr next_turn
-
 ; jumped to by: main_loop
 l901D:
 		lda cia1_port_b
@@ -584,7 +564,6 @@ move_player:
 		jsr explode
 		bne l9223
 		ldx current_player
-
 ; the trainer turns this dec into a bit, so lives never go down
 ; written by: start
 lose_life:
@@ -602,17 +581,14 @@ lose_life:
 		lda #$01
 		clc 
 		bcc l9225
-
 ; jumped to by: lose_life
 l91FD:
 		lda #$ff
 		bne l9225
-
 ; jumped to by: move_player
 check_joystick:
 		ldx #$01
 		ldy #$00
-
 check_right:
 		lda #$08
 		bit joystick_state
@@ -621,7 +597,6 @@ check_right:
 		jsr move_right
 		ldx #$01
 		ldy #$00
-
 ; jumped to by: check_right
 check_left:
 		lda #$04
@@ -629,11 +604,9 @@ check_left:
 		bne l9223
 		lda sprite_mask
 		jsr move_left
-
 ; jumped to by: move_player, check_left
 l9223:
 		lda #$00
-
 ; jumped to by: lose_life
 l9225:
 		rts 
@@ -652,7 +625,6 @@ move_bullet:
 		sta fire_state
 		clc 
 		bcc l92B6
-
 ; jumped to by: move_bullet
 l9240:
 		lda #$01
@@ -661,7 +633,6 @@ l9240:
 		lda #$10
 		bit joystick_state
 		bne l92AE
-
 fire_pressed:
 		lda #$02
 		bit fire_state
@@ -685,7 +656,6 @@ fire_pressed:
 		sta fire_state
 		lda #$01
 		jsr play_sound
-
 ; jumped to by: move_bullet
 l9286:
 		lda #$02
@@ -705,13 +675,11 @@ l9286:
 		sta fire_state
 		clc 
 		bcc l92F8
-
 ; jumped to by: move_bullet
 l92AE:
 		lda #$02
 		ora fire_state
 		sta fire_state
-
 ; jumped to by: move_bullet, fire_pressed
 l92B6:
 		lda #$fd
@@ -739,19 +707,16 @@ l92B6:
 		and sprite_x_high_bits
 		clc 
 		bcc l92EF
-
 ; jumped to by: fire_pressed
 l92EA:
 		lda #$02
 		ora sprite_x_high_bits
-
 ; jumped to by: fire_pressed
 l92EF:
 		sta sprite_x_high_bits
 		clc 
 		bcc l92F8
 		inc unused_9d9d
-
 ; jumped to by: fire_pressed
 l92F8:
 		rts 
@@ -778,7 +743,6 @@ explode:
 		lda #$01
 		bit sprite_mask
 		bne l9345
-
 ; jumped to by: explode
 l931E:
 		ldy current_player
@@ -793,7 +757,6 @@ l931E:
 		adc #$01
 		sta score_hi, y
 		bcc l9338
-
 ; jumped to by: explode
 l9338:
 		cld 
@@ -803,7 +766,6 @@ l9338:
 		lda #$f8
 		bit exploding
 		bne l931E
-
 ; jumped to by: explode
 l9345:
 		lda #$05
@@ -822,7 +784,6 @@ l9352:
 		ldx #$07
 		ldy #$91
 		bne l93CA
-
 ; jumped to by: explode
 l9365:
 		cmp #$02
@@ -831,7 +792,6 @@ l9365:
 		ldx #$46
 		ldy #$91
 		bne l93CA
-
 ; jumped to by: explode
 l9372:
 		cmp #$03
@@ -840,7 +800,6 @@ l9372:
 		ldx #$85
 		ldy #$91
 		bne l93CA
-
 ; jumped to by: explode
 l937F:
 		lda sprite_mask
@@ -863,31 +822,26 @@ l937F:
 		and score_lo, y
 		bne l93C0
 		ldx sprite_index
-
 flash_sprite:
 		inc vic_sprite_colors, x
 		lda vic_sprite_colors, x
 		and #$0f
 		beq flash_sprite
-
 ; jumped to by: explode
 l93C0:
 		lda vic_sprite_collision
 		lda #$00
 		sta vic_sprite_collision
 		beq l93D7
-
 ; jumped to by: explode
 l93CA:
 		jsr copy_sprite
 		ldx sprite_index
 		lda #$1e
 		sta explosion_timers, x
-
 ; jumped to by: explode
 l93D5:
 		lda #$01
-
 ; jumped to by: flash_sprite
 l93D7:
 		rts 
@@ -906,16 +860,13 @@ check_hit:
 		bit sprite_coll_state
 		bne l93F6
 		beq l93F2
-
 ; jumped to by: check_hit
 l93F2:
 		lda #$ff
 		bne l93F8
-
 ; jumped to by: check_hit
 l93F6:
 		lda #$00
-
 ; jumped to by: check_hit
 l93F8:
 		rts 
@@ -936,7 +887,6 @@ move_right:
 		lda sprite_mask
 		bit sprite_x_high_bits
 		bne l942B
-
 ; jumped to by: move_right
 l9417:
 		inc sprite_coords, x
@@ -944,22 +894,18 @@ l9417:
 		lda sprite_mask
 		ora sprite_x_high_bits
 		sta sprite_x_high_bits
-
 ; jumped to by: move_right
 l9425:
 		ldx move_count
 		clc 
 		bcc move_right
-
 ; jumped to by: move_right, move_left
 l942B:
 		lda #$01
 		bne l9431
-
 ; jumped to by: move_right, move_left
 l942F:
 		lda #$00
-
 ; jumped to by: move_right
 l9431:
 		sta move_result
@@ -968,11 +914,9 @@ l9431:
 		beq l9440
 		ldy #$01
 		bne l9442
-
 ; jumped to by: move_right
 l9440:
 		ldy #$00
-
 ; jumped to by: move_right
 l9442:
 		ldx sprite_coord_index
@@ -996,7 +940,6 @@ move_left:
 		lda sprite_mask
 		bit sprite_x_high_bits
 		beq l942B
-
 ; jumped to by: move_left
 l946B:
 		dec sprite_coords, x
@@ -1007,13 +950,11 @@ l946B:
 		eor #$ff
 		and sprite_x_high_bits
 		sta sprite_x_high_bits
-
 ; jumped to by: move_left
 l9480:
 		ldx move_count
 		clc 
 		bcc move_left
-
 ; called by: fire_pressed
 move_up:
 		cpy #$00
@@ -1028,23 +969,19 @@ move_up:
 		lda sprite_coords, x
 		cmp #$32
 		bcc l94A7
-
 ; jumped to by: move_up
 l949E:
 		dec sprite_coords, x
 		ldx move_count
 		clc 
 		bcc move_up
-
 ; jumped to by: move_up, move_down
 l94A7:
 		lda #$01
 		bne l94AD
-
 ; jumped to by: move_up, move_down
 l94AB:
 		lda #$00
-
 ; jumped to by: move_up
 l94AD:
 		sta move_result
@@ -1069,14 +1006,12 @@ move_down:
 		lda sprite_coords, x
 		cmp #$fa
 		bcs l94A7
-
 ; jumped to by: move_down
 l94D5:
 		inc sprite_coords, x
 		ldx move_count
 		clc 
 		bcc move_down
-
 ; copies a sprite image from X/Y (low/high) to the sprite pointer in A
 ; called by: explode, flash_sprite, init_game, switch_player
 copy_sprite:
@@ -1086,7 +1021,6 @@ copy_sprite:
 		lda #$00
 		sta sprite_destination + $1
 		ldx #$06
-
 ; jumped to by: copy_sprite
 l94EA:
 		asl sprite_destination
@@ -1094,7 +1028,6 @@ l94EA:
 		dex 
 		bne l94EA
 		ldy #$00
-
 ; jumped to by: copy_sprite
 l94F3:
 		lda (sprite_source), y
@@ -1111,7 +1044,6 @@ select_sprite:
 		beq l951B
 		sta sprite_mask
 		ldx #$00
-
 ; jumped to by: select_sprite
 l9506:
 		lsr 
@@ -1120,7 +1052,6 @@ l9506:
 		cpx #$08
 		bcc l9506
 		bcs l951B
-
 ; jumped to by: select_sprite
 l9510:
 		stx sprite_index
@@ -1129,14 +1060,12 @@ l9510:
 		sta sprite_coord_index
 		clc 
 		bcc l9526
-
 ; jumped to by: select_sprite
 l951B:
 		lda #$00
 		sta sprite_index
 		sta sprite_coord_index
 		sta sprite_mask
-
 ; jumped to by: select_sprite
 l9526:
 		lda sprite_mask
@@ -1167,7 +1096,6 @@ update_vic_sprite_positions:
 		lda sprite_x_high_bits
 		sta vic_sprite_x_high_bits
 		ldx #$00
-
 ; jumped to by: update_vic_sprite_positions
 l9551:
 		lda sprite_coords, x
@@ -1183,11 +1111,9 @@ l9551:
 ; called by: main_loop, title_screen, demo, show_top_score_row_14
 delay:
 		ldy delay_outer
-
 ; jumped to by: delay
 l9566:
 		ldx delay_inner
-
 ; jumped to by: delay
 l9569:
 		dex 
@@ -1200,7 +1126,6 @@ l9569:
 ; called by: main_loop, demo
 move_enemies:
 		lda #$04
-
 ; jumped to by: move_enemies
 l9572:
 		jsr select_sprite
@@ -1235,7 +1160,6 @@ l95AF:
 		lda sprite_mask
 		ora sprite_x_high_bits
 		sta sprite_x_high_bits
-
 ; jumped to by: move_enemies
 l95B8:
 		ldx sprite_index
@@ -1249,13 +1173,11 @@ l95B8:
 		sta enemy_directions, x
 		clc 
 		bcc l960F
-
 ; jumped to by: move_enemies
 l95D1:
 		lda #$80
 		ora enemy_directions, x
 		sta enemy_directions, x
-
 ; jumped to by: move_enemies
 l95D9:
 		lda #$02
@@ -1265,7 +1187,6 @@ l95D9:
 		ldy #$01
 		ldx #$ff
 		jsr move_down
-
 ; jumped to by: move_enemies
 l95EA:
 		lda #$08
@@ -1275,7 +1196,6 @@ l95EA:
 		ldx #$01
 		ldy #$00
 		jsr move_right
-
 ; jumped to by: move_enemies
 l95FB:
 		ldx sprite_index
@@ -1286,7 +1206,6 @@ l95FB:
 		ldx #$01
 		ldy #$00
 		jsr move_left
-
 ; jumped to by: move_enemies
 l960F:
 		lda #$04
@@ -1302,13 +1221,11 @@ l960F:
 		lda score_lo, y
 		cmp #$15
 		bcc l963A
-
 ; jumped to by: move_enemies
 l962D:
 		lda #$08
 		ora sprite_enable
 		sta sprite_enable
-
 ; jumped to by: move_enemies
 l9635:
 		lda #$08
@@ -1329,13 +1246,11 @@ l963A:
 		lda score_lo, y
 		cmp #$40
 		bcc l96B4
-
 ; jumped to by: move_enemies
 l9658:
 		lda #$10
 		ora sprite_enable
 		sta sprite_enable
-
 ; jumped to by: move_enemies
 l9660:
 		lda #$10
@@ -1356,13 +1271,11 @@ l9665:
 		lda score_lo, y
 		cmp #$80
 		bcc l96B4
-
 ; jumped to by: move_enemies
 l9683:
 		lda #$20
 		ora sprite_enable
 		sta sprite_enable
-
 ; jumped to by: move_enemies
 l968B:
 		lda #$20
@@ -1383,7 +1296,6 @@ l9690:
 		lda #$40
 		ora sprite_enable
 		sta sprite_enable
-
 ; jumped to by: move_enemies
 l96AF:
 		lda #$40
@@ -1403,7 +1315,6 @@ init_game:
 		lda #$90
 		sta chrget + $2
 		ldx #$00
-
 ; jumped to by: init_game
 l96C6:
 		lda sprite_pointer_values, x
@@ -1412,7 +1323,6 @@ l96C6:
 		cpx #$08
 		bcc l96C6
 		ldx #$00
-
 ; jumped to by: init_game
 l96D3:
 		lda sprite_images_lo, x
@@ -1427,7 +1337,6 @@ l96D3:
 		cpx #$07
 		bcc l96D3
 		ldx #$00
-
 ; jumped to by: init_game
 l96F2:
 		lda vic_init, x
@@ -1435,7 +1344,6 @@ l96F2:
 		cpx #$10
 		bcs l96FF
 		sta sprite_coords, x
-
 ; jumped to by: init_game
 l96FF:
 		inx 
@@ -1447,7 +1355,6 @@ l96FF:
 		sta delay_inner
 		lda #$00
 		ldx #$00
-
 ; jumped to by: init_game
 l9712:
 		sta explosion_timers, x
@@ -1475,7 +1382,6 @@ l9712:
 		sta saved_sprite_enable, x
 		lda #$00
 		ldx #$15
-
 sid_clear_loop:
 		dex 
 		sta voice1_frequency, x
@@ -1484,7 +1390,6 @@ sid_clear_loop:
 		sta sid_vol_filter
 		ldx #$00
 		ldy #$00
-
 ; jumped to by: sid_clear_loop
 l9762:
 		lda vic_init + $27, x
@@ -1501,7 +1406,6 @@ l9762:
 ; called by: main_loop, demo
 update_directions:
 		ldx #$00
-
 ; jumped to by: update_directions
 l9775:
 		dec direction_timers, x
@@ -1510,7 +1414,6 @@ l9775:
 		sta enemy_directions, x
 		lda #$32
 		sta direction_timers, x
-
 ; jumped to by: update_directions
 l9785:
 		inx 
@@ -1524,7 +1427,6 @@ draw_scores:
 		sta score_player
 		lda #$02
 		sta score_column
-
 ; jumped to by: draw_scores
 l9795:
 		ldy score_player
@@ -1534,7 +1436,6 @@ l9795:
 		cmp #$30
 		bne l97A5
 		lda #$20
-
 ; jumped to by: draw_scores
 l97A5:
 		ldy score_column
@@ -1551,7 +1452,6 @@ l97A5:
 		cpy #$00
 		bne l97C8
 		lda #$20
-
 ; jumped to by: draw_scores
 l97C8:
 		ldy score_column
@@ -1578,7 +1478,6 @@ l97C8:
 		lda #$20
 		sta score_column
 		bne l9795
-
 ; jumped to by: draw_scores
 l97FF:
 		jsr update_high_score
@@ -1587,7 +1486,6 @@ l97FF:
 ; called by: init_game
 draw_turns:
 		ldx #$00
-
 ; jumped to by: draw_turns
 l9805:
 		lda turns_text, x
@@ -1599,7 +1497,6 @@ l9805:
 		cpx #$07
 		bcc l9805
 		ldx #$00
-
 show_top_score_line:
 		lda top_score_line, x
 		and #$bf
@@ -1610,7 +1507,6 @@ show_top_score_line:
 		cpx #$28
 		bcc show_top_score_line
 		ldx #$00
-
 show_copyright:
 		lda robert_copyright, x
 		sta screen_ram + $3c0, x
@@ -1621,7 +1517,6 @@ show_copyright:
 		bcc show_copyright
 		ldx #$00
 		lda #$02
-
 make_scores_red:
 		sta color_ram + $28, x
 		inx 
@@ -1669,7 +1564,6 @@ play_sound:
 		lda #$11
 		sta voice2_control
 		bne l993B
-
 ; jumped to by: play_sound
 l98DA:
 		cmp #$02
@@ -1683,13 +1577,11 @@ l98DA:
 		sta voice2_frequency
 		clc 
 		bcc l993B
-
 ; jumped to by: play_sound
 l98F6:
 		lda #$00
 		sta voice2_control
 		sta voice1_control
-
 ; jumped to by: play_sound
 l98FE:
 		cmp #$05
@@ -1713,14 +1605,12 @@ l98FE:
 		sta voice1_control
 		clc 
 		bcc l993B
-
 ; jumped to by: play_sound
 l9932:
 		cmp #$fe
 		bne l993B
 		lda #$00
 		sta voice3_control
-
 ; jumped to by: play_sound
 l993B:
 		rts 
@@ -1736,14 +1626,12 @@ update_high_score:
 		cmp high_score_lo
 		bcc l995F
 		beq l995F
-
 ; jumped to by: update_high_score
 l9953:
 		lda score_lo, x
 		sta high_score_lo
 		lda score_hi, x
 		sta high_score_hi
-
 ; jumped to by: update_high_score
 l995F:
 		lda high_score_hi
@@ -1752,7 +1640,6 @@ l995F:
 		cmp #$30
 		bne l996C
 		lda #$20
-
 ; jumped to by: update_high_score
 l996C:
 		ldy #$11
@@ -1766,7 +1653,6 @@ l996C:
 		cpy #$00
 		bne hi_score_draw
 		lda #$20
-
 ; jumped to by: update_high_score
 hi_score_draw:
 		ldy #$12
@@ -1800,22 +1686,18 @@ l99AB:
 		lda current_player
 		cmp #$00
 		beq l99EB
-
 ; jumped to by: next_turn
 l99BA:
 		jsr draw_logo
-
 title_screen:
 		ldx #$00
 		stx title_countdown_lo
 		ldx #$0a
 		stx title_countdown_hi
 		bne l99CC
-
 ; jumped to by: title_screen
 l99C9:
 		jsr getin
-
 ; jumped to by: title_screen
 l99CC:
 		cmp #$0d
@@ -1836,14 +1718,12 @@ l99CC:
 l99EB:
 		ldx #$00
 		lda #$20
-
 ; jumped to by: title_screen
 l99EF:
 		sta screen_ram + $1e0, x
 		inx 
 		cpx #$28
 		bcc l99EF
-
 ; jumped to by: next_turn
 l99F7:
 		jsr switch_player
@@ -1859,7 +1739,6 @@ l99F7:
 		sta delay_inner
 		lda #$20
 		ldx #$00
-
 ; jumped to by: title_screen
 l9A19:
 		sta screen_ram + $1e0, x
@@ -1882,12 +1761,10 @@ l9A3B:
 		lda #$00
 		sta two_players
 		beq l9A47
-
 ; jumped to by: title_screen
 l9A42:
 		lda #$01
 		sta two_players
-
 ; jumped to by: title_screen
 l9A47:
 		jsr init_game
@@ -1906,7 +1783,6 @@ demo:
 		sta vic_sprite_colors + $4
 		lda #$0e
 		sta delay_inner
-
 ; jumped to by: demo
 l9A65:
 		jsr stop
@@ -1934,7 +1810,6 @@ l9A65:
 		bne l9AA4
 		clc 
 		bcc l9A65
-
 ; jumped to by: demo
 l9AA4:
 		ldx #$00
@@ -1958,7 +1833,6 @@ f3_2_player_text:
 show_game_over:
 		ldx #$00
 		ldy #$0f
-
 ; jumped to by: show_game_over
 l9AE3:
 		lda game_over_text, x
@@ -1970,7 +1844,6 @@ l9AE3:
 		iny 
 		cpx #$09
 		bcc l9AE3
-
 ; shows whose turn it is, and waits for a key or a while
 ; called by: title_screen
 show_player:
@@ -1979,7 +1852,6 @@ show_player:
 		lda current_player
 		beq show_top_score_row_14
 		ldx #$1e
-
 ; jumped to by: show_player
 show_top_score_row_14:
 		lda top_score_line, x
@@ -1994,7 +1866,6 @@ show_top_score_row_14:
 		lda #$ff
 		sta show_player_countdown
 		sta delay_outer
-
 ; jumped to by: show_top_score_row_14
 l9B1D:
 		jsr delay
@@ -2012,7 +1883,6 @@ l9B1D:
 		lda #$32
 		sta delay_outer
 		lda #$01
-
 ; jumped to by: show_top_score_row_14
 l9B40:
 		rts 
@@ -2035,7 +1905,6 @@ switch_player:
 		lda sprite_enable
 		sta saved_sprite_enable, x
 		ldy #$00
-
 ; jumped to by: switch_player
 l9B5D:
 		lda vic_sprite_colors, y
@@ -2053,7 +1922,6 @@ l9B5D:
 		lda saved_sprite_enable, x
 		sta sprite_enable
 		ldy #$00
-
 ; jumped to by: switch_player
 l9B7C:
 		lda saved_sprite_colors, x
@@ -2063,11 +1931,9 @@ l9B7C:
 		iny 
 		cpy #$08
 		bcc l9B7C
-
 ; jumped to by: switch_player
 l9B89:
 		ldx #$00
-
 ; jumped to by: switch_player
 l9B8B:
 		lda vic_init, x
@@ -2080,7 +1946,6 @@ l9B8B:
 		sta exploding
 		sta fire_state
 		ldx #$00
-
 ; jumped to by: switch_player
 l9BA3:
 		lda sprite_images_lo, x
@@ -2103,7 +1968,6 @@ l9BA3:
 ; called by: next_turn, demo
 draw_logo:
 		ldx #$00
-
 ; jumped to by: draw_logo
 l9BCE:
 		lda logo0, x
@@ -2114,7 +1978,6 @@ l9BCE:
 		cpx #$1c
 		bcc l9BCE
 		ldx #$00
-
 ; jumped to by: draw_logo
 l9BE0:
 		lda logo1, x
@@ -2125,7 +1988,6 @@ l9BE0:
 		cpx #$1c
 		bcc l9BE0
 		ldx #$00
-
 ; jumped to by: draw_logo
 l9BF2:
 		lda logo2, x
@@ -2136,7 +1998,6 @@ l9BF2:
 		cpx #$1c
 		bcc l9BF2
 		ldx #$00
-
 ; jumped to by: draw_logo
 l9C04:
 		lda logo3, x
@@ -2147,7 +2008,6 @@ l9C04:
 		cpx #$1c
 		bcc l9C04
 		ldx #$00
-
 ; jumped to by: draw_logo
 l9C16:
 		lda logo4, x
@@ -2159,7 +2019,6 @@ l9C16:
 		bcc l9C16
 		ldx #$00
 		ldy #$05
-
 ; jumped to by: draw_logo
 l9C2A:
 		lda f1_1_player_text, x
@@ -2215,7 +2074,6 @@ check_protection:
 		lda basic_end + $1
 		cmp #$08
 		beq nothing_just_rts
-
 ; jumped to by: check_protection
 l9CF4:
 		lda #$00
@@ -2224,7 +2082,6 @@ l9CF4:
 		sta clear_pointer + $1
 		lda #$00
 		ldy #$00
-
 ; jumped to by: check_protection
 l9D00:
 		sta (clear_pointer), y
@@ -2233,7 +2090,6 @@ l9D00:
 		inc clear_pointer + $1
 		bne l9D00
 		beq nothing_just_rts
-
 ; jumped to by: check_protection
 nothing_just_rts:
 		rts 
@@ -2246,7 +2102,6 @@ to_digits:
 		cmp #$0a
 		bcc l9D16
 		adc #$06
-
 ; jumped to by: to_digits
 l9D16:
 		adc #$30
@@ -2259,7 +2114,6 @@ l9D16:
 		cmp #$0a
 		bcc l9D24
 		adc #$06
-
 ; jumped to by: to_digits
 l9D24:
 		adc #$30
@@ -2439,7 +2293,6 @@ start:
 		sta background_color
 		jsr kernal_clear_screen
 		ldx #$68
-
 ; jumped to by: start
 l9E0D:
 		lda crack_trainer_msg, x
@@ -2449,7 +2302,6 @@ l9E0D:
 		dex 
 		bpl l9E0D
 		cli 
-
 ; jumped to by: start
 l9E1C:
 		jsr getin
@@ -2459,7 +2311,6 @@ l9E1C:
 		bne l9E1C
 		lda #$2c
 		sta lose_life
-
 ; jumped to by: start
 no_trainer:
 		lda #$9e
