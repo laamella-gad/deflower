@@ -26,16 +26,16 @@ lC109:
 		ldx $c0a4
 		stx $d404
 
-; jumped to by: lC109, lC1B0
+; jumped to by: lC100
 lC123:
 		dec $c0c0
 		rts 
 
-; jumped to by: lC109, lC192
+; jumped to by: lC100
 lC127:
 		jsr lC1CA
 
-; jumped to by: lC175
+; jumped to by: lC100
 lC12A:
 		jsr lC1D8
 		bne lC14E
@@ -43,7 +43,7 @@ lC12A:
 		bne lC137
 		jmp lC1E6
 
-; jumped to by: lC12A
+; jumped to by: lC100
 lC137:
 		lda $e7e1
 		sta $c0c4
@@ -55,7 +55,7 @@ lC137:
 		clc 
 		bcc lC192
 
-; jumped to by: lC12A
+; jumped to by: lC100
 lC14E:
 		cmp #$ff
 		bne lC198
@@ -69,18 +69,18 @@ lC14E:
 		clc 
 		bcc lC175
 
-; jumped to by: lC14E
+; jumped to by: lC100
 lC168:
 		lda $c0c2
 		bmi lC16F
 		bne lC18D
 
-; jumped to by: lC168
+; jumped to by: lC100
 lC16F:
 		jsr lC1DF
 		sta $c0c2
 
-; jumped to by: lC14E, lC18D
+; jumped to by: lC100
 lC175:
 		jsr lC1CA
 		jsr lC1DF
@@ -92,18 +92,18 @@ lC175:
 		clc 
 		bcc lC12A
 
-; jumped to by: lC168
+; jumped to by: lC100
 lC18D:
 		dec $c0c2
 		bne lC175
 
-; jumped to by: lC137
+; jumped to by: lC100
 lC192:
 		jsr lC1CA
 		clc 
 		bcc lC127
 
-; jumped to by: lC14E
+; jumped to by: lC100
 lC198:
 		cmp #$7f
 		beq lC1B0
@@ -116,7 +116,7 @@ lC198:
 		inx 
 		stx $d404
 
-; jumped to by: lC198
+; jumped to by: lC100
 lC1B0:
 		jsr lC1DF
 		asl 
@@ -124,7 +124,7 @@ lC1B0:
 		jmp lC123
 *=$c1bb
 
-; called by: lC137, lC175
+; called by: lC100
 ; jumped to by: lC1CA
 lC1BB:
 		lda $c0c4
@@ -135,7 +135,7 @@ lC1BB:
 		sta $c1e4
 		rts 
 
-; called by: lC127, lC175, lC192
+; called by: lC100
 lC1CA:
 		inc $c0c3
 		ldy $c0c3
@@ -147,20 +147,20 @@ lC1CA:
 lC1D7:
 		rts 
 
-; called by: lC12A, lC175
+; called by: lC100
 lC1D8:
 		ldy $c0c3
 		lda $e000, y
 		rts 
 
-; called by: lC109, lC14E, lC16F, lC175, lC1B0
+; called by: lC100
 lC1DF:
 		ldy $c0c3
 		lda $e800, y
 dC1E4 = $c1e4
 		rts 
 
-; jumped to by: lC12A
+; jumped to by: lC100
 lC1E6:
 		lda $c0cf
 		and #$fe
@@ -173,7 +173,7 @@ lC1E6:
 		sta $c0c3
 		rts 
 
-; called by: lC555
+; called by: snapshot_pc
 lC200:
 		lda $c0c6
 		beq lC209
@@ -193,16 +193,16 @@ lC209:
 		ldx $c0ab
 		stx $d40b
 
-; jumped to by: lC209, lC2B0
+; jumped to by: lC200
 lC223:
 		dec $c0c5
 		rts 
 
-; jumped to by: lC209, lC292
+; jumped to by: lC200
 lC227:
 		jsr lC2CA
 
-; jumped to by: lC275
+; jumped to by: lC200
 lC22A:
 		jsr lC2D8
 		bne lC24E
@@ -210,7 +210,7 @@ lC22A:
 		bne lC237
 		jmp lC2E6
 
-; jumped to by: lC22A
+; jumped to by: lC200
 lC237:
 		lda $a7e1
 		sta $c0c9
@@ -222,7 +222,7 @@ lC237:
 		clc 
 		bcc lC292
 
-; jumped to by: lC22A
+; jumped to by: lC200
 lC24E:
 		cmp #$ff
 		bne lC298
@@ -236,18 +236,18 @@ lC24E:
 		clc 
 		bcc lC275
 
-; jumped to by: lC24E
+; jumped to by: lC200
 lC268:
 		lda $c0c7
 		bmi lC26F
 		bne lC28D
 
-; jumped to by: lC268
+; jumped to by: lC200
 lC26F:
 		jsr lC2DF
 		sta $c0c7
 
-; jumped to by: lC24E, lC28D
+; jumped to by: lC200
 lC275:
 		jsr lC2CA
 		jsr lC2DF
@@ -259,18 +259,18 @@ lC275:
 		clc 
 		bcc lC22A
 
-; jumped to by: lC268
+; jumped to by: lC200
 lC28D:
 		dec $c0c7
 		bne lC275
 
-; jumped to by: lC237
+; jumped to by: lC200
 lC292:
 		jsr lC2CA
 		clc 
 		bcc lC227
 
-; jumped to by: lC24E
+; jumped to by: lC200
 lC298:
 		cmp #$7f
 		beq lC2B0
@@ -283,7 +283,7 @@ lC298:
 		inx 
 		stx $d40b
 
-; jumped to by: lC298
+; jumped to by: lC200
 lC2B0:
 		jsr lC2DF
 		asl 
@@ -291,7 +291,7 @@ lC2B0:
 		jmp lC223
 *=$c2bb
 
-; called by: lC237, lC275
+; called by: lC200
 ; jumped to by: lC2CA
 lC2BB:
 		lda $c0c9
@@ -302,7 +302,7 @@ lC2BB:
 		sta $c2e4
 		rts 
 
-; called by: lC227, lC275, lC292
+; called by: lC200
 lC2CA:
 		inc $c0c8
 		ldy $c0c8
@@ -314,20 +314,20 @@ lC2CA:
 lC2D7:
 		rts 
 
-; called by: lC22A, lC275
+; called by: lC200
 lC2D8:
 		ldy $c0c8
 		lda $a000, y
 		rts 
 
-; called by: lC209, lC24E, lC26F, lC275, lC2B0
+; called by: lC200
 lC2DF:
 		ldy $c0c8
 		lda $a800, y
 dC2E4 = $c2e4
 		rts 
 
-; jumped to by: lC22A
+; jumped to by: lC200
 lC2E6:
 		lda $c0cf
 		and #$fd
@@ -340,7 +340,7 @@ lC2E6:
 		sta $c0c8
 		rts 
 
-; called by: lC55D
+; called by: snapshot_pc
 lC300:
 		lda $c0cb
 		beq lC309
@@ -360,16 +360,16 @@ lC309:
 		ldx $c0b2
 		stx $d412
 
-; jumped to by: lC309, lC3B0
+; jumped to by: lC300
 lC323:
 		dec $c0ca
 		rts 
 
-; jumped to by: lC309, lC392
+; jumped to by: lC300
 lC327:
 		jsr lC3CA
 
-; jumped to by: lC375
+; jumped to by: lC300
 lC32A:
 		jsr lC3D8
 		bne lC34E
@@ -377,7 +377,7 @@ lC32A:
 		bne lC337
 		jmp lC3E6
 
-; jumped to by: lC32A
+; jumped to by: lC300
 lC337:
 		lda $b7e1
 		sta $c0ce
@@ -389,7 +389,7 @@ lC337:
 		clc 
 		bcc lC392
 
-; jumped to by: lC32A
+; jumped to by: lC300
 lC34E:
 		cmp #$ff
 		bne lC398
@@ -403,18 +403,18 @@ lC34E:
 		clc 
 		bcc lC375
 
-; jumped to by: lC34E
+; jumped to by: lC300
 lC368:
 		lda $c0cc
 		bmi lC36F
 		bne lC38D
 
-; jumped to by: lC368
+; jumped to by: lC300
 lC36F:
 		jsr lC3DF
 		sta $c0cc
 
-; jumped to by: lC34E, lC38D
+; jumped to by: lC300
 lC375:
 		jsr lC3CA
 		jsr lC3DF
@@ -426,18 +426,18 @@ lC375:
 		clc 
 		bcc lC32A
 
-; jumped to by: lC368
+; jumped to by: lC300
 lC38D:
 		dec $c0cc
 		bne lC375
 
-; jumped to by: lC337
+; jumped to by: lC300
 lC392:
 		jsr lC3CA
 		clc 
 		bcc lC327
 
-; jumped to by: lC34E
+; jumped to by: lC300
 lC398:
 		cmp #$7f
 		beq lC3B0
@@ -450,7 +450,7 @@ lC398:
 		inx 
 		stx $d412
 
-; jumped to by: lC398
+; jumped to by: lC300
 lC3B0:
 		jsr lC3DF
 		asl 
@@ -458,7 +458,7 @@ lC3B0:
 		jmp lC323
 *=$c3bb
 
-; called by: lC337, lC375
+; called by: lC300
 ; jumped to by: lC3CA
 lC3BB:
 		lda $c0ce
@@ -469,7 +469,7 @@ lC3BB:
 		sta $c3e4
 		rts 
 
-; called by: lC327, lC375, lC392
+; called by: lC300
 lC3CA:
 		inc $c0cd
 		ldy $c0cd
@@ -481,20 +481,20 @@ lC3CA:
 lC3D7:
 		rts 
 
-; called by: lC32A, lC375
+; called by: lC300
 lC3D8:
 		ldy $c0cd
 		lda $b000, y
 		rts 
 
-; called by: lC309, lC34E, lC36F, lC375, lC3B0
+; called by: lC300
 lC3DF:
 		ldy $c0cd
 		lda $b800, y
 dC3E4 = $c3e4
 		rts 
 
-; jumped to by: lC32A
+; jumped to by: lC300
 lC3E6:
 		lda $c0cf
 		and #$fb
@@ -515,7 +515,7 @@ lC48D:
 		sta $01
 		rts 
 
-; called by: lC566
+; called by: snapshot_pc
 lC494:
 		lda $01
 		ora #$03
@@ -547,7 +547,7 @@ lC555:
 		bcc lC55D
 		jsr lC200
 
-; jumped to by: lC555
+; jumped to by: snapshot_pc
 lC55D:
 		pla 
 		lsr 
@@ -556,13 +556,13 @@ lC55D:
 		nop 
 		jsr lC300
 
-; jumped to by: irq, lC55D
+; jumped to by: irq, snapshot_pc
 lC566:
 		jsr lC494
 		jmp lEA31
 *=$ea31
 
-; jumped to by: lC566
+; jumped to by: snapshot_pc
 lEA31:
 		ora ($01, x)
 		ora ($01, x)

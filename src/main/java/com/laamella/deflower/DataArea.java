@@ -86,7 +86,7 @@ class DataArea extends Area {
      */
     @Override
     public String labelFor(int address, Subject subject) {
-        String directLabel = subject.memory[address].label;
+        String directLabel = subject.memory[address].labelName();
         if (directLabel != null) {
             return directLabel;
         }

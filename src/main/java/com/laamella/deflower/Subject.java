@@ -10,13 +10,20 @@ class MemoryLocation {
     final int address;
     final int data;
     Area area = null;
-    String label = null;
+    Label label = null;
     // The comment lines from the .flo file, if any.
     List<String> comment = List.of();
 
     MemoryLocation(int address, int data) {
         this.address = address;
         this.data = data;
+    }
+
+    /**
+     * The label's name, or null when there is no label here.
+     */
+    String labelName() {
+        return label != null ? label.name : null;
     }
 }
 
@@ -77,7 +84,7 @@ class Subject {
     void annotate(Annotation annotation) {
         int address = annotation.address;
         if (annotation.name != null) {
-            memory[address].label = annotation.name;
+            memory[address].label = new Label(annotation.name, false);
         }
         if (!annotation.comment.isEmpty()) {
             memory[address].comment = annotation.comment;
@@ -238,9 +245,9 @@ class Subject {
             if (location.label == null) {
                 continue;
             }
-            Integer first = firstAddressByLabel.putIfAbsent(location.label, location.address);
+            Integer first = firstAddressByLabel.putIfAbsent(location.label.name, location.address);
             if (first != null) {
-                errors.add(String.format("Duplicate label %s at %s, already defined at %s", location.label, asHexWord(location.address), asHexWord(first)));
+                errors.add(String.format("Duplicate label %s at %s, already defined at %s", location.label.name, asHexWord(location.address), asHexWord(first)));
             }
         }
     }
@@ -259,7 +266,7 @@ class Subject {
     public void addPotentialCodeLocation(int address, boolean labelIt, int referencingAddress) {
         MemoryLocation location = memory[address];
         if (labelIt) {
-            ensureLabelled(address, "l", referencingAddress);
+            ensureLabelled(address, "l", true, referencingAddress);
         }
         // A placeholder may still turn out to be code (issue 0055).
         if (location.area == null || location.area.isPlaceholder()) {
@@ -267,11 +274,27 @@ class Subject {
         }
     }
 
+    /**
+     * A jsr target: code to trace, and the start of a routine, so its
+     * label isn't local even when a branch or jmp labelled it first.
+     */
+    public void addCallTarget(int address, int referencingAddress) {
+        addPotentialCodeLocation(address, true, referencingAddress);
+        MemoryLocation location = memory[address];
+        if (location.label.local) {
+            location.label = new Label(location.label.name, false);
+        }
+    }
+
     public void ensureLabelled(int address, String contentHint, int referencedFromAddress) {
+        ensureLabelled(address, contentHint, false, referencedFromAddress);
+    }
+
+    private void ensureLabelled(int address, String contentHint, boolean local, int referencedFromAddress) {
         MemoryLocation location = memory[address];
         if (location.label == null) {
-            location.label = String.format("%s%04X", contentHint, address);
-            System.out.println("Unnamed target: " + location.label + " from address " + asHexWord(referencedFromAddress));
+            location.label = new Label(String.format("%s%04X", contentHint, address), local);
+            System.out.println("Unnamed target: " + location.label.name + " from address " + asHexWord(referencedFromAddress));
         }
     }
 }

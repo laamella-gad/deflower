@@ -61,7 +61,7 @@ The pipeline is: **flow file → parse → memory image + annotations → code-f
   - `.virtual` blocks;
   - instructions with operands resolved to labels (`label + $offset` inside arrays), and `@w` on absolute operands below `$100` so they don't reassemble as zero page;
   - labels inside an array, a multi-byte element or an instruction printed as `label = $XXXX` defines after it, and labels on uncovered memory as defines in place;
-  - cross-references above each label (`; called by:`, `jumped to by:`, `read by:`, `written by:`, `modified by:`), collected by `CrossReferences` from the decoded instructions and named by the nearest label before each one.
+  - cross-references above each label (`; called by:`, `jumped to by:`, `read by:`, `written by:`, `modified by:`), collected by `CrossReferences` from the decoded instructions and named by the nearest routine label before each one (auto labels of branch and `jmp` targets no `jsr` calls are local and skipped).
 
   `LineEmitter` is the low-level writer: lines, indentation, value columns and open quotes.
 - **`vicevcf`** parses VICE snapshot files (`ViceVcfFileReader` → `Header` + `Module`s). `C64MemModuleHandler` extracts the `C64MEM` module, which provides the 64K RAM image. Other modules are kept as `UnhandledModule`.

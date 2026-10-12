@@ -32,7 +32,7 @@ public class InstructionArea extends Area {
     @Override
     public String labelFor(int address, Subject subject) {
         int offset = address - this.address;
-        String label = subject.memory[this.address].label;
+        String label = subject.memory[this.address].labelName();
         if (label == null) {
             return null;
         }

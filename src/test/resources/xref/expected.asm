@@ -5,7 +5,7 @@ counter:		.byte	?
 .endv
 
 .virtual $00fb
-; read by: lC009
+; read by: entry
 pointer:		.word	?
 .endv
 
@@ -27,6 +27,7 @@ lC009:
 		sta border
 		jsr chrout
 
+; jumped to by: entry
 lC01F:
 		dex 
 		bne lC01F
@@ -41,16 +42,16 @@ sub:
 lC02A:
 		rts 
 
-; read by: lC01F
+; read by: entry
 aC02B:
 		.addr	lC02A
 
-; read by: lC009
-; written by: lC009, $c032
-; modified by: lC009
+; read by: entry
+; written by: entry, $c032
+; modified by: entry
 value:
 		.byte	$00
-; read by: lC009
+; read by: entry
 table:
 		.byte	$01, $02, $03, $04
 
@@ -58,11 +59,11 @@ table:
 
 		sta value
 		rts 
-; written by: lC009
+; written by: entry
 border = $d020
 
 .virtual $ffd2
-; called by: lC009
+; called by: entry
 chrout:
 		.fill	3
 .endv

@@ -13,6 +13,7 @@ entry_a:
 		sta $ff
 		ldx $033f
 
+; jumped to by: entry_a
 lC015:
 		beq lC028
 		lda $fa
@@ -25,11 +26,11 @@ lC015:
 		dex 
 		jmp lC015
 
-; jumped to by: lC015, lC069
+; jumped to by: entry_a
 lC028:
 		ldx #$00
 
-; jumped to by: lC058
+; jumped to by: entry_a
 lC02A:
 		ldy #$00
 		lda ($fa), y
@@ -58,7 +59,7 @@ lC02A:
 		bcc lC058
 		inc $fb
 
-; jumped to by: lC02A
+; jumped to by: entry_a
 lC058:
 		cpx #$0e
 		bcc lC02A
@@ -70,7 +71,7 @@ lC058:
 		bcc lC069
 		inc $fd
 
-; jumped to by: lC058
+; jumped to by: entry_a
 lC069:
 		ldx #$00
 		stx $fe

@@ -1,7 +1,7 @@
 
 *=$0116
 
-; jumped to by: l082D
+; jumped to by: start
 l0116:
 		brk 
 *=$0801
@@ -17,6 +17,7 @@ start:
 		sta $01
 		ldx #$34
 
+; jumped to by: start
 l0817:
 		lda $0842, x
 		sta $01ff, x
@@ -24,6 +25,7 @@ l0817:
 		bne l0817
 		ldx #$cf
 
+; jumped to by: start
 l0822:
 		lda $0875, x
 		sta @w $00f6, x
@@ -31,6 +33,7 @@ l0822:
 		bne l0822
 		ldy #$69
 
+; jumped to by: start
 l082D:
 		dex 
 		lda $707b, x

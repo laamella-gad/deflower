@@ -1,12 +1,12 @@
 
 *=$0100
 
-; called by: l115A
+; called by: $1163
 l0100:
 		brk 
 *=$013a
 
-; jumped to by: l115A
+; jumped to by: $1173
 l013A:
 		brk 
 *=$0801
@@ -19,6 +19,7 @@ start:
 		ldy #$00
 		tsx 
 
+; jumped to by: start
 l0810:
 		lda $1175, x
 		sta @w $00fc, x
@@ -27,7 +28,7 @@ l0810:
 		jmp l1140
 *=$1140
 
-; jumped to by: l0810, l115A
+; jumped to by: start, $116c
 l1140:
 		inx 
 		tya 
@@ -37,6 +38,7 @@ l1140:
 		lsr 
 		ldx $0333, y
 
+; jumped to by: $114f
 l114B:
 		rol 
 		rol $9f
@@ -47,7 +49,7 @@ l114B:
 		lda $9f
 		adc $039b, y
 
-; jumped to by: l1140
+; jumped to by: $1144
 l115A:
 		sta $039c, y
 		txa 

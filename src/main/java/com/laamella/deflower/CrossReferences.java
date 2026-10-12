@@ -21,9 +21,10 @@ import static com.laamella.mpu6502.specification.Opcode.*;
  * Which instructions refer to each label (issue 0076), printed as comment
  * lines above it: "called by: game_loop, l336F". A reference is listed at
  * the label its operand prints, so one into an array is listed at the
- * array's label. The referrer is named by the nearest label at or before
- * its instruction, each once per kind, and a label referring to itself (a
- * loop back to its own start) is left out.
+ * array's label. The referrer is named by the nearest routine label at or
+ * before its instruction, skipping local labels (issue 0084), each once
+ * per kind, and a label referring to itself (a loop back to its own
+ * start) is left out.
  */
 class CrossReferences {
     enum Kind {
@@ -79,7 +80,7 @@ class CrossReferences {
         if (labelAddress == -1 || labelAddress == referrerAddress) {
             return;
         }
-        String referrer = referrerAddress != -1 ? subject.memory[referrerAddress].label : asHexWord(area.address);
+        String referrer = referrerAddress != -1 ? subject.memory[referrerAddress].labelName() : asHexWord(area.address);
         referrersByLabelAddress
                 .computeIfAbsent(labelAddress, a -> new EnumMap<>(Kind.class))
                 .computeIfAbsent(kind(area.instruction), k -> new LinkedHashSet<>())
@@ -132,14 +133,15 @@ class CrossReferences {
     }
 
     /**
-     * The address of the nearest label at or before the instruction in
-     * `area`, looking back through the instructions right before it, or -1
-     * when that code has none.
+     * The address of the nearest routine label at or before the
+     * instruction in `area`, looking back through the instructions right
+     * before it, or -1 when that code has none.
      */
     private static int referrerAddress(InstructionArea area, Subject subject) {
         Area current = area;
         while (true) {
-            if (subject.memory[current.address].label != null) {
+            MemoryLocation location = subject.memory[current.address];
+            if (location.label != null && !location.label.local) {
                 return current.address;
             }
             Area previous = current.address > 0 ? subject.peek(current.address - 1) : null;

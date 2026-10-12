@@ -39,3 +39,11 @@ The simplest version for now; the rest waits until it proves too coarse.
 - **Not in this issue.** Blank lines only above routine labels ([0073](0073-blank-line-only-after-flow-end.md)), skipping references from inside the same routine, and a way to mark a named label local in the `.flo` file. Self-modifying writes need no rule: references don't change a label's kind.
 
 Done when: a small fixture shows a routine with local branch targets referring to data and to other routines, its cross-references name the routine instead of the branch targets, and the changed expectations are reviewed with snipsert.
+
+## Closing note
+
+A `Label` (`MemoryLocation.label`) holds the name and whether it is local: local for an auto label created by `Subject.addPotentialCodeLocation` for a branch or `jmp` target. `Subject.addCallTarget`, which `FlowAnalyser` now uses for `jsr`, makes it a routine label, whichever reference labelled the target first. `CrossReferences` skips local labels when it looks back for the referrer.
+
+Fixture `routines` shows local loop and branch targets inside two routines, a `jmp` to a local label, and a target reached both by a branch and a `jsr`, which stays a routine. Its output reassembles to the `.prg`. In the other fixtures only cross-reference lines changed: `squirm`'s longest line went from 421 to 357 characters.
+
+A side effect of keeping the self-reference rule as it was: a loop now lists its own routine (`jumped to by: entry` above `lC002` in `routines`), because the referrer is the routine, not the loop label. Skipping references from inside the same routine, listed as not in this issue, would remove those.

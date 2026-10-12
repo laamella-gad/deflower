@@ -1,18 +1,18 @@
 
 .virtual $009d
 ; ---- KERNAL variables ----
-; written by: lC158, load_highscore
+; written by: save_highscore, load_highscore
 kernal_msgflag:		.byte	?
 .endv
 
 .virtual $00ba
-; read by: lC158, lC172, load_highscore, lC1F7
-; written by: lC1D3
+; read by: save_highscore, load_highscore
+; written by: load_highscore
 kernal_device:		.byte	?
 .endv
 
 .virtual $00c1
-; written by: lC191
+; written by: save_highscore
 kernal_save_start:		.word	?
 .endv
 
@@ -39,27 +39,27 @@ stop_vector:		.word	?
 
 .virtual $0400
 ; ---- screen ----
-; read by: l504F, l5068, l507A, l5086
-; written by: l40BF, l4106, l4113, l4123, l413C, countdown, l4281, l42EF, l4333, l4917, l4A10, draw_status, l4BDC, show_game_over, number_rows, l504F, l5068, l507A, l5086, lC026, lC0A5
+; read by: twinkle_stars
+; written by: title_loop, start_game, draw_title, clear_title, draw_ground, countdown, draw_scores, draw_status, clear_status, show_game_over, number_rows, twinkle_stars, crack_intro, ask_trainer
 screen:
 		.fill	1000
 .endv
 
 .virtual $07f8
-; written by: l4018, l445F, l446C, l44AE, l44C7, l44D4, l4516, l4521, l4592, move_shots, l4677
+; written by: start, check_shot_hits, move_shots
 sprite_pointers:
 		.fill	8
 .endv
 
 .virtual $2000
 ; ---- built at run time by build_charset and build_sprites ----
-; written by: l4FE2
+; written by: build_charset
 charset:
 		.fill	2048
 .endv
 
 .virtual $3200
-; written by: l5022
+; written by: build_sprites
 sprites:
 		.fill	256
 .endv
@@ -68,7 +68,7 @@ sprites:
 
 ; ---- game: code ----
 ; the game's start, where the decruncher jumps to
-; jumped to by: lC026
+; jumped to by: crack_intro
 start:
 		lda #$93
 		jsr chrout
@@ -81,6 +81,7 @@ start:
 		lda #$01
 		ldx #$00
 
+; jumped to by: start
 l4018:
 		sta color_ram, x
 		sta color_ram + $c8, x
@@ -105,7 +106,7 @@ l4018:
 
 ; shows the title screen; also where the game returns to after game over
 ; jumped to by: show_game_over
-; written by: lC0DB
+; written by: apply_trainer
 title_screen:
 		jsr save_highscore
 		lda #$94
@@ -142,7 +143,6 @@ title_screen:
 		lda #$00
 		sta scroll_offset
 
-; jumped to by: l40EB
 title_loop:
 		jsr wait_frame
 		inc scroll_timer
@@ -154,6 +154,7 @@ title_loop:
 		ldx scroll_offset
 		ldy #$00
 
+; jumped to by: title_loop
 l40BF:
 		lda scroll_text, x
 		sta screen + $258, y
@@ -177,7 +178,7 @@ l40CE:
 		jsr position_p1
 		jmp start_game
 
-; jumped to by: l40CE
+; jumped to by: title_loop
 l40EB:
 		jsr read_p2_fire
 		lda p2_fire
@@ -189,11 +190,12 @@ l40EB:
 		sta p2_y
 		jsr position_p2
 
-; jumped to by: l40CE
+; jumped to by: title_loop
 start_game:
 		lda #$20
 		ldy #$00
 
+; jumped to by: start_game
 l4106:
 		sta screen + $258, y
 		iny 
@@ -205,6 +207,7 @@ l4106:
 draw_title:
 		ldx #$00
 
+; jumped to by: draw_title
 l4113:
 		lda title_chars, x
 		sta screen + $f0, x
@@ -213,11 +216,12 @@ l4113:
 		bne l4113
 		rts 
 
-; called by: l4333
+; called by: countdown
 clear_title:
 		ldx #$00
 		lda #$20
 
+; jumped to by: clear_title
 l4123:
 		sta screen + $f0, x
 		inx 
@@ -230,6 +234,7 @@ fill_title_color:
 		ldx #$00
 		lda title_color
 
+; jumped to by: fill_title_color
 l4131:
 		sta color_ram + $f0, x
 		inx 
@@ -237,11 +242,11 @@ l4131:
 		bne l4131
 		rts 
 
-; called by: l4018
+; called by: start
 draw_ground:
 		ldx #$00
 
-; jumped to by: l4153
+; jumped to by: draw_ground
 l413C:
 		lda ground_chars, x
 		sta screen + $2f8, x
@@ -253,7 +258,7 @@ l413C:
 		lda #$0f
 		sta color_ram + $2f8, x
 
-; jumped to by: l413C
+; jumped to by: draw_ground
 l4153:
 		inx 
 		cpx #$f0
@@ -261,6 +266,7 @@ l4153:
 		ldx #$a0
 		lda #$09
 
+; jumped to by: draw_ground
 l415C:
 		sta color_ram + $2f8, x
 		inx 
@@ -268,6 +274,7 @@ l415C:
 		bne l415C
 		lda #$08
 
+; jumped to by: draw_ground
 l4166:
 		sta color_ram + $2f8, x
 		inx 
@@ -281,6 +288,7 @@ l4166:
 		lda #$03
 		ldx #$d7
 
+; jumped to by: draw_ground
 l417E:
 		sta color_ram + $2f8, x
 		inx 
@@ -293,46 +301,46 @@ stripe_title_colors:
 		ldx #$00
 		ldy #$00
 
-; jumped to by: l41C4
+; jumped to by: stripe_title_colors
 l418B:
 		cpy #$00
 		bne l4194
 		lda #$06
 		jmp l41BA
 
-; jumped to by: l418B
+; jumped to by: stripe_title_colors
 l4194:
 		cpy #$01
 		bne l419D
 		lda #$0b
 		jmp l41BA
 
-; jumped to by: l4194
+; jumped to by: stripe_title_colors
 l419D:
 		cpy #$02
 		bne l41A6
 		lda #$0c
 		jmp l41BA
 
-; jumped to by: l419D
+; jumped to by: stripe_title_colors
 l41A6:
 		cpy #$03
 		bne l41AF
 		lda #$0f
 		jmp l41BA
 
-; jumped to by: l41A6
+; jumped to by: stripe_title_colors
 l41AF:
 		cpy #$04
 		bne l41B8
 		lda #$01
 		jmp l41BA
 
-; jumped to by: l41AF
+; jumped to by: stripe_title_colors
 l41B8:
 		lda #$04
 
-; jumped to by: l418B, l4194, l419D, l41A6, l41AF
+; jumped to by: stripe_title_colors
 l41BA:
 		sta color_ram + $f0, x
 		iny 
@@ -340,17 +348,18 @@ l41BA:
 		bne l41C4
 		ldy #$00
 
-; jumped to by: l41BA
+; jumped to by: stripe_title_colors
 l41C4:
 		inx 
 		cpx #$a0
 		bne l418B
 		rts 
 
-; called by: l40CE, l4281, l42F9
+; called by: title_loop, countdown
 cycle_title_colors:
 		ldx #$00
 
+; jumped to by: cycle_title_colors
 l41CC:
 		inc color_ram + $f0, x
 		inx 
@@ -358,7 +367,7 @@ l41CC:
 		bne l41CC
 		rts 
 
-; jumped to by: lC1B4
+; jumped to by: save_highscore
 reset_game:
 		lda #$00
 		sta game_over_flag
@@ -436,7 +445,7 @@ countdown:
 		lda #$1d
 		sta countdown_timer
 
-; jumped to by: l42EC
+; jumped to by: countdown
 l4281:
 		jsr cycle_title_colors
 		dec countdown_timer
@@ -454,7 +463,7 @@ l4281:
 		adc #$02
 		sta screen + $b4
 
-; jumped to by: l4281
+; jumped to by: countdown
 l42A7:
 		jsr wait_frame
 		lda p1_playing
@@ -471,7 +480,7 @@ l42A7:
 		sta p1_y
 		jsr position_p1
 
-; jumped to by: l42A7
+; jumped to by: countdown
 l42CB:
 		lda p2_playing
 		cmp #$01
@@ -487,18 +496,18 @@ l42CB:
 		sta p2_y
 		jsr position_p2
 
-; jumped to by: l42CB
+; jumped to by: countdown
 l42EC:
 		jmp l4281
 
-; jumped to by: l4281
+; jumped to by: countdown
 l42EF:
 		lda #$47
 		sta screen + $b3
 		lda #$4f
 		sta screen + $b4
 
-; jumped to by: l4333
+; jumped to by: countdown
 l42F9:
 		jsr cycle_title_colors
 		jsr wait_frame
@@ -515,7 +524,7 @@ l42F9:
 		inc p1_y
 		jsr position_p1
 
-; jumped to by: l42F9
+; jumped to by: countdown
 l431F:
 		lda p2_playing
 		cmp #$01
@@ -526,7 +535,7 @@ l431F:
 		inc p2_y
 		jsr position_p2
 
-; jumped to by: l431F
+; jumped to by: countdown
 l4333:
 		lda invader_y
 		cmp #$20
@@ -555,7 +564,7 @@ l4333:
 		jsr clear_title
 		rts 
 
-; jumped to by: l4106
+; jumped to by: start_game
 play:
 		jsr reset_scores
 		jsr countdown
@@ -572,7 +581,7 @@ game_loop:
 
 ; the snapshot's PC was here, and the return address on the stack was
 ; game_loop's next instruction
-; called by: title_loop, l42A7, l42F9, game_loop, l4BEA, l4CB3
+; called by: title_loop, countdown, game_loop, game_over, wait_6_frames
 wait_frame:
 		lda raster
 		cmp #$fb
@@ -611,15 +620,15 @@ l43BE:
 		bcc l43D6
 		jmp l43D9
 
-; jumped to by: l43BE
+; jumped to by: read_fire_buttons
 l43D6:
 		jsr read_p2_fire
 
-; jumped to by: l43BE
+; jumped to by: read_fire_buttons
 l43D9:
 		rts 
 
-; called by: l40CE, l42A7, l43BB
+; called by: title_loop, countdown, read_fire_buttons
 read_p1_fire:
 		lda cia1_port_b
 		and #$10
@@ -640,13 +649,13 @@ l43E9:
 		jsr p1_shot_sound
 		rts 
 
-; jumped to by: l43E9
+; jumped to by: read_p1_fire
 l43FC:
 		lda #$00
 		sta p1_fire
 		rts 
 
-; called by: l40EB, l42CB, l43D6
+; called by: title_loop, countdown, read_fire_buttons
 read_p2_fire:
 		lda cia1_port_a
 		and #$10
@@ -667,7 +676,7 @@ l4411:
 		jsr p2_shot_sound
 		rts 
 
-; jumped to by: l4411
+; jumped to by: read_p2_fire
 l4424:
 		lda #$00
 		sta p2_fire
@@ -692,7 +701,7 @@ l4443:
 		bne l444D
 		jsr move_p2
 
-; jumped to by: l4443
+; jumped to by: update_game
 l444D:
 		jsr clear_fire_flags
 		rts 
@@ -751,7 +760,7 @@ l44AE:
 		sta sprite_pointers + $3
 		jmp l44B9
 
-; jumped to by: l445F, l446C, l44AE
+; jumped to by: check_shot_hits
 l44B9:
 		lda p2_shot_state
 		cmp #$00
@@ -760,7 +769,7 @@ l44B9:
 		beq l44D4
 		jmp l4516
 
-; jumped to by: l44B9
+; jumped to by: check_shot_hits
 l44C7:
 		lda #$00
 		sta p2_shot_state
@@ -768,7 +777,7 @@ l44C7:
 		sta sprite_pointers + $4
 		jmp l4521
 
-; jumped to by: l44B9
+; jumped to by: check_shot_hits
 l44D4:
 		lda #$ca
 		sta sprite_pointers + $4
@@ -798,14 +807,14 @@ l44D4:
 		cld 
 		jmp invader_hit
 
-; jumped to by: l44B9
+; jumped to by: check_shot_hits
 l4516:
 		dec p2_shot_state
 		lda #$cb
 		sta sprite_pointers + $4
 		jmp l4521
 
-; jumped to by: l44C7, l44D4, l4516
+; jumped to by: check_shot_hits
 l4521:
 		rts 
 
@@ -827,11 +836,11 @@ l4521:
 		lda #$ca
 		sta sprite_pointers + $3
 
-; jumped to by: l4521
+; jumped to by: check_shot_hits
 l4546:
 		jmp l4588
 
-; jumped to by: l4521
+; jumped to by: check_shot_hits
 l4549:
 		lda collisions
 		and #$09
@@ -860,14 +869,14 @@ l4549:
 		sta p1_shot_state
 		jmp invader_hit
 
-; jumped to by: l4521, l4546, l4549
+; jumped to by: check_shot_hits
 l4588:
 		lda p2_shot_state
 		cmp #$00
 		bne l4592
 		jmp l4659
 
-; jumped to by: l4588
+; jumped to by: check_shot_hits
 l4592:
 		cmp #$01
 		beq l45B2
@@ -882,11 +891,11 @@ l4592:
 		lda #$ca
 		sta sprite_pointers + $4
 
-; jumped to by: l4592
+; jumped to by: check_shot_hits
 l45AF:
 		jmp l4659
 
-; jumped to by: l4592
+; jumped to by: check_shot_hits
 l45B2:
 		lda collisions
 		and #$11
@@ -894,7 +903,7 @@ l45B2:
 		beq l45BE
 		jmp l4659
 
-; jumped to by: l45B2
+; jumped to by: check_shot_hits
 l45BE:
 		sed 
 		clc 
@@ -918,7 +927,7 @@ l45BE:
 		lda #$0c
 		sta p2_shot_state
 
-; jumped to by: l446C, l44D4, l4549
+; jumped to by: check_shot_hits
 invader_hit:
 		jsr hit_sound
 		dec speedup_counter
@@ -955,7 +964,7 @@ l4618:
 		lda #$00
 		sta invader_row
 
-; jumped to by: l4618
+; jumped to by: invader_hit
 l4634:
 		jsr set_hit_points
 		lda invader_direction
@@ -966,7 +975,7 @@ l4634:
 		sta invader_direction
 		jmp l4659
 
-; jumped to by: l4634
+; jumped to by: invader_hit
 l464A:
 		lda #$01
 		sta invader_x + $1
@@ -975,11 +984,11 @@ l464A:
 		lda #$00
 		sta invader_direction
 
-; jumped to by: l4588, l45AF, l45B2, l4634
+; jumped to by: check_shot_hits, invader_hit
 l4659:
 		rts 
 
-; called by: update_game, l4BEA
+; called by: update_game, game_over
 move_shots:
 		lda p1_shot_state
 		cmp #$0c
@@ -1010,7 +1019,7 @@ l4677:
 		lda #$ca
 		sta sprite_pointers + $4
 
-; jumped to by: l4677
+; jumped to by: move_shots
 l4697:
 		rts 
 
@@ -1019,6 +1028,7 @@ move_invader:
 		lda invader_speed
 		sta invader_steps
 
+; jumped to by: move_invader
 l469E:
 		lda invader_steps
 		cmp #$00
@@ -1027,11 +1037,11 @@ l469E:
 		dec invader_steps
 		jmp l469E
 
-; jumped to by: l469E
+; jumped to by: move_invader
 l46AE:
 		rts 
 
-; called by: l469E, l4C0B
+; called by: move_invader, game_over
 step_invader:
 		lda invader_direction
 		cmp #$00
@@ -1048,7 +1058,7 @@ l46C1:
 		dec invader_x
 		jmp l46DF
 
-; jumped to by: l46C1
+; jumped to by: step_invader
 l46CC:
 		dec invader_x
 		lda invader_x
@@ -1056,12 +1066,12 @@ l46CC:
 		beq l46D9
 		jmp l46DF
 
-; jumped to by: l46CC
+; jumped to by: step_invader
 l46D9:
 		dec invader_x + $1
 		jmp l46DF
 
-; jumped to by: step_invader, l46C1, l46CC, l46D9
+; jumped to by: step_invader
 l46DF:
 		lda invader_direction
 		cmp #$00
@@ -1090,7 +1100,7 @@ row_store_right:
 		jsr set_hit_points
 		jmp l472E
 
-; jumped to by: l46DF
+; jumped to by: step_invader
 l470A:
 		lda invader_x + $1
 		cmp #$00
@@ -1122,12 +1132,12 @@ l472E:
 		bcs l4738
 		jmp l473D
 
-; jumped to by: l472E
+; jumped to by: row_store_left
 l4738:
 		lda #$01
 		sta game_over_flag
 
-; jumped to by: l46DF, l470A, l472E
+; jumped to by: step_invader, row_store_right, row_store_left
 l473D:
 		rts 
 
@@ -1195,7 +1205,7 @@ l47A0:
 		sta p1_direction
 		sta p1_turned
 
-; jumped to by: check_cannon_edges, l47A0
+; jumped to by: check_cannon_edges
 l47B6:
 		lda p2_direction
 		cmp #$00
@@ -1212,7 +1222,7 @@ l47B6:
 		sta p2_turned
 		jmp l47EE
 
-; jumped to by: l47B6
+; jumped to by: check_cannon_edges
 l47D8:
 		lda p2_x + $1
 		cmp #$00
@@ -1224,11 +1234,11 @@ l47D8:
 		sta p2_direction
 		sta p2_turned
 
-; jumped to by: l47B6, l47D8
+; jumped to by: check_cannon_edges
 l47EE:
 		rts 
 
-; called by: update_game, l4BEA, check_invader_collision
+; called by: update_game, game_over, check_invader_collision
 move_p1:
 		lda p1_fire
 		cmp #$01
@@ -1247,13 +1257,13 @@ l47F9:
 		sta p1_direction
 		jmp l4817
 
-; jumped to by: l47F9
+; jumped to by: move_p1
 l480F:
 		lda #$01
 		sta p1_direction
 		jmp l4817
 
-; jumped to by: l47F9, l480F
+; jumped to by: move_p1
 l4817:
 		lda #$0c
 		sta p1_shot_state
@@ -1265,7 +1275,7 @@ l4817:
 		sta p1_shot_y
 		jmp l4830
 
-; jumped to by: move_p1, l4817
+; jumped to by: move_p1
 l4830:
 		lda p1_direction
 		cmp #$00
@@ -1275,14 +1285,14 @@ l4830:
 		inc p1_x + $1
 		jmp l4860
 
-; jumped to by: l4830
+; jumped to by: move_p1
 l4842:
 		lda p1_x + $1
 		bne l484D
 		dec p1_x
 		jmp l4860
 
-; jumped to by: l4842
+; jumped to by: move_p1
 l484D:
 		dec p1_x
 		lda p1_x
@@ -1290,20 +1300,20 @@ l484D:
 		beq l485A
 		jmp l4860
 
-; jumped to by: l484D
+; jumped to by: move_p1
 l485A:
 		dec p1_x + $1
 		jmp l4860
 
-; jumped to by: l4830, l4842, l484D, l485A
+; jumped to by: move_p1
 l4860:
 		jmp l4863
 
-; jumped to by: l4860
+; jumped to by: move_p1
 l4863:
 		rts 
 
-; called by: l4443, l4BEA, l4CF0
+; called by: update_game, game_over, check_invader_collision
 move_p2:
 		lda p2_fire
 		cmp #$01
@@ -1322,13 +1332,13 @@ l486E:
 		sta p2_direction
 		jmp l488C
 
-; jumped to by: l486E
+; jumped to by: move_p2
 l4884:
 		lda #$01
 		sta p2_direction
 		jmp l488C
 
-; jumped to by: l486E, l4884
+; jumped to by: move_p2
 l488C:
 		lda #$0c
 		sta p2_shot_state
@@ -1340,7 +1350,7 @@ l488C:
 		sta p2_shot_y
 		jmp l48A5
 
-; jumped to by: move_p2, l488C
+; jumped to by: move_p2
 l48A5:
 		lda p2_direction
 		cmp #$00
@@ -1350,14 +1360,14 @@ l48A5:
 		inc p2_x + $1
 		jmp l48D5
 
-; jumped to by: l48A5
+; jumped to by: move_p2
 l48B7:
 		lda p2_x + $1
 		bne l48C2
 		dec p2_x
 		jmp l48D5
 
-; jumped to by: l48B7
+; jumped to by: move_p2
 l48C2:
 		dec p2_x
 		lda p2_x
@@ -1365,20 +1375,20 @@ l48C2:
 		beq l48CF
 		jmp l48D5
 
-; jumped to by: l48C2
+; jumped to by: move_p2
 l48CF:
 		dec p2_x + $1
 		jmp l48D5
 
-; jumped to by: l48A5, l48B7, l48C2, l48CF
+; jumped to by: move_p2
 l48D5:
 		jmp l48D8
 
-; jumped to by: l48D5
+; jumped to by: move_p2
 l48D8:
 		rts 
 
-; called by: l444D
+; called by: update_game
 clear_fire_flags:
 		lda #$00
 		sta p1_fire
@@ -1406,12 +1416,12 @@ l48FE:
 		jsr position_p2
 		jsr position_p2_shot
 
-; jumped to by: l48FE
+; jumped to by: update_screen
 l490B:
 		jsr twinkle_stars
 		rts 
 
-; called by: title_screen, reset_scores, l4333, update_screen
+; called by: title_screen, reset_scores, countdown, update_screen
 draw_scores:
 		lda scores_changed
 		bne l4917
@@ -1514,7 +1524,7 @@ l4917:
 		cmp high_score
 		bcc l49E2
 
-; jumped to by: l4917
+; jumped to by: draw_scores
 l49D0:
 		lda p1_score
 		sta high_score
@@ -1523,7 +1533,7 @@ l49D0:
 		lda p1_score + $2
 		sta high_score + $2
 
-; jumped to by: l4917
+; jumped to by: draw_scores
 l49E2:
 		lda p2_score + $2
 		cmp high_score + $2
@@ -1537,7 +1547,7 @@ l49E2:
 		cmp high_score
 		bcc l4A10
 
-; jumped to by: l49E2
+; jumped to by: draw_scores
 l49FE:
 		lda p2_score
 		sta high_score
@@ -1546,7 +1556,7 @@ l49FE:
 		lda p2_score + $2
 		sta high_score + $2
 
-; jumped to by: l49E2
+; jumped to by: draw_scores
 l4A10:
 		lda high_score
 		and #$0f
@@ -1592,7 +1602,7 @@ l4A10:
 l4A58:
 		rts 
 
-; called by: update_screen, l4C0B
+; called by: update_screen, game_over
 position_invader:
 		lda invader_color
 		sta sprite0_color
@@ -1617,7 +1627,7 @@ l4A7C:
 		sta sprites_x_msb
 		rts 
 
-; called by: title_screen, l40CE, l42A7, l42F9, update_screen, l4BEA, l4C0B
+; called by: title_screen, title_loop, countdown, update_screen, game_over
 position_p1:
 		lda p1_color
 		sta sprite1_color
@@ -1641,7 +1651,7 @@ l4AAB:
 		sta sprites_x_msb
 		rts 
 
-; called by: title_screen, l40EB, l42CB, l431F, l48FE, l4BEA, l4C0B
+; called by: title_screen, title_loop, countdown, update_screen, game_over
 position_p2:
 		lda p2_color
 		sta sprite2_color
@@ -1665,7 +1675,7 @@ l4ADA:
 		sta sprites_x_msb
 		rts 
 
-; called by: update_screen, l4BEA
+; called by: update_screen, game_over
 position_p1_shot:
 		lda p1_shot_state
 		cmp #$00
@@ -1702,7 +1712,7 @@ l4B27:
 		sta sprite_enable
 		rts 
 
-; called by: l48FE, l4BEA
+; called by: update_screen, game_over
 position_p2_shot:
 		lda p2_shot_state
 		cmp #$00
@@ -1800,6 +1810,7 @@ clear_status:
 		lda #$20
 		ldx #$0f
 
+; jumped to by: clear_status
 l4BDC:
 		sta screen + $3c0, x
 		inx 
@@ -1812,7 +1823,7 @@ game_over:
 		lda #$00
 		sta game_over_flag
 
-; jumped to by: l4C0B
+; jumped to by: game_over
 l4BEA:
 		jsr wait_frame
 		jsr twinkle_stars
@@ -1826,6 +1837,7 @@ l4BEA:
 		lda invader_speed
 		sta invader_steps
 
+; jumped to by: game_over
 l4C0B:
 		lda game_over_flag
 		cmp #$01
@@ -1841,7 +1853,7 @@ l4C0B:
 		jsr position_p2
 		jmp l4C0B
 
-; jumped to by: l4C0B
+; jumped to by: game_over
 show_game_over:
 		jsr stripe_title_colors
 		lda #$45
@@ -1896,6 +1908,7 @@ show_game_over:
 wait_6_frames:
 		ldy #$06
 
+; jumped to by: wait_6_frames
 l4CB3:
 		jsr wait_frame
 		cpy #$00
@@ -1903,11 +1916,11 @@ l4CB3:
 		dey 
 		jmp l4CB3
 
-; jumped to by: l4CB3
+; jumped to by: wait_6_frames
 l4CBE:
 		rts 
 
-; called by: l4C0B
+; called by: game_over
 check_invader_collision:
 		lda collisions
 		and #$03
@@ -1945,7 +1958,7 @@ l4CF0:
 		cmp #$00
 		bne l4D06
 
-; jumped to by: l4CF0
+; jumped to by: check_invader_collision
 l4D06:
 		rts 
 
@@ -1998,7 +2011,7 @@ number_rows:
 		rts 
 
 ; sets hit_points from invader_row: the higher the 1nvader, the more points
-; called by: l4333, l4634, row_store_right, row_store_left
+; called by: countdown, invader_hit, row_store_right, row_store_left
 set_hit_points:
 		lda #$00
 		sta hit_points
@@ -2022,7 +2035,7 @@ l4D7F:
 		sta hit_points + $1
 		jmp l4EDD
 
-; jumped to by: l4D7F
+; jumped to by: set_hit_points
 l4D90:
 		cmp #$02
 		bne l4DA1
@@ -2032,7 +2045,7 @@ l4D90:
 		sta hit_points + $1
 		jmp l4EDD
 
-; jumped to by: l4D90
+; jumped to by: set_hit_points
 l4DA1:
 		cmp #$03
 		bne l4DB2
@@ -2042,7 +2055,7 @@ l4DA1:
 		sta hit_points + $1
 		jmp l4EDD
 
-; jumped to by: l4DA1
+; jumped to by: set_hit_points
 l4DB2:
 		cmp #$04
 		bne l4DC3
@@ -2052,7 +2065,7 @@ l4DB2:
 		sta hit_points + $1
 		jmp l4EDD
 
-; jumped to by: l4DB2
+; jumped to by: set_hit_points
 l4DC3:
 		cmp #$05
 		bne l4DD4
@@ -2062,7 +2075,7 @@ l4DC3:
 		sta hit_points + $1
 		jmp l4EDD
 
-; jumped to by: l4DC3
+; jumped to by: set_hit_points
 l4DD4:
 		cmp #$06
 		bne l4DE5
@@ -2072,7 +2085,7 @@ l4DD4:
 		sta hit_points + $1
 		jmp l4EDD
 
-; jumped to by: l4DD4
+; jumped to by: set_hit_points
 l4DE5:
 		cmp #$07
 		bne l4DF6
@@ -2082,7 +2095,7 @@ l4DE5:
 		sta hit_points + $1
 		jmp l4EDD
 
-; jumped to by: l4DE5
+; jumped to by: set_hit_points
 l4DF6:
 		cmp #$08
 		bne l4E07
@@ -2092,7 +2105,7 @@ l4DF6:
 		sta hit_points + $1
 		jmp l4EDD
 
-; jumped to by: l4DF6
+; jumped to by: set_hit_points
 l4E07:
 		cmp #$09
 		bne l4E18
@@ -2102,7 +2115,7 @@ l4E07:
 		sta hit_points + $1
 		jmp l4EDD
 
-; jumped to by: l4E07
+; jumped to by: set_hit_points
 l4E18:
 		cmp #$10
 		bne l4E29
@@ -2112,7 +2125,7 @@ l4E18:
 		sta hit_points + $1
 		jmp l4EDD
 
-; jumped to by: l4E18
+; jumped to by: set_hit_points
 l4E29:
 		cmp #$11
 		bne l4E3A
@@ -2122,7 +2135,7 @@ l4E29:
 		sta hit_points + $1
 		jmp l4EDD
 
-; jumped to by: l4E29
+; jumped to by: set_hit_points
 l4E3A:
 		cmp #$12
 		bne l4E4B
@@ -2132,7 +2145,7 @@ l4E3A:
 		sta hit_points + $1
 		jmp l4EDD
 
-; jumped to by: l4E3A
+; jumped to by: set_hit_points
 l4E4B:
 		cmp #$13
 		bne l4E5C
@@ -2142,7 +2155,7 @@ l4E4B:
 		sta hit_points + $1
 		jmp l4EDD
 
-; jumped to by: l4E4B
+; jumped to by: set_hit_points
 l4E5C:
 		cmp #$14
 		bne l4E6D
@@ -2152,7 +2165,7 @@ l4E5C:
 		sta hit_points + $1
 		jmp l4EDD
 
-; jumped to by: l4E5C
+; jumped to by: set_hit_points
 l4E6D:
 		cmp #$15
 		bne l4E7E
@@ -2162,7 +2175,7 @@ l4E6D:
 		sta hit_points + $1
 		jmp l4EDD
 
-; jumped to by: l4E6D
+; jumped to by: set_hit_points
 l4E7E:
 		cmp #$16
 		bne l4E8F
@@ -2172,7 +2185,7 @@ l4E7E:
 		sta hit_points + $1
 		jmp l4EDD
 
-; jumped to by: l4E7E
+; jumped to by: set_hit_points
 l4E8F:
 		cmp #$17
 		bne l4EA0
@@ -2182,7 +2195,7 @@ l4E8F:
 		sta hit_points + $1
 		jmp l4EDD
 
-; jumped to by: l4E8F
+; jumped to by: set_hit_points
 l4EA0:
 		cmp #$18
 		bne l4EB1
@@ -2192,7 +2205,7 @@ l4EA0:
 		sta hit_points + $1
 		jmp l4EDD
 
-; jumped to by: l4EA0
+; jumped to by: set_hit_points
 l4EB1:
 		cmp #$19
 		bne l4EC2
@@ -2202,7 +2215,7 @@ l4EB1:
 		sta hit_points + $1
 		jmp l4EDD
 
-; jumped to by: l4EB1
+; jumped to by: set_hit_points
 l4EC2:
 		cmp #$20
 		bne l4ED3
@@ -2212,14 +2225,14 @@ l4EC2:
 		sta hit_points + $1
 		jmp l4EDD
 
-; jumped to by: l4EC2
+; jumped to by: set_hit_points
 l4ED3:
 		lda #$01
 		sta hit_points
 		lda #$00
 		sta hit_points + $1
 
-; jumped to by: set_hit_points, l4D7F, l4D90, l4DA1, l4DB2, l4DC3, l4DD4, l4DE5, l4DF6, l4E07, l4E18, l4E29, l4E3A, l4E4B, l4E5C, l4E6D, l4E7E, l4E8F, l4EA0, l4EB1, l4EC2
+; jumped to by: set_hit_points
 l4EDD:
 		rts 
 
@@ -2295,7 +2308,7 @@ stop_voice3:
 		sta voice3_control
 		rts 
 
-; called by: l43E9
+; called by: read_p1_fire
 p1_shot_sound:
 		jsr stop_voice1
 		lda #$09
@@ -2313,7 +2326,7 @@ p1_shot_sound:
 		jsr play_voice1
 		rts 
 
-; called by: l4411
+; called by: read_p2_fire
 p2_shot_sound:
 		jsr stop_voice2
 		lda #$09
@@ -2350,7 +2363,7 @@ hit_sound:
 		rts 
 
 ; copies the ROM font to charset, with custom_chars as characters $20-$5f
-; called by: l4018
+; called by: start
 build_charset:
 		sei 
 		lda #$18
@@ -2360,6 +2373,7 @@ build_charset:
 		sta $01
 		ldx #$00
 
+; jumped to by: build_charset
 l4FE2:
 		lda sprite0_x, x
 		sta charset, x
@@ -2381,7 +2395,7 @@ l4FE2:
 		beq l5018
 		jmp l4FE2
 
-; jumped to by: l4FE2
+; jumped to by: build_charset
 l5018:
 		lda $01
 		ora #$04
@@ -2389,10 +2403,11 @@ l5018:
 		cli 
 		rts 
 
-; called by: l4018
+; called by: start
 build_sprites:
 		ldx #$00
 
+; jumped to by: build_sprites
 l5022:
 		lda sprite_shapes, x
 		sta sprites, x
@@ -2407,7 +2422,7 @@ l5022:
 		bne l5022
 		rts 
 
-; called by: l490B, l4BEA
+; called by: update_screen, game_over
 twinkle_stars:
 		inc star_index
 		lda star_index
@@ -2430,7 +2445,7 @@ l504F:
 		lda #$20
 		sta screen + $28, y
 
-; jumped to by: l504F
+; jumped to by: twinkle_stars
 l5068:
 		jsr next_star_position
 		lda screen + $28, y
@@ -2440,7 +2455,7 @@ l5068:
 		sta screen + $28, y
 		jmp l5095
 
-; jumped to by: l504F
+; jumped to by: twinkle_stars
 l507A:
 		lda screen + $130, y
 		cmp #$2a
@@ -2448,7 +2463,7 @@ l507A:
 		lda #$20
 		sta screen + $130, y
 
-; jumped to by: l507A
+; jumped to by: twinkle_stars
 l5086:
 		jsr next_star_position
 		lda screen + $130, y
@@ -2457,17 +2472,17 @@ l5086:
 		lda #$2a
 		sta screen + $130, y
 
-; jumped to by: l5068, l5086
+; jumped to by: twinkle_stars
 l5095:
 		tya 
 		sta star_positions, x
 		jmp l509C
 
-; jumped to by: l5095
+; jumped to by: twinkle_stars
 l509C:
 		rts 
 
-; called by: l5068, l5086
+; called by: twinkle_stars
 next_star_position:
 		tya 
 		beq l50A5
@@ -2486,26 +2501,26 @@ l50A7:
 
 ; ---- game: data ----
 ; BCD, low byte first
-; read by: l4917, l49E2, l4A10, lC14A, lC1EE
-; written by: l49D0, l49FE
+; read by: draw_scores, save_highscore, load_highscore
+; written by: draw_scores
 high_score:
 		.byte	$00, $00, $00
 
 ; BCD points for a hit, set by set_hit_points
-; read by: l446C, l44D4, l4549, l45BE, draw_status
-; written by: set_hit_points, l4D7F, l4D90, l4DA1, l4DB2, l4DC3, l4DD4, l4DE5, l4DF6, l4E07, l4E18, l4E29, l4E3A, l4E4B, l4E5C, l4E6D, l4E7E, l4E8F, l4EA0, l4EB1, l4EC2, l4ED3
+; read by: check_shot_hits, draw_status
+; written by: set_hit_points
 hit_points:
 		.word	$1000
 
-; read by: game_loop, l4C0B
-; written by: reset_game, l4738, game_over, show_game_over
+; read by: game_loop, game_over
+; written by: reset_game, row_store_left, game_over, show_game_over
 game_over_flag:
 		.byte	$00
 ; set to make draw_scores redraw
 ; read by: draw_scores
-; written by: title_screen, reset_game, reset_scores, l4333, l4618, l4917
+; written by: title_screen, reset_game, reset_scores, countdown, invader_hit, draw_scores
 scores_changed:		.byte	$00
-; read by: l446C, l44D4, l4549, l45B2, bounce_cannons, check_invader_collision, l4CF0
+; read by: check_shot_hits, bounce_cannons, check_invader_collision
 ; written by: wait_frame
 collisions:		.byte	$00
 ; read by: fill_title_color
@@ -2513,16 +2528,16 @@ title_color:		.byte	$00
 unused_50b2:		.byte	$00
 ; read by: title_loop
 ; written by: title_screen
-; modified by: l40BF
+; modified by: title_loop
 scroll_offset:		.byte	$1e
 unused_50b4:		.byte	$00
-; read by: l4281
+; read by: countdown
 ; written by: countdown
-; modified by: l4281
+; modified by: countdown
 countdown_digit:		.byte	$30
-; read by: l4281
-; written by: countdown, l4281
-; modified by: l4281
+; read by: countdown
+; written by: countdown
+; modified by: countdown
 countdown_timer:		.byte	$1d
 ; read by: title_loop
 ; written by: title_loop
@@ -2530,8 +2545,8 @@ countdown_timer:		.byte	$1d
 scroll_timer:		.byte	$01
 
 ; BCD, shown on the status line
-; read by: l446C, l44D4, l4549, l45BE, draw_status
-; written by: reset_scores, l446C, l44D4, l4549, l45BE, invader_hit
+; read by: check_shot_hits, draw_status
+; written by: reset_scores, check_shot_hits, invader_hit
 hit_counter:
 		.word	$0080
 
@@ -2558,171 +2573,171 @@ sound_waveform:
 		.byte	$20
 
 ; ---- player 1 ----
-; read by: check_cannon_edges, l47A0, l4817, l4842, l484D, position_p1, l4AAB, check_invader_collision
-; written by: title_screen, reset_game, l4CE6
-; modified by: l4830, l4842, l484D, l485A
+; read by: check_cannon_edges, move_p1, position_p1, check_invader_collision
+; written by: title_screen, reset_game, check_invader_collision
+; modified by: move_p1
 p1_x:
 		.word	$0094
 
-; read by: l42F9, position_p1
-; written by: title_screen, l40CE, reset_game, l42A7
-; modified by: l42F9
+; read by: countdown, position_p1
+; written by: title_screen, title_loop, reset_game, countdown
+; modified by: countdown
 p1_y:
 		.byte	$fa
 ; 0 = moving left, 1 = moving right
-; read by: bounce_cannons, check_cannon_edges, l47F9, l4830
-; written by: reset_game, bounce_cannons, l476D, check_cannon_edges, l47A0, l47F9, l480F, check_invader_collision
+; read by: bounce_cannons, check_cannon_edges, move_p1
+; written by: reset_game, bounce_cannons, check_cannon_edges, move_p1, check_invader_collision
 p1_direction:		.byte	$00
 ; 1 for the frame the fire button went down
-; read by: l40CE, l42A7, move_p1
-; written by: reset_game, l4333, l43E9, l43FC, clear_fire_flags
+; read by: title_loop, countdown, move_p1
+; written by: reset_game, countdown, read_p1_fire, clear_fire_flags
 p1_fire:		.byte	$00
 ; BCD, low byte first
-; read by: l446C, l4549, l4917, l49D0
-; written by: reset_scores, l446C, l4549
+; read by: check_shot_hits, draw_scores
+; written by: reset_scores, check_shot_hits
 p1_score:
 		.byte	$00, $00, $00
 ; read by: position_p1, position_p1_shot
 ; written by: reset_game
 p1_color:		.byte	$0d
-; read by: l42A7, l42F9, read_fire_buttons, update_game, bounce_cannons, update_screen
-; written by: l40CE, reset_game, l42A7, show_game_over
+; read by: countdown, read_fire_buttons, update_game, bounce_cannons, update_screen
+; written by: title_loop, reset_game, countdown, show_game_over
 p1_playing:		.byte	$00
 ; set when the cannon turned this frame
-; read by: l47F9
-; written by: reset_scores, bounce_cannons, l476D, check_cannon_edges, l47A0, clear_fire_flags
+; read by: move_p1
+; written by: reset_scores, bounce_cannons, check_cannon_edges, clear_fire_flags
 p1_turned:		.byte	$00
 
-; read by: position_p1_shot, l4B18
-; written by: l4817
+; read by: position_p1_shot
+; written by: move_p1
 p1_shot_x:
 		.word	$0000
 
 ; read by: read_fire_buttons, move_shots, position_p1_shot
-; written by: move_shots, l4817
+; written by: move_shots, move_p1
 p1_shot_y:
 		.byte	$00
 ; 0 = no shot, $0c = flying, counting down from $0b = explosion
-; read by: read_fire_buttons, check_shot_hits, l4521, move_shots, position_p1_shot
-; written by: l4333, l445F, l4521, l4549, move_shots, l4817
-; modified by: l446C, l44AE, l4521
+; read by: read_fire_buttons, check_shot_hits, move_shots, position_p1_shot
+; written by: countdown, check_shot_hits, move_shots, move_p1
+; modified by: check_shot_hits
 p1_shot_state:		.byte	$00
 
 ; ---- player 2 ----
-; read by: l47B6, l47D8, l488C, l48B7, l48C2, position_p2, l4ADA
+; read by: check_cannon_edges, move_p2, position_p2
 ; written by: title_screen, reset_game
-; modified by: l48A5, l48B7, l48C2, l48CF
+; modified by: move_p2
 p2_x:
 		.word	$011b
 
-; read by: l431F, position_p2
-; written by: title_screen, l40EB, reset_game, l42CB
-; modified by: l431F
+; read by: countdown, position_p2
+; written by: title_screen, title_loop, reset_game, countdown
+; modified by: countdown
 p2_y:
 		.byte	$ea
 ; 0 = moving left, 1 = moving right
-; read by: l47B6, l486E, l48A5
-; written by: reset_game, bounce_cannons, l476D, l47B6, l47D8, l486E, l4884, l4CF0
+; read by: check_cannon_edges, move_p2
+; written by: reset_game, bounce_cannons, check_cannon_edges, move_p2, check_invader_collision
 p2_direction:		.byte	$00
 ; 1 for the frame the fire button went down
-; read by: l40EB, l42CB, move_p2
-; written by: reset_game, l4333, l4411, l4424, clear_fire_flags
+; read by: title_loop, countdown, move_p2
+; written by: reset_game, countdown, read_p2_fire, clear_fire_flags
 p2_fire:		.byte	$00
 ; BCD, low byte first
-; read by: l44D4, l45BE, l4917, l49E2, l49FE
-; written by: reset_scores, l44D4, l45BE
+; read by: check_shot_hits, draw_scores
+; written by: reset_scores, check_shot_hits
 p2_score:
 		.byte	$00, $00, $00
 ; read by: position_p2, position_p2_shot
 ; written by: reset_game
 p2_color:		.byte	$0e
-; read by: l42CB, l431F, l43BE, l4443, bounce_cannons, l48FE
-; written by: l40EB, reset_game, l42CB, show_game_over
+; read by: countdown, read_fire_buttons, update_game, bounce_cannons, update_screen
+; written by: title_loop, reset_game, countdown, show_game_over
 p2_playing:		.byte	$01
 ; set when the cannon turned this frame
-; read by: l486E
-; written by: reset_scores, bounce_cannons, l476D, l47B6, l47D8, clear_fire_flags
+; read by: move_p2
+; written by: reset_scores, bounce_cannons, check_cannon_edges, clear_fire_flags
 p2_turned:		.byte	$00
 
-; read by: position_p2_shot, l4B5F
-; written by: l488C
+; read by: position_p2_shot
+; written by: move_p2
 p2_shot_x:
 		.word	$0000
 
-; read by: l43BE, l4677, position_p2_shot
-; written by: l4677, l488C
+; read by: read_fire_buttons, move_shots, position_p2_shot
+; written by: move_shots, move_p2
 p2_shot_y:
 		.byte	$00
 ; 0 = no shot, $0c = flying, counting down from $0b = explosion
-; read by: l43BE, l44B9, l4588, l4592, l4677, position_p2_shot
-; written by: l4333, l44C7, l4592, l45BE, l4677, l488C
-; modified by: l44D4, l4516, l4592
+; read by: read_fire_buttons, check_shot_hits, move_shots, position_p2_shot
+; written by: countdown, check_shot_hits, move_shots, move_p2
+; modified by: check_shot_hits
 p2_shot_state:		.byte	$00
 
-; read by: title_screen, l46C1, l46CC, l46DF, l470A, position_invader, l4A7C
-; written by: title_screen, reset_game, l4333, l4634, l464A
-; modified by: step_invader, l46C1, l46CC, l46D9
+; read by: title_screen, step_invader, row_store_right, position_invader
+; written by: title_screen, reset_game, countdown, invader_hit
+; modified by: step_invader
 invader_x:
 		.word	$0146
 
-; read by: title_screen, l42F9, l4333
-; written by: title_screen, l4333
-; modified by: l42F9
+; read by: title_screen, countdown
+; written by: title_screen, countdown
+; modified by: countdown
 invader_y:
 		.byte	$3a
 ; 0 = moving left, 1 = moving right
-; read by: l4634, step_invader, l46DF, check_invader_collision, l4CF0
-; written by: reset_game, l4634, l464A, l46DF, l470A
+; read by: invader_hit, step_invader, check_invader_collision
+; written by: reset_game, invader_hit, step_invader, row_store_right
 invader_direction:		.byte	$01
 ; read by: title_screen, position_invader
-; written by: reset_game, l4333
+; written by: reset_game, countdown
 invader_color:		.byte	$02
 ; steps per frame
-; read by: invader_hit, move_invader, l4BEA
+; read by: invader_hit, move_invader, game_over
 ; written by: reset_scores, invader_hit
 ; modified by: invader_hit
 invader_speed:		.byte	$02
-; read by: l469E, l4C0B
-; written by: move_invader, l4BEA
-; modified by: l469E, l4C0B
+; read by: move_invader, game_over
+; written by: move_invader, game_over
+; modified by: move_invader, game_over
 invader_steps:		.byte	$00
-; read by: l4612
+; read by: invader_hit
 ; written by: reset_scores
 speedup_interval:		.byte	$0a
 ; read by: invader_hit
-; written by: reset_scores, l4612
+; written by: reset_scores, invader_hit
 ; modified by: invader_hit
 speedup_counter:		.byte	$0a
 ; BCD; the game is over when it reaches $22
-; read by: l4333, l4618, l46DF, l470A, l472E, position_invader, draw_status, set_hit_points, trainer_next_row
-; written by: title_screen, reset_game, l4333, l4618, row_store_right, row_store_left, lC0F4
+; read by: countdown, invader_hit, step_invader, row_store_right, row_store_left, position_invader, draw_status, set_hit_points, trainer_next_row
+; written by: title_screen, reset_game, countdown, invader_hit, row_store_right, row_store_left, trainer_next_row
 invader_row:		.byte	$00
 unused_50e8:		.byte	$00
-; read by: l43E9
-; written by: reset_game, read_p1_fire, l43E9
+; read by: read_p1_fire
+; written by: reset_game, read_p1_fire
 p1_fire_held:		.byte	$00
 unused_50ea:		.byte	$00
-; read by: l4411
-; written by: reset_game, read_p2_fire, l4411
+; read by: read_p2_fire
+; written by: reset_game, read_p2_fire
 p2_fire_held:		.byte	$00
-; read by: l504F
-; written by: l5095
+; read by: twinkle_stars
+; written by: twinkle_stars
 star_positions:
 		.byte	$4e, $27, $27, $ba, $4e, $d3
 unused_50f2:
 		.byte	$c0, $e0
-; read by: twinkle_stars, l504F
+; read by: twinkle_stars
 ; written by: twinkle_stars
 ; modified by: twinkle_stars
 star_index:		.byte	$01
 ; sprite y per invader_row, indexed by the BCD value, so $0a-$0f and $1a-$1f are unused
-; read by: l4333, position_invader
+; read by: countdown, position_invader
 row_y:
 		.byte	$3a, $42, $4a, $52, $5a, $62, $6a, $72, $7a, $82, $00, $00, $00, $00, $00, $00
 		.byte	$8a, $92, $9a, $a2, $aa, $b2, $ba, $c2, $ca, $d2, $00, $00, $00, $00, $00, $00
 		.byte	$da, $e2, $ea
 
-; read by: l40BF
+; read by: title_loop
 scroll_text:
 		.text	"                                "
 		.text	"      PRESS FIRE TO PLAY     FIR"
@@ -2734,7 +2749,7 @@ scroll_text:
 		.text	"XP     HI NATE AND TBONE/       "
 
 ; the title screen: the end of scroll_text, the logo and the copyright line
-; read by: l4113
+; read by: draw_title
 title_chars:
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $ff, $e1, $7b, $e1, $e1
 		.byte	$20, $e1, $20, $fe, $e1, $e2, $7b, $e1, $e2, $e2, $e1, $e2, $7f, $20, $20, $20
@@ -2751,7 +2766,7 @@ title_chars:
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
-; read by: l413C
+; read by: draw_ground
 ground_chars:
 		.byte	$20, $5d, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$5d, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $5d, $20, $20, $20
@@ -2768,7 +2783,7 @@ ground_chars:
 		.byte	$5f, $5f, $5f, $5f, $5f, $5f, $5f, $40, $5e, $5e, $5e, $5e, $5e, $5e, $5e, $5e
 		.byte	$5e, $5e, $5e, $5e, $5e, $5e, $5e, $5e, $5e, $5e, $5e, $5e, $5e, $5e, $5e, $5e
 		.byte	$5e, $5e, $5e, $5e, $5e, $5e, $5e, $5e, $5e, $5e, $5e, $5e, $5e, $5e, $5e, $5e
-; read by: l4FE2
+; read by: build_charset
 custom_chars:
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $01, $06, $01, $01, $01, $01, $00
 		.byte	$00, $1f, $00, $07, $18, $18, $1f, $00, $00, $1f, $00, $01, $00, $00, $1f, $00
@@ -2802,7 +2817,7 @@ custom_chars:
 		.byte	$00, $7c, $00, $08, $10, $20, $7c, $00, $01, $02, $06, $0a, $18, $2a, $40, $a0
 		.byte	$80, $40, $a0, $30, $28, $04, $26, $05, $00, $00, $00, $00, $18, $3c, $6e, $ab
 		.byte	$ff, $11, $44, $00, $00, $00, $00, $00, $99, $42, $99, $40, $aa, $55, $ff, $00
-; read by: l5022
+; read by: build_sprites
 sprite_shapes:
 		.byte	$00, $7e, $00, $01, $ff, $80, $03, $ff, $c0, $06, $db, $60, $0f, $ff, $f0, $0f
 		.byte	$ff, $f0, $03, $99, $c0, $01, $00, $80, $00, $00, $00, $00, $00, $00, $00, $00
@@ -2837,6 +2852,7 @@ crack_intro:
 		sta background_color
 		tax 
 
+; jumped to by: crack_intro
 lC017:
 		sta color_ram, x
 		sta color_ram + $100, x
@@ -2845,6 +2861,7 @@ lC017:
 		inx 
 		bne lC017
 
+; jumped to by: crack_intro
 lC026:
 		lda title_line, x
 		sta screen, x
@@ -2862,20 +2879,20 @@ lC026:
 		jsr apply_trainer
 		jmp start
 
-; called by: lC026
-; modified by: lC09A
+; called by: crack_intro
 ask_trainer:
 		lda #$00
 		bne lC09D
 
-; jumped to by: lC055
+; jumped to by: ask_trainer
 lC052:
 		ldy #$80
 
-; jumped to by: lC055
+; jumped to by: ask_trainer
 lC054:
 		tax 
 
+; jumped to by: ask_trainer
 lC055:
 		inx 
 		bne lC055
@@ -2892,6 +2909,7 @@ lC055:
 		cpy cia1_port_a
 		bne lC052
 
+; jumped to by: ask_trainer
 lC072:
 		sty cia1_port_a
 		lda cia1_port_a
@@ -2915,28 +2933,28 @@ lC072:
 		bcc lC0A2
 		bne lC072
 
-; jumped to by: lC072
+; jumped to by: ask_trainer
 lC09A:
 		inc ask_trainer + 1
 
-; jumped to by: ask_trainer, lC072
+; jumped to by: ask_trainer
 lC09D:
 		sec 
 		lda #$19
 		bne lC0A5
 
-; jumped to by: lC072
+; jumped to by: ask_trainer
 lC0A2:
 		clc 
 		lda #$0e
 
-; jumped to by: lC09D
+; jumped to by: ask_trainer
 lC0A5:
 		rol trainer_flag
 		sta screen + $ef
 		rts 
 
-; modified by: lC0A5, apply_trainer
+; modified by: ask_trainer, apply_trainer
 trainer_flag:
 		.byte	$00
 unused_c0ad:
@@ -2944,7 +2962,7 @@ unused_c0ad:
 
 ; patches the game: with the trainer, invader_row's increment calls trainer_next_row;
 ; without it, title_screen calls save_highscore
-; called by: lC026
+; called by: crack_intro
 apply_trainer:
 		ror trainer_flag
 		bcc lC0DB
@@ -2986,12 +3004,12 @@ lC0F4:
 		sta invader_row
 		rts 
 
-; read by: lC026
+; read by: crack_intro
 title_line:
 		.enc	"screen"
 		.text	"1NVADER +1               BY FAAY"
 		.text	"D/EXCESS"
-; read by: lC026
+; read by: crack_intro
 question_line:
 		.text	"ALIEN CAN'T KILL YOU?           "
 		.text	" (Y/N)  "
@@ -3001,6 +3019,7 @@ question_line:
 save_highscore:
 		ldx #$02
 
+; jumped to by: save_highscore
 lC14A:
 		lda loaded_highscore, x
 		cmp high_score, x
@@ -3009,7 +3028,7 @@ lC14A:
 		bpl lC14A
 		jmp lC1B4
 
-; jumped to by: lC14A
+; jumped to by: save_highscore
 lC158:
 		lda #$00
 		sta kernal_msgflag
@@ -3024,7 +3043,7 @@ lC158:
 		bpl lC172
 		ldx #$08
 
-; jumped to by: lC158
+; jumped to by: save_highscore
 lC172:
 		jsr setlfs
 		lda #$0b
@@ -3041,7 +3060,7 @@ lC172:
 		bpl lC191
 		ldx #$08
 
-; jumped to by: lC172
+; jumped to by: save_highscore
 lC191:
 		jsr setlfs
 		lda #$09
@@ -3059,12 +3078,12 @@ lC191:
 		lda saved_volume
 		sta volume_filter_mode
 
-; jumped to by: lC14A
+; jumped to by: save_highscore
 lC1B4:
 		jmp reset_game
 
-; read by: lC191
-; written by: lC158
+; read by: save_highscore
+; written by: save_highscore
 saved_volume:
 		.byte	$00
 
@@ -3075,7 +3094,7 @@ scratch_command:
 highscore_filename:
 		.text	"HIGHSCORE"
 
-; called by: lC026
+; called by: crack_intro
 load_highscore:
 		lda #$00
 		sta kernal_msgflag
@@ -3101,13 +3120,14 @@ lC1D3:
 		bcs lC1F7
 		ldx #$02
 
+; jumped to by: load_highscore
 lC1EE:
 		lda high_score, x
 		sta loaded_highscore, x
 		dex 
 		bpl lC1EE
 
-; jumped to by: lC1D3
+; jumped to by: load_highscore
 lC1F7:
 		lda kernal_device
 		jsr talk
@@ -3116,6 +3136,7 @@ lC1F7:
 		ldy #$00
 		sty $90
 
+; jumped to by: load_highscore
 lC205:
 		jsr acptr
 		bit $90
@@ -3123,36 +3144,36 @@ lC205:
 		iny 
 		bne lC205
 
-; jumped to by: lC205
+; jumped to by: load_highscore
 lC20F:
 		jsr untlk
 		rts 
 
-; read by: lC14A
-; written by: lC1EE
+; read by: save_highscore
+; written by: load_highscore
 loaded_highscore:
 		.byte	$00, $00, $00
 
 .virtual $d000
 ; ---- VIC-II ----
-; read by: l4FE2
-; written by: title_screen, position_invader, l4A7C
+; read by: build_charset
+; written by: title_screen, position_invader
 sprite0_x:		.byte	?
-; written by: title_screen, l42F9, position_invader
+; written by: title_screen, countdown, position_invader
 sprite0_y:		.byte	?
-; written by: position_p1, l4AAB
+; written by: position_p1
 sprite1_x:		.byte	?
 ; written by: position_p1
 sprite1_y:		.byte	?
-; written by: position_p2, l4ADA
+; written by: position_p2
 sprite2_x:		.byte	?
 ; written by: position_p2
 sprite2_y:		.byte	?
-; written by: position_p1_shot, l4B18
+; written by: position_p1_shot
 sprite3_x:		.byte	?
 ; written by: position_p1_shot
 sprite3_y:		.byte	?
-; written by: position_p2_shot, l4B5F
+; written by: position_p2_shot
 sprite4_x:		.byte	?
 ; written by: position_p2_shot
 sprite4_y:		.byte	?
@@ -3162,19 +3183,19 @@ sprite6_x:		.byte	?
 sprite6_y:		.byte	?
 sprite7_x:		.byte	?
 sprite7_y:		.byte	?
-; read by: position_invader, l4A7C, position_p1, l4AAB, position_p2, l4ADA, position_p1_shot, l4B18, position_p2_shot, l4B5F
-; written by: position_invader, l4A7C, position_p1, l4AAB, position_p2, l4ADA, position_p1_shot, l4B18, position_p2_shot, l4B5F
+; read by: position_invader, position_p1, position_p2, position_p1_shot, position_p2_shot
+; written by: position_invader, position_p1, position_p2, position_p1_shot, position_p2_shot
 sprites_x_msb:		.byte	?
 vic_control1:		.byte	?
 ; read by: wait_frame
 raster:		.byte	?
 light_pen_x:		.byte	?
 light_pen_y:		.byte	?
-; read by: position_p1_shot, l4B27, position_p2_shot, l4B6E
-; written by: title_screen, position_p1_shot, l4B27, position_p2_shot, l4B6E
+; read by: position_p1_shot, position_p2_shot
+; written by: title_screen, position_p1_shot, position_p2_shot
 sprite_enable:		.byte	?
 vic_control2:		.byte	?
-; written by: title_screen, l4333
+; written by: title_screen, countdown
 sprite_expand_y:		.byte	?
 ; written by: build_charset
 vic_memory:		.byte	?
@@ -3182,7 +3203,7 @@ vic_irq_status:		.byte	?
 vic_irq_enable:		.byte	?
 sprite_priority:		.byte	?
 sprite_multicolor:		.byte	?
-; written by: title_screen, l4333
+; written by: title_screen, countdown
 sprite_expand_x:		.byte	?
 ; read by: wait_frame
 sprite_sprite_collision:		.byte	?
@@ -3199,10 +3220,10 @@ sprite_multicolor1:		.byte	?
 ; written by: title_screen, position_invader
 sprite0_color:		.byte	?
 ; written by: position_p1
-; modified by: l42A7
+; modified by: countdown
 sprite1_color:		.byte	?
 ; written by: position_p2
-; modified by: l42CB
+; modified by: countdown
 sprite2_color:		.byte	?
 ; written by: position_p1_shot
 sprite3_color:		.byte	?
@@ -3215,7 +3236,7 @@ sprite7_color:		.byte	?
 
 .virtual $d400
 ; ---- SID ----
-; read by: l4FE2
+; read by: build_charset
 ; written by: play_voice1
 voice1_frequency:		.word	?
 voice1_pulse_width:		.word	?
@@ -3245,26 +3266,26 @@ voice3_attack_decay:		.byte	?
 voice3_sustain_release:		.byte	?
 filter_cutoff:		.word	?
 filter_control:		.byte	?
-; read by: lC158
-; written by: play_voice1, play_voice2, play_voice3, lC158, lC191
+; read by: save_highscore
+; written by: play_voice1, play_voice2, play_voice3, save_highscore
 volume_filter_mode:		.byte	?
 .endv
 
 .virtual $d800
 ; ---- color RAM ----
-; written by: l4018, l4131, l413C, l415C, l4166, l417E, l41BA, lC017, lC026
-; modified by: l41CC
+; written by: start, fill_title_color, draw_ground, stripe_title_colors, crack_intro
+; modified by: cycle_title_colors
 color_ram:
 		.fill	1000
 .endv
 
 .virtual $dc00
 ; ---- CIA 1 ----
-; read by: read_p2_fire, lC055, lC072
-; written by: lC026, lC055, lC072
-; modified by: lC072
+; read by: read_p2_fire, ask_trainer
+; written by: crack_intro, ask_trainer
+; modified by: ask_trainer
 cia1_port_a:		.byte	?
-; read by: read_p1_fire, lC055, lC072
+; read by: read_p1_fire, ask_trainer
 cia1_port_b:		.byte	?
 .endv
 ; ---- KERNAL jump table ----
@@ -3284,7 +3305,7 @@ setmsg:
 		.fill	3
 second:
 		.fill	3
-; called by: lC1F7
+; called by: load_highscore
 tksa:
 		.fill	3
 memtop:
@@ -3295,33 +3316,33 @@ scnkey:
 		.fill	3
 settmo:
 		.fill	3
-; called by: lC205
+; called by: load_highscore
 acptr:
 		.fill	3
 ciout:
 		.fill	3
-; called by: lC20F
+; called by: load_highscore
 untlk:
 		.fill	3
 unlsn:
 		.fill	3
 listen:
 		.fill	3
-; called by: lC1F7
+; called by: load_highscore
 talk:
 		.fill	3
 readst:
 		.fill	3
-; called by: lC172, lC191, lC1D3
+; called by: save_highscore, load_highscore
 setlfs:
 		.fill	3
-; called by: lC172, lC191, lC1D3
+; called by: save_highscore, load_highscore
 setnam:
 		.fill	3
-; called by: lC172
+; called by: save_highscore
 open:
 		.fill	3
-; called by: lC172
+; called by: save_highscore
 close:
 		.fill	3
 chkin:
@@ -3335,10 +3356,10 @@ chrin:
 ; called by: start
 chrout:
 		.fill	3
-; called by: lC1D3
+; called by: load_highscore
 load:
 		.fill	3
-; called by: lC191
+; called by: save_highscore
 save:
 		.fill	3
 settim:

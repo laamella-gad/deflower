@@ -115,6 +115,16 @@ class DeflowerTest {
     }
 
     /**
+     * Issue 0084: a cross-reference names the routine its instruction is
+     * in, skipping the local labels of branch and jmp targets on the way.
+     * A jsr target is a routine even when a branch reaches it too.
+     */
+    @Test
+    void crossReferencesNameTheRoutine() throws IOException, URISyntaxException {
+        assertDeflowered("routines");
+    }
+
+    /**
      * AssemblyFileFormat.print(DataArea, ...) used to only handle BYTE,
      * silently skipping WORD/DWORD/CHAR areas (issue 0002). Covers all three:
      * two WORDs, one DWORD, and three CHARs (printed as one .text

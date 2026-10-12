@@ -1,12 +1,12 @@
 
 *=$0100
 
-; called by: l2475
+; called by: $247e
 l0100:
 		brk 
 *=$0147
 
-; jumped to by: l2475
+; jumped to by: $248b
 l0147:
 		brk 
 *=$0801
@@ -19,6 +19,7 @@ start:
 		ldy #$1e
 		tsx 
 
+; jumped to by: start
 l0810:
 		lda $248d, x
 		sta @w $00fc, x
@@ -27,14 +28,14 @@ l0810:
 		jmp l2452
 *=$2452
 
-; jumped to by: l0810
+; jumped to by: start, $2459
 l2452:
 		lda $255d, y
 		sta $07fd, y
 		dey 
 		bne l2452
 
-; jumped to by: l2475
+; jumped to by: $2487
 l245B:
 		inx 
 		tya 
@@ -44,6 +45,7 @@ l245B:
 		lsr 
 		ldx $0333, y
 
+; jumped to by: $246a
 l2466:
 		rol 
 		rol $9f
@@ -54,7 +56,7 @@ l2466:
 		lda $9f
 		adc $039b, y
 
-; jumped to by: l245B
+; jumped to by: $245f
 l2475:
 		sta $039c, y
 		txa 

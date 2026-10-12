@@ -46,6 +46,8 @@ class FlowAnalyser {
                 break;
             case JSR:
                 subject.addPotentialCodeLocation(address + instruction.addressingMode.totalBytes, false, address);
+                subject.addCallTarget(getAbsoluteAddressOperand(address, subject), address);
+                break;
             case JMP:
                 if (instruction.addressingMode == AddressingMode.INDIRECT) {
                     // The operand is where the destination address is stored,

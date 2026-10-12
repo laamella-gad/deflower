@@ -107,7 +107,7 @@ class AssemblyFileFormat {
         for (int address : addresses) {
             out.finishLine();
             printCommentLines(address, subject);
-            String label = subject.memory[address].label;
+            String label = subject.memory[address].labelName();
             if (label != null) {
                 out.print(label + " = " + asHexWord(address));
             }
@@ -132,7 +132,7 @@ class AssemblyFileFormat {
         int address = start;
         while (address < subject.memory.length && subject.isVirtualAt(address)) {
             DataArea area = (DataArea) subject.peek(address);
-            String label = subject.memory[address].label;
+            String label = subject.memory[address].labelName();
             printCommentLines(address, subject);
             if (address != area.address) {
                 // A label landing inside a multi-byte element (the second
@@ -402,7 +402,7 @@ class AssemblyFileFormat {
         if (area == null) {
             // Memory no area covers can still carry a label: a user label,
             // or a jump target whose instruction couldn't be decoded.
-            String label = subject.memory[address].label;
+            String label = subject.memory[address].labelName();
             return label != null ? label : String.format(formatWhenNumeric, address);
         }
         String label = area.labelFor(address, subject);
@@ -449,7 +449,7 @@ class ResultWriter {
                 } else if (continuesPrevious(currentArea, address, subject)) {
                     deferred.add(address);
                 } else {
-                    assemblyFile.printAnnotation(address, subject.memory[address].label, currentArea, subject);
+                    assemblyFile.printAnnotation(address, subject.memory[address].labelName(), currentArea, subject);
                 }
             }
             if (currentArea != null) {
