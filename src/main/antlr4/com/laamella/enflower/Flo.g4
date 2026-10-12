@@ -41,6 +41,8 @@
  *       the same line is ignored.
  *     - virtual: memory the program uses but doesn't contain (I/O,
  *       zero page, screen). Output as a .virtual reservation, not as data.
+ *       A data element on memory the image doesn't load is made virtual
+ *       anyway, with a warning, so it isn't printed as zero bytes.
  *     - type: char (text), byte, word, long (24 bits), dword, addr (a
  *       16-bit address, printed as .addr with the label of the address it
  *       holds), sbyte, sword, slong, sdword (signed numbers, printed as

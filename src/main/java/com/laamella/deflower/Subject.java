@@ -141,15 +141,48 @@ class Subject {
                         return;
                     }
                 }
+                int size = type.dataType.sizeInBytes;
+                // Issue 0087: an element the image doesn't (fully) load is
+                // virtual, so its bytes aren't printed as zeroes.
+                List<String> unloaded = new ArrayList<>();
+                int unloadedStart = -1;
                 for (int i = 0; i < amount; i++) {
-                    DataArea area = new DataArea(address + i * type.dataType.sizeInBytes, type.dataType, annotation.virtual, annotation.name, i, annotation.included, export);
+                    int elementAddress = address + i * size;
+                    boolean loaded = isLoaded(elementAddress, size);
+                    if (!loaded && !annotation.virtual && unloadedStart == -1) {
+                        unloadedStart = elementAddress;
+                    } else if (loaded && unloadedStart != -1) {
+                        unloaded.add(asHexWord(unloadedStart) + "-" + asHexWord(elementAddress));
+                        unloadedStart = -1;
+                    }
+                    DataArea area = new DataArea(elementAddress, type.dataType, annotation.virtual || !loaded, annotation.name, i, annotation.included, export);
                     if (!annotation.included || !overlapsOwnArea(area)) {
                         registerArea(area);
                     }
                 }
+                if (unloadedStart != -1) {
+                    unloaded.add(asHexWord(unloadedStart) + "-" + asHexWord(address + amount * size));
+                }
+                if (!unloaded.isEmpty() && !annotation.included) {
+                    System.out.format("Warning: %s %s at %s: the image doesn't load %s, printed as virtual%n",
+                            type.dataType.name().toLowerCase(), annotation.name == null ? "area" : annotation.name,
+                            asHexWord(address), String.join(", ", unloaded));
+                }
             }
             default -> throw new RuntimeException("No data type");
         }
+    }
+
+    /**
+     * True when the image loaded all `size` bytes from `address` on.
+     */
+    private boolean isLoaded(int address, int size) {
+        for (int a = address; a < address + size; a++) {
+            if (a >= memory.length || !memory[a].loaded) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

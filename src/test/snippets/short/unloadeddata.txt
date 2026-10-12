@@ -1,0 +1,54 @@
+>>> Issue 0087: a data line on memory the image doesn't load is printed
+as virtual, with a warning, instead of as zero bytes. This is decided per
+element, so an array running past the image's end splits into data and a
+virtual tail. <<<
+
+*=$c000
+
+entry:
+		lda table
+		sta $0400
+		rts 
+
+table:
+		.byte	$01, $02
+===
+deflower test.prg
+$400 byte[48] screen
+$c000 code entry
+$c007 word[3] table
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Marking area of 48 byte at 400 "screen"
+Warning: byte screen at $0400: the image doesn't load $0400-$0430, printed as virtual
+Will disassemble from C000
+Marking area of 3 word at C007 "table"
+Warning: word table at $c007: the image doesn't load $c009-$c00d, printed as virtual
+Starting flow analysis.
+Writing out/test.asm
+~~~
+
+.virtual $0400
+; written by: entry
+screen:
+		.fill	48
+.endv
+
+*=$c000
+
+entry:
+		lda table
+		sta screen
+		rts 
+
+; read by: entry
+table:
+		.word	$0201
+
+.virtual $c009
+		.fill	4
+.endv
+~~~
+vvv

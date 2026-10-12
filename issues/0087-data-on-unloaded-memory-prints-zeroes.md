@@ -1,7 +1,6 @@
 ---
 title: A data area on memory the image doesn't load prints as zero bytes
-status: open
-priority: medium
+status: done
 labels: bug
 ---
 
@@ -29,3 +28,9 @@ Exports already catch this case: "Exported table.bin at $c030 holds memory the i
 - **Partly loaded areas.** What happens when an area is only partly loaded: split it, or apply the rule to the whole area?
 
 Done when: a short snippet with a data area on unloaded memory gives the chosen output, and passes the round trip.
+
+## Closing note
+
+Warn and treat as virtual, decided per element. In `Subject.annotate`, a data element with any byte the image doesn't load is registered as virtual, so an array running past the image's end splits into data and a `.virtual` tail. A line from the `.flo` file itself (not an included one) prints one warning naming the unloaded ranges, e.g. "Warning: byte screen at $0400: the image doesn't load $0400-$0430, printed as virtual". Exports still report unloaded memory as an error.
+
+The snippet `short/unloadeddata.txt` has an array wholly outside the `.prg` and a `word[3]` crossing its end, and passes the round trip. `blockoffset` keeps its `virtual`, since that snippet is about the operand offset.
