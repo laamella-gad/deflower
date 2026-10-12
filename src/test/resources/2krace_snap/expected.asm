@@ -2,29 +2,55 @@
 .virtual $0002
 ; ---- zero page ----
 ; the road map row at the top of the screen; counts down as the road scrolls
+; read by: l0892, l08CF, l093B
+; written by: init_road
+; modified by: l0892
 road_row:		.byte	?
 .endv
 
 .virtual $0004
 ; the screen's fine scroll, 0-7
+; read by: game_loop, l08CF, irq
+; written by: game_loop, init_road
 fine_scroll:		.byte	?
 ; scroll speed in eighths of a row per frame
+; read by: game_loop, l08BE
+; written by: l0A5F
+; modified by: l08BE
 speed:		.byte	?
+; read by: l08BE
+; written by: l0A5F, check_stage
 max_speed:		.byte	?
 ; 0 = in the left lane, 1 = in the right lane, 2 = moving left, 3 = moving right
+; read by: l093B, steer, read_joystick
+; written by: new_game, steer, l09B9, l0B24
+; modified by: l0B2D
 car_state:		.byte	?
 ; index into car_x while the car changes lanes
+; read by: steer
+; written by: new_game, steer, l09B9, l0B24, l0B2D
+; modified by: steer
 car_step:		.byte	?
 ; the current stage's index into the wall tables
+; read by: l0892
+; written by: l0A5F, check_stage
 difficulty:		.byte	?
 .endv
 
 .virtual $00d0
+; read by: l10BE, l10DF, l11C8, l11F2, l1211
+; written by: l10BE, l11C8
 music_pointer:		.word	?
 .endv
 
 .virtual $00fb
+; read by: l0926, l0B9A
+; written by: l08CF, snapshot_pc, l093B
+; modified by: l0926
 draw_pointer:		.word	?
+; read by: l0926
+; written by: snapshot_pc
+; modified by: l0926
 draw_pointer2:		.word	?
 .endv
 
@@ -63,6 +89,7 @@ start:
 		cli 
 
 ; ---- game ----
+; jumped to by: l098A
 new_game:
 		jsr clear_screen
 		jsr wait_frame
@@ -82,6 +109,8 @@ new_game:
 		jsr title
 
 ; waits until irq_bottom sets the operand of the lda to 1
+; jumped to by: position_car
+; written by: new_game, position_car, irq_bottom
 game_loop:
 		lda #$01
 		beq game_loop
@@ -98,6 +127,7 @@ game_loop:
 		sta score_add + $4
 		beq l08BE
 
+; jumped to by: l08B5
 l0892:
 		pha 
 		dec road_row
@@ -110,6 +140,7 @@ l0892:
 		bmi l08A7
 		lda #$01
 
+; jumped to by: l0892
 l08A7:
 		sta left_road, x
 		lda #$00
@@ -118,6 +149,7 @@ l08A7:
 		bmi l08B5
 		lda #$01
 
+; jumped to by: l08A7
 l08B5:
 		sta right_road, x
 		pla 
@@ -125,6 +157,7 @@ l08B5:
 		sbc #$01
 		bne l0892
 
+; jumped to by: game_loop
 l08BE:
 		lda #$82
 		inc l08BE + 1
@@ -135,6 +168,7 @@ l08BE:
 		bcs l08CF
 		inc speed
 
+; jumped to by: l08BE
 l08CF:
 		lda fine_scroll
 		clc 
@@ -180,6 +214,9 @@ snapshot_pc:
 		ldx #$19
 		ldy #$00
 
+; jumped to by: l093B
+; written by: l08CF
+; modified by: l093B
 l0926:
 		lda left_road + $fd
 ; operands the game loop changes to step down the road map
@@ -196,6 +233,7 @@ right_road_source = $092c
 		inc draw_pointer + $1
 		inc draw_pointer2 + $1
 
+; jumped to by: l0926
 l093B:
 		inc l0926 + 1
 		inc $092c
@@ -233,6 +271,7 @@ l093B:
 		sta volume_filter_mode
 		ldy #$04
 
+; jumped to by: l098A
 l0988:
 		ldx #$1f
 
@@ -247,6 +286,7 @@ l098A:
 		jsr update_high_score
 		jmp new_game
 
+; jumped to by: l093B
 steer:
 		jsr read_joystick
 		ldx car_step
@@ -261,6 +301,7 @@ steer:
 		stx car_state
 		jmp position_car
 
+; jumped to by: steer
 l09B9:
 		inx 
 		stx car_step
@@ -269,6 +310,7 @@ l09B9:
 		lda #$01
 		sta car_state
 
+; jumped to by: steer, l09B9
 position_car:
 		lda car_x, x
 		sta sprite0_x
@@ -342,6 +384,7 @@ lower_road_y = $0a32
 		pla 
 		rti 
 
+; called by: new_game
 init_road:
 		ldx #$00
 		stx road_row
@@ -360,6 +403,7 @@ l0A5F:
 		sta difficulty
 		rts 
 
+; called by: new_game, l098A, l0C77
 wait_frame:
 		bit vic_control1
 		bmi wait_frame
@@ -369,6 +413,7 @@ l0A78:
 		bpl l0A78
 		rts 
 
+; called by: new_game
 init_video:
 		lda #$00
 		sta idle_byte
@@ -434,12 +479,14 @@ l0ADF:
 		sta sprite0_y
 		rts 
 
+; called by: steer
 read_joystick:
 		ldx car_state
 		cpx #$02
 		bcc l0B16
 		rts 
 
+; jumped to by: read_joystick
 l0B16:
 		lda cia1_port_a
 		and #$0c
@@ -449,15 +496,18 @@ l0B16:
 		beq l0B24
 		rts 
 
+; jumped to by: l0B16
 l0B24:
 		ldx #$03
 		stx car_state
 		lda #$00
 		sta car_step
 
+; jumped to by: l0B2D
 l0B2C:
 		rts 
 
+; jumped to by: l0B16
 l0B2D:
 		cmp #$08
 		bne l0B2C
@@ -469,6 +519,7 @@ l0B2D:
 		rts 
 
 ; moves to the next stage when the score is high enough
+; called by: position_car
 check_stage:
 		lda score + $1
 		lsr 
@@ -487,20 +538,29 @@ check_stage:
 		lda stage_car_sprite, x
 		sta sprite_pointers
 
+; jumped to by: check_stage
 l0B65:
 		rts 
 
+; read by: check_stage
+; written by: new_game
+; modified by: check_stage
 stage:
 		.byte	$01
+; read by: check_stage
 stage_color:
 		.byte	$02, $04, $0b, $00
+; read by: check_stage
 stage_max_speed:
 		.byte	$06, $07, $08, $08
+; read by: check_stage
 stage_difficulty:
 		.byte	$00, $00, $00, $01
+; read by: check_stage
 stage_car_sprite:
 		.byte	$07, $06, $05, $05
 
+; called by: new_game, l0C7F
 clear_screen:
 		lax #$00
 
@@ -516,16 +576,21 @@ l0B79:
 		rts 
 
 ; draws one road sprite's column of walls from the road map
+; called by: l08CF, l093B
 draw_road_sprite:
 		ldy #$00
 		ldx #$04
 
+; jumped to by: l0B9A
+; written by: l08CF, l093B
+; modified by: l0B9A
 l0B93:
 		lda right_road + $fd
 d0B94 = $0b94
 		beq l0B9A
 		lda #$ff
 
+; jumped to by: l0B93
 l0B9A:
 		sta (draw_pointer), y
 		iny 
@@ -548,6 +613,7 @@ l0B9A:
 		bpl l0B93
 		rts 
 
+; called by: new_game
 reset_score:
 		lda #$00
 		sta score
@@ -558,6 +624,7 @@ reset_score:
 		rts 
 
 ; adds score_add to score, one decimal digit per byte
+; called by: position_car
 add_score:
 		ldx #$04
 		lda #$00
@@ -568,6 +635,7 @@ l0BCB:
 		bpl l0BCB
 		ldx #$04
 
+; jumped to by: l0BE9
 l0BD3:
 		lda score, x
 		clc 
@@ -580,6 +648,7 @@ l0BD3:
 		sec 
 		sbc #$0a
 
+; jumped to by: l0BD3
 l0BE9:
 		sta score, x
 		dex 
@@ -594,19 +663,30 @@ l0BF1:
 		bpl l0BF1
 		rts 
 
+; read by: check_stage, l0BD3, l0BF1, l0C13, l0C2A
+; written by: reset_score, l0BE9
 score:
 		.byte	$00, $00, $00, $00, $08
 ; the last digit is the number of rows scrolled this frame
+; read by: l0BD3
+; written by: game_loop
+; modified by: l0BD3
 score_add:
 		.byte	$00, $00, $00, $00, $00
+; read by: l0BD3
+; written by: l0BCB
 score_carry:
 		.byte	$00, $00, $00, $00, $00
+; read by: l0C13, l0C35
+; written by: l0C2A
 high_score:
 		.byte	$00, $00, $00, $00, $00
 
+; called by: l098A, l0C63
 update_high_score:
 		ldx #$00
 
+; jumped to by: l0C20
 l0C13:
 		lda high_score, x
 		cmp score, x
@@ -614,12 +694,14 @@ l0C13:
 		beq l0C20
 		jmp l0C33
 
+; jumped to by: l0C13
 l0C20:
 		inx 
 		cpx #$05
 		bne l0C13
 		jmp l0C33
 
+; jumped to by: l0C13
 l0C28:
 		ldx #$04
 
@@ -629,6 +711,7 @@ l0C2A:
 		dex 
 		bpl l0C2A
 
+; jumped to by: l0C13, l0C20
 l0C33:
 		ldx #$04
 
@@ -640,11 +723,13 @@ l0C35:
 		bpl l0C35
 		rts 
 
+; read by: l098A, l0C77
 flash_colors:
 		.byte	$00, $09, $0b, $08, $0c, $0c, $0f, $0f, $0f, $07, $07, $07, $07, $01, $01, $01
 		.byte	$01, $01, $01, $01, $07, $07, $07, $07, $0f, $0f, $0f, $0c, $0c, $08, $0b, $09
 
 ; the title: shows the logo and flashes it until fire is pressed
+; called by: new_game
 title:
 		ldx #$0b
 
@@ -660,6 +745,7 @@ l0C63:
 		jsr update_high_score
 		ldx #$1f
 
+; jumped to by: l0C7F
 l0C77:
 		jsr wait_frame
 		ldy #$09
@@ -681,19 +767,30 @@ l0C7F:
 		rts 
 
 ; the length of the current wall on each side; 0 = no wall
+; read by: l0892, next_row, l0CE9, l0D0A
+; written by: init_walls, l0CE9, l0D0A, l0D1C
+; modified by: next_row
 left_wall:
 		.byte	$09
+; read by: l08A7, l0CE1, l0D1C, l0D3A
+; written by: init_walls, l0CE9, l0D1C, l0D3A
+; modified by: l0CE1
 right_wall:		.byte	$09
 ; per difficulty
+; read by: l0CE9, l0D1C
 wall_switch_length:
 		.byte	$03, $03, $04, $04, $04, $04, $05, $05, $05, $06
+; read by: l0CE9, l0D1C
 wall_max_length:
 		.byte	$10, $0f, $0f, $0e, $0e, $0d, $0d, $0c, $0c, $0c
+; read by: l0CE9, l0D1C
 wall_end_chance:
 		.byte	$19, $23, $2d, $38, $42, $4c, $56, $60, $6b, $75
+; read by: l0D0A, l0D3A
 wall_start_chance:
 		.byte	$0c, $11, $16, $1c, $21, $26, $2b, $30, $35, $3a
 
+; called by: new_game
 init_walls:
 		lda #$01
 		sta left_wall
@@ -706,16 +803,19 @@ init_walls:
 		rts 
 
 ; builds the next row of the road map
+; called by: l0892
 next_row:
 		lda left_wall
 		beq l0CE1
 		inc left_wall
 
+; jumped to by: next_row
 l0CE1:
 		lda right_wall
 		beq l0CE9
 		inc right_wall
 
+; jumped to by: l0CE1
 l0CE9:
 		jsr random
 		lda left_wall
@@ -730,6 +830,7 @@ l0CE9:
 		sta right_wall
 		jmp l0D1C
 
+; jumped to by: l0CE9
 l0D0A:
 		lda left_wall
 		bne l0D1C
@@ -739,6 +840,7 @@ l0D0A:
 		lda #$01
 		sta left_wall
 
+; jumped to by: l0CE9, l0D0A
 l0D1C:
 		lda right_wall
 		cmp wall_max_length, x
@@ -752,6 +854,7 @@ l0D1C:
 		sta left_wall
 		jmp l0D4C
 
+; jumped to by: l0D1C
 l0D3A:
 		lda right_wall
 		bne l0D4C
@@ -761,10 +864,12 @@ l0D3A:
 		lda #$01
 		sta right_wall
 
+; jumped to by: l0D1C, l0D3A
 l0D4C:
 		rts 
 
 ; a 32-bit Galois LFSR; returns its low byte
+; called by: l0CE9
 random:
 		asl random_seed
 		rol random_seed + $1
@@ -784,24 +889,31 @@ random:
 		eor #$04
 		sta random_seed + $3
 
+; jumped to by: random
 l0D7B:
 		lda random_seed
 		rts 
 
+; read by: l0CE9, l0D0A, l0D1C, l0D3A, random, l0D7B
+; written by: init_walls, random
+; modified by: random
 random_seed:
 		.dword	$4e08bfb4
 
 unused_0d83:
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 ; sprite 0's x for each car_step, easing between the lanes
+; read by: position_car
 car_x:
 		.byte	$56, $57, $5d, $66, $71, $80, $90, $a1, $b2, $c3, $d4, $e2, $ed, $f6, $fc, $fe
 *=$1000
 
 ; ---- music player ----
+; called by: new_game
 music_init:
 		jmp l100C
 
+; called by: position_car
 music_play:
 		jmp l1014
 
@@ -812,14 +924,17 @@ music_set_volume:
 
 		jmp l1173
 
+; jumped to by: music_init
 l100C:
 		sta $1017
 		rts 
 
+; jumped to by: music_set_volume
 l1010:
 		sta $10a0
 		rts 
 
+; jumped to by: music_play
 l1014:
 		ldx #$00
 		ldy #$ff
@@ -843,6 +958,7 @@ l101D:
 		jsr l103A
 		ldx #$0e
 
+; called by: l101D
 l103A:
 		lda #$05
 		sta tempo, x
@@ -851,6 +967,8 @@ l103A:
 		sta instrument, x
 		jmp l123E
 
+; jumped to by: l1014
+; written by: l101D, l1090, l111B
 l104A:
 		ldy #$01
 		beq l1093
@@ -868,14 +986,17 @@ filter_steps = $104f
 		bne l1087
 		iny 
 
+; jumped to by: l104A
 l1069:
 		lda filter_right, y
 		sta l1093 + 1
 		jmp l1084
 
+; jumped to by: l104A
 l1072:
 		sta $104f
 
+; jumped to by: l104A
 l1075:
 		lda filter_right, y
 		clc 
@@ -884,9 +1005,11 @@ l1075:
 		dec $104f
 		bne l1095
 
+; jumped to by: l1069
 l1084:
 		lda filter_left + $1, y
 
+; jumped to by: l104A
 l1087:
 		cmp #$ff
 		iny 
@@ -894,12 +1017,17 @@ l1087:
 		bcc l1090
 		lda filter_right, y
 
+; jumped to by: l1087
 l1090:
 		sta l104A + 1
 
+; jumped to by: l104A
+; read by: l1075
+; written by: l1069, l1075
 l1093:
 		lda #$05
 
+; jumped to by: l1075
 l1095:
 		sta filter_cutoff + $1
 		lda #$f1
@@ -915,6 +1043,7 @@ master_volume = $10a0
 		jsr l10AE
 		ldx #$0e
 
+; called by: l1095
 l10AE:
 		dec tick, x
 		beq l10BE
@@ -922,9 +1051,11 @@ l10AE:
 		lda tempo, x
 		sta tick, x
 
+; jumped to by: l10AE
 l10BB:
 		jmp l113D
 
+; jumped to by: l10AE
 l10BE:
 		lda pattern_position, x
 		bne l10F3
@@ -942,6 +1073,7 @@ l10BE:
 		tay 
 		lda (music_pointer), y
 
+; jumped to by: l10BE
 l10DF:
 		cmp #$e0
 		bcc l10EB
@@ -950,12 +1082,14 @@ l10DF:
 		iny 
 		lda (music_pointer), y
 
+; jumped to by: l10DF
 l10EB:
 		sta pattern_number, x
 		iny 
 		tya 
 		sta order_position, x
 
+; jumped to by: l10BE
 l10F3:
 		ldy instrument, x
 		lda new_note, x
@@ -974,6 +1108,7 @@ l10F3:
 		lda #$00
 		sta pulse_timer, x
 
+; jumped to by: l10F3
 l111B:
 		lda instrument_filter, y
 		beq l1128
@@ -981,6 +1116,7 @@ l111B:
 		lda #$00
 		sta $104f
 
+; jumped to by: l111B
 l1128:
 		lda instrument_wave, y
 		sta wave_position, x
@@ -990,6 +1126,7 @@ l1128:
 		sta attack_decay, x
 		jmp l121A
 
+; jumped to by: l10BB, l10F3
 l113D:
 		ldy wave_position, x
 		beq l1173
@@ -997,6 +1134,7 @@ l113D:
 		beq l114A
 		sta waveform, x
 
+; jumped to by: l113D
 l114A:
 		lda wave_left + $1, y
 		cmp #$ff
@@ -1006,6 +1144,7 @@ l114A:
 		clc 
 		lda wave_right + $1, y
 
+; jumped to by: l114A
 l1157:
 		sta wave_position, x
 		lda wave_right, y
@@ -1014,6 +1153,7 @@ l1157:
 		adc note, x
 		and #$7f
 
+; jumped to by: l1157
 l1166:
 		tay 
 		lda frequency_lo, y
@@ -1021,6 +1161,7 @@ l1166:
 		lda frequency_hi, y
 		sta frequency + $1, x
 
+; jumped to by: music_set_volume, l113D, l1157
 l1173:
 		lda tick, x
 		cmp #$02
@@ -1038,25 +1179,30 @@ l1173:
 		sta pulse_width, x
 		jmp l11B6
 
+; jumped to by: l1173
 l119A:
 		sta pulse_timer, x
 
+; jumped to by: l1173
 l119D:
 		lda pulse_right, y
 		clc 
 		bpl l11A6
 		dec pulse_width + $1, x
 
+; jumped to by: l119D
 l11A6:
 		adc pulse_width, x
 		sta pulse_width, x
 		bcc l11B1
 		inc pulse_width + $1, x
 
+; jumped to by: l11A6
 l11B1:
 		dec pulse_timer, x
 		bne l11C5
 
+; jumped to by: l1173
 l11B6:
 		lda pulse_left + $1, y
 		cmp #$ff
@@ -1065,12 +1211,15 @@ l11B6:
 		bcc l11C2
 		lda pulse_right, y
 
+; jumped to by: l11B6
 l11C2:
 		sta pulse_position, x
 
+; jumped to by: l1173, l11B1
 l11C5:
 		jmp l121A
 
+; jumped to by: l1173
 l11C8:
 		ldy pattern_number, x
 		lda pattern_lo, y
@@ -1087,17 +1236,20 @@ l11C8:
 		bne l11E9
 		lda (music_pointer), y
 
+; jumped to by: l11C8
 l11E9:
 		adc #$00
 		sta note_delay, x
 		beq l1211
 		bne l121A
 
+; jumped to by: l11C8
 l11F2:
 		sta instrument, x
 		iny 
 		lda (music_pointer), y
 
+; jumped to by: l11C8
 l11F8:
 		cmp #$bd
 		beq l1211
@@ -1110,15 +1262,18 @@ l11F8:
 		lda #$fe
 		sta gate, x
 
+; jumped to by: l11E9, l11F8
 l1211:
 		iny 
 		lda (music_pointer), y
 		beq l1217
 		tya 
 
+; jumped to by: l1211
 l1217:
 		sta pattern_position, x
 
+; jumped to by: l1128, l11C5, l11E9
 l121A:
 		lda attack_decay, x
 		sta voice1_attack_decay, x
@@ -1133,6 +1288,7 @@ l121A:
 		lda frequency + $1, x
 		sta voice1_frequency + $1, x
 
+; jumped to by: l103A
 l123E:
 		lda waveform, x
 		and gate, x
@@ -1140,47 +1296,91 @@ l123E:
 		rts 
 
 ; per-channel state, 7 bytes apart for channels 1, 2 and 3
+; read by: l10BE
+; written by: l101D, l10EB
 order_position:
 		.byte	$02
+; read by: l11F8
+; written by: l10DF
 transpose:		.byte	$00
 		.byte	$00
 
+; read by: l10BE, l1173, l11C8
+; written by: l1217
 pattern_position:
 		.byte	$16
+; read by: l11C8
+; written by: l11E9
 note_delay:		.byte	$00
 		.byte	$00, $00, $02, $00, $00, $01, $fd, $00, $00, $02, $00, $00, $01, $fd, $00, $00
 		.byte	$00, $00
 
+; read by: l10F3
+; written by: l10F3, l11F8
 new_note:
 		.byte	$00
+; read by: l113D
+; written by: l1128, l1157
 wave_position:		.byte	$01
+; read by: l123E
+; written by: l10F3, l113D
 waveform:		.byte	$09
+; read by: l1173
+; written by: l10F3, l11C2
 pulse_position:		.byte	$01
+; read by: l1173
+; written by: l10F3, l119A
+; modified by: l11B1
 pulse_timer:		.byte	$00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
+; read by: l10BE
 order_list_index:
 		.byte	$00
+; read by: l11C8
+; written by: l10EB
 pattern_number:		.byte	$00
+; read by: l10AE
+; written by: l103A
 tempo:		.byte	$05
+; read by: l1173
+; written by: l103A, l10AE
+; modified by: l10AE
 tick:		.byte	$00
+; read by: l1157
+; written by: l10F3
 note:		.byte	$13
+; read by: l10F3
+; written by: l103A, l11F2
 instrument:		.byte	$01
+; read by: l123E
+; written by: l11F8
+; modified by: l10F3
 gate:		.byte	$ff
 		.byte	$01, $02, $05, $00, $00, $01, $fe, $02, $02, $05, $00, $00, $01, $fe, $00, $00
 		.byte	$00
 
+; read by: l121A
+; written by: l1166
 frequency:
 		.word	$0343
+; read by: l11A6, l121A
+; written by: l1173, l11A6
+; modified by: l119D, l11A6
 pulse_width:		.word	$8d00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
+; read by: l121A
+; written by: l1128, l11F8
 attack_decay:
 		.byte	$00
+; read by: l121A
+; written by: l1128, l11F8
 sustain_release:		.byte	$fa
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00
 
+; read by: l1166
 frequency_lo:
 		.byte	$17, $27, $39, $4b, $5f, $74, $8a, $a1, $ba, $d4, $f0, $0e, $2d, $4e, $71, $96
 		.byte	$be, $e8, $14, $43, $74, $a9, $e1, $1c, $5a, $9c, $e2, $2d, $7c, $cf, $28, $85
@@ -1188,6 +1388,7 @@ frequency_lo:
 		.byte	$68, $71, $8a, $b3, $ee, $3c, $9e, $15, $a2, $46, $04, $dc, $d0, $e2, $14, $67
 		.byte	$dd, $79, $3c, $29, $44, $8d, $08, $b8, $a1, $c5, $28, $cd, $ba, $f1, $78, $53
 		.byte	$87, $1a, $10, $71, $42, $89, $4f, $9b, $74, $e2, $f0, $a6, $0e, $33, $20, $ff
+; read by: l1166
 frequency_hi:
 		.byte	$01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $02, $02, $02, $02, $02
 		.byte	$02, $02, $03, $03, $03, $03, $03, $04, $04, $04, $04, $05, $05, $05, $06, $06
@@ -1195,41 +1396,56 @@ frequency_hi:
 		.byte	$11, $12, $13, $14, $15, $17, $18, $1a, $1b, $1d, $1f, $20, $22, $24, $27, $29
 		.byte	$2b, $2e, $31, $34, $37, $3a, $3e, $41, $45, $49, $4e, $52, $57, $5c, $62, $68
 		.byte	$6e, $75, $7c, $83, $8b, $93, $9c, $a5, $af, $b9, $c4, $d0, $dd, $ea, $f8, $ff
+; read by: l10BE
 order_list_lo:
 		.byte	$46, $57, $68
+; read by: l10BE
 order_list_hi:
 		.byte	$14, $14, $14
+; read by: l11C8
 pattern_lo:
 		.byte	$79, $93, $bf, $c2, $d5, $ef, $04, $1e, $4a, $5f, $78
+; read by: l11C8
 pattern_hi:
 		.byte	$14, $14, $14, $14, $14, $14, $15, $15, $15, $15
 ; the tables below are indexed from 1: entry n is at label + n
+; read by: l1128
 instrument_attack_decay:
 		.byte	$15, $00, $00, $00, $70, $00, $50, $00, $00, $00, $00
+; read by: l1128
 instrument_sustain_release:
 		.byte	$00, $fa, $f7, $f7, $f4, $f9, $fa, $f9, $f9, $f9, $f9
+; read by: l1128
 instrument_wave:
 		.byte	$f9, $01, $03, $08, $0c, $0e, $01, $15, $1c, $23, $2a
+; read by: l10F3
 instrument_pulse:
 		.byte	$32, $01, $00, $00, $00, $00, $03, $00, $00, $00, $00
+; read by: l111B
 instrument_filter:
 		.byte	$00, $01, $00, $00, $00, $00, $00, $00, $00, $00, $00
+; read by: l113D, l114A
 wave_left:
 		.byte	$00, $40, $ff, $81, $10, $10, $10, $ff, $81, $10, $10, $10, $80, $ff, $20, $20
 		.byte	$20, $20, $20, $20, $ff, $20, $20, $20, $20, $20, $20, $ff, $20, $20, $20, $20
 		.byte	$20, $20, $ff, $20, $20, $20, $20, $20, $20, $ff, $81, $10, $10, $10, $10, $10
 		.byte	$10, $ff, $20, $20, $20, $20, $20
+; read by: l114A, l1157
 wave_right:
 		.byte	$20, $ff, $80, $00, $5f, $21, $20, $1f, $00, $5f, $2d, $2c, $2b, $5f, $00, $80
 		.byte	$80, $83, $83, $87, $87, $0e, $f8, $f8, $fb, $fb, $80, $80, $15, $fb, $fb, $80
 		.byte	$80, $84, $84, $1c, $fb, $fb, $80, $80, $85, $85, $23, $5f, $80, $fe, $fc, $f9
 		.byte	$f5, $f0, $00, $80, $80, $84, $84, $87, $87
+; read by: l1173, l11B6
 pulse_left:
 		.byte	$32, $8d, $ff, $8e, $20, $20
+; read by: l1173, l119D, l11B6
 pulse_right:
 		.byte	$ff, $00, $00, $00, $fa, $06
+; read by: l104A, l1084
 filter_left:
 		.byte	$04, $88, $00
+; read by: l104A, l1069, l1075, l1087
 filter_right:
 		.byte	$ff, $f1, $05, $00
 order_list1:
@@ -1279,6 +1495,7 @@ pattern10:
 .virtual $4040
 ; ---- video bank 1 ($4000-$7fff) ----
 ; four sprites the game draws the road walls into
+; written by: l0B79
 road_sprites:
 		.fill	256
 .endv
@@ -1304,11 +1521,13 @@ car_sprites:
 		.byte	$00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $00, $00, $00
 
 .virtual $4400
+; written by: l0B79, l0C63
 screen:
 		.fill	1000
 .endv
 
 .virtual $47f8
+; written by: irq, irq_lower, l0AA9, check_stage, l0BF1, l0C35
 sprite_pointers:
 		.fill	8
 .endv
@@ -1374,72 +1593,115 @@ charset:
 
 .virtual $7fff
 ; the VIC shows the bank's last byte in the open border
+; written by: init_video
 idle_byte:		.byte	?
 ; ---- road map, built at run time ----
 ; one byte per row: 1 = wall
+; read by: l0926
+; written by: l08A7, l0A5F
 left_road:
 		.fill	256
+; read by: l0926, l0B93
+; written by: l08B5, l0A5F
 right_road:
 		.fill	256
 .endv
 
 .virtual $d000
 ; ---- VIC-II ----
+; written by: position_car, l0B79
 sprite0_x:		.byte	?
+; written by: l0ADF
 sprite0_y:		.byte	?
+; written by: l0ADF
 sprite1_x:		.byte	?
+; written by: irq, irq_lower
 sprite1_y:		.byte	?
+; written by: l0ADF
 sprite2_x:		.byte	?
+; written by: irq, irq_lower
 sprite2_y:		.byte	?
+; written by: l0ADF
 sprite3_x:		.byte	?
+; written by: l0ADF
 sprite3_y:		.byte	?
 sprite4_x:		.byte	?
+; written by: l0ADF
 sprite4_y:		.byte	?
 sprite5_x:		.byte	?
+; written by: l0ADF
 sprite5_y:		.byte	?
 sprite6_x:		.byte	?
+; written by: l0ADF
 sprite6_y:		.byte	?
 sprite7_x:		.byte	?
+; written by: l0ADF
 sprite7_y:		.byte	?
+; written by: l0ADF
 sprites_x_msb:		.byte	?
+; read by: irq_bottom, irq, wait_frame, l0A78
+; written by: start, irq_bottom, irq, l0AA9
 vic_control1:		.byte	?
+; written by: start, irq_bottom, irq, irq_lower
 raster:		.byte	?
 light_pen_x:		.byte	?
 light_pen_y:		.byte	?
+; written by: l0AA9
 sprite_enable:		.byte	?
 vic_control2:		.byte	?
+; written by: l0AA9
 sprite_expand_y:		.byte	?
+; written by: l0AA9
 vic_memory:		.byte	?
+; modified by: start, irq_bottom, irq, irq_lower
 vic_irq_status:		.byte	?
+; written by: start
 vic_irq_enable:		.byte	?
+; written by: l0AA9
 sprite_priority:		.byte	?
 sprite_multicolor:		.byte	?
 sprite_expand_x:		.byte	?
 sprite_sprite_collision:		.byte	?
+; read by: new_game, l093B
 sprite_background_collision:		.byte	?
+; written by: init_video, check_stage
 border_color:		.byte	?
+; written by: init_video, check_stage
 background_color:		.byte	?
 background_color1:		.byte	?
 background_color2:		.byte	?
 background_color3:		.byte	?
 sprite_multicolor0:		.byte	?
 sprite_multicolor1:		.byte	?
+; written by: l098A, init_video
 sprite0_color:		.byte	?
+; written by: init_video
 sprite1_color:		.byte	?
+; written by: init_video
 sprite2_color:		.byte	?
+; written by: init_video
 sprite3_color:		.byte	?
+; written by: init_video
 sprite4_color:		.byte	?
+; written by: init_video
 sprite5_color:		.byte	?
+; written by: init_video
 sprite6_color:		.byte	?
+; written by: init_video
 sprite7_color:		.byte	?
 .endv
 
 .virtual $d400
 ; ---- SID ----
+; written by: l121A
 voice1_frequency:		.word	?
+; written by: l121A
 voice1_pulse_width:		.word	?
+; written by: l123E
 voice1_control:		.byte	?
+; written by: l121A
 voice1_attack_decay:		.byte	?
+; written by: l121A
 voice1_sustain_release:		.byte	?
 voice2_frequency:		.word	?
 voice2_pulse_width:		.word	?
@@ -1451,37 +1713,48 @@ voice3_pulse_width:		.word	?
 voice3_control:		.byte	?
 voice3_attack_decay:		.byte	?
 voice3_sustain_release:		.byte	?
+; written by: l101D, l1095
 filter_cutoff:		.word	?
+; written by: l1095
 filter_control:		.byte	?
+; written by: l093B, l1095
 volume_filter_mode:		.byte	?
 .endv
 
 .virtual $d800
 ; ---- color RAM ----
+; written by: l0AA9, l0C7F
 color_ram:
 		.fill	1000
 .endv
 
 .virtual $dc00
 ; ---- CIAs ----
+; read by: l0B16, l0C7F
 cia1_port_a:		.byte	?
 cia1_port_b:		.byte	?
 .endv
 
 .virtual $dc0d
+; read by: start
+; written by: start
 cia1_interrupt_control:		.byte	?
 .endv
 
 .virtual $dd00
+; written by: l0AA9
 cia2_port_a:		.byte	?
 .endv
 
 .virtual $dd0d
+; read by: start
+; written by: start
 cia2_interrupt_control:		.byte	?
 .endv
 
 *=$fffe
 
 ; the hardware IRQ vector ($01 = $35: KERNAL banked out, so it's RAM)
+; written by: start, irq_bottom, irq, irq_lower
 irq_vector:
 		.addr	irq

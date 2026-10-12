@@ -1,0 +1,11 @@
+deflower xref.prg
+$02 virtual byte counter
+$fb virtual word pointer
+$c000 code entry
+$c025 sub
+$c02d byte value
+$c02e byte[4] table
+; reached from no label: listed by address
+$c032 code
+$d020 border
+$ffd2 virtual byte[3] chrout

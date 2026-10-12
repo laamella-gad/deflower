@@ -41,4 +41,9 @@ public class InstructionArea extends Area {
         }
         return String.format("%s + %d", label, offset);
     }
+
+    @Override
+    public int labelAddressFor(int address, Subject subject) {
+        return subject.memory[this.address].label != null ? this.address : -1;
+    }
 }

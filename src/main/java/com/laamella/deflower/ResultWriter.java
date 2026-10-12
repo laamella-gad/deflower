@@ -15,19 +15,22 @@ import static java.lang.String.format;
 
 class AssemblyFileFormat {
     private final LineEmitter out;
+    private final CrossReferences crossReferences;
     private Area lastArea = null;
     boolean needsToReOrg = true;
 
-    AssemblyFileFormat(Writer w) {
+    AssemblyFileFormat(Writer w, CrossReferences crossReferences) {
         this.out = new LineEmitter(w);
+        this.crossReferences = crossReferences;
     }
 
     /**
      * Prints a comment (one output line per source line, each prefixed
-     * "; "), a label (as "label:"), both, or neither, for the given
-     * address. Comment and label share one blank-line separator above
-     * them, so a commented label doesn't get a blank line wedged between
-     * the comment and the label it belongs to.
+     * "; ", followed by the label's cross-references), a label (as
+     * "label:"), both, or neither, for the given address. Comment and
+     * label share one blank-line separator above them, so a commented
+     * label doesn't get a blank line wedged between the comment and the
+     * label it belongs to.
      * <p>
      * Exception (issue 0027): when this address merely continues the same
      * contiguous same-type data run as the address before it, skip the
@@ -41,7 +44,7 @@ class AssemblyFileFormat {
      * fine on one line), several values get their own line so the
      * tabular dump underneath stays readable.
      */
-    void printAnnotation(int address, String comment, String label, Area currentArea, Subject subject) throws IOException {
+    void printAnnotation(int address, String label, Area currentArea, Subject subject) throws IOException {
         considerReOrg(address);
         // Same kind of data as whatever was printed right before this
         // address: print(DataArea, ...) below won't insert its own
@@ -64,7 +67,7 @@ class AssemblyFileFormat {
             out.finishLine();
             out.newLine();
         }
-        printCommentLines(comment);
+        printCommentLines(address, subject);
         if (label != null) {
             out.print(label + ":");
             if (sameKindAsPrevious && !isSingleValueRun(address, (DataArea) currentArea, subject)) {
@@ -103,7 +106,7 @@ class AssemblyFileFormat {
         }
         for (int address : addresses) {
             out.finishLine();
-            printCommentLines(subject.memory[address].comment);
+            printCommentLines(address, subject);
             String label = subject.memory[address].label;
             if (label != null) {
                 out.print(label + " = " + asHexWord(address));
@@ -129,9 +132,8 @@ class AssemblyFileFormat {
         int address = start;
         while (address < subject.memory.length && subject.isVirtualAt(address)) {
             DataArea area = (DataArea) subject.peek(address);
-            String comment = subject.memory[address].comment;
             String label = subject.memory[address].label;
-            printCommentLines(comment);
+            printCommentLines(address, subject);
             if (address != area.address) {
                 // A label landing inside a multi-byte element (the second
                 // byte of a word): no reservation of its own to hang it on.
@@ -181,12 +183,16 @@ class AssemblyFileFormat {
         };
     }
 
-    private void printCommentLines(String comment) throws IOException {
-        if (comment != null) {
-            for (String line : comment.split("\n", -1)) {
-                out.print("; " + line);
-                out.newLine();
-            }
+    /**
+     * Prints the comment at `address` and the cross-references to its
+     * label (issue 0076), one "; " line each.
+     */
+    private void printCommentLines(int address, Subject subject) throws IOException {
+        List<String> lines = new ArrayList<>(subject.memory[address].comment);
+        lines.addAll(crossReferences.linesFor(address));
+        for (String line : lines) {
+            out.print("; " + line);
+            out.newLine();
         }
     }
 
@@ -419,7 +425,7 @@ class ResultWriter {
      * of an origin block with nothing in it.
      */
     void write(Subject subject, Writer w) throws IOException {
-        AssemblyFileFormat assemblyFile = new AssemblyFileFormat(w);
+        AssemblyFileFormat assemblyFile = new AssemblyFileFormat(w, new CrossReferences(subject));
         List<Integer> deferred = new ArrayList<>();
         for (int address = 0; address < 0x10000; address++) {
 
@@ -437,15 +443,13 @@ class ResultWriter {
             }
 
             // Is there a comment or a label here? Print them.
-            String comment = subject.memory[address].comment;
-            String label = subject.memory[address].label;
-            if (comment != null || label != null) {
+            if (subject.isAnnotated(address)) {
                 if (currentArea == null) {
                     assemblyFile.printDefines(List.of(address), subject);
                 } else if (continuesPrevious(currentArea, address, subject)) {
                     deferred.add(address);
                 } else {
-                    assemblyFile.printAnnotation(address, comment, label, currentArea, subject);
+                    assemblyFile.printAnnotation(address, subject.memory[address].label, currentArea, subject);
                 }
             }
             if (currentArea != null) {

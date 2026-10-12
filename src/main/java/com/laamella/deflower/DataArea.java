@@ -99,4 +99,12 @@ class DataArea extends Area {
         }
         return String.format("%s + $%x", arrayLabel, offset);
     }
+
+    @Override
+    public int labelAddressFor(int address, Subject subject) {
+        if (subject.memory[address].label != null) {
+            return address;
+        }
+        return arrayLabel != null ? arrayStart() : -1;
+    }
 }

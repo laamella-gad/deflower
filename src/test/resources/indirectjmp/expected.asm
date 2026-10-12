@@ -5,6 +5,7 @@ entry:
 		jmp (aC010)
 *=$c010
 
+; read by: entry
 aC010:
 		.addr	lC020
 *=$c020

@@ -13,24 +13,41 @@ cpu_port:		.byte	?
 basic_zero_page:
 		.fill	85
 ; the joystick direction the player keeps walking in, $ef when standing still
+; read by: try_move, l308B, l382D, nothing_hit
+; written by: check_fire, try_move, l308B, l309B, l3934, l3B03, reset_everything
 player_direction:		.byte	?
+; read by: check_move_up, try_move, l308B
+; written by: try_move, l308B
 joy_dir_for_move:		.byte	?
 basic_kernal_zero_page:
 		.fill	71
 jiffy_clock:
 		.fill	2
 ; the game waits by setting this negative and waiting until it counts up past 0
+; read by: l30AE, l3120, l329A, l32B4, l37A2, l37AF, l37D6, l3856, l38C2, l38E4, l38F1, l3A9E, l3AE2, l3B03, play_music_wait_loop, l3C5B, l3C7C, l3D4F, l3D82
+; written by: l30A4, l3113, game_over, l32A0, burp_bonus_text, l37A2, l37AF, bonus_get_ready, l382D, l38B2, l38D0, l38E4, l3A8F, l3AD8, l3AE2, play_music_loop, player_not_moving, pause, reset_bonus_notes, quiet
 jiffy_timer:		.byte	?
 kernal_zero_page:
 		.fill	34
+; read by: l3C5B
 last_key_pressed:		.byte	?
 kernal_zero_page2:
 		.fill	53
 ; the screen cell of the player
+; read by: check_move_possible, check_move_up, check_move_down, check_move_right, check_move_left, try_move, bonus_round_loop, l3846, life_lost_handler, l3A8F, l3A9E, l3AB1, game_loop, player_not_moving
+; written by: check_move_possible, check_move_up, check_move_down, l3934, l3A9E, l3AB1, reset_everything
+; modified by: check_move_right, check_move_left
 new_loc_lo:		.byte	?
+; read by: check_move_down, try_move
+; written by: check_move_possible, check_move_down, l3934, l3AB1, reset_everything
+; modified by: check_move_up, check_move_right, check_move_left, l3A9E
 new_loc_hi:		.byte	?
 ; the previous screen cell of the player, also a scratch pointer
+; read by: check_move_possible, old_test_cell, move_snake_0, l33B0, move_snake_1, draw_snake_1_body, move_snake_2, l34BA, move_snake_3, l353F, move_snake_4, l35C4, l382D, move_bonus_guy, l39B5, l39F8, l3A15, life_lost_handler, l3A9E, nothing_hit, test_cell
+; written by: try_move, old_test_cell, move_snake_0, l33B0, move_snake_1, draw_snake_1_body, move_snake_2, l34BA, move_snake_3, l353F, move_snake_4, l35C4, move_bonus_guy, l39B5, l39F8, l3A15, l3A8F, l3AB1, test_cell
 tmp_loc_lo:		.byte	?
+; read by: check_move_possible, l315A
+; written by: try_move, l315A, old_test_cell, move_snake_0, l33B0, move_snake_1, draw_snake_1_body, move_snake_2, l34BA, move_snake_3, l353F, move_snake_4, l35C4, move_bonus_guy, l39B5, l39F8, l3A15, l3AB1, test_cell
 tmp_loc_hi:		.byte	?
 unused_00ff:		.byte	?
 ; ---- stack and KERNAL workspace ----
@@ -38,21 +55,38 @@ stack:
 		.fill	256
 kernal_workspace:
 		.fill	276
+; written by: l37DC, setup_irq
 irq_vector:		.addr	?
 kernal_vectors:
 		.fill	234
 ; ---- screen ----
+; read by: l30BA, l30E0, l30F7, l3113, l3136, l3148, l315A, sort_high_scores, l319A, l31B7, l31CE, l31EB, l3202, l321F, l3236, copy_hi_text, l35EC, colorize_maze_2, colorize_maze_3, colorize_maze_4, inc_score_digit_x, burp_bonus_text
+; written by: more_chars, l241E, l2437, l2445, l245E, l246C, l2485, l2493, l24AC, l24BA, l24D3, l30F7, l3113, l3136, l3148, l315A, l319A, l31CE, l3202, l3236, l32A0, inc_score_digit_x, l3736, burp_bonus_text, bonus_get_ready, l37DC, l38A5, l38D0, l38F1, l3AE2
 screen_ram:
 		.fill	35
 ; the level number on the top line
+; read by: l38F1
+; written by: end_level
 level_tens:		.byte	?
+; read by: end_level, l38F1
+; written by: end_level, check_space
+; modified by: end_level
 level_ones:
 		.fill	817
 ; the home position of snake_1 and of the bonus guy
 bonus_guy_2_start:
 		.fill	137
+; read by: l384C
+; written by: bonus_round, end_bonus_round
+; modified by: countdown_irq
 bonus_timer_digit_1:		.byte	?
+; read by: countdown_irq
+; written by: end_bonus_round, countdown_irq
+; modified by: countdown_irq
 bonus_timer_digit_2:		.byte	?
+; read by: countdown_irq
+; written by: end_bonus_round, countdown_irq
+; modified by: countdown_irq
 bonus_timer_digit_3:
 		.fill	8
 unused_07e8:
@@ -209,8 +243,10 @@ unused_080e:
 		.byte	$33, $35
 ; ---- texts and screens, in screen codes ----
 ; the top two lines of the screen
+; read by: more_chars
 top_line:
 		.byte	$a0, $88, $89, $a0
+; written by: copy_hi_text
 hi_text:
 		.byte	$b0, $b0, $b0, $b0, $b0, $b0
 top_line_rest:
@@ -221,6 +257,7 @@ top_line_rest:
 		.byte	$a0, $a0, $a0, $a0, $a0, $a0
 unused_0ff0:		.byte	$5a
 ; the bottom two lines of the screen
+; read by: more_chars
 empty_line:
 		.byte	$a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0
 		.byte	$a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0
@@ -231,6 +268,7 @@ bottom_line:
 		.byte	$b0, $a0, $a0, $a0, $a0, $a0, $a0, $5a
 unused_1041:		.byte	$20
 ; the high score screen is 40*21 bytes, with the 5 entries of 10 bytes in it
+; read by: l241E
 high_score_screen:
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
@@ -243,6 +281,7 @@ high_score_screen:
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $31, $20
+; written by: l30BA
 high_score_table_1:
 		.byte	$14, $0b, $31, $20, $30, $30, $30, $30, $30, $30
 high_score_screen_2:
@@ -251,6 +290,8 @@ high_score_screen_2:
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $32, $20
+; read by: l241E
+; written by: l30BA
 high_score_table_2:
 		.byte	$14, $0b, $32, $20, $30, $30, $30, $30, $30, $30
 high_score_screen_3:
@@ -259,6 +300,7 @@ high_score_screen_3:
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $33, $20
+; written by: l30BA
 high_score_table_3:
 		.byte	$14, $0b, $33, $20, $30, $30, $30, $30, $30, $30
 high_score_screen_4:
@@ -267,6 +309,7 @@ high_score_screen_4:
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $34, $20
+; written by: l30BA
 high_score_table_4:
 		.byte	$14, $0b, $34, $20, $30, $30, $30, $30, $30, $30
 high_score_screen_5:
@@ -275,11 +318,14 @@ high_score_screen_5:
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $35, $20
+; written by: l30BA
 high_score_table_5:
 		.byte	$14, $0b, $35, $20, $30, $30, $30, $30, $30, $30
 ; the digits of the lowest high score
+; read by: l30E0
 hiscore = $1234
 
+; read by: l241E, l2437
 high_score_screen_6:
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
@@ -303,6 +349,7 @@ high_score_screen_6:
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 ; the title screen is 40*21 bytes; rest_of_title is its last 75
+; read by: l2445
 title:
 		.byte	$a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $a0
@@ -352,12 +399,14 @@ title:
 		.byte	$a0, $a0, $a0, $a0, $a0, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $20, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0
+; read by: l245E
 rest_of_title:
 		.byte	$a0, $a0, $20, $20, $20, $10, $12, $05, $13, $13, $20, $20, $86, $89, $92, $85
 		.byte	$20, $14, $0f, $20, $13, $14, $01, $12, $14, $20, $20, $20, $a0, $a0, $a0, $a0
 		.byte	$a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $20, $20, $20, $20
 		.byte	$20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20, $20
 		.byte	$20, $20, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0, $a0
+; read by: l246C, l2485
 level_1:
 		.byte	$1c, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d
 		.byte	$1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d
@@ -412,6 +461,7 @@ level_1:
 		.byte	$21, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d
 		.byte	$1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d
 		.byte	$1d, $1d, $1d, $1d, $1d, $1d, $1d, $1f
+; read by: l2493, l24AC
 level_2:
 		.byte	$1c, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d
 		.byte	$1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d
@@ -466,6 +516,7 @@ level_2:
 		.byte	$21, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d
 		.byte	$1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d
 		.byte	$1d, $1d, $1d, $1d, $1d, $1d, $1d, $1f
+; read by: l24BA, l24D3
 level_3:
 		.byte	$1c, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d
 		.byte	$1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d
@@ -521,6 +572,7 @@ level_3:
 		.byte	$1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d, $1d
 		.byte	$1d, $1d, $1d, $1d, $1d, $1d, $1d, $1f
 unused_20aa:		.byte	$04
+; read by: l24E1, l24FA
 title_screen_colors:
 		.byte	$f2, $f2, $c2, $f2, $92, $f2, $f2, $c2, $f2, $62, $12, $f2, $f2, $f2, $12, $f2
 		.byte	$f2, $a2, $62, $f2, $f2, $f2, $92, $12, $f2, $f2, $12, $f2, $f2, $f2, $12, $02
@@ -579,6 +631,7 @@ unused_23f3:
 		.byte	$b1, $31, $35, $a7, $31, $32, $31
 
 ; ---- drawing ----
+; called by: copy_hi_text, reset_everything
 set_top_bottom_text:
 		ldx #$00
 
@@ -592,6 +645,7 @@ more_chars:
 		bne more_chars
 		rts 
 
+; called by: game_over, l32B4, bonus_round, l3934, reset_everything
 set_top_bottom_red:
 		ldx #$00
 
@@ -603,6 +657,7 @@ more_colors:
 		bne more_colors
 		rts 
 
+; called by: game_over
 draw_high_score_screen:
 		ldx #$00
 
@@ -652,6 +707,7 @@ l245E:
 		bne l245E
 		rts 
 
+; called by: l391D, check_space
 draw_level_1:
 		ldx #$00
 
@@ -675,6 +731,7 @@ l2485:
 		bne l2485
 		rts 
 
+; called by: l3927
 draw_level_2:
 		ldx #$00
 
@@ -698,6 +755,7 @@ l24AC:
 		bne l24AC
 		rts 
 
+; called by: l3931
 draw_level_3:
 		ldx #$00
 
@@ -721,6 +779,7 @@ l24D3:
 		bne l24D3
 		rts 
 
+; called by: reset_everything
 draw_screen_colors:
 		ldx #$00
 
@@ -747,6 +806,7 @@ l24FA:
 unused_2506:
 		.byte	$00, $00
 
+; called by: animate_charset
 animate_player_chars:
 		ldx #$00
 
@@ -774,6 +834,7 @@ l250A:
 		bne l250A
 		rts 
 
+; called by: game_over
 color_lines:
 		ldx #$00
 
@@ -817,61 +878,130 @@ unused_2572:
 
 ; ---- the snakes: the screen cells of the head, then of the body ----
 ; snake_0 and snake_4 leave a dot where their tail was; the others leave a space
+; read by: l3364, l336F, l33B0
+; written by: l3395, l33A4, initialize_pointers
 snake_0_head:
 		.word	$048e
+; read by: move_snake_0, l33B0
+; written by: l3364, initialize_pointers
 snake_0_body:
 		.word	$048e, $048e, $048e, $048e, $048e, $048e, $048e
+; read by: l33E9, l33F4, draw_snake_1_body
+; written by: l341A, snake_1_home, initialize_pointers
 snake_1_head:		.word	$05e0
+; read by: move_snake_1, draw_snake_1_body
+; written by: l33E9, initialize_pointers
 snake_1_body:
 		.word	$05e1, $0609, $0631, $0659
+; read by: shift_snake_2, l3479, l34BA
+; written by: l349F, l34AE, initialize_pointers
 snake_2_head:		.word	$0541
+; read by: move_snake_2, l34BA
+; written by: shift_snake_2, initialize_pointers
 snake_2_body:
 		.word	$0519, $04f1, $04f2, $04f3
+; read by: l34F3, l34FE, l353F
+; written by: l3524, l3533, initialize_pointers
 snake_3_head:		.word	$05d3
+; read by: move_snake_3, l353F
+; written by: l34F3, initialize_pointers
 snake_3_body:
 		.word	$05d2, $05d1, $05d0, $05cf
+; read by: l3578, l3583, l35C4
+; written by: l35A9, l35B8, initialize_pointers
 snake_4_head:		.word	$065b
+; read by: move_snake_4, l35C4
+; written by: l3578, initialize_pointers
 snake_4_body:
 		.word	$0683, $06ab, $06d3, $06fb
 
 ; ---- variables ----
 ; the next direction a snake tries: 1 right, 2 left, 3 up, 4 down
+; read by: next_snake_direction, l336F, l33F4, l3479, l34FE, l3583, l3976
+; written by: next_snake_direction
+; modified by: next_snake_direction
 snake_direction:
 		.byte	$01
 ; how often a snake has tried to move
+; read by: l336F, l33F4, l3479, l34FE, l3583, l3976
+; written by: move_snake_0, move_snake_1, move_snake_2, move_snake_3, move_snake_4, move_bonus_guy
+; modified by: l336F, l33F4, l3479, l34FE, l3583, l3976
 snake_tries:		.byte	$02
+; read by: l38F1
+; written by: l38F1, check_space
+; modified by: l38F1
 level_nr:		.byte	$03
+; read by: irq
+; written by: irq
+; modified by: irq
 irq_delay_counter:		.byte	$06
 ; what the bonus guy is worth: 1 nothing, 2 10 points, 3 100 points
+; read by: bonus_guy_hit_handle, update_bonus_guy
+; written by: update_bonus_guy, reset_everything
+; modified by: update_bonus_guy
 bonus_value:		.byte	$02
+; read by: l3AE2, hit_snake
+; written by: reset_everything
+; modified by: hit_snake
 lives:		.byte	$00
 
 ; the screen cell a snake or the bonus guy tries to move to
+; read by: old_test_cell, step_candidate, l3303, l3317, l332C, l3395, l341A, l349F, l3524, l35A9, l399C, test_cell
+; written by: l3317, l332C, l336F, l33F4, l3479, l34FE, l3583, l3976
+; modified by: step_candidate, l3303, l3317, l332C
 move_candidate:
 		.word	$0768
 
 ; 1 to 4: which snakes move, and whether the bonus guy does
+; read by: var_2_stuff
+; written by: l3A72, reset_everything
+; modified by: end_level
 difficulty:
 		.byte	$03
 ; the jiffy_timer start value of a game step; higher is faster
+; read by: l382D, player_not_moving
+; written by: reset_everything
+; modified by: l3A72
 game_speed:		.byte	$fa
+; read by: move_bonus_guy, l3976, l39B5, l39F8, l3A15
+; written by: l3934, l399C, l39AB, l3A15, reset_everything
 bon_gy_loc_lo:		.byte	$68
+; read by: move_bonus_guy, l3976, l39B5, l39F8, l3A15
+; written by: l3934, l399C, l39AB, l3A15, reset_everything
 bon_gy_loc_hi:		.byte	$07
 unused_268c:		.byte	$00
 ; counts down while the points of the bonus guy are shown
+; read by: l39EE, l39F8
+; written by: no_bonus, bonus_10_points, bonus_100_points, l3934, reset_everything
+; modified by: l39F8
 points_shown_timer:		.byte	$00
+; read by: l39B5, l3A15, check_hit_bonus_guy
+; written by: l3A15, reset_everything
+; modified by: l3A15
 bonus_guy_char_2:		.byte	$49
+; read by: l39B5, l39D5
+; written by: l3934, l39B5
+; modified by: l39B5
 bonus_guy_note:		.byte	$0a
+; read by: check_hit_dot
+; written by: l389B, reset_everything
+; modified by: check_hit_dot
 dots_eaten:		.byte	$00
+; read by: l39F8
+; written by: no_bonus, bonus_10_points, bonus_100_points
 bonus_points_char:		.byte	$4d
+; read by: play_next_note
+; written by: l3D4F, l3D6C
 note_idx:		.byte	$97
 ; cleared, but never read
+; written by: l3D4F
 unused_2693:		.byte	$00
 unused_2694:
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00
 
 ; ---- texts ----
+; read by: l32A0
 press_fire_to_start_:
 		.enc	"screen"
 		.text	"PRESS FIRE TO START"
@@ -879,10 +1009,13 @@ press_fire_to_start_:
 unused_26bf:
 		.byte	$20
 
+; read by: bonus_get_ready, l38A5
 get_ready_text:
 		.text	$87, $85, $94, $a0, $92, $85, $81, $84, $99, " "
+; read by: l38D0
 level_text:
 		.text	$8c, $85, $96, $85, $8c, $a0, $a0, $a0, $a0, " "
+; read by: burp_bonus_text
 bonus_run_text:
 		.text	"BONUS RUN"
 
@@ -940,10 +1073,16 @@ charset:
 		.byte	$ff, $18, $18, $18, $18, $18, $18, $18, $18, $18, $18, $18, $18, $18, $18, $ff
 		.byte	$fe, $01, $01, $01, $01, $01, $01, $fe, $e0, $10, $08, $04, $04, $02, $02, $01
 		.byte	$80, $c0, $a0, $90, $88, $84, $82, $81, $01, $03, $05, $09, $11, $21, $41, $81
+; read by: animate_charset
+; written by: animate_charset
 arrow_char_1:
 		.byte	$00, $04, $c6, $ff, $ff, $c6, $04, $00
+; read by: animate_charset
+; written by: animate_charset
 arrow_char_2:
 		.byte	$00, $c4, $c6, $ff, $ff, $c6, $c4, $00
+; read by: animate_charset
+; written by: animate_charset
 arrow_char_3:
 		.byte	$00, $0c, $06, $ff, $ff, $06, $0c, $00
 snake_head_char:
@@ -952,14 +1091,25 @@ snake_body_char:
 		.byte	$00, $1c, $32, $7d, $7f, $7f, $3e, $1c
 unused_char:
 		.byte	$00, $1c, $32, $7d, $7f, $7f, $3e, $1c
+; read by: animate_charset
+; written by: animate_charset
+; modified by: animate_charset
 dot_char:
 		.byte	$00, $00, $18, $00, $0c, $00, $00, $00
+; read by: animate_charset
+; written by: animate_charset
 bonus_gy_1_char_1:
 		.byte	$3c, $5a, $ff, $3c, $18, $3c, $18, $3c
+; read by: animate_charset
+; written by: animate_charset
 bonus_gy_1_char_2:
 		.byte	$00, $00, $c3, $3c, $5a, $ff, $3c, $18
+; read by: animate_charset
+; written by: animate_charset
 bonus_gy_2_char_1:
 		.byte	$00, $18, $18, $3c, $6e, $66, $3c, $00
+; read by: animate_charset
+; written by: animate_charset
 bonus_gy_2_char_2:
 		.byte	$00, $ff, $18, $3c, $66, $76, $3c, $00
 points_100_char:
@@ -968,20 +1118,36 @@ points_10_char:
 		.byte	$00, $4e, $59, $55, $53, $4e, $00, $ff
 no_points_char:
 		.byte	$00, $00, $4a, $52, $62, $3c, $00, $ff
+; read by: l250A
+; written by: l250A
 player_char_1:
 		.byte	$66, $99, $3c, $5a, $ff, $18, $18, $00
+; read by: l250A
+; written by: l250A
 player_char_2:
 		.byte	$00, $66, $18, $3c, $5a, $ff, $18, $18
+; read by: l250A
+; written by: l250A
 player_char_3:
 		.byte	$00, $00, $66, $18, $3c, $5a, $ff, $18
+; read by: l250A
+; written by: l250A
 player_char_4:
 		.byte	$00, $66, $18, $3c, $5a, $ff, $18, $24
+; read by: l250A
+; written by: l250A
 player_char_5:
 		.byte	$66, $18, $3c, $5a, $ff, $18, $18, $24
+; read by: l250A
+; written by: l250A
 player_char_6:
 		.byte	$66, $99, $3c, $5a, $ff, $18, $18, $18
+; read by: l250A
+; written by: l250A
 player_char_7:
 		.byte	$66, $99, $3c, $5a, $ff, $18, $18, $00
+; read by: l250A
+; written by: l250A
 player_char_8:
 		.byte	$66, $99, $3c, $5a, $ff, $18, $00, $00
 more_chars_56:
@@ -1075,6 +1241,7 @@ charset_rest:
 
 ; ---- the player ----
 ; A is 0 when the player can move to new_loc, otherwise new_loc is put back
+; jumped to by: l3025, check_move_down, l304B, l305D
 check_move_possible:
 		clc 
 		ldy #$00
@@ -1090,10 +1257,12 @@ check_move_possible:
 		lda #$01
 		rts 
 
+; jumped to by: check_move_possible
 move_is_possible:
 		lda #$00
 		rts 
 
+; called by: try_move, l308B
 check_move_up:
 		lda joy_dir_for_move
 		cmp #$fe
@@ -1105,9 +1274,11 @@ check_move_up:
 		bcs l3025
 		dec new_loc_hi
 
+; jumped to by: check_move_up
 l3025:
 		jmp check_move_possible
 
+; jumped to by: check_move_up
 check_move_down:
 		cmp #$fd
 		bne check_move_right
@@ -1120,6 +1291,7 @@ check_move_down:
 		sta new_loc_hi
 		jmp check_move_possible
 
+; jumped to by: check_move_down
 check_move_right:
 		cmp #$f7
 		bne check_move_left
@@ -1130,9 +1302,11 @@ check_move_right:
 		bne l304B
 		inc new_loc_hi
 
+; jumped to by: check_move_right
 l304B:
 		jmp check_move_possible
 
+; jumped to by: check_move_right
 check_move_left:
 		cmp #$fb
 		bne check_fire
@@ -1143,9 +1317,11 @@ check_move_left:
 		bne l305D
 		dec new_loc_hi
 
+; jumped to by: check_move_left
 l305D:
 		jmp check_move_possible
 
+; jumped to by: check_move_left
 check_fire:
 		cmp #$ef
 		bne l306B
@@ -1154,10 +1330,12 @@ check_fire:
 		lda #$00
 		rts 
 
+; jumped to by: check_fire
 l306B:
 		lda #$01
 		rts 
 
+; called by: bonus_round_loop, game_loop
 try_move:
 		lda new_loc_lo
 		sta tmp_loc_lo
@@ -1174,6 +1352,7 @@ try_move:
 		sta player_direction
 		rts 
 
+; jumped to by: try_move
 l308B:
 		lda player_direction
 		sta joy_dir_for_move
@@ -1184,6 +1363,7 @@ l308B:
 		sta player_direction
 		rts 
 
+; jumped to by: l308B
 l309B:
 		lda #$ef
 		sta player_direction
@@ -1193,9 +1373,11 @@ unused_30a0:
 		.byte	$00, $ec
 
 ; ---- high scores ----
+; called by: l315A, l3179, l319A, l31CE, l3202, copy_hi_text
 sfx_hi_char_entry:
 		ldx #$0f
 
+; jumped to by: l30AE
 l30A4:
 		stx sid_vol_filter
 		stx voice1_pulse_width + $1
@@ -1210,6 +1392,7 @@ l30AE:
 		bne l30A4
 		rts 
 
+; jumped to by: l3195, l31C9, l31FD, l3231, copy_hi_text
 move_hi_from_scr_to_:
 		ldx #$00
 
@@ -1230,9 +1413,11 @@ l30BA:
 		rts 
 
 ; lets the player enter initials when the score beats the lowest high score
+; called by: game_over
 update_hi:
 		ldx #$00
 
+; jumped to by: l30EF
 l30E0:
 		lda screen_ram + $14, x
 		and #$7f
@@ -1242,14 +1427,17 @@ l30E0:
 		bcs l30F5
 		bcc l30F4
 
+; jumped to by: l30E0
 l30EF:
 		inx 
 		cpx #$05
 		bne l30E0
 
+; jumped to by: l30E0
 l30F4:
 		rts 
 
+; jumped to by: l30E0
 l30F5:
 		ldx #$00
 
@@ -1267,6 +1455,7 @@ l30F7:
 		ldy #$00
 		ldx #$00
 
+; jumped to by: l3120, l3136, l3148, l315A
 l3113:
 		lda screen_ram + $2d5, x
 		clc 
@@ -1287,6 +1476,7 @@ l3120:
 		beq l315A
 		jmp l3113
 
+; jumped to by: l3120
 l3136:
 		lda screen_ram + $2d5, x
 		and #$7f
@@ -1297,6 +1487,7 @@ l3136:
 		ldx #$00
 		jmp l3113
 
+; jumped to by: l3120
 l3148:
 		lda screen_ram + $2d5, x
 		and #$7f
@@ -1307,6 +1498,7 @@ l3148:
 		ldx #$1a
 		jmp l3113
 
+; jumped to by: l3120
 l315A:
 		lda screen_ram + $2d5, x
 		ora #$80
@@ -1322,12 +1514,14 @@ l315A:
 		beq l3179
 		jmp l3113
 
+; jumped to by: l315A
 l3179:
 		lda #$0a
 		sta voice1_frequency + $1
 		jsr sfx_hi_char_entry
 		ldx #$00
 
+; jumped to by: l3190
 sort_high_scores:
 		clc 
 		lda screen_ram + $242, x
@@ -1336,14 +1530,17 @@ sort_high_scores:
 		bcs l3198
 		bcc l3195
 
+; jumped to by: sort_high_scores
 l3190:
 		inx 
 		cpx #$05
 		bne sort_high_scores
 
+; jumped to by: sort_high_scores
 l3195:
 		jmp move_hi_from_scr_to_
 
+; jumped to by: sort_high_scores
 l3198:
 		ldx #$00
 
@@ -1362,6 +1559,7 @@ l319A:
 		jsr sfx_hi_char_entry
 		ldx #$00
 
+; jumped to by: l31C4
 l31B7:
 		clc 
 		lda screen_ram + $1f2, x
@@ -1370,14 +1568,17 @@ l31B7:
 		bcs l31CC
 		bcc l31C9
 
+; jumped to by: l31B7
 l31C4:
 		inx 
 		cpx #$05
 		bne l31B7
 
+; jumped to by: l31B7
 l31C9:
 		jmp move_hi_from_scr_to_
 
+; jumped to by: l31B7
 l31CC:
 		ldx #$00
 
@@ -1396,6 +1597,7 @@ l31CE:
 		jsr sfx_hi_char_entry
 		ldx #$00
 
+; jumped to by: l31F8
 l31EB:
 		clc 
 		lda screen_ram + $1a2, x
@@ -1404,14 +1606,17 @@ l31EB:
 		bcs l3200
 		bcc l31FD
 
+; jumped to by: l31EB
 l31F8:
 		inx 
 		cpx #$05
 		bne l31EB
 
+; jumped to by: l31EB
 l31FD:
 		jmp move_hi_from_scr_to_
 
+; jumped to by: l31EB
 l3200:
 		ldx #$00
 
@@ -1430,6 +1635,7 @@ l3202:
 		jsr sfx_hi_char_entry
 		ldx #$00
 
+; jumped to by: l322C
 l321F:
 		clc 
 		lda screen_ram + $152, x
@@ -1438,14 +1644,17 @@ l321F:
 		bcs l3234
 		bcc l3231
 
+; jumped to by: l321F
 l322C:
 		inx 
 		cpx #$05
 		bne l321F
 
+; jumped to by: l321F
 l3231:
 		jmp move_hi_from_scr_to_
 
+; jumped to by: l321F
 l3234:
 		ldx #$00
 
@@ -1474,6 +1683,7 @@ copy_hi_text:
 		jsr sfx_hi_char_entry
 		jmp move_hi_from_scr_to_
 
+; called by: restart_to_title
 game_over:
 		lda #$06
 		jsr set_top_bottom_red
@@ -1527,6 +1737,7 @@ l32C5:
 		beq l32CF
 		jmp l32C5
 
+; jumped to by: l32C5
 l32CF:
 		rts 
 
@@ -1535,6 +1746,7 @@ unused_32d0:
 
 ; ---- the snakes ----
 ; A is 0 when move_candidate is free for a snake
+; jumped to by: l3300, l3314, l3329, l333A
 test_candidate:
 		jmp test_cell
 
@@ -1553,11 +1765,13 @@ old_test_cell:
 		lda #$01
 		rts 
 
+; jumped to by: old_test_cell
 l32EC:
 		lda #$00
 		rts 
 
 ; moves move_candidate in direction A, then tests it
+; called by: l336F, l33F4, l3479, l34FE, l3583, l3976
 step_candidate:
 		cmp #$01
 		bne l3303
@@ -1567,9 +1781,11 @@ step_candidate:
 		bne l3300
 		inc move_candidate + $1
 
+; jumped to by: step_candidate
 l3300:
 		jmp test_candidate
 
+; jumped to by: step_candidate
 l3303:
 		cmp #$02
 		bne l3317
@@ -1579,9 +1795,11 @@ l3303:
 		bne l3314
 		dec move_candidate + $1
 
+; jumped to by: l3303
 l3314:
 		jmp test_candidate
 
+; jumped to by: l3303
 l3317:
 		cmp #$03
 		bne l332C
@@ -1592,9 +1810,11 @@ l3317:
 		bcs l3329
 		dec move_candidate + $1
 
+; jumped to by: l3317
 l3329:
 		jmp test_candidate
 
+; jumped to by: l3317
 l332C:
 		clc 
 		lda move_candidate
@@ -1603,9 +1823,11 @@ l332C:
 		bcc l333A
 		inc move_candidate + $1
 
+; jumped to by: l332C
 l333A:
 		jmp test_candidate
 
+; called by: l336F, l33F4, l3479, l34FE, l3583, l3976
 next_snake_direction:
 		inc snake_direction
 		lda snake_direction
@@ -1614,10 +1836,12 @@ next_snake_direction:
 		lda #$01
 		sta snake_direction
 
+; jumped to by: next_snake_direction
 l334C:
 		rts 
 
 ; each move_snake_ falls through to the next one
+; called by: l3A67
 move_snake_0:
 		lda #$00
 		sta snake_tries
@@ -1653,6 +1877,7 @@ l336F:
 		bne l3395
 		jmp l336F
 
+; jumped to by: l336F
 l3395:
 		lda move_candidate
 		sta snake_0_head
@@ -1660,12 +1885,14 @@ l3395:
 		sta snake_0_head + $1
 		jmp l33AE
 
+; jumped to by: l336F
 l33A4:
 		lda #$8e
 		sta snake_0_head
 		lda #$04
 		sta snake_0_head + $1
 
+; jumped to by: l3395
 l33AE:
 		ldx #$00
 
@@ -1687,6 +1914,7 @@ l33B0:
 		lda #$43
 		sta (tmp_loc_lo), y
 
+; called by: l3A5C
 move_snake_1:
 		lda #$00
 		sta snake_tries
@@ -1722,6 +1950,7 @@ l33F4:
 		bne l341A
 		jmp l33F4
 
+; jumped to by: l33F4
 l341A:
 		lda move_candidate
 		sta snake_1_head
@@ -1729,12 +1958,14 @@ l341A:
 		sta snake_1_head + $1
 		jmp draw_snake_1
 
+; jumped to by: l33F4
 snake_1_home:
 		lda #$55
 		sta snake_1_head
 		lda #$07
 		sta snake_1_head + $1
 
+; jumped to by: l341A
 draw_snake_1:
 		ldx #$00
 
@@ -1756,6 +1987,7 @@ draw_snake_1_body:
 		lda #$43
 		sta (tmp_loc_lo), y
 
+; called by: var_2_stuff, l3A51
 move_snake_2:
 		lda #$00
 		sta snake_tries
@@ -1791,6 +2023,7 @@ l3479:
 		bne l349F
 		jmp l3479
 
+; jumped to by: l3479
 l349F:
 		lda move_candidate
 		sta snake_2_head
@@ -1798,12 +2031,14 @@ l349F:
 		sta snake_2_head + $1
 		jmp l34B8
 
+; jumped to by: l3479
 l34AE:
 		lda #$cb
 		sta snake_2_head
 		lda #$04
 		sta snake_2_head + $1
 
+; jumped to by: l349F
 l34B8:
 		ldx #$00
 
@@ -1860,6 +2095,7 @@ l34FE:
 		bne l3524
 		jmp l34FE
 
+; jumped to by: l34FE
 l3524:
 		lda move_candidate
 		sta snake_3_head
@@ -1867,12 +2103,14 @@ l3524:
 		sta snake_3_head + $1
 		jmp l353D
 
+; jumped to by: l34FE
 l3533:
 		lda #$75
 		sta snake_3_head
 		lda #$05
 		sta snake_3_head + $1
 
+; jumped to by: l3524
 l353D:
 		ldx #$00
 
@@ -1929,6 +2167,7 @@ l3583:
 		bne l35A9
 		jmp l3583
 
+; jumped to by: l3583
 l35A9:
 		lda move_candidate
 		sta snake_4_head
@@ -1936,12 +2175,14 @@ l35A9:
 		sta snake_4_head + $1
 		jmp l35C2
 
+; jumped to by: l3583
 l35B8:
 		lda #$fb
 		sta snake_4_head
 		lda #$06
 		sta snake_4_head + $1
 
+; jumped to by: l35A9
 l35C2:
 		ldx #$00
 
@@ -1968,10 +2209,12 @@ unused_35e7:
 		.byte	$41
 
 ; ---- the game ----
+; called by: l3934, check_space
 colorize_maze:
 		ldy #$01
 		ldx #$00
 
+; jumped to by: l3606
 l35EC:
 		lda screen_ram + $50, x
 		cmp #$20
@@ -1980,21 +2223,25 @@ l35EC:
 		sta color_ram + $50, x
 		jmp l35FF
 
+; jumped to by: l35EC
 l35FB:
 		tya 
 		sta color_ram + $50, x
 
+; jumped to by: l35EC
 l35FF:
 		iny 
 		cpy #$08
 		bne l3606
 		ldy #$01
 
+; jumped to by: l35FF
 l3606:
 		inx 
 		cpx #$ff
 		bne l35EC
 
+; jumped to by: l3625
 colorize_maze_2:
 		lda screen_ram + $14f, x
 		cmp #$20
@@ -2003,21 +2250,25 @@ colorize_maze_2:
 		sta color_ram + $14f, x
 		jmp l361E
 
+; jumped to by: colorize_maze_2
 l361A:
 		tya 
 		sta color_ram + $14f, x
 
+; jumped to by: colorize_maze_2
 l361E:
 		iny 
 		cpy #$08
 		bne l3625
 		ldy #$01
 
+; jumped to by: l361E
 l3625:
 		inx 
 		cpx #$ff
 		bne colorize_maze_2
 
+; jumped to by: l3644
 colorize_maze_3:
 		lda screen_ram + $24e, x
 		cmp #$20
@@ -2026,21 +2277,25 @@ colorize_maze_3:
 		sta color_ram + $24e, x
 		jmp l363D
 
+; jumped to by: colorize_maze_3
 l3639:
 		tya 
 		sta color_ram + $24e, x
 
+; jumped to by: colorize_maze_3
 l363D:
 		iny 
 		cpy #$08
 		bne l3644
 		ldy #$01
 
+; jumped to by: l363D
 l3644:
 		inx 
 		cpx #$ff
 		bne colorize_maze_3
 
+; jumped to by: l3663
 colorize_maze_4:
 		lda screen_ram + $34d, x
 		cmp #$20
@@ -2049,22 +2304,26 @@ colorize_maze_4:
 		sta color_ram + $34d, x
 		jmp l365C
 
+; jumped to by: colorize_maze_4
 l3658:
 		tya 
 		sta color_ram + $34d, x
 
+; jumped to by: colorize_maze_4
 l365C:
 		iny 
 		cpy #$08
 		bne l3663
 		ldy #$01
 
+; jumped to by: l365C
 l3663:
 		inx 
 		cpx #$4b
 		bne colorize_maze_4
 		rts 
 
+; called by: l389B, reset_everything, check_space
 initialize_pointers:
 		lda #$8e
 		sta snake_0_head
@@ -2133,6 +2392,7 @@ initialize_pointers:
 		sta snake_4_body + $7
 		rts 
 
+; called by: bonus_10_points, bonus_100_points, bonus_walk_on_44, bonus_walk_on_43, bonus_walk_on_46, check_hit_dot
 inc_score_digit_x:
 		lda screen_ram + $14, x
 		tay 
@@ -2144,11 +2404,13 @@ inc_score_digit_x:
 		dex 
 		jmp inc_score_digit_x
 
+; jumped to by: inc_score_digit_x
 l3736:
 		tya 
 		sta screen_ram + $14, x
 		rts 
 
+; called by: check_hit_bonus_guy
 bonus_guy_hit_handle:
 		lda bonus_value
 		cmp #$01
@@ -2163,6 +2425,7 @@ no_bonus:
 		sta bonus_points_char
 		rts 
 
+; jumped to by: bonus_guy_hit_handle
 bonus_10_points:
 		cmp #$02
 		bne bonus_100_points
@@ -2176,6 +2439,7 @@ bonus_10_points:
 		sta points_shown_timer
 		rts 
 
+; jumped to by: bonus_10_points
 bonus_100_points:
 		ldx #$03
 		jsr inc_score_digit_x
@@ -2187,6 +2451,7 @@ bonus_100_points:
 		sta points_shown_timer
 		rts 
 
+; called by: end_level
 bonus_round:
 		lda #$07
 		sta border_color
@@ -2195,6 +2460,7 @@ bonus_round:
 		sta bonus_timer_digit_1
 		ldx #$00
 
+; jumped to by: l37AF
 burp_bonus_text:
 		lda screen_ram + $1c5, x
 		pha 
@@ -2254,6 +2520,7 @@ l37DC:
 		sta irq_vector + $1
 		cli 
 
+; jumped to by: l3856
 bonus_round_loop:
 		jsr try_move
 		ldy #$00
@@ -2268,6 +2535,7 @@ bonus_walk_on_44:
 		jsr inc_score_digit_x
 		jmp l382D
 
+; jumped to by: bonus_walk_on_44
 bonus_walk_on_43:
 		cmp #$43
 		bne bonus_walk_on_46
@@ -2279,6 +2547,7 @@ bonus_walk_on_43:
 		jsr inc_score_digit_x
 		jmp l382D
 
+; jumped to by: bonus_walk_on_43
 bonus_walk_on_46:
 		cmp #$46
 		bne l382D
@@ -2287,6 +2556,7 @@ bonus_walk_on_46:
 		ldx #$04
 		jsr inc_score_digit_x
 
+; jumped to by: bonus_walk_on_44, bonus_walk_on_43, bonus_walk_on_46
 l382D:
 		jsr play_next_note
 		nop 
@@ -2303,17 +2573,20 @@ l382D:
 		lda #$00
 		sta (tmp_loc_lo), y
 
+; jumped to by: l382D
 l3846:
 		ldy #$00
 		lda #$51
 		sta (new_loc_lo), y
 
+; jumped to by: l3856
 l384C:
 		lda bonus_timer_digit_1
 		cmp #$af
 		bne l3856
 		jmp end_bonus_round
 
+; jumped to by: l384C
 l3856:
 		lda jiffy_timer
 		bmi l384C
@@ -2321,6 +2594,7 @@ l3856:
 		sta voice1_frequency + $1
 		jmp bonus_round_loop
 
+; jumped to by: l384C
 end_bonus_round:
 		jsr setup_irq
 		lda #$00
@@ -2332,6 +2606,7 @@ end_bonus_round:
 		sta bonus_timer_digit_3
 		rts 
 
+; called by: check_hit_dot
 end_level:
 		lda #$00
 		sta voice1_frequency + $1
@@ -2347,6 +2622,7 @@ end_level:
 		lda #$b0
 		sta level_ones
 
+; jumped to by: end_level
 l389B:
 		lda #$00
 		sta dots_eaten
@@ -2361,6 +2637,7 @@ l38A5:
 		bne l38A5
 		ldx #$00
 
+; jumped to by: l38C2
 l38B2:
 		lda voice_1_notes, x
 		sta voice1_frequency + $1
@@ -2378,6 +2655,7 @@ l38C2:
 		ldx #$00
 		sta voice2_frequency + $1
 
+; jumped to by: l38F1
 l38D0:
 		lda level_text, x
 		sta screen_ram + $1c5, x
@@ -2419,21 +2697,25 @@ l38F1:
 		lda #$01
 		sta level_nr
 
+; jumped to by: l38F1
 l391D:
 		cmp #$01
 		bne l3927
 		jsr draw_level_1
 		jmp l3934
 
+; jumped to by: l391D
 l3927:
 		cmp #$02
 		bne l3931
 		jsr draw_level_2
 		jmp l3934
 
+; jumped to by: l3927
 l3931:
 		jsr draw_level_3
 
+; jumped to by: l391D, l3927
 l3934:
 		jsr colorize_maze
 		lda #$02
@@ -2455,6 +2737,7 @@ l3934:
 		sta bon_gy_loc_hi
 		rts 
 
+; jumped to by: l39EE
 move_bonus_guy:
 		lda #$00
 		sta snake_tries
@@ -2482,6 +2765,7 @@ l3976:
 		bne l399C
 		jmp l3976
 
+; jumped to by: l3976
 l399C:
 		lda move_candidate
 		sta bon_gy_loc_lo
@@ -2489,12 +2773,14 @@ l399C:
 		sta bon_gy_loc_hi
 		jmp l39B5
 
+; jumped to by: l3976
 l39AB:
 		lda #$55
 		sta bon_gy_loc_lo
 		lda #$07
 		sta bon_gy_loc_hi
 
+; jumped to by: l399C
 l39B5:
 		lda bon_gy_loc_lo
 		sta tmp_loc_lo
@@ -2510,12 +2796,14 @@ l39B5:
 		lda #$01
 		sta bonus_guy_note
 
+; jumped to by: l39B5
 l39D5:
 		ldx bonus_guy_note
 		lda voice_1_notes, x
 		sta voice2_frequency + $1
 		rts 
 
+; called by: l3A51, l3A5C, l3A67
 update_bonus_guy:
 		inc bonus_value
 		lda bonus_value
@@ -2524,12 +2812,14 @@ update_bonus_guy:
 		lda #$01
 		sta bonus_value
 
+; jumped to by: update_bonus_guy
 l39EE:
 		lda points_shown_timer
 		cmp #$00
 		bne l39F8
 		jmp move_bonus_guy
 
+; jumped to by: l39EE
 l39F8:
 		dec points_shown_timer
 		lda points_shown_timer
@@ -2545,6 +2835,7 @@ l39F8:
 		sta (tmp_loc_lo), y
 		rts 
 
+; jumped to by: l39F8
 l3A15:
 		cmp #$aa
 		bne l3A45
@@ -2567,10 +2858,13 @@ l3A15:
 		lda #$47
 		sta bonus_guy_char_2
 
+; jumped to by: l3A15
 l3A45:
 		rts 
 
 ; moves the snakes, and the bonus guy, for the difficulty
+; called by: game_loop
+; jumped to by: l3A72
 var_2_stuff:
 		lda difficulty
 		cmp #$01
@@ -2578,6 +2872,7 @@ var_2_stuff:
 		jsr move_snake_2
 		rts 
 
+; jumped to by: var_2_stuff
 l3A51:
 		cmp #$02
 		bne l3A5C
@@ -2585,6 +2880,7 @@ l3A51:
 		jsr update_bonus_guy
 		rts 
 
+; jumped to by: l3A51
 l3A5C:
 		cmp #$03
 		bne l3A67
@@ -2592,6 +2888,7 @@ l3A5C:
 		jsr update_bonus_guy
 		rts 
 
+; jumped to by: l3A5C
 l3A67:
 		cmp #$04
 		bne l3A72
@@ -2599,12 +2896,14 @@ l3A67:
 		jsr update_bonus_guy
 		rts 
 
+; jumped to by: l3A67
 l3A72:
 		inc game_speed
 		lda #$01
 		sta difficulty
 		jmp var_2_stuff
 
+; called by: restart_to_title, life_lost
 life_lost_handler:
 		lda #$81
 		sta voice1_control
@@ -2615,6 +2914,7 @@ life_lost_handler:
 		sta (new_loc_lo), y
 		sta (tmp_loc_lo), y
 
+; jumped to by: l3AB1
 l3A8F:
 		dec voice1_frequency + $1
 		lda (new_loc_lo), y
@@ -2636,6 +2936,7 @@ l3A9E:
 		bcc l3AB1
 		inc new_loc_hi
 
+; jumped to by: l3A9E
 l3AB1:
 		lda (new_loc_lo), y
 		cmp #$a0
@@ -2655,6 +2956,7 @@ l3AB1:
 		sta multicolor_1
 		sta multicolor_2_register
 
+; jumped to by: l3AE2
 l3AD8:
 		inc multicolor_1
 		inc multicolor_2_register
@@ -2684,6 +2986,7 @@ l3B03:
 		sta player_direction
 		rts 
 
+; jumped to by: hit_snake
 restart_to_title:
 		jsr life_lost_handler
 		lda #$00
@@ -2697,6 +3000,7 @@ entry:
 		lda #$1a
 		sta vic_memory_setup
 
+; jumped to by: restart_to_title
 reset_everything:
 		lda #$00
 		sta background_color
@@ -2754,6 +3058,7 @@ reset_everything:
 		sta game_speed
 		ldx #$00
 
+; jumped to by: check_space
 play_music_loop:
 		lda voice_1_notes, x
 		sta voice1_frequency + $1
@@ -2770,6 +3075,7 @@ play_music_wait_loop:
 		bne check_space
 		ldx #$00
 
+; jumped to by: play_music_wait_loop
 check_space:
 		lda cia1_port_b
 		cmp #$ef
@@ -2787,6 +3093,7 @@ check_space:
 		jsr colorize_maze
 		jsr initialize_pointers
 
+; jumped to by: l3C70
 game_loop:
 		jsr var_2_stuff
 		jsr try_move
@@ -2806,6 +3113,7 @@ check_hit_dot:
 		jsr end_level
 		jmp nothing_hit
 
+; jumped to by: check_hit_dot
 check_hit_bonus_guy:
 		cmp bonus_guy_char_2
 		bne check_hit_snake
@@ -2814,12 +3122,14 @@ check_hit_bonus_guy:
 		jsr bonus_guy_hit_handle
 		jmp nothing_hit
 
+; jumped to by: check_hit_bonus_guy
 check_hit_snake:
 		cmp #$44
 		beq hit_snake
 		cmp #$43
 		bne nothing_hit
 
+; jumped to by: check_hit_snake
 hit_snake:
 		dec lives
 		lda lives
@@ -2827,9 +3137,11 @@ hit_snake:
 		bne life_lost
 		jmp restart_to_title
 
+; jumped to by: hit_snake
 life_lost:
 		jsr life_lost_handler
 
+; jumped to by: check_hit_dot, check_hit_bonus_guy, check_hit_snake
 nothing_hit:
 		ldy #$00
 		lda player_direction
@@ -2839,6 +3151,7 @@ nothing_hit:
 		ldy #$00
 		sta (tmp_loc_lo), y
 
+; jumped to by: nothing_hit
 player_not_moving:
 		lda #$51
 		sta (new_loc_lo), y
@@ -2856,9 +3169,11 @@ l3C5B:
 		bne l3C70
 		jsr pause
 
+; jumped to by: l3C5B
 l3C70:
 		jmp game_loop
 
+; called by: l3C5B
 pause:
 		lda #$00
 		sta sid_vol_filter
@@ -2877,12 +3192,14 @@ l3C80:
 		sta sid_vol_filter
 		rts 
 
+; called by: l3AE2
 multicolor_2:
 		lda multicolor_2_register
 		and #$0f
 		rts 
 
 ; A is 0 when the cell at move_candidate is a space, the player or a dot
+; jumped to by: test_candidate
 test_cell:
 		lda move_candidate
 		sta tmp_loc_lo
@@ -2899,6 +3216,7 @@ test_cell:
 		lda #$01
 		rts 
 
+; jumped to by: test_cell
 l3CB0:
 		lda #$00
 		rts 
@@ -2945,9 +3263,11 @@ animate_charset:
 		bne animate_charset
 		jsr animate_player_chars
 
+; jumped to by: irq
 skip_irq:
 		jmp kernal_irq
 
+; called by: end_bonus_round, entry
 setup_irq:
 		sei 
 		lda #$b3
@@ -2969,6 +3289,7 @@ unused_3d18:
 		sta voice1_pulse_width + $1
 
 ; the interrupt of the bonus run: counts the bonus timer down
+; jumped to by: unused_3d18
 countdown_irq:
 		dec bonus_timer_digit_3
 		lda bonus_timer_digit_3
@@ -2984,9 +3305,11 @@ countdown_irq:
 		sta bonus_timer_digit_2
 		dec bonus_timer_digit_1
 
+; jumped to by: countdown_irq
 l3D48:
 		jmp kernal_irq
 
+; called by: l37AF
 reset_bonus_notes:
 		lda #$81
 		sta jiffy_timer
@@ -2999,6 +3322,7 @@ l3D4F:
 		sta unused_2693
 		rts 
 
+; called by: l382D
 play_next_note:
 		ldx note_idx
 		lda bonus_notes, x
@@ -3008,6 +3332,7 @@ play_next_note:
 		bne l3D6C
 		ldx #$00
 
+; jumped to by: play_next_note
 l3D6C:
 		stx note_idx
 		rts 
@@ -3015,6 +3340,7 @@ l3D6C:
 unused_3d70:
 		.byte	$92, $26, $8d, $08, $d4, $60
 
+; called by: l38F1
 quiet:
 		lda #$00
 		sta voice2_frequency + $1
@@ -3033,6 +3359,7 @@ unused_3d87:
 		.byte	$2f, $2f, $2f, $02, $ed, $6c, $27, $4d, $4f, $0f, $ff, $00, $4f, $00, $ff, $00
 		.byte	$ef
 ; play_next_note plays 255 of them, so it runs into voice_1_notes
+; read by: play_next_note
 bonus_notes:
 		.byte	$0a, $14, $1e, $28, $32, $3c, $46, $50, $5a, $64, $c8, $14, $1e, $28, $32, $3c
 		.byte	$46, $50, $5a, $14, $1e, $28, $32, $3c, $46, $50, $5a, $1e, $28, $32, $3c, $46
@@ -3047,6 +3374,7 @@ bonus_notes:
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00
+; read by: l38B2, l39D5, play_music_loop
 voice_1_notes:
 		.byte	$00, $14, $1e, $28, $32, $3c, $46, $50, $5a, $64, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $0a, $14, $1e, $28, $32, $3c, $46, $50, $5a
@@ -3055,6 +3383,7 @@ voice_1_notes:
 		.byte	$0a, $00, $00, $00, $00, $00, $00, $5a, $50, $46, $3c, $32, $28, $1e, $14, $0a
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $32, $28, $1e, $14, $0a, $32, $3c
 		.byte	$46, $50, $5a, $64
+; read by: l38B2, play_music_loop
 voice_2_notes:
 		.byte	$0a, $14, $0a, $14, $0a, $14, $0a, $14, $0a, $14, $0a, $14, $0a, $14, $0a, $14
 		.byte	$0a, $14, $0a, $14, $0a, $14, $0a, $14, $0a, $14, $0a, $14, $1e, $14, $1e, $14
@@ -3079,14 +3408,23 @@ vic_sprite_coords:
 vic_sprite_x_high_bits:		.byte	?
 vic_control:
 		.fill	5
+; written by: game_over, reset_everything, check_space
 vic_control_2:		.byte	?
 vic_sprite_double_height:		.byte	?
+; written by: entry
 vic_memory_setup:		.byte	?
 vic_registers:
 		.fill	7
+; written by: game_over, l32B4, bonus_round, l3934, reset_everything
 border_color:		.byte	?
+; written by: reset_everything
 background_color:		.byte	?
+; written by: l3AB1, l3AE2, reset_everything
+; modified by: l3AD8
 multicolor_1:		.byte	?
+; read by: multicolor_2
+; written by: l3AB1, l3AE2, reset_everything
+; modified by: l3AD8
 multicolor_2_register:		.byte	?
 vic_colors:
 		.fill	3
@@ -3095,26 +3433,41 @@ vic_sprite_colors:
 vic_rest:
 		.fill	977
 ; ---- SID ----
+; written by: l315A, l3179, l319A, l31CE, l3202, copy_hi_text, game_over, l32A0, l32B4, no_bonus, bonus_10_points, bonus_100_points, burp_bonus_text, l37A2, l37AF, bonus_walk_on_44, bonus_walk_on_43, bonus_walk_on_46, l3856, end_bonus_round, end_level, l38B2, l38D0, l38E4, l3934, life_lost_handler, l3AB1, restart_to_title, reset_everything, play_music_loop, check_space, check_hit_dot, check_hit_bonus_guy, l3C5B, quiet
+; modified by: l3A8F
 voice1_frequency:		.word	?
+; read by: unused_3d18
+; written by: l30A4, game_over, reset_everything, unused_3d18
 voice1_pulse_width:		.word	?
+; written by: game_over, life_lost_handler, l3AB1, reset_everything
 voice1_control:		.byte	?
+; written by: reset_everything
 voice1_attack_decay:		.byte	?
+; written by: reset_everything
 voice1_sustain_release:		.byte	?
+; written by: end_bonus_round, end_level, l38B2, l38C2, l39D5, l3AB1, restart_to_title, reset_everything, play_music_loop, check_space, l3C5B, play_next_note, quiet
 voice2_frequency:		.word	?
+; written by: reset_everything
 voice2_pulse_width:		.word	?
+; written by: reset_everything
 voice2_control:		.byte	?
+; written by: reset_everything
 voice2_attack_decay:		.byte	?
+; written by: reset_everything
 voice2_sustain_release:		.byte	?
 voice3_frequency:		.word	?
 voice3_pulse_width:		.word	?
+; written by: reset_everything
 voice3_control:		.byte	?
 voice3_attack_decay:		.byte	?
 voice3_sustain_release:		.byte	?
 filter_cutoff:		.word	?
 filter_control:		.byte	?
+; written by: l30A4, game_over, reset_everything, pause, l3C80
 sid_vol_filter:		.byte	?
 sid_mirrors:
 		.fill	999
+; written by: more_colors, l24E1, l24FA, l2544, l35EC, l35FB, colorize_maze_2, l361A, colorize_maze_3, l3639, colorize_maze_4, l3658, l38D0
 color_ram:
 		.fill	1000
 unused_color_ram:
@@ -3122,6 +3475,7 @@ unused_color_ram:
 ; ---- CIAs ----
 cia1_port_a:		.byte	?
 ; joystick port 1
+; read by: try_move, l3120, l32C5, check_space, l3C80
 cia1_port_b:		.byte	?
 cia1_rest:
 		.fill	254
@@ -3132,6 +3486,7 @@ io_expansion:
 ; ---- KERNAL, in ROM ----
 kernal_rom:
 		.fill	2609
+; jumped to by: skip_irq, l3D48
 kernal_irq:
 		.fill	5583
 .endv

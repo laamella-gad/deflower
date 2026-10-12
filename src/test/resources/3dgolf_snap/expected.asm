@@ -2,57 +2,153 @@
 .virtual $0000
 ; ---- zero page ----
 cpu_port_direction:		.byte	?
+; read by: start2, l2CDC, lA003, irq, lA5FA, bank_out_io, bank_in_io, lC03B, lC059, lC0F3
+; written by: l0193, decrunch, start2, l2CDC, lA003, lA57B, lA64F, bank_out_io, bank_in_io, lC03B, lC059, lC0F3
 cpu_port:		.byte	?
+; read by: l2C60, l2C81, store_hex, l2CA7, lA5FA
+; written by: print_inline, lA64F, lC13B
+; modified by: l2C69, print_inline, store_hex, l2CA7
 text_pointer:		.word	?
+; read by: l0DD0, l0E1B, l0E37, l0E8D, draw_shape, l1C5F, l1CA0, l1D13, l1D1B, color_text, l41C7, l41E6, lA5FA, lA8D5, lA8DF, lA8E7, lB1E6, lB3B8, lB3BF, lB60A, lB79F
+; written by: l0DD0, scroll_text, l0E8D, l1D1B, l1FA1, color_text, l41C7, l41EF, lA64F, lA8CB, lA8E7, lB14A, lB1E6, lB396, lB3BF, lB5FC, lB60A
+; modified by: l0DD0, color_text, l41C7, l41E1
 pointer_04:		.word	?
+; read by: l0910, l0942, l1022, plot_pixel, l1501, l1567, l15F5, l1703, l19D0, l19EC, l1A1F, l1A7E, l1A8B, l1AB9, lA2FB, lA31E, lA341, lA364, lA5FA, lA6BC, lA6DF, lA702, lA72F, lA752, lA775, lA798, lA7BB, lA7DE, lA801, lA824, lA847, lA86A, lA88D, lA8B7, lB25F, lB282, lB2A5, lB3BF, lB895, lB8A1, lB8A8, lB8D7, lB9CD, lBA19, lBBDF
+; written by: to_log, l092B, clear_bitmap, plot_pixel, l1501, l1567, l15F5, l1703, l1929, l19EC, l1A1F, l1A8B, read_hex_word, clear_screen, lA304, lA327, lA34A, lA64F, fill_colors, lA6C5, lA6E8, lA71D, lA738, lA75B, lA77E, lA7A1, lA7C4, lA7E7, lA80A, lA82D, lA850, lA873, lA896, title_screen, lB268, lB28B, lB396, lB3BF, lB8A8, lB8D7, lBA26, lBBC6
+; modified by: l0908, l0939, l0945, l1022, l19D0, l1A1F, l1A7E, l1AB9, lA2FB, lA31E, lA341, lA364, lA6BC, lA6DF, lA702, lA72F, lA752, lA775, lA798, lA7BB, lA7DE, lA801, lA824, lA847, lA86A, lA88D, lA8B7, lB25F, lB282, lB2A5, next_music_byte, lB9B4
 pointer_06:		.word	?
+; read by: l17BA, l17C9, l17D6, l19A7, l1A1F, l205B, l209E, l212E, l2571, draw_hole_shape, l262D, l263B, l2657, l267F, l2691, l26B4, l26D1, l277D, l2804, l286E, l289B, project_vertex, l2AE1, collect_features, l2BC2, l2BD0, lA93C, lB3BF
+; written by: clear_bitmap, l19A7, l1A1F, l205B, l212E, find_cell, l251D, l2547, l2571, l25C9, draw_hole_shape, l26D1, collect_features, clear_screen, lA304, lA327, lA34A, fill_colors, lA6C5, lA6E8, lA71D, lA738, lA75B, lA77E, lA7A1, lA7C4, lA7E7, lA80A, lA82D, lA850, lA873, lA896, lA930, title_screen, lB268, lB28B, lB396, lB3BF
+; modified by: l102B, collect_objects, lA304, lA327, lA34A, lA36D, lA6C5, lA6E8, lA70B, lA738, lA75B, lA77E, lA7A1, lA7C4, lA7E7, lA80A, lA82D, lA850, lA873, lA896, lA8C0, lB268, lB28B, lB2AE
 pointer_08:		.word	?
+; read by: l0E08, l0E1B, l0E8D, l0EC7, l12AD, test_pixel, plot_pixel, l1501, l1567, l15F5, l1703, l18EF, l1929, l19CE, l19D0, l19EC, l1A6D, l1A6F, l1A8B, l1BB6, color_text, l41E6, l41EF, lA5FA, lB83D
+; written by: l0E08, l0E1B, scroll_text, l0E8D, pixel_address, test_pixel, plot_pixel, l1501, l1567, l15F5, l1703, l18EF, l1929, l19EC, l1A1F, l1A8B, color_text, lA64F
 bitmap_pointer:		.word	?
+; read by: l1929, l19A7, l1A1F
+; written by: l1929
 v0c:		.byte	?
+; read by: l18B0, l18C9, l1929, l1994, l19A7, l1A1F, l1ACA, l1B04, l1B2D, l1B5F, l1BA1
+; written by: l18B0, l190F, l1BA1
 v0d:		.byte	?
+; read by: log_multiply, log_divide_into, project, l0B46, l0C97, l0CDE, l16EC, l176B, l1785, l179D, l1929, l1989, l1994, l1A1F, l1AB9, l1ACA, l1B04, l1DA8, l21CF, compute_shot, l34C1, l3516, l35A8, l3E42, l4225, lAE22, lB525
+; written by: log_multiply, l095D, log_divide_into, l0983, project, l0B46, rotate_45, l0CB4, draw_line, l16EC, l176B, l1785, l179D, l18B0, l190F, l1A1F, l1D9A, l1DA8, l2197, compute_shot, l34C1, l35A8, l3E42, l4210, lAE22, lB525
+; modified by: l219B
 log_value:		.word	?
+; read by: l0BC3, rotate_0, rotate_1, rotate_2, rotate_3, rotate_45, l0CB4, add_fill_seed, l16BA, l16C0, l16CA, l18C9, l1929, l1AB9, l1B2D, l1B5F, l205B, l2089, find_cell, l2AFE, l3711, l3747
+; written by: l0BC3, rotate_0, l16A2, l16BA, l18B0, l190F, l1989, l1994, l1AB9, l200F, l205B, l2089, l212E, l28E9, clip_edge, l2A7C, project_vertex, l2AD6, l3711, l3747, draw_flag, lB700
+; modified by: l16C0, find_cell, l3747
 point_x:		.word	?
+; read by: to_view, rotate_0, rotate_1, rotate_2, rotate_3, rotate_45, l0CB4, rotate_6, rotate_7, horizontal_line, l15B6, l164A, l174F, l190A, l1929, l1ACA, l1B04, l1B2D, l1B5F, l1B90, l1BA1, l209E, l20B0, find_cell, l2AFE, l3750, l3763
+; written by: to_view, rotate_0, rotate_6, rotate_7, draw_line, l18C9, l190F, l1929, l1ACA, l1B04, l1B2D, l1B5F, l200F, l205B, l209E, l20B0, l212E, l28E9, clip_edge, l2A7C, l2AE1, l2AF3, l3711, l3750, l3763, draw_flag, lB700
+; modified by: find_cell, l3763
 point_y:		.word	?
 ; the start of the line being drawn
+; read by: horizontal_line, draw_line, l16CA, line_start_on_screen, l1E41, l1EA9, l1EDA, l29CA, draw_flag, lB14A
+; written by: l15C1, l1760, draw_shape, l1E2A, l1EDA, l2718, l2786, l29CA, lA901, draw_flag, lB14A, lB3BF, lB623
+; modified by: draw_flag
 line_x:		.word	?
+; read by: vertical_line, l15F3, draw_line, l16A2, l16CA, line_start_on_screen, l1E41, l1EA9, l1EDA, l29CA, draw_flag, lAE0A, lB14A
+; written by: l1657, l1760, draw_shape, l1E2A, l1EDA, l2718, l2786, l29CA, lA901, draw_flag, lB14A, lB3BF, lB623
+; modified by: draw_flag
 line_y:		.word	?
+; read by: add_fill_seed, l1501, l1567, l15F5, l164A, l16CA, l1703, l174F, set_cell_color, l1BD5, l1BDC, lB805
+; written by: horizontal_line, l15F5, draw_line, l16CA, l1703, l19A7, l1A1F, l1BB6
+; modified by: l19EC, l1A8B
 plot_y:		.byte	?
 unused_19:
 		.fill	2
+; read by: l0BC3, l200F, l205B, check_out_of_bounds, l3711, l379D, l38E7, l39EA, l3AC7, l3AE4, l3FA4, l3FDD, l400C, l404E, shot_loop, lA99D, lA9B6, lAF7C
+; written by: l30EA, l379D, l39EA, setup_practice_hole, l3AC7, l3AE4, l3FA4, l3FDD, l404E, l4103, lA12B, shot_loop, lA99D, lA9B6, lAF3B
+; modified by: l39EA, l3FDD
 ball_x:		.word	?
+; read by: to_view, l200F, l205B, l3128, l3711, l379D, face_hole, l39EA, l3B00, l3B18, l3FA4, l3FE9, l4000, l400C, l404E, shot_loop, lA9CE, lA9E2, lAF7C
+; written by: l30EA, l379D, l39EA, setup_practice_hole, l3B00, l3B18, l3FE9, l4000, l404E, l4103, lA12B, shot_loop, lA9CE, lA9E2, lAF3B
+; modified by: l39EA, l4000
 ball_y:		.word	?
+; read by: l0DD0, l0E37, message_line, color_text, print_score_labels, $a196, $a1a7, $a1b8, $a1c9, $a1dc, $a1f0, $a203, lA5FA, print_par_result, lB14A, aim
+; written by: l0E37, l0E4F, l0E65, l0EB5, message_line, print_club_name, setup_hole, color_text, main, print_score_labels, $a19b, $a1ac, $a1bd, $a1ce, $a1e1, $a1f5, $a208, lA64F, add_stroke, lAC91, lACB2, lACFC, print_par_result, draw_wind, lB14A, lB2AE, lB336, aim, lB5EE
 text_x:		.byte	?
+; read by: l0E08, l0E53, color_text, lA5FA, lB14A
+; written by: l0E60, l0E65, l0EB5, message_line, print_club_name, setup_hole, color_text, main, print_score_labels, lA64F, add_stroke, lAC91, print_par_result, draw_wind, lB14A, lB2AE, lB336, aim, lB5EE
 text_y:		.byte	?
+; read by: l0BE0
+; written by: l0BC3
 v21:		.byte	?
+; read by: l0BE0
+; written by: to_view
+; modified by: to_view, l0BC3, l0BE0
 octant:		.byte	?
 ; the world position that a shape's relative points start from
+; read by: l212E, l2571, l262D, l263B, l264C, l267F, l2691, l26A9, l286E, l288E, project_vertex, l2AD6, collect_features
+; written by: find_cell, l2547, l2571, draw_hole_shape, l262D, l263B, l264C, l2691, l26A9, l26D1
+; modified by: draw_hole_shape
 base_x:		.word	?
+; read by: l212E, l2571, l262D, l2657, l2669, l267F, l26B4, l26C6, l289B, l28AF, l2AE1, l2AF3, collect_features
+; written by: find_cell, l2547, l2571, draw_hole_shape, l262D, l2657, l2669, l26B4, l26C6, l26D1
+; modified by: draw_hole_shape
 base_y:		.word	?
+; read by: draw_objects, l1FB3, l212E, sort_objects, l21CF
+; written by: l200F
+; modified by: l212E, sort_objects, l21CF
 object_count:		.byte	?
+; read by: set_cell_color
+; written by: draw_object
 object_depth:		.byte	?
+; read by: l15F5, l16FA, line_start_on_screen, pen_on_screen, lB14A
+; written by: main, lB14A
 clip_top:		.byte	?
 unused_2a:
 		.fill	3
+; read by: l015C, l0177, l0189
+; written by: l0116, l0177, l0193
 decrunch_pointer:		.word	?
 unused_2f:
 		.fill	50
+; read by: mirror_sprite, l3077, reverse_bits, l3253, l39EA
+; written by: mirror_sprite, l3253, l39EA
+; modified by: mirror_sprite
 pointer_61:		.word	?
+; written by: reverse_bits
+; modified by: l309C
 v63:		.byte	?
+; read by: set_cell_color
+; written by: l19A7, l1A1F
 pointer_64:		.word	?
+; read by: l2E91, l2FB1, l2FC5, l3793, l400C, l40AC, l40D2, l416A, shot_loop, save_player, lAF7C, compute_drift
+; written by: l2EB3, setup_hole, l404E, l40AC, l40D2, l416A, lAF3B
 hole_distance:		.byte	?
+; read by: l15F5, l16FA, l1BA1, line_start_on_screen, pen_on_screen
+; written by: draw_terrain, reset_clip, main
 clip_bottom:		.byte	?
 unused_68:
 		.fill	93
 ; the KERNAL's last key pressed
+; read by: l2F09, lA63E
 kernal_lstx:		.byte	?
+; written by: l0822
 unused_c6:
 		.fill	49
+; written by: decrunch_get_byte
+; modified by: l0213, l0226
 vf7:		.byte	?
+; read by: l0104, l0116
+; written by: l0104
 vf8:		.byte	?
+; called by: l010E, l015F, l0189
 vf9:		.byte	?
+; read by: l0177, l0193
 vfa:		.byte	?
+; read by: l0177, l0193, l08BC, lC059
+; written by: old_loader, lC03B
+; modified by: $0100
 vfb:		.byte	?
+; read by: l08BC, lC059
+; written by: old_loader, lC03B
+; modified by: l08BC, lC059
 vfc:		.byte	?
+; read by: l08BC, load_animation, l3300, l3385, l3399, l33CC, l33E5, lC059
+; written by: old_loader, load_animation, draw_animation_frame, l3385, lC03B
+; modified by: l08BC, lC059
 pointer_fd:		.word	?
 unused_ff:		.byte	?
 .endv
@@ -61,9 +157,11 @@ unused_ff:		.byte	?
 		inc vfb
 		dex 
 
+; read by: add_fill_seed
 d0103:
 		rts 
 
+; jumped to by: l0116
 l0104:
 		ldy vf8
 		ldx #$02
@@ -71,11 +169,13 @@ l0104:
 		sta vf8
 		tya 
 
+; jumped to by: l0116
 l010E:
 		ldx #$06
 		jsr l022F
 		jsr @w vf9
 
+; jumped to by: l0167, l082D
 l0116:
 		ldy #$00
 		tya 
@@ -104,6 +204,7 @@ l0116:
 		jsr l0211
 		tay 
 
+; jumped to by: l0116
 l014B:
 		jsr l0211
 		tax 
@@ -114,6 +215,7 @@ l014B:
 		ldx #$03
 		jsr l0226
 
+; jumped to by: l014B
 l015C:
 		ldx decrunch_pointer
 		inx 
@@ -124,9 +226,11 @@ l015F:
 		dey 
 		bne l015F
 
+; jumped to by: l0189
 l0167:
 		beq l0116
 
+; jumped to by: l0116
 l0169:
 		jsr l0211
 		cmp #$ff
@@ -135,6 +239,7 @@ l0169:
 		ldx #$00
 		jsr l022F
 
+; jumped to by: l0116
 l0177:
 		sta decrunch_pointer + $1
 		jsr l0223
@@ -153,6 +258,7 @@ l0189:
 		bne l0189
 		beq l0167
 
+; jumped to by: l0169
 l0193:
 		lda #$37
 		sta cpu_port
@@ -172,9 +278,11 @@ unused_stack:
 		.byte	$00, $00, $00, $70, $70, $a5, $70, $a5, $70, $a5, $6f, $70, $a5, $70, $70, $a5
 		.byte	$06, $04, $70, $a5, $06, $00, $70, $70, $a5, $06, $70, $a5, $06, $2a, $05, $fc
 		.byte	$a1, $f6, $2e
+; written by: l0817
 stack:
 		.byte	$05, $0f, $38, $9f, $31, $a3, $a2
 
+; called by: l0213, l0226
 decrunch_get_byte:
 		pha 
 		lda unused_ed07 + $c
@@ -186,19 +294,23 @@ d0203 = $0203
 		bne l020F
 		inc $0203
 
+; jumped to by: decrunch_get_byte
 l020F:
 		pla 
 		rts 
 
+; called by: l0116, l014B, l0169
 l0211:
 		inx 
 		txa 
 
+; jumped to by: l021A
 l0213:
 		asl vf7
 		bne l021A
 		jsr decrunch_get_byte
 
+; jumped to by: l0213
 l021A:
 		bcc l022E
 		inx 
@@ -206,23 +318,30 @@ l021A:
 		bne l0213
 		beq l022E
 
+; called by: l0177
 l0223:
 		ldx #$07
 
+; called by: l0116
 l0225:
 		inx 
 
+; called by: l0116, l014B
+; jumped to by: l022F
 l0226:
 		asl vf7
 		bne l022D
 		jsr decrunch_get_byte
 
+; jumped to by: l0226
 l022D:
 		rol 
 
+; jumped to by: l021A
 l022E:
 		dex 
 
+; called by: l0104, l010E, l0116, l0169
 l022F:
 		bne l0226
 		clc 
@@ -237,6 +356,8 @@ kernal_workspace:
 *=$0314
 
 ; the KERNAL's IRQ and NMI vectors, pointing into RAM under BASIC
+; read by: lA5B1
+; written by: lA5B1
 irq_vector:
 		.addr	irq
 
@@ -246,6 +367,7 @@ brk_vector:		.addr	?
 
 *=$0318
 
+; written by: lA5B1
 nmi_vector:
 		.addr	nmi
 
@@ -256,6 +378,7 @@ kernal_vectors:
 
 *=$033c
 
+; called by: l08D0
 tape_header:
 		.byte	$03, $01, $08, $7b, $71
 
@@ -267,129 +390,318 @@ tape_buffer_rest:
 		.fill	175
 ; ---- game variables, in the old text screen ----
 ; the hole (flag) position
+; read by: l379D, l38E7, l400C, l404E, l4103, draw_flag, lB700
+; written by: l39EA, setup_practice_hole
 hole_x:		.word	?
+; read by: l379D, face_hole, l400C, l404E, l4103, draw_flag, lB700
+; written by: l39EA, setup_practice_hole
 hole_y:		.word	?
+; read by: l2E91, l30B7, check_out_of_bounds, l3187, check_terrain, l3C3F, l3CC7, l3CFA, l3DAD, l3EB0, l3F76, l416A, lB508, lB6F8
+; written by: setup_hole, shot_loop
 green_view:		.byte	?
 ; per player: where the ball was before the shot, put back after water
+; read by: l30EA
+; written by: l3FA4
 safe_ball_x:
 		.fill	4
+; read by: l30EA
+; written by: l3FA4
 safe_ball_y:
 		.fill	4
+; read by: lB9CD, lBA26, lBA7A, lBBC6, lBBF2
+; written by: lB9CD, lBA26, lBA7A, lBBC6, lBBF2
 v040d:		.byte	?
+; read by: lB9CD, lBA26, lBA7A
+; written by: lB9CD, lBA26, lBA7A
 v040e:		.byte	?
+; read by: lB895, lB8A8, lB9CD, lBA7A
+; written by: lB8D7, lB9CD, lBA26, lBA7A
+; modified by: lBACD
 v040f:		.byte	?
+; read by: lB895, lB8A8, lB9CD, lBA7A
+; written by: lB8A8, lB8D7, lB9CD, lBA26, lBA7A
+; modified by: lBA7A
 v0410:		.byte	?
+; read by: lB9CD, lBA26, lBA7A
+; written by: lB9CD, lBA26, lBACD
+; modified by: lBA26
 v0411:		.byte	?
+; read by: lB9CD, lBA7A, lBBC6
+; written by: lBA26, lBBDF
 v0412:		.byte	?
+; read by: lBBC6
+; written by: lBBDF
 v0413:		.byte	?
 unused_0414:
 		.fill	2
+; read by: music_start
+; written by: music_start, lBC62, lBC9F, lBCDC
 v0416:		.byte	?
+; read by: music_start
+; written by: music_start, lBC62, lBC9F, lBCDC
 v0417:		.byte	?
 unused_0418:		.byte	?
+; written by: music_start, lBC62, lBC9F, lBCDC
 v0419:		.byte	?
+; written by: music_start, lBC62, lBC9F, lBCDC
 v041a:		.byte	?
 unused_041b:
 		.fill	2
+; written by: music_start, lBC62, lBC9F, lBCDC
 v041d:		.byte	?
+; written by: music_start, lBC62, lBC9F, lBCDC
 v041e:		.byte	?
 unused_041f:		.byte	?
+; written by: music_start, lBC62, lBC9F, lBCDC
 v0420:		.byte	?
+; written by: music_start, lBC62, lBC9F, lBCDC
 v0421:		.byte	?
 unused_0422:
 		.fill	2
+; written by: music_start, lBC62, lBC9F, lBCDC
 v0424:		.byte	?
+; written by: music_start, lBC62, lBC9F, lBCDC
 v0425:		.byte	?
 unused_0426:		.byte	?
+; written by: music_start, lBC62, lBC9F, lBCDC
 v0427:		.byte	?
+; written by: music_start, lBC62, lBC9F, lBCDC
 v0428:		.byte	?
+; read by: lB8D7, lB9CD, lBA7A
+; written by: lB8A8, lB8D7
 v0429:		.byte	?
+; read by: lB9CD, lBA7A
+; written by: lB8D7
 v042a:		.byte	?
+; read by: lB988, lBAE8, lBB4F
+; written by: music_step
 music_note:		.byte	?
+; read by: lBAE8, lBB4F
+; written by: lB988
 music_duration:		.byte	?
+; read by: lBB14, lBB8B
+; written by: init_sid
 music_tempo:		.byte	?
+; read by: music_push, music_pop, lBB34, lBB4F, lBB77, lBBBD, lBBDF
+; written by: lBB2F
+; modified by: lBB77
 music_voice:		.byte	?
+; read by: lBB4F
+; written by: lBB34
 v042f:		.byte	?
+; read by: lBB34, lBB4F
 v0430:		.byte	?
+; written by: init_sid
 v0431:		.byte	?
+; written by: lBAD8, lBAE8, init_sid
 v0432:		.byte	?
+; written by: init_sid
 v0433:		.byte	?
+; written by: lBB4F
+; modified by: lBB34
 v0434:		.byte	?
+; written by: music_start
 v0435:		.byte	?
+; written by: music_start
 v0436:		.byte	?
+; written by: music_start
 v0437:		.byte	?
+; read by: lBBAE
+; written by: music_start
 music_saved_stack:		.byte	?
+; read by: lAF0A, music_push, lB8D7, lBA26
+; written by: lAF0A, music_pop, lB8A8, lB9CD, lBA19, lBA7A
 v0439:		.byte	?
+; read by: lAF3B, music_push, lB8D7, lBA26
+; written by: lAF7C, music_pop, lB8A8, lB9CD, lBA19, lBA7A
 v043a:		.byte	?
+; read by: lAF3B
+; written by: lAF7C
 v043b:		.byte	?
+; read by: lAF3B
+; written by: lAF7C
 v043c:		.byte	?
+; read by: lAF3B
+; written by: lAF7C
 v043d:		.byte	?
+; read by: lAE9C, lAF0A
+; written by: lAE9C, lAF7C
 v043e:		.byte	?
+; read by: lAE9C
+; written by: lAE9C, lAF7C
 v043f:		.byte	?
+; read by: lAEB7, lAF0A
+; written by: lAEB7, lAF7C
 v0440:		.byte	?
+; read by: lAEB7
+; written by: lAEB7, lAF7C
 v0441:		.byte	?
+; read by: lAF3B
+; written by: lAF7C
 v0442:		.byte	?
+; read by: l2FC5, lA2A1, lAF3B
+; written by: lAF7C
 v0443:		.byte	?
 unused_0444:
 		.fill	4
+; read by: lAED2, lAF0A
+; written by: lAED2
 v0448:		.byte	?
+; read by: lAED2
+; written by: lAED2
 v0449:		.byte	?
+; read by: lAEED, lAF0A
+; written by: lAEED
 v044a:		.byte	?
+; read by: lAEED
+; written by: lAEED
 v044b:		.byte	?
 unused_044c:		.byte	?
+; read by: lA2A1
 v044d:		.byte	?
+; read by: l2FB1, lA2A1, lA2D9, lA70B, lA896, lAC41, lAE92, read_joystick
+; written by: main, lB305, lB34B
 game_mode:		.byte	?
+; read by: l2D04, l2FB1, l30EA, l378C, l3FA4, lA42D, lA4A8, add_stroke, lAC17, update_scores, lAC91, lAF5D, lAF75, print_par_result, read_joystick
+; written by: hole_loop, lAC2B, select_player
+; modified by: lAC41
 current_player:		.byte	?
+; read by: l3843, update_scores, print_par_result
+; written by: setup_hole, lA12B
 par:		.byte	?
+; read by: l3843, setup_hole, l39EA, hole_loop, lA2C6, change_wind, lB360, lB389
+; written by: l3854, setup_hole, lA2D9, lB355, lB360
 hole_number:		.byte	?
+; read by: l38E7, l3956, l3965, l404E, l40A1, l4103, lAF7C
+; written by: l38E7, l3965, l400C, hole_loop, save_player
+; modified by: l3929, l403A, l40EE
 v0452:		.byte	?
+; read by: l38E7, l3956, l3965, l404E, l4103, lAF7C
+; written by: l38E7, l3965, l400C, hole_loop, save_player
+; modified by: l3929, l403A, l40E2, l40EE
 v0453:		.byte	?
+; read by: face_hole, l3956, l3965, l404E, l40C7, l4103, lAF7C
+; written by: face_hole, l3965, l400C, save_player
+; modified by: l4045, l4103
 v0454:		.byte	?
+; read by: face_hole, l3956, l3965, l404E, l40AC, l4103, lAF7C
+; written by: face_hole, l3965, l400C, save_player
+; modified by: l4045, l40EE, l4103
 v0455:		.byte	?
+; read by: l4103, lAF7C
+; written by: l40E2, lAF3B
 v0456:		.byte	?
+; read by: l34C1
+; written by: lB099
 v0457:		.byte	?
+; read by: compute_shot
+; written by: lB099
 v0458:		.byte	?
+; read by: lB14A
+; written by: lB099
 v0459:		.byte	?
+; read by: lB057, compute_drift
+; written by: lB057, random_wind
 wind_direction:		.byte	?
+; read by: change_wind, lB03B, compute_drift
+; written by: change_wind, lB03B, random_wind
 wind_strength:		.byte	?
+; read by: l2DC8, l2E21, $2e68, l2E72
+; written by: l2DB4, l2E00, l2E43, $2e6f
 frame_timer_reload:		.byte	?
+; read by: l2DC8, l2E21, l2E72
+; written by: l2DB4, l2DC8, l2E00, l2E43, $2e6b, l2E72
+; modified by: snapshot_pc
 frame_timer:		.byte	?
+; read by: l34C1
+; written by: l2DB4
+; modified by: l2DC8
 v045e:		.byte	?
+; read by: $2e5b, l2E72
+; written by: l2DEE, l2E72
+; modified by: l2DF8
 v045f:		.byte	?
+; written by: l2DEE
+; modified by: l2DF8
 v0460:		.byte	?
+; read by: l34C1
+; written by: $2e5f
 v0461:		.byte	?
 unused_0462:		.byte	?
+; read by: l2E21, l34C1
+; written by: l2E00
+; modified by: l2E17
 v0463:		.byte	?
+; read by: swing, $31d0, l33B2, l33E5
+; written by: l2D04, $31d6, l33B2
 golfer_x:		.byte	?
 unused_0465:		.byte	?
+; read by: l33E5
+; written by: l2D04
 golfer_y:		.byte	?
 unused_0467:
 		.fill	3
+; read by: l2D3E, raise_meter, lower_meter, l2DC8, l2DE0, l2E21
+; written by: l2D3E, raise_meter, lower_meter
 power_level:		.byte	?
 unused_046b:		.byte	?
+; read by: l4103, shot_loop
+; written by: l379D, l4103
 v046c:		.byte	?
+; read by: l4103, shot_loop
+; written by: l379D, l4103
 v046d:		.byte	?
+; read by: l4103, shot_loop
+; written by: l379D, l4103
 v046e:		.byte	?
+; read by: l4103, shot_loop
+; written by: l379D, l4103
 v046f:		.byte	?
+; read by: l3DC3, l3EB0, draw_flag
+; written by: shot_loop, draw_flag
 green_flag_x:		.byte	?
+; read by: l3DC3, l3EB0, draw_flag, lB525
+; written by: shot_loop, draw_flag
 green_flag_y:		.byte	?
+; read by: $b4e4
+; written by: lB45A
 aim_x:		.byte	?
+; read by: $b4de
 aim_y:		.byte	?
+; read by: lB568
 aim_max:		.byte	?
+; read by: lB58C
 aim_min:		.byte	?
+; read by: l36E6, lB508, lB568, lB58C
+; written by: l3F8D, lB4F5, lB508, lB558
+; modified by: lB573, lB597
 aim_offset:		.byte	?
+; read by: lA40B
+; written by: l31FC, l3202
 v0477:		.byte	?
+; read by: l41E1
+; written by: main
 text_color:		.byte	?
+; read by: music_push, music_pop
+; written by: music_push, music_pop
 v0479:		.byte	?
+; written by: music_start
 v047a:		.byte	?
+; written by: music_start
 v047b:		.byte	?
+; written by: music_start
 v047c:		.byte	?
+; read by: music_pop
+; written by: music_push
 v047d:		.byte	?
 ; what the KERNAL printed while loading, under the game variables
+; read by: l082D
 old_screen:
 		.fill	837
+; called by: tamper_crash2
 l07C3:
 		.fill	3
+; called by: tamper_crash
 l07C6:
 		.fill	34
 unused_07e8:
@@ -438,6 +750,7 @@ d0833 = $0833
 		bne l082D
 		jmp l0116
 
+; read by: l0822
 decruncher_leftover:
 		.byte	$48, $ad, $dc, $84, $2a, $85, $f7, $ee, $02, $02, $d0, $03, $ee, $a2, $01, $20
 		.byte	$3c, $03, $4c, $80, $08, $4c, $80, $08, $69, $a0, $08, $20, $bd, $ff, $a9, $00
@@ -487,12 +800,16 @@ l08BC:
 		bne l08BC
 		jmp start
 
+; called by: old_loader
+; read by: lAB0A, lAB1B
 l08D0:
 		ldx loader_part
 		jsr tape_header
 		inc loader_part
 		rts 
 
+; read by: l08D0, lAB5F
+; modified by: l08D0
 loader_part:
 		.byte	$06, $ea
 		ldy #$08
@@ -502,6 +819,7 @@ loader_part:
 		inc loader_part2
 		rts 
 
+; modified by: $08e6
 loader_part2:
 		.byte	$43
 unused_08eb:
@@ -510,6 +828,7 @@ unused_08eb:
 
 ; ---- routine names ----
 ; converts the 16-bit A:X to a log: A the fraction (in 32nds of an octave), X the exponent
+; called by: project, l0B46, l0C97, l0CDE, l1D9A, compute_shot, l34C1, l3516, l35A8, l3E42, l4210, l4225, lAE22, lB525
 to_log:
 		stx pointer_06
 		ldx #$00
@@ -524,6 +843,7 @@ l0908:
 		plp 
 		bne l0908
 
+; jumped to by: to_log
 l0910:
 		ldy pointer_06
 		lda log_table, y
@@ -532,6 +852,7 @@ l0910:
 		clc 
 		rts 
 
+; jumped to by: l0910
 l091B:
 		ldx #$c0
 		sec 
@@ -539,18 +860,22 @@ l091B:
 
 ; ---- 3D engine ----
 ; back from a log in A:X to a 16-bit value
+; called by: project, l0B46, l0C97, l0CDE, l1DA8, l34C1, l3516, l3E42, l4225, lAE22, lB525
+; jumped to by: l35A8
 from_log:
 		cmp #$80
 		bcc l0927
 		and #$7f
 		bpl l092B
 
+; jumped to by: from_log
 l0927:
 		dex 
 		dex 
 		dex 
 		dex 
 
+; jumped to by: from_log
 l092B:
 		tay 
 		lda exp_table, y
@@ -567,13 +892,16 @@ l0939:
 		dex 
 		bne l0939
 
+; jumped to by: l092B, l0945
 l0941:
 		clc 
 
+; jumped to by: l0939
 l0942:
 		ldx pointer_06
 		rts 
 
+; jumped to by: l092B
 l0945:
 		lsr pointer_06
 		inx 
@@ -581,10 +909,12 @@ l0945:
 		beq l0941
 
 ; log_value -= A:X, i.e. divides
+; called by: l0B46, compute_shot, l3516, l3E42, l4225, lAE22, lB525
 log_divide:
 		jsr log_negate
 
 ; log_value += A:X, i.e. multiplies
+; called by: l0B46, l1DA8, compute_shot, l34C1, l3516, l35A8, l3E42, l4225, lB525
 log_multiply:
 		clc 
 		adc log_value
@@ -596,10 +926,12 @@ log_multiply:
 		bcc l095D
 		adc #$06
 
+; jumped to by: log_multiply
 l095D:
 		sta log_value + $1
 		rts 
 
+; called by: log_divide
 log_negate:
 		clc 
 		eor #$ff
@@ -614,12 +946,14 @@ log_negate:
 		bcs l0972
 		sbc #$07
 
+; jumped to by: log_negate
 l0972:
 		tax 
 		pla 
 		rts 
 
 ; log_value = A:X - log_value
+; called by: project, l0C97, l0CDE
 log_divide_into:
 		sec 
 		sbc log_value
@@ -631,10 +965,12 @@ log_divide_into:
 		bcs l0983
 		sbc #$06
 
+; jumped to by: log_divide_into
 l0983:
 		sta log_value + $1
 		rts 
 
+; read by: l0910
 log_table:
 		.byte	$00, $00, $20, $33, $40, $4a, $53, $5a, $60, $65, $6a, $6f, $73, $76, $7a, $7d
 		.byte	$80, $83, $85, $88, $8a, $8d, $8f, $91, $93, $95, $96, $98, $9a, $9b, $9d, $9f
@@ -652,6 +988,7 @@ log_table:
 		.byte	$f6, $f7, $f7, $f7, $f7, $f8, $f8, $f8, $f8, $f8, $f9, $f9, $f9, $f9, $f9, $fa
 		.byte	$fa, $fa, $fa, $fa, $fb, $fb, $fb, $fb, $fb, $fc, $fc, $fc, $fc, $fc, $fd, $fd
 		.byte	$fd, $fd, $fd, $fe, $fe, $fe, $fe, $fe, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
+; read by: l092B
 exp_table:
 		.byte	$10, $10, $11, $11, $11, $12, $12, $13, $13, $13, $14, $14, $15, $15, $16, $16
 		.byte	$17, $17, $18, $18, $19, $19, $1a, $1a, $1b, $1b, $1c, $1d, $1d, $1e, $1f, $1f
@@ -663,6 +1000,8 @@ exp_table:
 		.byte	$b5, $b9, $bd, $c1, $c5, $ca, $ce, $d3, $d7, $dc, $e1, $e6, $eb, $f0, $f5, $fb
 
 ; projects view_x/view_y to proj_x/proj_y: x scaled by 1/depth around the middle, y = scale/depth
+; called by: l212E, l297F, l2B54, lB700
+; jumped to by: l3DAD
 project:
 		lda view_y + $1
 		ldx view_y
@@ -690,6 +1029,7 @@ project:
 		sbc view_x + $1
 		sta view_x + $1
 
+; jumped to by: project
 l0B46:
 		ldx view_x
 		jsr to_log
@@ -717,6 +1057,7 @@ l0B46:
 		sta proj_x + $1
 		bcc l0B94
 
+; jumped to by: l0B46
 l0B85:
 		sec 
 		sbc proj_x
@@ -725,19 +1066,24 @@ l0B85:
 		sbc proj_x + $1
 		sta proj_x + $1
 
+; jumped to by: l0B46
 l0B94:
 		rts 
 
+; called by: main
 l0B95:
 		rts 
 
 ; log-domain constants: +0 is 1/sqrt(2), +4 and +6 the projection scales, +$a the
 ; current shape scale, +$c the log of the depth being projected
+; read by: project, l0B46, rotate_45, l0CB4, l1DA8
+; written by: project, l1F33, l1F71, l3E04, l3E30
 math_words:
 		.word	$0010, $00f0, $00d0, $00f0, $0065, $fd00, $0000
 
 ; makes point_x/point_y relative to the ball and turns it to the view, or culls it when it's
 ; outside the view's octants
+; called by: l212E, l28E9, clip_edge, l2A7C, l2AFE, l376C, draw_flag, lB700
 to_view:
 		lda #$00
 		sta octant
@@ -757,6 +1103,7 @@ to_view:
 		eor #$ff
 		adc #$01
 
+; jumped to by: to_view
 l0BC3:
 		sta v21
 		lda point_x
@@ -775,6 +1122,7 @@ l0BC3:
 		eor #$ff
 		adc #$01
 
+; jumped to by: l0BC3
 l0BE0:
 		cmp v21
 		rol octant
@@ -789,9 +1137,12 @@ l0BE0:
 		cmp #$07
 		bne l0BFC
 
+; jumped to by: l0BE0, l0BFC
+; written by: set_direction, l0D91
 l0BF9:
 		jmp rotate_1
 
+; jumped to by: l0BE0
 l0BFC:
 		lda #$ff
 		cmp direction_flag
@@ -799,8 +1150,11 @@ l0BFC:
 		sta view_y + $1
 		rts 
 
+; read by: l0BFC, lB700
+; written by: l28E9, clip_edge, l2A7C, l2AFE, lB700
 direction_flag:
 		.byte	$00
+; read by: l0BE0
 direction_order:
 		.byte	$00, $01, $07, $06, $03, $02, $04, $05
 
@@ -820,6 +1174,7 @@ rotate_0:
 		sbc point_y + $1
 		sta point_y + $1
 
+; jumped to by: l0BF9
 rotate_1:
 		lda point_x
 		sta view_x
@@ -885,6 +1240,7 @@ rotate_45:
 		eor #$ff
 		adc #$00
 
+; jumped to by: rotate_45
 l0C97:
 		jsr to_log
 		jsr log_divide_into
@@ -903,6 +1259,7 @@ l0C97:
 		eor #$ff
 		adc #$00
 
+; jumped to by: l0C97
 l0CB4:
 		sta view_y + $1
 		stx view_y
@@ -928,6 +1285,7 @@ l0CB4:
 		eor #$ff
 		adc #$00
 
+; jumped to by: l0CB4
 l0CDE:
 		jsr to_log
 		jsr log_divide_into
@@ -946,6 +1304,7 @@ l0CDE:
 		eor #$ff
 		adc #$00
 
+; jumped to by: l0CDE
 l0CFB:
 		sta view_x + $1
 		stx view_x
@@ -989,6 +1348,7 @@ rotate_6:
 		sta view_x + $1
 		rts 
 
+; jumped to by: l0CFB
 rotate_7:
 		lda view_x
 		sta point_y
@@ -1007,11 +1367,13 @@ rotate_7:
 		sta view_y + $1
 		rts 
 
+; called by: turn_right, lA967
 direction_down:
 		lda direction
 		sec 
 		sbc #$01
 
+; jumped to by: direction_up, l3950
 set_direction:
 		and #$07
 		sta direction
@@ -1025,6 +1387,7 @@ set_direction:
 		sta l0BF9 + 2
 		rts 
 
+; jumped to by: set_direction
 l0D91:
 		lda #$73
 		sta l0BF9 + 1
@@ -1036,30 +1399,38 @@ l0D91:
 		sta $0d03
 		rts 
 
+; read by: set_direction, l0D91
 rotations:
 		.addr	rotate_1, rotate_5, rotate_3, rotate_6, rotate_0, rotate_4, rotate_2, rotate_7
 
+; read by: l0BE0, direction_down, direction_up, l200F, l36E6, l3AC7, lA99D, lB099
+; written by: set_direction
 direction:
 		.byte	$00
 
+; called by: turn_left, l3AB8, lA967, lA98E
+; jumped to by: l3AB8, lA98E
 direction_up:
 		lda direction
 		clc 
 		adc #$01
 		bpl set_direction
 
+; jumped to by: print_char
 draw_char:
 		pha 
 		jsr l0DC7
 		pla 
 		rts 
 
+; called by: draw_char
 l0DC7:
 		and #$7f
 		cmp #$20
 		bcs l0DD0
 		jmp l0E4B
 
+; jumped to by: l0DC7
 l0DD0:
 		sec 
 		sbc #$20
@@ -1093,6 +1464,7 @@ l0DD0:
 		sta pointer_04 + $1
 		lda text_x
 
+; jumped to by: l0DD0
 l0E08:
 		ldx text_y
 		jsr pixel_address
@@ -1136,17 +1508,21 @@ l0E37:
 		adc #$08
 		sta text_x
 
+; jumped to by: l0E53, l0E60
 l0E4A:
 		rts 
 
+; jumped to by: l0DC7
 l0E4B:
 		cmp #$0d
 		bne l0E65
 
+; called by: l0DD0
 l0E4F:
 		lda #$00
 		sta text_x
 
+; jumped to by: l0E65
 l0E53:
 		lda text_y
 		sec 
@@ -1155,10 +1531,12 @@ l0E53:
 		jsr scroll_text
 		jmp l0E4A
 
+; jumped to by: l0E53
 l0E60:
 		sta text_y
 		jmp l0E4A
 
+; jumped to by: l0E4B
 l0E65:
 		cmp #$0a
 		beq l0E53
@@ -1170,9 +1548,11 @@ l0E65:
 		lda #$c7
 		sta text_y
 
+; jumped to by: l0E65
 l0E78:
 		rts 
 
+; called by: l0E53
 scroll_text:
 		lda #$ff
 		sta pointer_04
@@ -1184,6 +1564,7 @@ scroll_text:
 		sta bitmap_pointer + $1
 		ldx #$30
 
+; jumped to by: l0E8D
 l0E8B:
 		ldy #$a0
 
@@ -1222,6 +1603,7 @@ l0EB5:
 		sta text_y
 		rts 
 
+; called by: l0E1B, l0E37
 l0EC7:
 		tax 
 		lda double_bits, x
@@ -1235,13 +1617,19 @@ l0EC7:
 		sta (bitmap_pointer), y
 		rts 
 
+; read by: l0EC7
 double_bits:
 		.byte	$00, $03, $0c, $0f, $30, $33, $3c, $3f, $c0, $c3, $cc, $cf, $f0, $f3, $fc, $ff
+; read by: l0EC7
+; written by: l0EC7
 v0eed:		.byte	$aa
 
+; read by: l0DD0
 font_pointer:
 		.word	$7f4e
 
+; read by: l190F
+; written by: l18C9, l1929, l1ACA, l1B04, l1B2D, l1B5F
 fill_stack:
 		.byte	$98, $98, $76, $01, $88, $8a, $87, $01, $84, $85, $88, $01, $7f, $81, $89, $01
 		.byte	$7d, $7e, $89, $01, $74, $76, $8b, $01, $70, $71, $8c, $01, $51, $52, $8d, $01
@@ -1262,11 +1650,16 @@ unused_z80_junk:
 		.byte	$d1, $e1, $21, $bb, $02, $e5, $d5, $c5, $c9, $b7, $cd, $f7, $10, $23, $22, $ce
 		.byte	$41, $7e, $f6, $28, $77, $cd, $86, $32, $22, $df, $41, $0e, $00, $c5, $cd
 
+; called by: lC01A
+; jumped to by: lB5D8
 l0FF3:
 		jsr scnkey
 		jsr getin
 		beq l0FF3
 
+; called by: l2C69, print_hex, print_club_name, l3A76, read_hex_digit, l3B78, color_text, lACFC, lB14A, lB360
+; jumped to by: print_nibble, print_club_name
+; written by: bitmap_mode, text_mode
 print_char:
 		jmp draw_char
 
@@ -1282,6 +1675,7 @@ screen_on:
 		sta vic_control1
 		rts 
 
+; called by: l0E65
 clear_bitmap:
 		lda #$00
 		sta pointer_06
@@ -1293,6 +1687,7 @@ clear_bitmap:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: l102B
 l1022:
 		lda #$00
 		sta (pointer_06), y
@@ -1300,6 +1695,7 @@ l1022:
 		bne l102B
 		inc pointer_06 + $1
 
+; jumped to by: l1022
 l102B:
 		inc pointer_08
 		bne l1022
@@ -1307,6 +1703,7 @@ l102B:
 		bne l1022
 		rts 
 
+; called by: new_game
 bitmap_mode:
 		lda #$c1
 		sta print_char + 1
@@ -1340,9 +1737,16 @@ text_mode:
 		sta vic_control2
 		rts 
 
+; written by: l1357, l153B, l15A6, l163A, l173F, l1B90
+; modified by: l1357, l153B, l15A6, l163A, l173F
 seed_countdown:
 		.byte	$0a
+; read by: plot_pixel, l1501, l1567, l15F5, draw_line, l1703
+; written by: l1357, l153B, l15A6, l163A, draw_line, l173F, draw_shape, l1E2A, draw_polygon
+; modified by: l1357, l153B, l15A6, l163A, l173F
 seed_enable:		.byte	$ff
+; read by: l1CF3, l2844, lB805
+; written by: l12AD, l1BD5
 fill_seeds:
 		.byte	$41, $cd, $41, $86, $45, $88, $49, $8c, $4d, $8c, $51, $ff, $53, $8d, $5f, $8d
 		.byte	$62, $8d, $65, $8e, $6a, $8e, $74, $8a, $78, $89, $82, $87, $8b, $ff, $8c, $84
@@ -1360,6 +1764,8 @@ fill_seeds:
 		.byte	$b7, $fc, $4c, $34, $cd, $de, $3c, $cd, $17, $36, $fe, $0d, $20, $ef, $e5, $2a
 		.byte	$f0, $41, $e5, $2a, $e3, $41, $e5, $c3, $22, $37, $2a, $e3, $41, $23, $af, $32
 		.byte	$de, $41, $c3, $fd, $36, $7d, $93, $5f, $7c, $9a, $57, $c9, $3a, $c4, $3f, $b7
+; read by: l1BB6, lB805, lB822
+; written by: l12AD
 seed_edges:
 		.byte	$c2, $bf, $41, $87, $45, $89, $49, $8d, $4d, $8d, $51, $8d, $53, $8e, $5f, $8e
 		.byte	$62, $8e, $65, $8f, $6a, $8f, $74, $8b, $78, $8a, $82, $88, $8b, $86, $8d, $84
@@ -1377,9 +1783,12 @@ seed_edges:
 		.byte	$23, $72, $7b, $f6, $04, $5f, $c9, $d5, $f5, $2a, $fd, $41, $eb, $7b, $e6, $1f
 		.byte	$cc, $b3, $3b, $2a, $f5, $41, $19, $f1, $f5, $77, $7b, $e6, $1f, $fe, $1f, $28
 		.byte	$01, $13, $cc, $54, $3c, $eb, $22, $fd, $41, $f1, $d1, $c9, $7b, $e6, $e0, $5f
+; read by: add_fill_seed, l12AD, l1BB6, l1CF3, l2844, lB822
+; written by: l12AD, draw_object, l1CF3, draw_polygon, l2844, lA901, lB14A, lB3BF, lB623
 seed_count:		.byte	$02
 
 ; every 10 pixels of an outline, remembers a point next to it to fill from
+; called by: plot_pixel, l1501, l1567, l15F5, l1703
 add_fill_seed:
 		tsx 
 		lda d0103, x
@@ -1395,13 +1804,17 @@ add_fill_seed:
 		cmp point_x + $1
 		bcs l129E
 
+; written by: horizontal_line, l15DF, l15EB, l16B2, l1785
 d129A:
 		dey 
 		jmp l129F
 
+; jumped to by: add_fill_seed
+; written by: vertical_line, l1698, l176B
 l129E:
 		dex 
 
+; jumped to by: d129A
 l129F:
 		txa 
 		pha 
@@ -1410,14 +1823,17 @@ l129F:
 		jsr test_pixel
 		beq l12AD
 
+; jumped to by: l12AD
 l12A8:
 		pla 
 		pla 
 		lda #$ff
 
+; jumped to by: add_fill_seed
 l12AC:
 		rts 
 
+; jumped to by: l129F
 l12AD:
 		lda pixel_hit
 		php 
@@ -1448,12 +1864,20 @@ l12AD:
 		lda #$00
 		rts 
 
+; read by: l12AD
+; written by: add_fill_seed
 v12ec:
 		.byte	$98
+; read by: l12AD
+; written by: add_fill_seed
 v12ed:		.byte	$76
+; written by: draw_object
 v12ee:		.byte	$ff
+; read by: l12AD
+; written by: l12AD, l1354, l1538, l15A3, l1637, l173C, l1B90
 pixel_hit:		.byte	$ff
 
+; called by: l0E08, l12AD
 pixel_address:
 		pha 
 		and #$fc
@@ -1469,6 +1893,7 @@ pixel_address:
 		tax 
 		rts 
 
+; called by: l129F, l3C3F, lAE58, lB805
 test_pixel:
 		pha 
 		and #$fc
@@ -1486,6 +1911,7 @@ test_pixel:
 		and pixel_bits, x
 		rts 
 
+; jumped to by: vertical_line
 plot_pixel:
 		pha 
 		and #$fc
@@ -1512,9 +1938,11 @@ plot_pixel:
 		jsr add_fill_seed
 		jmp l1357
 
+; jumped to by: plot_pixel
 l1354:
 		sta pixel_hit
 
+; jumped to by: plot_pixel
 l1357:
 		sta seed_enable
 		dec seed_countdown
@@ -1523,17 +1951,23 @@ l1357:
 		lda #$0a
 		sta seed_countdown
 
+; jumped to by: l1357
 l1367:
 		rts 
 
+; read by: l0EC7, plot_pixel, l1501, l1567, l15F5, l1703, l19D0, l19EC, l1A6F, l1A8B, l1BB6, lB83D
+; written by: draw_line, l17CE, l17D6, l41EF, print_score_labels, draw_flag, draw_wind, lB2AE, lB623
 pixel_pattern:
 		.byte	$ff
 ; masks that clear one multicolor pixel, and its bits
+; read by: l12AD
 pixel_clear_masks:
 		.byte	$3f, $cf, $f3, $fc
+; read by: test_pixel, plot_pixel, l1501, l1567, l15F5, l1703, l18EF, l1929, l19D0, l1A6F, l1BB6, lB83D
 pixel_bits:
 		.byte	$c0, $30, $0c, $03
 ; bitmap row addresses, bottom row first
+; read by: pixel_address, test_pixel, plot_pixel, l1501, l1567, l15F5, l1703, l18EF, l1929, l1A1F
 bitmap_row_lo:
 		.byte	$07, $06, $05, $04, $03, $02, $01, $00, $c7, $c6, $c5, $c4, $c3, $c2, $c1, $c0
 		.byte	$87, $86, $85, $84, $83, $82, $81, $80, $47, $46, $45, $44, $43, $42, $41, $40
@@ -1548,6 +1982,7 @@ bitmap_row_lo:
 		.byte	$07, $06, $05, $04, $03, $02, $01, $00, $c7, $c6, $c5, $c4, $c3, $c2, $c1, $c0
 		.byte	$87, $86, $85, $84, $83, $82, $81, $80, $47, $46, $45, $44, $43, $42, $41, $40
 		.byte	$07, $06, $05, $04, $03, $02, $01, $00
+; read by: pixel_address, test_pixel, plot_pixel, l1501, l1567, l15F5, l1703, l18EF, l1929, l1A1F
 bitmap_row_hi:
 		.byte	$7e, $7e, $7e, $7e, $7e, $7e, $7e, $7e, $7c, $7c, $7c, $7c, $7c, $7c, $7c, $7c
 		.byte	$7b, $7b, $7b, $7b, $7b, $7b, $7b, $7b, $7a, $7a, $7a, $7a, $7a, $7a, $7a, $7a
@@ -1563,6 +1998,7 @@ bitmap_row_hi:
 		.byte	$62, $62, $62, $62, $62, $62, $62, $62, $61, $61, $61, $61, $61, $61, $61, $61
 		.byte	$60, $60, $60, $60, $60, $60, $60, $60
 
+; called by: draw_line
 l1501:
 		txa 
 		pha 
@@ -1592,9 +2028,11 @@ l1501:
 		jsr add_fill_seed
 		jmp l153B
 
+; jumped to by: l1501
 l1538:
 		sta pixel_hit
 
+; jumped to by: l1501
 l153B:
 		sta seed_enable
 		dec seed_countdown
@@ -1603,11 +2041,13 @@ l153B:
 		lda #$0a
 		sta seed_countdown
 
+; jumped to by: l153B
 l154B:
 		pla 
 		tax 
 		rts 
 
+; jumped to by: l16A2
 horizontal_line:
 		lda #$ea
 		sta d129A
@@ -1619,10 +2059,13 @@ horizontal_line:
 		sta l1567
 		bne l1567
 
+; jumped to by: horizontal_line
 l1562:
 		lda #$e8
 		sta l1567
 
+; jumped to by: horizontal_line, l15B6
+; written by: horizontal_line, l1562
 l1567:
 		dex 
 		cpx #$a0
@@ -1655,9 +2098,11 @@ l1567:
 		jsr add_fill_seed
 		jmp l15A6
 
+; jumped to by: l1567
 l15A3:
 		sta pixel_hit
 
+; jumped to by: l1567
 l15A6:
 		sta seed_enable
 		dec seed_countdown
@@ -1666,6 +2111,7 @@ l15A6:
 		lda #$0a
 		sta seed_countdown
 
+; jumped to by: l15A6
 l15B6:
 		pla 
 		tax 
@@ -1674,12 +2120,14 @@ l15B6:
 		lda v17ac
 		bne l1567
 
+; jumped to by: l1567
 l15C1:
 		lda #$00
 		sta v17ac
 		stx line_x
 		rts 
 
+; jumped to by: draw_line
 vertical_line:
 		lda #$ea
 		sta l129E
@@ -1694,6 +2142,7 @@ vertical_line:
 		pla 
 		jmp plot_pixel
 
+; jumped to by: vertical_line
 l15DF:
 		bcc l15EB
 		lda #$c8
@@ -1701,14 +2150,18 @@ l15DF:
 		sta l15F5
 		bne l15F3
 
+; jumped to by: l15DF
 l15EB:
 		lda #$88
 		sta d129A
 		sta l15F5
 
+; jumped to by: l15DF
 l15F3:
 		ldy line_y
 
+; jumped to by: l164A
+; written by: l15DF, l15EB
 l15F5:
 		dey 
 		cpy clip_top
@@ -1744,9 +2197,11 @@ l15F5:
 		jsr add_fill_seed
 		jmp l163A
 
+; jumped to by: l15F5
 l1637:
 		sta pixel_hit
 
+; jumped to by: l15F5
 l163A:
 		sta seed_enable
 		dec seed_countdown
@@ -1755,6 +2210,7 @@ l163A:
 		lda #$0a
 		sta seed_countdown
 
+; jumped to by: l163A
 l164A:
 		pla 
 		tax 
@@ -1764,6 +2220,7 @@ l164A:
 		lda v17ac
 		bne l15F5
 
+; jumped to by: l15F5
 l1657:
 		lda #$00
 		sta v17ac
@@ -1771,6 +2228,8 @@ l1657:
 		rts 
 
 ; draws a line from line_x/line_y to X/Y
+; called by: l1E21, lA901, draw_flag, lB14A, lB3BF, lB623
+; jumped to by: lB3BF
 draw_line:
 		stx point_y + $1
 		lda #$ff
@@ -1802,16 +2261,19 @@ draw_line:
 		bne l1693
 		jmp vertical_line
 
+; jumped to by: draw_line
 l1693:
 		bcs l1698
 		jmp l176B
 
+; jumped to by: l1693
 l1698:
 		ldx #$ca
 		stx l129E
 		ldx #$e8
 		stx l16EC
 
+; jumped to by: l176B
 l16A2:
 		sta point_x
 		tya 
@@ -1820,15 +2282,18 @@ l16A2:
 		bne l16AD
 		jmp horizontal_line
 
+; jumped to by: l16A2
 l16AD:
 		bcs l16B2
 		jmp l1785
 
+; jumped to by: l16AD
 l16B2:
 		ldy #$c8
 		sty d129A
 		sty l16FA
 
+; jumped to by: l1785
 l16BA:
 		sta point_x + $1
 		ora point_x
@@ -1841,6 +2306,7 @@ l16C0:
 		ora point_x + $1
 		bpl l16C0
 
+; jumped to by: l16BA
 l16CA:
 		ldx line_x
 		ldy line_y
@@ -1854,6 +2320,7 @@ l16CA:
 		lda #$80
 		pha 
 
+; jumped to by: l174F, l179D
 l16E2:
 		pla 
 		clc 
@@ -1862,6 +2329,8 @@ l16E2:
 		bcs l16EC
 		jmp l179D
 
+; jumped to by: l16E2
+; written by: l1698, l176B
 l16EC:
 		inx 
 		cpx #$a0
@@ -1872,6 +2341,8 @@ l16EC:
 		sta log_value + $1
 		bcc l1703
 
+; jumped to by: l17A9
+; written by: l16B2, l1785
 l16FA:
 		dey 
 		cpy clip_top
@@ -1879,6 +2350,7 @@ l16FA:
 		cpy clip_bottom
 		bcs l1760
 
+; jumped to by: l16EC
 l1703:
 		sty plot_y
 		txa 
@@ -1909,9 +2381,11 @@ l1703:
 		jsr add_fill_seed
 		jmp l173F
 
+; jumped to by: l1703
 l173C:
 		sta pixel_hit
 
+; jumped to by: l1703
 l173F:
 		sta seed_enable
 		dec seed_countdown
@@ -1920,6 +2394,7 @@ l173F:
 		lda #$0a
 		sta seed_countdown
 
+; jumped to by: l173F
 l174F:
 		pla 
 		tax 
@@ -1931,6 +2406,7 @@ l174F:
 		lda v17ac
 		bne l16E2
 
+; jumped to by: l16EC, l16FA
 l1760:
 		lda #$00
 		sta v17ac
@@ -1939,6 +2415,7 @@ l1760:
 		pla 
 		rts 
 
+; jumped to by: l1693
 l176B:
 		pha 
 		lda log_value + $1
@@ -1954,6 +2431,7 @@ l176B:
 		stx l16EC
 		jmp l16A2
 
+; jumped to by: l16AD
 l1785:
 		pha 
 		lda log_value + $1
@@ -1968,6 +2446,7 @@ l1785:
 		stx l16FA
 		jmp l16BA
 
+; jumped to by: l16E2
 l179D:
 		lda log_value + $1
 		clc 
@@ -1976,14 +2455,20 @@ l179D:
 		bcs l17A9
 		jmp l16E2
 
+; jumped to by: l179D
 l17A9:
 		jmp l16FA
 
+; read by: l15B6, l164A, l174F
+; written by: l15C1, vertical_line, l1657, l1760, l1ECA
 v17ac:
 		.byte	$00
+; read by: add_fill_seed
+; written by: draw_clipped_line, l1E2A, l1EDA
 v17ad:		.byte	$00
 
 ; colors the screen cell under a filled pixel, and keeps the nearest depth in cell_depths
+; called by: l19A7, l19EC, l1A1F, l1A8B
 set_cell_color:
 		tya 
 		pha 
@@ -1993,6 +2478,7 @@ set_cell_color:
 		bcs l17BA
 		sta (pointer_64), y
 
+; jumped to by: set_cell_color
 l17BA:
 		lda (pointer_08), y
 		and #$0f
@@ -2002,10 +2488,12 @@ l17BA:
 		beq l17CE
 		bne l17D6
 
+; jumped to by: l17BA
 l17C9:
 		lda fill_color
 		sta (pointer_08), y
 
+; jumped to by: l17BA
 l17CE:
 		lda #$aa
 		sta pixel_pattern
@@ -2013,6 +2501,7 @@ l17CE:
 		tay 
 		rts 
 
+; jumped to by: l17BA
 l17D6:
 		ora fill_color_high
 		sta (pointer_08), y
@@ -2023,6 +2512,7 @@ l17D6:
 		rts 
 
 ; screen row addresses, bottom row first, each repeated for 4 pixel rows
+; read by: l19A7, l1A1F, l3CC7
 screen_rows:
 		.word	$47c0, $47c0, $47c0, $47c0, $4798, $4798, $4798, $4798, $4770, $4770, $4770, $4770, $4748, $4748, $4748, $4748
 		.word	$4720, $4720, $4720, $4720, $46f8, $46f8, $46f8, $46f8, $46d0, $46d0, $46d0, $46d0, $46a8, $46a8, $46a8, $46a8
@@ -2033,11 +2523,13 @@ screen_rows:
 		.word	$4400, $4400, $4400, $4400
 
 ; fills the area around X/Y with color A, scanline by scanline through fill_stack
+; called by: l1CA0, l1CF3, l2844
 flood_fill:
 		cpy #$c8
 		bcc l18B0
 		rts 
 
+; jumped to by: flood_fill
 l18B0:
 		sta fill_color
 		asl 
@@ -2054,6 +2546,7 @@ l18B0:
 		beq l18C9
 		rts 
 
+; jumped to by: l18B0
 l18C9:
 		ldx point_x
 		ldy v0d
@@ -2076,6 +2569,7 @@ l18C9:
 		sty point_y + $1
 		bne l1929
 
+; called by: l18B0, l1994
 l18EF:
 		pha 
 		and #$fc
@@ -2093,11 +2587,13 @@ l18EF:
 		and pixel_bits, x
 		rts 
 
+; jumped to by: l1929, l1989, l19A2, l1BA1
 l190A:
 		ldy point_y + $1
 		bne l190F
 		rts 
 
+; jumped to by: l190A
 l190F:
 		dey 
 		lda fill_stack, y
@@ -2113,6 +2609,7 @@ l190F:
 		sta log_value
 		sty point_y + $1
 
+; jumped to by: l18C9, l1992, l1994, l1BAF
 l1929:
 		lda log_value
 		clc 
@@ -2166,15 +2663,18 @@ l1929:
 		sbc #$04
 		sta point_y + $1
 
+; jumped to by: l1929
 l1989:
 		stx point_x
 		cpx log_value
 		bne l1992
 		jmp l190A
 
+; jumped to by: l1989
 l1992:
 		bne l1929
 
+; jumped to by: l1929
 l1994:
 		lda log_value
 		sta point_x
@@ -2183,10 +2683,12 @@ l1994:
 		bne l19A2
 		jmp l1929
 
+; jumped to by: l1994
 l19A2:
 		beq l19A7
 		jmp l190A
 
+; jumped to by: l1929, l19A2
 l19A7:
 		tya 
 		pha 
@@ -2211,9 +2713,11 @@ l19A7:
 		tay 
 		jsr set_cell_color
 
+; jumped to by: l19D0
 l19CE:
 		lda (bitmap_pointer), y
 
+; jumped to by: l19EC
 l19D0:
 		and pixel_bits, x
 		bne l1A1F
@@ -2257,6 +2761,7 @@ l19EC:
 		bcs l19EC
 		bcc l1A1F
 
+; jumped to by: l19D0, l19EC
 l1A1F:
 		inc pointer_06
 		lda log_value
@@ -2302,9 +2807,11 @@ l1A1F:
 		tax 
 		bcc l1A7E
 
+; jumped to by: l1A7E
 l1A6D:
 		lda (bitmap_pointer), y
 
+; jumped to by: l1A8B
 l1A6F:
 		and pixel_bits, x
 		bne l1AB9
@@ -2313,6 +2820,7 @@ l1A6F:
 		ora (bitmap_pointer), y
 		sta (bitmap_pointer), y
 
+; jumped to by: l1A1F
 l1A7E:
 		inx 
 		inc pointer_06
@@ -2347,6 +2855,7 @@ l1A8B:
 		cmp #$a0
 		bcc l1A8B
 
+; jumped to by: l1A6F, l1A7E, l1A8B
 l1AB9:
 		dec pointer_06
 		lda point_x
@@ -2357,6 +2866,7 @@ l1AB9:
 		bcs l1ACA
 		jmp l1BE3
 
+; jumped to by: l1AB9
 l1ACA:
 		lda log_value
 		sec 
@@ -2390,6 +2900,7 @@ l1ACA:
 		sta point_y + $1
 		bne l1B2D
 
+; jumped to by: l1ACA
 l1B04:
 		cmp #$03
 		bcc l1B2D
@@ -2413,6 +2924,7 @@ l1B04:
 		sbc #$04
 		sta point_y + $1
 
+; jumped to by: l1ACA, l1B04
 l1B2D:
 		lda point_x
 		sec 
@@ -2441,6 +2953,7 @@ l1B2D:
 		sta point_y + $1
 		bne l1B90
 
+; jumped to by: l1B2D
 l1B5F:
 		cmp #$03
 		bcc l1B90
@@ -2469,6 +2982,7 @@ l1B5F:
 		sbc #$04
 		sta point_y + $1
 
+; jumped to by: l1B2D, l1B5F
 l1B90:
 		ldy point_y + $1
 		beq l1BA1
@@ -2480,6 +2994,7 @@ l1B90:
 		lda #$0a
 		sta seed_countdown
 
+; jumped to by: l1B90
 l1BA1:
 		lda v0d
 		clc 
@@ -2489,16 +3004,23 @@ l1BA1:
 		bcc l1BAF
 		jmp l190A
 
+; jumped to by: l1BA1
 l1BAF:
 		jmp l1929
 
+; read by: l17BA, l17C9
+; written by: l18B0
 fill_color:
 		.byte	$0d
+; read by: l17D6
+; written by: l18B0
 fill_color_high:		.byte	$d0
 
+; called by: l1CA0, l283E
 replot_seeds:
 		ldy #$02
 
+; jumped to by: l1BDC
 l1BB6:
 		cpy seed_count
 		beq l1BE2
@@ -2514,22 +3036,27 @@ l1BB6:
 		sta (bitmap_pointer), y
 		bne l1BDC
 
+; jumped to by: l1BB6
 l1BD5:
 		lda #$ff
 		ldy plot_y
 		sta fill_seeds, y
 
+; jumped to by: l1BB6
 l1BDC:
 		ldy plot_y
 		iny 
 		jmp l1BB6
 
+; jumped to by: l1BB6
 l1BE2:
 		rts 
 
+; jumped to by: l1AB9
 l1BE3:
 		jmp l1BE3
 
+; called by: l1FA1
 draw_object:
 		lda proj_y
 		sta object_depth
@@ -2544,6 +3071,7 @@ unused_1bfb:
 		.byte	$ea
 
 ; draws a list of polygons from pointer_04, scaled by math_words+$a, each outlined and filled
+; jumped to by: lB7FD
 draw_shape:
 		ldy #$00
 		sty seed_enable
@@ -2612,6 +3140,7 @@ l1C5F:
 		ldy v1f16
 		bne l1C5F
 
+; jumped to by: l1C5F
 l1CA0:
 		sty v1f16
 		lda v1f18
@@ -2645,6 +3174,7 @@ l1CA0:
 		pha 
 		jsr flood_fill
 
+; jumped to by: l1CA0
 l1CF3:
 		ldx seed_count
 		dex 
@@ -2661,10 +3191,12 @@ l1CF3:
 		jsr flood_fill
 		jmp l1CF3
 
+; jumped to by: l1CF3
 l1D0F:
 		pla 
 		ldy v1f16
 
+; jumped to by: draw_object
 l1D13:
 		lda (pointer_04), y
 		iny 
@@ -2672,6 +3204,7 @@ l1D13:
 		bne l1D1B
 		rts 
 
+; jumped to by: l1D13
 l1D1B:
 		jsr scale_x
 		lda pen_x
@@ -2700,6 +3233,7 @@ l1D1B:
 		sta pointer_04 + $1
 		jmp lA023
 
+; called by: draw_shape, l1C5F, l1D1B
 scale_x:
 		stx v1f17
 		sty v1f16
@@ -2712,6 +3246,7 @@ scale_x:
 		ldy v1f16
 		rts 
 
+; called by: draw_shape, l1C5F, l1D1B
 scale_y:
 		stx v1f17
 		sty v1f16
@@ -2724,6 +3259,7 @@ scale_y:
 		ldy v1f16
 		rts 
 
+; called by: scale_x, scale_y, l3E42
 scale_step:
 		cmp #$80
 		php 
@@ -2732,6 +3268,7 @@ scale_step:
 		eor #$ff
 		adc #$01
 
+; jumped to by: scale_step
 l1D9A:
 		tax 
 		lda #$00
@@ -2741,6 +3278,7 @@ l1D9A:
 		bne l1DA8
 		dex 
 
+; jumped to by: l1D9A
 l1DA8:
 		stx log_value + $1
 		lda math_words + $a
@@ -2761,12 +3299,14 @@ l1DA8:
 		eor #$ff
 		adc #$00
 
+; jumped to by: l1DA8
 l1DCA:
 		rts 
 
 unused_1dcb:
 		.byte	$00, $00
 
+; called by: draw_clipped_line, l2718, l2786, l28C6
 line_start_on_screen:
 		lda line_x + $1
 		ora line_y + $1
@@ -2780,10 +3320,12 @@ line_start_on_screen:
 		cmp clip_bottom
 		rts 
 
+; jumped to by: line_start_on_screen
 l1DE2:
 		sec 
 		rts 
 
+; called by: l1CA0, l1E1C, l1EC2, l1ED2, l297F
 pen_on_screen:
 		lda pen_x + $1
 		ora pen_y + $1
@@ -2797,11 +3339,13 @@ pen_on_screen:
 		cmp clip_bottom
 		rts 
 
+; jumped to by: pen_on_screen
 l1DFD:
 		sec 
 		rts 
 
 ; draws from line_x/line_y to pen_x/pen_y, finding the screen's edge by halving the line
+; called by: l1C5F, l1CA0, l281A, l29FF
 draw_clipped_line:
 		lda pen_x + $1
 		pha 
@@ -2817,15 +3361,18 @@ draw_clipped_line:
 		bcc l1E1C
 		jmp l1ED2
 
+; jumped to by: draw_clipped_line
 l1E1C:
 		jsr pen_on_screen
 		bcs l1E41
 
+; jumped to by: l1EA9, l1ECA
 l1E21:
 		ldx pen_x
 		ldy pen_y
 		jsr draw_line
 
+; jumped to by: l1ED2
 l1E2A:
 		lda #$ff
 		sta seed_enable
@@ -2841,6 +3388,7 @@ l1E2A:
 		sta line_x + $1
 		rts 
 
+; jumped to by: l1E1C, l1EC2, l1EDA
 l1E41:
 		lda pen_x
 		sta v1f1a
@@ -2882,6 +3430,7 @@ l1E41:
 		lda pen_x + $1
 		cmp v1f1b
 
+; jumped to by: l1E41
 l1E99:
 		bne l1EC2
 		lda pen_y
@@ -2890,6 +3439,7 @@ l1E99:
 		lda pen_y + $1
 		cmp v1f1d
 
+; jumped to by: l1E99
 l1EA9:
 		bne l1EC2
 		lda line_x
@@ -2902,21 +3452,25 @@ l1EA9:
 		sta pen_y + $1
 		jmp l1E21
 
+; jumped to by: l1E99, l1EA9
 l1EC2:
 		jsr pen_on_screen
 		bcc l1ECA
 		jmp l1E41
 
+; jumped to by: l1EC2
 l1ECA:
 		lda #$ff
 		sta v17ac
 		jmp l1E21
 
+; jumped to by: draw_clipped_line
 l1ED2:
 		jsr pen_on_screen
 		bcc l1EDA
 		jmp l1E2A
 
+; jumped to by: l1ED2
 l1EDA:
 		lda pen_x + $1
 		pha 
@@ -2948,35 +3502,72 @@ l1EDA:
 
 unused_1f12:
 		.byte	$af, $32
+; read by: scale_x
+; written by: l1F83, l1F97
 v1f14:		.byte	$0a
+; read by: l1D9A
+; written by: scale_x, scale_y, l3E42
 v1f15:		.byte	$ff
+; read by: l1C5F, l1CA0, l1D0F, scale_x, scale_y
+; written by: l1C5F, l1CA0, scale_x, scale_y
 v1f16:		.byte	$10
+; read by: scale_x, scale_y
+; written by: scale_x, scale_y
 v1f17:		.byte	$01
+; read by: l1CA0
+; written by: draw_shape
 v1f18:		.byte	$a9
+; read by: l1CA0
+; written by: draw_shape
 v1f19:		.byte	$00
+; read by: l1E41
+; written by: l1E41
 v1f1a:		.byte	$a0
+; read by: l1E41
+; written by: l1E41
 v1f1b:		.byte	$00
+; read by: l1E99
+; written by: l1E41
 v1f1c:		.byte	$6f
+; read by: l1E99
+; written by: l1E41
 v1f1d:		.byte	$00
+; read by: l1CA0
+; written by: draw_shape
 v1f1e:		.byte	$97
+; read by: l1CA0
+; written by: draw_shape
 v1f1f:		.byte	$00
 
+; read by: draw_shape, l1C5F, l1D1B, pen_on_screen, draw_clipped_line, l1E21, l1E41, l1EDA, l29CA, lB7D2
+; written by: draw_shape, l1C5F, l1CA0, scale_x, l1E41, l1EA9, l1EDA, l281A, l297F, l29CA, l2A62
+; modified by: l1E41
 pen_x:
 		.word	$009a
+; read by: draw_shape, l1C5F, l1D1B, pen_on_screen, draw_clipped_line, l1E21, l1E41, l1E99, l1EDA, l29CA, lB7D2
+; written by: draw_shape, l1C5F, l1CA0, scale_y, l1E41, l1EA9, l1EDA, l281A, l297F, l29CA, l2A62
+; modified by: l1E41
 pen_y:		.word	$0074
 ; a projected point on the screen
+; read by: l0B46, l0B85, draw_shape, l1C5F, l1CA0, l1D1B, l212E, l2718, l2786, l281A, l297F, l2B54, l3B9C, l3BC0, l3C3F, l3C8E, l3CC7, l3D17, l3E04, l42C0, lAE58, lB700, lB79F
+; written by: l0B46, l0B85, l1D1B, l1F33, l297F, l2B54, l3B9C, l3C16, l3C74, l3D17, l3D92, l3DC3, l3E04, read_aim_cursor, lAE58, lB700, lB7D2
+; modified by: l3CC7, l3DC3, lAE58
 proj_x:		.word	$0160
+; read by: draw_object, draw_shape, l1C5F, l1CA0, l1D1B, l212E, l2718, l2786, l281A, l297F, l2B54, l3B9C, l3BE0, l3C3F, l3C8E, l3CFA, l3D17, l3D61, l3DC3, l3E04, l3E42, l42C0, lAE58, lB700, lB75C, lB79F
+; written by: project, l1D1B, l1F33, l297F, l2B54, l3B9C, l3C16, l3C74, l3C8E, l3D17, l3D92, l3DC3, l3E42, lAE58, lB700, lB7D2
 proj_y:		.word	$ffdb
 
 unused_1f28:
 		.byte	$32, $63
 
+; called by: l20D7
 draw_objects:
 		ldy #$00
 		cpy object_count
 		bne l1F33
 		jmp l1FC4
 
+; jumped to by: draw_objects, l1FB3, l1FBF
 l1F33:
 		lda object_x, y
 		sec 
@@ -3005,6 +3596,7 @@ l1F33:
 		sta math_words + $b
 		jmp l1F83
 
+; jumped to by: l1F33
 l1F71:
 		lsr 
 		lsr 
@@ -3016,6 +3608,7 @@ l1F71:
 		lda far_scales + $1, x
 		sta math_words + $b
 
+; jumped to by: l1F33
 l1F83:
 		lda object_types, y
 		sty v2007
@@ -3027,6 +3620,7 @@ l1F83:
 		sbc #$07
 		bcs l1FA1
 
+; jumped to by: l1F83
 l1F97:
 		cmp #$09
 		bcc l1FA1
@@ -3034,6 +3628,7 @@ l1F97:
 		sec 
 		sbc #$09
 
+; jumped to by: l1F83, l1F97
 l1FA1:
 		asl 
 		tax 
@@ -3044,6 +3639,7 @@ l1FA1:
 		jsr draw_object
 		ldy v2007
 
+; jumped to by: l1F33
 l1FB3:
 		iny 
 		cpy #$30
@@ -3052,23 +3648,30 @@ l1FB3:
 		bcs l1FBF
 		jmp l1F33
 
+; jumped to by: l1FB3
 l1FBF:
 		bcs l1FC4
 		jmp l1F33
 
+; jumped to by: draw_objects, l1FB3, l1FBF
 l1FC4:
 		jmp draw_terrain
 
+; read by: l1F33, l3E04
 near_scales:
 		.word	$fc00, $fd00, $fe00, $fe00, $ff00, $ff00, $ff00, $ff00, $0000, $0000, $0000, $0000, $0000, $0000, $0000, $0100
+; read by: l1F71, l3E30
 far_scales:
 		.word	$fc00, $0000, $0100, $0100, $0200, $0200, $0200, $0200, $0300, $0300, $0300, $0300, $0300, $0400, $0400, $0400
 
+; read by: l1FA1
+; written by: l1F83
 v2007:
 		.byte	$25
 
 ; draws the 3D view from the ball: collects the objects and features of the ball's map cell
 ; and the cells ahead, then draws them nearest first; fills never cover what is already drawn
+; called by: lB5B0
 draw_view:
 		lda #$00
 		sta feature_count
@@ -3107,6 +3710,7 @@ l200F:
 		adc #$02
 		tax 
 
+; jumped to by: l200F
 l204B:
 		txa 
 		clc 
@@ -3116,6 +3720,7 @@ l204B:
 		adc #$00
 		sta step_pointer + $1
 
+; jumped to by: l20C5
 l205B:
 		sty v20de
 		lda ball_x
@@ -3140,6 +3745,7 @@ l205B:
 		sta point_x + $1
 		bcc l209E
 
+; jumped to by: l205B
 l2089:
 		clc 
 		eor #$ff
@@ -3154,6 +3760,7 @@ l2089:
 		sbc #$00
 		sta point_x + $1
 
+; jumped to by: l205B
 l209E:
 		dey 
 		lda (pointer_08), y
@@ -3166,6 +3773,7 @@ l209E:
 		sta point_y + $1
 		bcc l20C5
 
+; jumped to by: l209E
 l20B0:
 		clc 
 		eor #$ff
@@ -3180,6 +3788,7 @@ l20B0:
 		sbc #$00
 		sta point_y + $1
 
+; jumped to by: l209E
 l20C5:
 		dey 
 		sty v20de
@@ -3189,11 +3798,14 @@ l20C5:
 		bmi l20D7
 		jmp l205B
 
+; jumped to by: l20C5
 l20D7:
 		jsr sort_objects
 		jsr draw_objects
 		rts 
 
+; read by: l20C5
+; written by: l205B, l20C5
 v20de:
 		.byte	$ff
 
@@ -3204,9 +3816,12 @@ direction_steps:
 		.char	-64, -64, -64, 64, -64, 0, 0, -64, 0, 64, -64, -64, 0, -64, -64, 0
 		.char	64, -64, -64, -64, 0, -64, 64, 0, -64, 0, 64, -64, 64, 0, 0, -64
 
+; read by: l204B, l205B
+; written by: l200F, l204B
 step_pointer:
 		.word	$20df
 
+; called by: l200F, l20C5
 collect_objects:
 		lda #$10
 		sta object_pass
@@ -3214,9 +3829,11 @@ collect_objects:
 		bne l212C
 		inc pointer_08 + $1
 
+; jumped to by: collect_objects, l212E
 l212C:
 		ldy #$00
 
+; jumped to by: l2184
 l212E:
 		iny 
 		lda (pointer_08), y
@@ -3261,6 +3878,7 @@ l212E:
 		bne l212C
 		dec object_count
 
+; jumped to by: l212E
 l2184:
 		lda object_pass
 		beq l2190
@@ -3268,18 +3886,22 @@ l2184:
 		sta object_pass
 		beq l212E
 
+; jumped to by: l2184
 l2190:
 		jmp collect_features
 
 ; sorts the objects by screen row, nearest first
+; called by: l20D7
 sort_objects:
 		lda object_count
 		dec object_count
 
+; jumped to by: l21CF
 l2197:
 		ldy #$00
 		sty log_value
 
+; jumped to by: l21CF
 l219B:
 		lda object_y, y
 		cmp object_y + $1, y
@@ -3304,6 +3926,7 @@ l219B:
 		sta object_y + $1, y
 		inc log_value
 
+; jumped to by: l219B
 l21CF:
 		iny 
 		cpy object_count
@@ -3313,6 +3936,8 @@ l21CF:
 		inc object_count
 		rts 
 
+; read by: l1F83, l219B
+; written by: l212E, l219B
 object_types:
 		.byte	$00, $07, $09, $01, $01, $0a, $0b, $0b, $04, $01, $0b, $05, $0c, $0a, $04, $09
 		.byte	$04, $03, $07, $0e, $00, $06, $01, $06, $00, $06, $00, $09, $05, $05, $05, $0c
@@ -3330,6 +3955,8 @@ object_types:
 		.byte	$4c, $fe, $0d, $c2, $ba, $4c, $23, $22, $71, $48, $c9, $f1, $e5, $d5, $c5, $f5
 		.byte	$0e, $02, $e6, $7f, $5f, $cd, $05, $00, $f1, $c1, $d1, $e1, $b7, $c9, $e5, $2a
 		.byte	$71, $48, $2b, $7e, $e6, $7f, $fe, $0a, $23, $cc, $f0, $4b, $23, $22, $71, $48
+; read by: l1F33, l219B
+; written by: l212E, l219B
 object_x:
 		.byte	$2f, $d3, $67, $c4, $c7, $b0, $ad, $b7, $a7, $a4, $b0, $d9, $d5, $78, $a8, $a6
 		.byte	$aa, $ca, $c4, $ca, $76, $7c, $7f, $9f, $a9, $aa, $b2, $c0, $b9, $c4, $c0, $bc
@@ -3347,6 +3974,8 @@ object_x:
 		.byte	$4a, $d5, $3a, $8c, $42, $3c, $ca, $7d, $4d, $fa, $09, $4e, $3e, $0d, $cd, $1b
 		.byte	$4e, $3e, $0a, $cd, $1b, $4e, $3e, $1a, $cd, $1b, $4e, $e5, $2a, $1b, $44, $11
 		.byte	$1d, $44, $c5, $01, $8c, $42, $cd, $f3, $4d, $11, $1d, $44, $0e, $1a, $cd, $05
+; read by: l1F33, l219B
+; written by: l212E, l219B
 object_y:
 		.byte	$12, $0f, $0a, $09, $07, $06, $05, $05, $04, $04, $04, $04, $04, $03, $03, $03
 		.byte	$03, $03, $03, $03, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02, $02
@@ -3366,6 +3995,7 @@ object_y:
 		.byte	$e1, $c9, $3a, $ad, $42, $3c, $ca, $a5, $4c, $fa, $35, $4f, $e5, $d5, $2a, $1d
 
 ; finds the map cell (7 by 7) for point_x/point_y
+; called by: l200F, l20C5
 find_cell:
 		lda point_x
 		and #$c0
@@ -3404,6 +4034,7 @@ find_cell:
 		sta pointer_08 + $1
 		rts 
 
+; jumped to by: find_cell
 l251D:
 		lda #$ff
 		sta cell_x
@@ -3416,10 +4047,16 @@ l251D:
 
 empty_cell:
 		.byte	$80, $80, $80, $80, $80, $80, $80, $80
+; read by: find_cell
+; written by: find_cell, l251D
 cell_x:		.byte	$01
+; written by: find_cell, l251D
 cell_y:		.byte	$05
+; read by: l212E, l2184
+; written by: collect_objects, l2184
 object_pass:		.byte	$00
 
+; jumped to by: l1FC4
 draw_terrain:
 		lda horizon
 		clc 
@@ -3429,6 +4066,7 @@ draw_terrain:
 		lda #$07
 		sta polygon_color
 
+; jumped to by: l2571
 l2547:
 		ldx feature_count
 		beq l25C1
@@ -3497,14 +4135,17 @@ l2571:
 		sta pointer_08 + $1
 		jmp l2571
 
+; jumped to by: l2547
 l25C1:
 		ldx #$1e
 
+; jumped to by: l25C9, l25EA
 l25C3:
 		dex 
 		bne l25C9
 		jmp reset_clip
 
+; jumped to by: l25C3
 l25C9:
 		lda shape_visible, x
 		beq l25C3
@@ -3524,6 +4165,7 @@ l25C9:
 		bcs l25EA
 		lda #$0c
 
+; jumped to by: l25C9
 l25EA:
 		sta polygon_color
 		jsr draw_hole_shape
@@ -3531,6 +4173,7 @@ l25EA:
 		tax 
 		bne l25C3
 
+; called by: l25EA
 draw_hole_shape:
 		ldy #$00
 		sty base_x
@@ -3565,6 +4208,7 @@ draw_hole_shape:
 		ldy #$04
 		bne l263B
 
+; jumped to by: draw_hole_shape
 l262D:
 		lda (pointer_08), y
 		ora base_x
@@ -3575,6 +4219,7 @@ l262D:
 		sta base_y
 		iny 
 
+; jumped to by: draw_hole_shape
 l263B:
 		lda (pointer_08), y
 		bmi l264C
@@ -3586,6 +4231,7 @@ l263B:
 		sta base_x + $1
 		bcc l2657
 
+; jumped to by: l263B
 l264C:
 		clc 
 		adc base_x
@@ -3594,6 +4240,7 @@ l264C:
 		sbc #$00
 		sta base_x + $1
 
+; jumped to by: l263B
 l2657:
 		iny 
 		lda (pointer_08), y
@@ -3606,6 +4253,7 @@ l2657:
 		sta base_y + $1
 		bcc l2674
 
+; jumped to by: l2657
 l2669:
 		clc 
 		adc base_y
@@ -3614,6 +4262,7 @@ l2669:
 		sbc #$00
 		sta base_y + $1
 
+; jumped to by: l2657
 l2674:
 		iny 
 		lda polygon_color
@@ -3621,6 +4270,7 @@ l2674:
 		beq l267F
 		jmp draw_polygon
 
+; jumped to by: l2674
 l267F:
 		lda pointer_08 + $1
 		pha 
@@ -3650,6 +4300,7 @@ l2691:
 		sta base_x + $1
 		bcc l26B4
 
+; jumped to by: l2691
 l26A9:
 		clc 
 		adc base_x
@@ -3658,6 +4309,7 @@ l26A9:
 		sbc #$00
 		sta base_x + $1
 
+; jumped to by: l2691
 l26B4:
 		iny 
 		lda (pointer_08), y
@@ -3670,6 +4322,7 @@ l26B4:
 		sta base_y + $1
 		bcc l26D1
 
+; jumped to by: l26B4
 l26C6:
 		clc 
 		adc base_y
@@ -3678,6 +4331,7 @@ l26C6:
 		sbc #$00
 		sta base_y + $1
 
+; jumped to by: l26B4
 l26D1:
 		tya 
 		sec 
@@ -3709,6 +4363,8 @@ l26D1:
 		ldy #$06
 
 ; draws a polygon of world points, cut where it crosses behind the view, and fills it
+; called by: l2571, l26D1
+; jumped to by: l2674
 draw_polygon:
 		lda #$00
 		sta v2c4d
@@ -3719,6 +4375,7 @@ draw_polygon:
 		beq l2718
 		jmp l2775
 
+; jumped to by: draw_polygon
 l2718:
 		lda proj_x
 		sta line_x
@@ -3732,6 +4389,7 @@ l2718:
 		bcc l2734
 		jmp l2804
 
+; jumped to by: l2718
 l2734:
 		lda v2c44
 		pha 
@@ -3761,17 +4419,20 @@ l2734:
 		sta v2c44
 		jmp l2804
 
+; jumped to by: draw_polygon, l2786, l28C6, l28CE
 l2775:
 		lda v2c4d
 		beq l277D
 		jmp l283E
 
+; jumped to by: l2775
 l277D:
 		lda (pointer_08), y
 		cmp #$80
 		bne l2786
 		jsr l2862
 
+; jumped to by: l277D
 l2786:
 		jsr project_vertex
 		bne l2775
@@ -3829,6 +4490,7 @@ l2786:
 		pla 
 		sta v2c44
 
+; jumped to by: l2718, l2734, l2786, l281A
 l2804:
 		lda v2c4d
 		bne l283E
@@ -3837,11 +4499,13 @@ l2804:
 		bne l2812
 		jsr l2862
 
+; jumped to by: l2804
 l2812:
 		jsr project_vertex
 		beq l281A
 		jmp l28C6
 
+; jumped to by: l2812
 l281A:
 		lda proj_x
 		sta pen_x
@@ -3856,6 +4520,7 @@ l281A:
 		ldy v2c4b
 		jmp l2804
 
+; jumped to by: l2775, l2804
 l283E:
 		ldy v2c4c
 		jsr replot_seeds
@@ -3875,15 +4540,18 @@ l2844:
 		jsr flood_fill
 		jmp l2844
 
+; jumped to by: l2844
 l2861:
 		rts 
 
+; called by: l277D, l2804
 l2862:
 		sty v2c4c
 		ldy #$06
 		sty v2c4d
 		rts 
 
+; called by: l2734
 l286B:
 		sty v2c4b
 
@@ -3907,6 +4575,7 @@ l286E:
 		sta v2c44
 		bcc l289B
 
+; jumped to by: l286E
 l288E:
 		clc 
 		adc base_x
@@ -3915,6 +4584,7 @@ l288E:
 		sbc #$00
 		sta v2c44
 
+; jumped to by: l286E
 l289B:
 		iny 
 		lda (pointer_08), y
@@ -3927,6 +4597,7 @@ l289B:
 		sta v2c48
 		bcc l28BC
 
+; jumped to by: l289B
 l28AF:
 		clc 
 		adc base_y
@@ -3935,10 +4606,12 @@ l28AF:
 		sbc #$00
 		sta v2c48
 
+; jumped to by: l289B
 l28BC:
 		ldy v2c4b
 		rts 
 
+; jumped to by: l25C3
 reset_clip:
 		lda #$c8
 		sta clip_bottom
@@ -3947,11 +4620,13 @@ reset_clip:
 unused_28c5:
 		.byte	$ea
 
+; jumped to by: l2812
 l28C6:
 		jsr line_start_on_screen
 		bcc l28CE
 		jmp l2775
 
+; jumped to by: l28C6
 l28CE:
 		lda v2c44
 		pha 
@@ -3966,6 +4641,7 @@ l28CE:
 		sta v2c44
 		jmp l2775
 
+; called by: l2734
 l28E9:
 		lda v2c43
 		sta point_x
@@ -3985,16 +4661,20 @@ l28E9:
 		lda view_y
 		bne l291C
 
+; jumped to by: l28E9
 l2914:
 		lda #$ff
 		sta v2c4e
 		jsr clip_edge
 
+; jumped to by: l28E9
 l291C:
 		ldy v2c4b
 		rts 
 
 ; halves an edge until its end is in front of the view
+; called by: l2786, l28CE, l2914
+; jumped to by: l2A29, l2AAA
 clip_edge:
 		lda v2c43
 		clc 
@@ -4031,11 +4711,13 @@ clip_edge:
 		beq l2977
 		jmp l2A06
 
+; jumped to by: clip_edge
 l2977:
 		lda view_y
 		bne l297F
 		jmp l2A06
 
+; jumped to by: l2977, l2A7C
 l297F:
 		jsr project
 		lda #$30
@@ -4067,6 +4749,7 @@ l297F:
 		bcs l29CA
 		jmp l2A44
 
+; jumped to by: l297F
 l29CA:
 		lda v2c4e
 		beq l29FF
@@ -4095,11 +4778,13 @@ l29CA:
 		pla 
 		sta pen_y + $1
 
+; jumped to by: l29CA
 l29FF:
 		jsr draw_clipped_line
 		ldy v2c4b
 		rts 
 
+; jumped to by: clip_edge, l2977
 l2A06:
 		lda v2c3f
 		cmp v2c43
@@ -4107,6 +4792,7 @@ l2A06:
 		lda v2c40
 		cmp v2c44
 
+; jumped to by: l2A06
 l2A14:
 		bne l2A29
 		lda v2c41
@@ -4115,10 +4801,12 @@ l2A14:
 		lda v2c42
 		cmp v2c48
 
+; jumped to by: l2A14
 l2A24:
 		bne l2A29
 		jmp l2A7C
 
+; jumped to by: l2A14, l2A24
 l2A29:
 		lda v2c3f
 		sta v2c43
@@ -4130,6 +4818,7 @@ l2A29:
 		sta v2c48
 		jmp clip_edge
 
+; jumped to by: l297F
 l2A44:
 		lda v2c3f
 		cmp v2c45
@@ -4137,6 +4826,7 @@ l2A44:
 		lda v2c40
 		cmp v2c46
 
+; jumped to by: l2A44
 l2A52:
 		bne l2AAA
 		lda v2c41
@@ -4145,6 +4835,7 @@ l2A52:
 		lda v2c42
 		cmp v2c4a
 
+; jumped to by: l2A52
 l2A62:
 		bne l2AAA
 		lda v2c3f
@@ -4156,6 +4847,7 @@ l2A62:
 		lda v2c42
 		sta pen_y + $1
 
+; jumped to by: l2A24
 l2A7C:
 		lda v2c3f
 		sta point_x
@@ -4176,6 +4868,7 @@ l2A7C:
 		sta view_y + $1
 		jmp l297F
 
+; jumped to by: l2A52, l2A62
 l2AAA:
 		lda v2c41
 		sta v2c49
@@ -4187,6 +4880,7 @@ l2AAA:
 		sta v2c46
 		jmp clip_edge
 
+; called by: draw_polygon, l2786, l2812
 project_vertex:
 		lda (pointer_08), y
 		bmi l2AD6
@@ -4198,6 +4892,7 @@ project_vertex:
 		sta point_x + $1
 		bcc l2AE1
 
+; jumped to by: project_vertex
 l2AD6:
 		clc 
 		adc base_x
@@ -4206,6 +4901,7 @@ l2AD6:
 		sbc #$00
 		sta point_x + $1
 
+; jumped to by: project_vertex
 l2AE1:
 		iny 
 		lda (pointer_08), y
@@ -4218,6 +4914,7 @@ l2AE1:
 		sta point_y + $1
 		bcc l2AFE
 
+; jumped to by: l2AE1
 l2AF3:
 		clc 
 		adc base_y
@@ -4226,6 +4923,7 @@ l2AF3:
 		sbc #$00
 		sta point_y + $1
 
+; jumped to by: l2AE1
 l2AFE:
 		lda v2c43
 		sta v2c45
@@ -4258,12 +4956,14 @@ l2AFE:
 		dey 
 		sty view_y
 
+; jumped to by: l2AFE
 l2B4B:
 		lda view_y
 		bne l2B54
 		lda #$ff
 		bne l2B81
 
+; jumped to by: l2B4B
 l2B54:
 		jsr project
 		lda #$30
@@ -4285,12 +4985,14 @@ l2B54:
 		sta proj_y + $1
 		lda #$00
 
+; jumped to by: l2AFE, l2B4B
 l2B81:
 		php 
 		ldy v2c4b
 		plp 
 		rts 
 
+; jumped to by: l2190
 collect_features:
 		iny 
 		lda (pointer_08), y
@@ -4321,6 +5023,7 @@ collect_features:
 		stx feature_count
 		ldy #$00
 
+; jumped to by: collect_features
 l2BC2:
 		lda (pointer_08), y
 		iny 
@@ -4330,6 +5033,7 @@ l2BC2:
 		lda #$16
 		sta shape_visible
 
+; jumped to by: l2BE2, l2BF3
 l2BD0:
 		lda (pointer_08), y
 		iny 
@@ -4341,6 +5045,7 @@ l2BD0:
 		inc shape_visible, x
 		jmp l2BD0
 
+; jumped to by: l2BD0
 l2BE2:
 		lda shape_visible
 		beq l2BFB
@@ -4350,55 +5055,112 @@ l2BE2:
 		sta shape_visible
 		jmp l2BD0
 
+; jumped to by: l2BE2
 l2BF3:
 		lda #$12
 		sta shape_visible
 		jmp l2BD0
 
+; jumped to by: l2BE2
 l2BFB:
 		rts 
 
+; read by: l25C9, l2BD0, l2BE2
+; written by: l200F, l2BC2, l2BE2, l2BF3
+; modified by: l2BD0
 shape_visible:
 		.byte	$00, $02, $02, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $01, $01, $00, $02, $00, $00, $00, $00, $00, $00
 
+; read by: l2547
+; written by: collect_features
 feature_pointers:
 		.word	$86ae, $8723, $ffff, $ffff, $ffff, $0000
+; read by: l2547
+; written by: collect_features
 feature_x:
 		.word	$0000, $0040, $0000, $0000, $0000, $0000
+; read by: l2547
+; written by: collect_features
 feature_y:
 		.word	$0140, $0140, $0000, $0000, $0000, $0000
 
+; read by: l2547, collect_features
+; written by: draw_view, l2547, collect_features
 feature_count:
 		.byte	$00
+; read by: clip_edge, l2A06, l2A29, l2A44, l2A62, l2A7C, l2AAA
+; written by: clip_edge
+; modified by: clip_edge
 v2c3f:		.byte	$00
+; read by: clip_edge, l2A06, l2A29, l2A44, l2A62, l2A7C, l2AAA
+; written by: clip_edge
 v2c40:		.byte	$00
+; read by: clip_edge, l2A14, l2A29, l2A52, l2A62, l2A7C, l2AAA
+; written by: clip_edge
+; modified by: clip_edge
 v2c41:		.byte	$00
+; read by: clip_edge, l2A14, l2A29, l2A52, l2A62, l2A7C, l2AAA
+; written by: clip_edge
 v2c42:		.byte	$00
+; read by: l2734, l2786, l28CE, l28E9, clip_edge, l2A06, l2AFE
+; written by: l2734, l2786, l286E, l288E, l28CE, l2A29, l2AFE
 v2c43:		.byte	$0d
+; read by: l2734, l2786, l28CE, l28E9, clip_edge, l2A06, l2AFE
+; written by: l2734, l2786, l286E, l288E, l28CE, l2A29, l2AFE
 v2c44:		.byte	$00
+; read by: l2786, clip_edge, l2A44
+; written by: l2734, l2786, l2AAA, l2AFE
 v2c45:		.byte	$10
+; read by: l2786, clip_edge, l2A44
+; written by: l2734, l2786, l2AAA, l2AFE
 v2c46:		.byte	$00
+; read by: l2734, l2786, l28E9, clip_edge, l2A14, l2AFE
+; written by: l2734, l2786, l289B, l28AF, l2A29, l2AFE
 v2c47:		.byte	$30
+; read by: l2734, l2786, l28E9, clip_edge, l2A14, l2AFE
+; written by: l2734, l2786, l289B, l28AF, l2A29, l2AFE
 v2c48:		.byte	$01
+; read by: l2786, clip_edge, l2A52
+; written by: l2734, l2786, l2AAA, l2AFE
 v2c49:		.byte	$31
+; read by: l2786, clip_edge, l2A52
+; written by: l2734, l2786, l2AAA, l2AFE
 v2c4a:		.byte	$01
+; read by: l281A, l28BC, l291C, l29FF, l2B81
+; written by: l281A, l286B, l2AFE
 v2c4b:		.byte	$08
+; read by: l283E
+; written by: l2862
 v2c4c:		.byte	$3c
+; read by: l2775, l2804
+; written by: draw_polygon, l2862
 v2c4d:		.byte	$06
+; read by: l29CA
+; written by: l2786, l28CE, l2914
 v2c4e:		.byte	$00
+; read by: draw_hole_shape, l2674, l2844
+; written by: draw_terrain, l25EA, l26D1
 polygon_color:
 		.byte	$0d, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
 ; a point turned to the view: x across, y the depth ($ff in the high byte when culled)
+; read by: project, l0B46, rotate_4, rotate_6, rotate_7, l376C, l3DC3, draw_flag
+; written by: project, rotate_1, rotate_2, rotate_3, l0CFB, rotate_4, rotate_6, rotate_7, l3D9F, l3DAD, l3DC3, draw_flag
 view_x:
 		.word	$0000
+; read by: project, rotate_4, rotate_6, rotate_7, l212E, l28E9, clip_edge, l2977, l2AFE, l2B4B, l376C, l3DC3, draw_flag
+; written by: l0BFC, rotate_1, rotate_2, rotate_3, l0CB4, rotate_4, rotate_6, rotate_7, l2A7C, l2AFE, l3DAD, l3DC3, draw_flag
 view_y:		.word	$0000
 
 ; the screen row of the horizon (rows count up from the bottom)
+; read by: l1F33, draw_terrain, l297F, l2B54, l3CFA, l3E42, lB700
+; written by: main
 horizon:
 		.byte	$90
 
+; called by: l2C81
+; jumped to by: l2C72
 l2C60:
 		ldy #$00
 		lda (text_pointer), y
@@ -4406,16 +5168,19 @@ l2C60:
 		bne l2C69
 		rts 
 
+; jumped to by: l2C60
 l2C69:
 		jsr print_char
 		inc text_pointer
 		bne l2C72
 		inc text_pointer + $1
 
+; jumped to by: l2C69
 l2C72:
 		jmp l2C60
 
 ; prints the $ff-terminated text after the jsr
+; called by: swing, l2E4C, l2EBC, l30CD, l3138, l314F, l3197, print_score_labels, $a19d, $a1a2, $a1ae, $a1bf, $a1c4, $a1d0, $a1e3, $a1eb, $a1f7, $a1fe, $a20a, lA5FA, print_par_result, lAFE9, lAFFB, lB2AE, $b2d3, $b2d8, $b2ec, $b2f1, lB305, $b322, aim, lB9C1, lC0F3, lC13B
 print_inline:
 		pla 
 		sta text_pointer
@@ -4425,6 +5190,7 @@ print_inline:
 		bne l2C81
 		inc text_pointer + $1
 
+; jumped to by: print_inline
 l2C81:
 		jsr l2C60
 		lda text_pointer + $1
@@ -4433,12 +5199,14 @@ l2C81:
 		pha 
 		rts 
 
+; called by: lB5D8, lC0F3, lC13B
 print_hex:
 		pha 
 		jsr l2CB4
 		jsr print_char
 		pla 
 
+; jumped to by: lAD3F
 print_nibble:
 		jsr l2CBB
 		jmp print_char
@@ -4452,6 +5220,7 @@ store_hex:
 		bne l2CA7
 		inc text_pointer + $1
 
+; jumped to by: store_hex
 l2CA7:
 		pla 
 		jsr l2CBB
@@ -4460,9 +5229,11 @@ l2CA7:
 		bne l2CB3
 		inc text_pointer + $1
 
+; jumped to by: l2CA7
 l2CB3:
 		rts 
 
+; called by: print_hex, store_hex
 l2CB4:
 		lsr 
 		lsr 
@@ -4470,9 +5241,11 @@ l2CB4:
 		lsr 
 		jmp l2CBD
 
+; called by: print_nibble, l2CA7
 l2CBB:
 		and #$0f
 
+; jumped to by: l2CB4
 l2CBD:
 		cmp #$0a
 		bcc l2CC7
@@ -4481,6 +5254,7 @@ l2CBD:
 		adc #$41
 		rts 
 
+; jumped to by: l2CBD
 l2CC7:
 		adc #$30
 		rts 
@@ -4488,6 +5262,7 @@ l2CC7:
 unused_2cca:
 		.byte	$00, $00, $00, $00, $00, $00
 
+; jumped to by: l0193, l08BC, lC0EB
 start:
 		jmp l2CDC
 
@@ -4497,20 +5272,28 @@ start2:
 		sta cpu_port
 		jmp lA003
 
+; jumped to by: start
 l2CDC:
 		lda cpu_port
 		and #$fe
 		sta cpu_port
 		jmp lA000
 
+; read by: lA95B
 a2CE5:
 		.addr	setup_hole
+; read by: lA95E
 a2CE7:		.addr	check_landing
+; read by: lA961
 a2CE9:		.addr	color_text
+; read by: lA964
 a2CEB:		.addr	l378C
+; read by: lA967
 a2CED:		.addr	get_key
+; read by: lB623
 a2CEF:		.addr	check_terrain
 
+; called by: swing, l30B7
 draw_golfer:
 		pha 
 		lda sprites + $3f
@@ -4523,6 +5306,7 @@ draw_golfer:
 		lda #$05
 		sta sprites + $3f
 
+; jumped to by: draw_golfer
 l2D04:
 		ldy #$91
 		stx golfer_x
@@ -4534,10 +5318,12 @@ l2D04:
 		beq l2D1B
 		lda #$08
 
+; jumped to by: l2D04
 l2D1B:
 		jsr set_golfer_colors
 		jmp l2D3E
 
+; called by: l2D1B, l3793
 set_golfer_colors:
 		ldx raster
 		cpx #$14
@@ -4557,6 +5343,7 @@ l2D31:
 		bcc l2D31
 		rts 
 
+; jumped to by: l2D1B
 l2D3E:
 		pla 
 		sta power_level
@@ -4574,10 +5361,12 @@ l2D3E:
 		lda #$05
 		sta sprites + $3f
 
+; jumped to by: l2D3E
 l2D61:
 		rts 
 
 ; shifts A right one bit, keeping its sign
+; jumped to by: l2FAB
 shift_right_signed:
 		asl 
 		php 
@@ -4586,6 +5375,7 @@ shift_right_signed:
 		ror 
 		rts 
 
+; called by: l2E21, l2E72, l32C2
 raise_meter:
 		ldy power_level
 		cpy #$10
@@ -4594,12 +5384,14 @@ raise_meter:
 		sty power_level
 		jsr l2F60
 
+; jumped to by: raise_meter
 l2D76:
 		dey 
 		lda #$00
 		ldx #$59
 		jmp draw_animation_frame
 
+; called by: l2DC8
 lower_meter:
 		ldy power_level
 		cpy #$02
@@ -4607,6 +5399,7 @@ lower_meter:
 		dey 
 		sty power_level
 
+; jumped to by: lower_meter
 l2D89:
 		dey 
 		lda #$00
@@ -4616,6 +5409,7 @@ l2D89:
 unused_2d91:
 		.byte	$60
 
+; jumped to by: l31EB
 swing:
 		jsr get_key
 		ldx golfer_x
@@ -4639,6 +5433,7 @@ l2DB4:
 		sta frame_timer_reload
 		sta frame_timer
 
+; jumped to by: l2DE0
 l2DC8:
 		inc v045e
 		lda frame_timer
@@ -4650,6 +5445,7 @@ l2DC8:
 		cmp #$01
 		beq l2DEE
 
+; jumped to by: l2DC8
 l2DE0:
 		jsr get_key
 		cmp #$2a
@@ -4658,17 +5454,20 @@ l2DE0:
 		cmp #$0a
 		bcs l2DC8
 
+; jumped to by: l2DC8
 l2DEE:
 		lda #$00
 		sta v045f
 		lda #$00
 		sta v0460
 
+; jumped to by: l2E00
 l2DF8:
 		inc v045f
 		bne l2E00
 		inc v0460
 
+; jumped to by: l2DF8
 l2E00:
 		jsr get_key
 		cmp #$29
@@ -4680,12 +5479,14 @@ l2E00:
 		sta frame_timer
 		jsr swing_sound
 
+; jumped to by: l2E49
 l2E17:
 		jsr get_key
 		cmp #$29
 		bne l2E21
 		inc v0463
 
+; jumped to by: l2E17
 l2E21:
 		lda frame_timer
 		bne l2E49
@@ -4704,13 +5505,16 @@ l2E21:
 		clc 
 		adc #$05
 
+; jumped to by: l2E21
 l2E43:
 		sta frame_timer
 		sta frame_timer_reload
 
+; jumped to by: l2E21
 l2E49:
 		jmp l2E17
 
+; jumped to by: l2E21
 l2E4C:
 		jsr click_sound
 		jsr message_line
@@ -4758,12 +5562,14 @@ l2E91:
 		bne l2EB3
 		beq l2ED2
 
+; jumped to by: l2E91
 l2EB3:
 		jsr l32AD
 		beq l2ED2
 		lda #$00
 		sta hole_distance
 
+; jumped to by: l2E91
 l2EBC:
 		jsr l434E
 		lda #$3f
@@ -4774,6 +5580,7 @@ l2EBC:
 text_down:
 		.text	"DOWN !!", $ff
 
+; jumped to by: l2E91, l2EB3
 l2ED2:
 		jsr get_key
 		cmp #$3c
@@ -4781,6 +5588,7 @@ l2ED2:
 		jsr l434B
 		jmp silence_voices
 
+; jumped to by: l2ED2
 silence_voices:
 		lda #$00
 		sta voice1_control
@@ -4789,6 +5597,7 @@ silence_voices:
 		jmp l2FB1
 
 ; waits a frame and returns the key or joystick direction
+; called by: swing, l2DB4, l2DE0, l2E00, l2E17, l2E72, l2E91, l2ED2, l31F0, l3447, l380D
 get_key:
 		txa 
 		pha 
@@ -4808,6 +5617,7 @@ snapshot_pc:
 		beq l2F09
 		jsr l3EF4
 
+; jumped to by: snapshot_pc
 l2F09:
 		pla 
 		tax 
@@ -4815,9 +5625,11 @@ l2F09:
 		jsr l32B0
 		rts 
 
+; read by: l2D31
 golfer_colors:
 		.byte	$09, $01, $02, $02, $00, $00, $01, $01, $00, $01, $01, $01, $09, $09, $01, $01
 
+; called by: l2E00, l3447
 swing_sound:
 		lda #$00
 		sta voice1_control
@@ -4843,11 +5655,13 @@ swing_sound:
 		sta voice1_control
 		rts 
 
+; called by: l2E72
 l2F5A:
 		lda #$80
 		sta voice1_control
 		rts 
 
+; called by: raise_meter
 l2F60:
 		lda swing_cutoff
 		clc 
@@ -4856,6 +5670,7 @@ l2F60:
 		sta filter_cutoff + $1
 		rts 
 
+; called by: l2E4C, l3447, l3F76
 click_sound:
 		ldx #$81
 		stx voice2_control
@@ -4863,12 +5678,16 @@ click_sound:
 		stx voice2_control
 		rts 
 
+; read by: l2F60
+; written by: swing_sound, l2F60
 swing_cutoff:
 		.byte	$42
 
+; called by: l314F
 l2F78:
 		rts 
 
+; called by: l3435
 l2F79:
 		lda #$00
 		sta voice1_attack_decay
@@ -4885,6 +5704,7 @@ l2F79:
 		sta voice1_control
 		rts 
 
+; called by: l3466
 l2F9B:
 		lda #$80
 		sta voice1_control
@@ -4898,12 +5718,14 @@ l2F9B:
 		eor #$ff
 		adc #$01
 
+; jumped to by: l2F9B
 l2FAB:
 		jmp shift_right_signed
 
 unused_2fae:
 		.byte	$79, $fe, $3d
 
+; jumped to by: silence_voices
 l2FB1:
 		ldx #$00
 		lda game_mode
@@ -4916,21 +5738,25 @@ l2FB1:
 		bne l2FC5
 		ldx #$0a
 
+; jumped to by: l2FB1
 l2FC5:
 		lda v0443, x
 		ora hole_distance
 
+; jumped to by: l2FB1
 l2FCA:
 		cmp #$40
 		bcs l2FD4
 		jsr l31FC
 		jmp l3011
 
+; jumped to by: l2FCA
 l2FD4:
 		lda sprites + $3f
 		bne l2FDC
 		jsr mirror_golfer
 
+; jumped to by: l2FD4
 l2FDC:
 		lda #$0a
 		sta frame_delay
@@ -4954,6 +5780,7 @@ l2FDC:
 		ldy #$24
 		jsr play_animation
 
+; jumped to by: l2FCA
 l3011:
 		lda #$00
 		sta sprite6_y
@@ -4961,14 +5788,17 @@ l3011:
 		sta sprites_x_msb
 		rts 
 
+; called by: l31D9
 l301D:
 		lda sprites + $3f
 		beq l3025
 		jsr mirror_golfer
 
+; jumped to by: l301D
 l3025:
 		lda #$03
 
+; called by: l2FDC
 l3027:
 		pha 
 		lda #$05
@@ -4982,6 +5812,7 @@ l3027:
 		bne l3027
 		rts 
 
+; called by: l2D3E, l2FD4, l301D, check_landing, $31cd
 mirror_golfer:
 		ldx #$2f
 
@@ -5004,6 +5835,7 @@ l3048:
 		sta sprites + $3f
 		rts 
 
+; called by: l303E, l3048
 mirror_sprite:
 		lda #$00
 		sta pointer_61
@@ -5042,11 +5874,13 @@ l3077:
 		tax 
 		rts 
 
+; called by: l3077
 reverse_bits:
 		lda (pointer_61), y
 		sta v63
 		ldx #$08
 
+; jumped to by: l30A8
 l309C:
 		lsr v63
 		php 
@@ -5056,6 +5890,7 @@ l309C:
 		rol 
 		dex 
 
+; jumped to by: l309C
 l30A8:
 		plp 
 		rol 
@@ -5063,6 +5898,8 @@ l30A8:
 		bne l309C
 		rts 
 
+; read by: l309C
+; written by: mirror_sprite
 sprite_mode:
 		.byte	$3a
 
@@ -5071,6 +5908,7 @@ check_landing:
 		bne l30B7
 		jsr mirror_golfer
 
+; jumped to by: check_landing
 l30B7:
 		lda #$fd
 		sta sprite7_y
@@ -5082,6 +5920,7 @@ l30B7:
 		lda #$26
 		jsr draw_golfer
 
+; jumped to by: l30B7
 l30CD:
 		lda #$ff
 		sta sprite_enable
@@ -5093,6 +5932,7 @@ l30CD:
 text_in_the_water:
 		.text	"IN THE WATER", $ff
 
+; jumped to by: $314c
 l30EA:
 		jsr l434B
 		jsr l434E
@@ -5111,6 +5951,7 @@ l30EA:
 		sta @w ball_y + $1
 		rts 
 
+; jumped to by: l30CD
 check_out_of_bounds:
 		lda green_view
 		bne l314F
@@ -5122,6 +5963,7 @@ check_out_of_bounds:
 		cmp #$c0
 		bcs l3138
 
+; jumped to by: check_out_of_bounds
 l3128:
 		lda @w ball_y + $1
 		beq l314F
@@ -5131,6 +5973,7 @@ l3128:
 		cmp #$c0
 		bcc l314F
 
+; jumped to by: check_out_of_bounds, l3128
 l3138:
 		jsr message_line
 		jsr print_inline
@@ -5139,6 +5982,7 @@ text_out_of_bounds:
 		.text	"OUT OF BOUNDS", $ff
 		jmp l30EA
 
+; jumped to by: check_out_of_bounds, l3128
 l314F:
 		lda #$00
 		sta v32bc
@@ -5159,11 +6003,13 @@ text_select_club:
 		jsr l32B9
 		ldx #$0c
 
+; jumped to by: $317a
 l3181:
 		cmp #$06
 		bne l3187
 		ldx #$0b
 
+; jumped to by: l3181
 l3187:
 		lda green_view
 		beq l3197
@@ -5172,6 +6018,7 @@ l3187:
 		jsr select_club
 		jmp l31EB
 
+; jumped to by: l3187
 l3197:
 		stx club
 		jsr l3202
@@ -5200,6 +6047,7 @@ l3197:
 		adc #$2d
 		sta golfer_x
 
+; jumped to by: $31cb
 l31D9:
 		lda #$02
 		sta anim_frame_count
@@ -5209,9 +6057,11 @@ l31D9:
 		jsr play_animation
 		jsr l301D
 
+; jumped to by: l3187
 l31EB:
 		jmp swing
 
+; called by: l2FDC, l3197
 wait_16_frames:
 		ldx #$10
 
@@ -5225,11 +6075,13 @@ l31F0:
 unused_31f8:
 		.byte	$60, $4c, $3c, $30
 
+; called by: l2FCA
 l31FC:
 		lda #$00
 		sta v0477
 		rts 
 
+; called by: l3197
 l3202:
 		lda #$ff
 		sta v0477
@@ -5238,6 +6090,7 @@ l3202:
 unused_3208:
 		.byte	$00
 
+; called by: l30CD
 check_terrain:
 		lda green_view
 		bne l321D
@@ -5248,6 +6101,7 @@ check_terrain:
 		lda #$ad
 		sta sprite6_y
 
+; jumped to by: check_terrain
 l321D:
 		lda sprite_enable
 		ora #$40
@@ -5272,10 +6126,12 @@ l3227:
 		bne l324F
 		jmp l32B6
 
+; jumped to by: l3227
 l324F:
 		lda terrain_type
 		rts 
 
+; called by: l3227
 l3253:
 		and #$0c
 		lsr 
@@ -5292,6 +6148,7 @@ l3253:
 		lsr 
 		lsr 
 
+; jumped to by: l3253
 l326B:
 		and #$0f
 		tax 
@@ -5299,22 +6156,32 @@ l326B:
 		sta terrain_type
 		rts 
 
+; read by: l3253
 pointers_3275:
 		.addr	buffer_328e, bitmap_colors + $295, bitmap_colors + $295, color_ram + $295
 
+; read by: l3227
+; written by: l3227
 v327d:
 		.byte	$0a
+; read by: l326B
 table_327e:
 		.byte	$08, $08, $08, $08, $08, $09, $00, $06, $08, $08, $08, $08, $07, $0a, $00, $08
+; read by: l3227
+; written by: l3227
 buffer_328e:
 		.byte	$01, $aa, $aa, $aa, $aa
 
+; called by: $2e62
 l3293:
 		rts 
 
+; read by: l2E91, snapshot_pc
+; written by: $2e58, l30B7, l3F50, l3F76
 v3294:
 		.byte	$00
 
+; called by: swing, l2E4C, l2EBC, l30CD, l3138, l314F, l3197
 message_line:
 		lda #$00
 		sta @w text_x
@@ -5327,21 +6194,27 @@ message_line:
 		lda #$0d
 		jmp color_text
 
+; called by: l2EB3
 l32AD:
 		jmp (aA010)
 
+; called by: l2F09
 l32B0:
 		jmp (aA012)
 
+; called by: swing
 l32B3:
 		jmp (aA018)
 
+; jumped to by: l3227
 l32B6:
 		jmp (aA01A)
 
+; called by: $317c
 l32B9:
 		jmp (aA01C)
 
+; written by: l314F
 v32bc:
 		.byte	$01
 
@@ -5355,9 +6228,11 @@ l32C2:
 		jsr wait_frames
 		jmp l32C2
 
+; called by: l32C2, play_animation
 wait_frames:
 		ldx frame_delay
 
+; jumped to by: l32D3
 l32CE:
 		lda raster
 		bpl l32CE
@@ -5369,9 +6244,12 @@ l32D3:
 		bne l32CE
 		rts 
 
+; read by: wait_frames
+; written by: l2E91, l2FDC, l3027, $31b1, $31bb, l31D9
 frame_delay:
 		.byte	$7e
 
+; called by: l2D3E
 load_animation:
 		stx pointer_fd + $1
 		sta pointer_fd
@@ -5392,6 +6270,7 @@ load_animation:
 		ldy #$00
 		jsr l33C0
 
+; jumped to by: l3353
 l3300:
 		lda (pointer_fd), y
 		sta anim_sprite_flags, y
@@ -5408,6 +6287,7 @@ l3300:
 		sta sprite_multicolor
 		lda #$00
 
+; jumped to by: l3300
 l3323:
 		ora sprite_multicolor
 		sta sprite_multicolor
@@ -5419,6 +6299,7 @@ l3323:
 		sta sprite_expand_y
 		lda #$00
 
+; jumped to by: l3323
 l333B:
 		ora sprite_expand_y
 		sta sprite_expand_y
@@ -5430,6 +6311,7 @@ l333B:
 		sta sprite_expand_x
 		lda #$00
 
+; jumped to by: l333B
 l3353:
 		ora sprite_expand_x
 		sta sprite_expand_x
@@ -5438,15 +6320,28 @@ l3353:
 		bcc l3300
 		rts 
 
+; read by: l3300
 bit_values:
 		.byte	$01, $02, $04, $08, $10, $20, $40, $80
+; written by: l3300
+; modified by: l3300, l3323, l333B
 v3368:		.byte	$28
+; read by: l3300, l3323, l333B
+; written by: l3300
 v3369:		.byte	$20
+; read by: l33E5
+; written by: load_animation
 anim_pointer_base:		.byte	$25
+; read by: l3353, draw_animation_frame, l33E5
+; written by: load_animation
 anim_sprite_count:		.byte	$06
+; read by: l33CC
+; written by: $32bf, l3300
 anim_sprite_flags:
 		.byte	$41, $42, $43, $80, $44, $45, $04, $77, $23
 
+; called by: l2D3E, play_animation
+; jumped to by: l2D76, l2D89
 draw_animation_frame:
 		stx pointer_fd + $1
 		sta pointer_fd
@@ -5470,6 +6365,7 @@ l3385:
 		pla 
 		bne l3385
 
+; jumped to by: l3385
 l3399:
 		ldx #$00
 		lda (pointer_fd), y
@@ -5479,6 +6375,7 @@ l3399:
 		ora #$00
 		rts 
 
+; jumped to by: l3399
 l33A5:
 		pha 
 		lda sprites + $3f
@@ -5489,6 +6386,7 @@ l33A5:
 		adc #$01
 		pha 
 
+; jumped to by: l33A5
 l33B2:
 		pla 
 		clc 
@@ -5497,6 +6395,7 @@ l33B2:
 		jsr l33C0
 		jmp l33CC
 
+; called by: load_animation, l33B2
 l33C0:
 		lda raster
 		cmp #$1e
@@ -5505,6 +6404,7 @@ l33C0:
 		bcs l33C0
 		rts 
 
+; jumped to by: l33B2, l33E5
 l33CC:
 		txa 
 		pha 
@@ -5523,6 +6423,7 @@ l33CC:
 		adc #$01
 		pha 
 
+; jumped to by: l33CC
 l33E5:
 		pla 
 		clc 
@@ -5551,6 +6452,7 @@ l33E5:
 		bcs l3414
 		jmp l33CC
 
+; jumped to by: l33E5
 l3414:
 		lda #$00
 		rts 
@@ -5559,6 +6461,8 @@ l3414:
 unused_3417:
 		.byte	$06, $25, $41, $42, $43, $80, $44, $45
 
+; called by: l2E91, l2FDC, l3027, $31b6, $31c5, l31D9
+; jumped to by: l3469
 play_animation:
 		tya 
 		pha 
@@ -5573,6 +6477,7 @@ play_animation:
 		cpy #$1d
 		bne l3447
 
+; jumped to by: play_animation
 l3435:
 		php 
 		pha 
@@ -5589,6 +6494,7 @@ l3435:
 		plp 
 		jmp l3469
 
+; jumped to by: play_animation
 l3447:
 		cpy #$22
 		bne l3466
@@ -5602,20 +6508,26 @@ l3447:
 		jsr get_key
 		jsr get_key
 
+; jumped to by: l3447
 l3466:
 		jsr l2F9B
 
+; jumped to by: l3435
 l3469:
 		iny 
 		dec anim_frame_count
 		bne play_animation
 		rts 
 
+; written by: l2E91, l2FDC, l3027, $31ac, $31c0, l31D9
+; modified by: l3469
 anim_frame_count:
 		.byte	$44
+; read by: compute_shot
 club_power:
 		.byte	$c0, $b0, $a0, $90, $80, $e8, $d8, $c8, $b8, $a8, $90, $87, $c8, $c8
 
+; called by: swing
 compute_shot:
 		ldx terrain_type
 		lda #$00
@@ -5646,6 +6558,7 @@ compute_shot:
 		sta v377d
 		jmp l36E6
 
+; called by: $2e65
 l34C1:
 		lda v377c
 		sta log_value
@@ -5684,11 +6597,13 @@ l34C1:
 		eor #$ff
 		adc #$01
 
+; jumped to by: l34C1
 l3510:
 		cmp #$26
 		bcc l3516
 		lda #$25
 
+; jumped to by: l3510
 l3516:
 		tax 
 		lda #$00
@@ -5716,6 +6631,7 @@ l3516:
 		eor #$ff
 		adc #$01
 
+; jumped to by: l34C1, l3516
 l354B:
 		sta shot_sideways
 		ldx #$01
@@ -5730,6 +6646,7 @@ l354B:
 		inx 
 		inx 
 
+; jumped to by: l354B
 l3562:
 		lda shot_speed
 		jsr l3589
@@ -5740,6 +6657,7 @@ l3562:
 		jsr l3711
 		jmp ball_flight
 
+; called by: l3562
 l357A:
 		stx v3594
 
@@ -5754,6 +6672,7 @@ l357D:
 		ldx v3594
 		rts 
 
+; called by: l3562
 l3589:
 		stx v3594
 
@@ -5764,28 +6683,54 @@ l358C:
 		ldx v3594
 		rts 
 
+; read by: l357D, l358C
+; written by: l357A, l3589
 v3594:
 		.byte	$4c
+; read by: l3516, l3562, l3711, l3E42, l3F1B, l423D
+; written by: l34C1, l3516, l3562, l376C, l3F8D
 shot_speed:		.byte	$00
+; read by: l3516, l3562, l3711, ball_flight, l3F1B, l423D
+; written by: l3516, l354B, l3562, l376C, l3F8D
 shot_sideways:		.byte	$00
+; read by: compute_shot, l354B, select_club, l385B, l386A, print_club_name, l3D61, l3F01, l4210
+; written by: l3187, l3197
+; modified by: l385B, l386A
 club:		.byte	$00
+; read by: $3173, l324F, compute_shot
+; written by: l326B
 terrain_type:		.byte	$0a
+; read by: l34C1
+; written by: l34C1
 v3599:		.byte	$41
+; read by: l34C1
+; written by: l34C1
 v359a:		.byte	$43
 ; old text "ROS" under the variables
 unused_359b:
 		.byte	$52, $4f
+; read by: l35DE, l3F1B, l3F44, l423D, l428D
+; written by: l35BC, ball_flight, l3F1B, l3F44, l428D, l431D
 v359d:		.byte	$53
+; read by: l3D9F, l3F1B, l3F8D, l423D, l428D
+; written by: ball_flight, l3F1B, l428D, l431D
+; modified by: l3F44
 v359e:		.byte	$20
+; read by: l3604, l3F1B, l423D, l428D
+; written by: l35BC, ball_flight, l3EB0, l3F1B, l428D, l431D
 v359f:		.byte	$4d
+; read by: l3DAD, l3F1B, l3F8D, l423D, l428D
+; written by: ball_flight, l3EB0, l3F1B, l428D, l431D
 v35a0:		.byte	$41
 
+; called by: l35BC, l362A
 l35A1:
 		bpl l35A8
 		clc 
 		eor #$ff
 		adc #$01
 
+; jumped to by: l35A1
 l35A8:
 		tax 
 		lda #$00
@@ -5797,6 +6742,7 @@ l35A8:
 		ldx log_value + $1
 		jmp from_log
 
+; called by: l369A, l36D2
 l35BC:
 		pha 
 		jsr l366E
@@ -5812,6 +6758,7 @@ l35BC:
 		sta v3788
 		sta v3789
 
+; jumped to by: l362A, l365C
 l35DE:
 		lda v359d
 		bmi l35F5
@@ -5823,6 +6770,7 @@ l35DE:
 		sta v3788
 		jmp l3604
 
+; jumped to by: l35DE
 l35F5:
 		clc 
 		adc v378a
@@ -5831,6 +6779,7 @@ l35F5:
 		sbc #$00
 		sta v3788
 
+; jumped to by: l35DE
 l3604:
 		lda v359f
 		bmi l361B
@@ -5842,6 +6791,7 @@ l3604:
 		sta v3789
 		jmp l362A
 
+; jumped to by: l3604
 l361B:
 		clc 
 		adc v378b
@@ -5850,6 +6800,7 @@ l361B:
 		sbc #$00
 		sta v3789
 
+; jumped to by: l3604
 l362A:
 		lda v3788
 		jsr l35A1
@@ -5870,21 +6821,25 @@ l362A:
 		bcs l3657
 		jmp l35DE
 
+; jumped to by: l362A
 l3657:
 		beq l365C
 		jmp l3667
 
+; jumped to by: l3657
 l365C:
 		lda v3786
 		cmp v3784
 		bcs l3667
 		jmp l35DE
 
+; jumped to by: l3657, l365C
 l3667:
 		ldx v3788
 		ldy v3789
 		rts 
 
+; called by: l35BC
 l366E:
 		txa 
 		jsr l368B
@@ -5908,6 +6863,7 @@ l366E:
 		tay 
 		jmp l366E
 
+; called by: l366E
 l368B:
 		asl 
 		bcs l3693
@@ -5915,20 +6871,25 @@ l368B:
 		bcs l3698
 		bcc l3696
 
+; jumped to by: l368B
 l3693:
 		asl 
 		bcc l3698
 
+; jumped to by: l368B
 l3696:
 		clc 
 		rts 
 
+; jumped to by: l368B, l3693
 l3698:
 		sec 
 
+; jumped to by: l366E
 l3699:
 		rts 
 
+; called by: l36E6, l3711
 l369A:
 		lda v3780
 		ldx v377e
@@ -5960,6 +6921,7 @@ l369A:
 		tay 
 		pla 
 
+; jumped to by: l369A
 l36D2:
 		jsr l35BC
 		txa 
@@ -5972,6 +6934,8 @@ l36D2:
 		sta v3783
 		rts 
 
+; called by: l3F8D
+; jumped to by: compute_shot
 l36E6:
 		lda direction
 		tax 
@@ -5990,6 +6954,7 @@ l36E6:
 		sta v377f
 		rts 
 
+; called by: l3562, l3F8D
 l3711:
 		lda shot_speed
 		sta v3780
@@ -6014,6 +6979,7 @@ l3711:
 		sta point_x + $1
 		jmp l3750
 
+; jumped to by: l3711
 l3747:
 		clc 
 		adc point_x
@@ -6021,6 +6987,7 @@ l3747:
 		bcs l3750
 		dec point_x + $1
 
+; jumped to by: l3711, l3747
 l3750:
 		lda v3783
 		bmi l3763
@@ -6032,6 +6999,7 @@ l3750:
 		sta point_y + $1
 		jmp l376C
 
+; jumped to by: l3750
 l3763:
 		clc 
 		adc point_y
@@ -6039,6 +7007,7 @@ l3763:
 		bcs l376C
 		dec point_y + $1
 
+; jumped to by: l3750, l3763
 l376C:
 		jsr to_view
 		lda view_x
@@ -6047,22 +7016,54 @@ l376C:
 		sta shot_speed
 		rts 
 
+; read by: l34C1
+; written by: compute_shot
 v377c:
 		.byte	$00
+; read by: l34C1
+; written by: compute_shot
 v377d:		.byte	$01
+; read by: l369A
+; written by: l36E6
 v377e:		.byte	$50
+; read by: l369A
+; written by: l36E6
 v377f:		.byte	$20
+; read by: l369A
+; written by: l36E6, l3711
 v3780:		.byte	$08
+; read by: l369A
+; written by: l36E6, l3711
 v3781:		.byte	$00
+; read by: l36D2, l36E6, l3711, l3FA4
+; written by: l369A, l36D2
 v3782:		.byte	$20
+; read by: l36D2, l36E6, l3750, l3FE9
+; written by: l369A, l36D2
 v3783:		.byte	$8e
+; read by: l365C
+; written by: l35BC
 v3784:		.byte	$49
+; read by: l362A
+; written by: l35BC
 v3785:		.byte	$00
+; read by: l362A, l365C
+; written by: l362A
 v3786:		.byte	$00
+; read by: l362A
+; written by: l362A
 v3787:		.byte	$00
+; read by: l35DE, l35F5, l362A, l3667
+; written by: l35BC, l35DE, l35F5
 v3788:		.byte	$00
+; read by: l3604, l361B, l362A, l3667
+; written by: l35BC, l3604, l361B
 v3789:		.byte	$01
+; read by: l35DE, l35F5
+; written by: l35BC, l35DE, l35F5
 v378a:		.byte	$50
+; read by: l3604, l361B
+; written by: l35BC, l3604, l361B
 v378b:		.byte	$20
 
 l378C:
@@ -6070,12 +7071,14 @@ l378C:
 		beq l3793
 		lda #$08
 
+; jumped to by: l378C
 l3793:
 		jsr set_golfer_colors
 		lda hole_distance
 		bne l379D
 		jsr l382B
 
+; jumped to by: l3793
 l379D:
 		jsr face_hole
 		jsr l3AB8
@@ -6116,18 +7119,22 @@ l379D:
 		sta @w ball_x + $1
 		jmp l3AB8
 
+; called by: l3187, l3197
 select_club:
 		jsr print_club_name
 		lda club
 		beq l3808
 		rts 
 
+; jumped to by: select_club, l385B, l386A
 l3808:
 		jsr print_club_name
 
+; jumped to by: l3819
 l380B:
 		ldx #$0a
 
+; jumped to by: l3819
 l380D:
 		jsr get_key
 		cmp #$03
@@ -6135,6 +7142,7 @@ l380D:
 		jsr l4351
 		ldx #$01
 
+; jumped to by: l380D
 l3819:
 		dex 
 		bne l380D
@@ -6146,6 +7154,7 @@ l3819:
 		bne l380B
 		jmp l434B
 
+; called by: l3793
 l382B:
 		tax 
 		pla 
@@ -6154,16 +7163,19 @@ l382B:
 		bne l3835
 		jmp turn_left
 
+; jumped to by: l382B
 l3835:
 		cpx #$25
 		bne l383C
 		jmp turn_right
 
+; jumped to by: l3835
 l383C:
 		cpx #$01
 		bne l3843
 		jmp l3B45
 
+; jumped to by: l383C
 l3843:
 		rts 
 
@@ -6177,11 +7189,13 @@ l3843:
 		bne l3854
 		ldx #$01
 
+; jumped to by: l3843
 l3854:
 		stx hole_number
 		txa 
 		jmp setup_hole
 
+; jumped to by: l3819, l386A
 l385B:
 		jsr l434E
 		inc club
@@ -6190,6 +7204,7 @@ l385B:
 		beq l386A
 		bne l3808
 
+; jumped to by: l3819, l385B
 l386A:
 		jsr l434E
 		dec club
@@ -6198,6 +7213,7 @@ l386A:
 		beq l385B
 		bne l3808
 
+; called by: select_club, l3808
 print_club_name:
 		lda #$50
 		sta text_x
@@ -6217,9 +7233,11 @@ print_club_name:
 		jmp print_char
 
 ; two letters per club: 1W 3W 1I 3I ... 9I PW SW PT
+; read by: print_club_name
 club_names:
 		.text	"1W3W1I3I4I5I6I7I8I9IPWSWPTPT"
 
+; called by: l379D
 face_hole:
 		lda #$00
 		sta v3982
@@ -6243,6 +7261,7 @@ face_hole:
 		sbc v0455
 		sta v0455
 
+; jumped to by: face_hole
 l38E7:
 		lda hole_x
 		sec 
@@ -6264,6 +7283,7 @@ l38E7:
 		sbc v0453
 		sta v0453
 
+; jumped to by: l38E7
 l3913:
 		jsr l3956
 		php 
@@ -6275,6 +7295,7 @@ l3913:
 		bcc l3929
 		jsr l3965
 
+; jumped to by: l3913
 l3929:
 		asl v0452
 		rol v0453
@@ -6285,6 +7306,7 @@ l3929:
 		sta v3982
 		bne l3950
 
+; jumped to by: l3929
 l393E:
 		lda v3982
 		and #$01
@@ -6295,10 +7317,12 @@ l393E:
 		and #$07
 		sta v3982
 
+; jumped to by: l3929, l393E
 l3950:
 		lda v3982
 		jmp set_direction
 
+; called by: l3913, l3929
 l3956:
 		lda v0453
 		cmp v0455
@@ -6306,9 +7330,11 @@ l3956:
 		lda v0452
 		cmp v0454
 
+; jumped to by: l3956
 l3964:
 		rts 
 
+; called by: l3913
 l3965:
 		lda v0452
 		pha 
@@ -6324,11 +7350,16 @@ l3965:
 		sta v0455
 		rts 
 
+; read by: l3913, l3929, l393E, l3950
+; written by: face_hole, l3913, l3929, l393E
+; modified by: face_hole, l38E7, l3913
 v3982:
 		.byte	$00
+; read by: l3913
 octant_directions:
 		.byte	$00, $01, $07, $06, $03, $02, $04, $05
 
+; jumped to by: l3854
 setup_hole:
 		sta hole_number
 		asl 
@@ -6374,6 +7405,7 @@ setup_hole:
 		bne l39EA
 		jmp setup_practice_hole
 
+; jumped to by: setup_hole
 l39EA:
 		asl 
 		asl 
@@ -6419,6 +7451,7 @@ l39EA:
 		sta @w ball_y
 		rts 
 
+; jumped to by: setup_hole
 setup_practice_hole:
 		lda #$1a
 		sta @w ball_x
@@ -6438,6 +7471,7 @@ setup_practice_hole:
 		sta hole_y + $1
 		rts 
 
+; called by: setup_hole
 l3A73:
 		ldx digit_text_index
 
@@ -6463,9 +7497,12 @@ l3A76:
 		stx digit_text_index
 		rts 
 
+; read by: l3A73
+; written by: setup_hole, l3A76
 digit_text_index:
 		.byte	$06
 
+; jumped to by: l382B
 turn_left:
 		jsr l3AC4
 		jsr direction_up
@@ -6474,6 +7511,7 @@ turn_left:
 		jsr l3AC4
 		jmp l3AB8
 
+; jumped to by: l3835
 turn_right:
 		jsr l3AC4
 		jsr direction_down
@@ -6482,15 +7520,19 @@ turn_right:
 		jsr l3AC4
 		jmp l3AB8
 
+; called by: l379D
+; jumped to by: l379D, turn_left, turn_right
 l3AB8:
 		jsr direction_up
 		jsr direction_up
 		jsr direction_up
 		jmp direction_up
 
+; called by: l379D, turn_left, turn_right, l3FA4
 l3AC4:
 		jsr l3AC7
 
+; called by: l3AC4
 l3AC7:
 		ldy direction
 		lda steps_x, y
@@ -6506,6 +7548,7 @@ l3AC7:
 		sta @w ball_x + $1
 		jmp l3B00
 
+; jumped to by: l3AC7
 l3AE4:
 		clc 
 		eor #$ff
@@ -6523,6 +7566,7 @@ l3AE4:
 		sbc #$00
 		sta @w ball_x + $1
 
+; jumped to by: l3AC7
 l3B00:
 		lda steps_y, y
 		bmi l3B18
@@ -6537,6 +7581,7 @@ l3B00:
 		sta @w ball_y + $1
 		rts 
 
+; jumped to by: l3B00
 l3B18:
 		clc 
 		eor #$ff
@@ -6555,12 +7600,15 @@ l3B18:
 		sta @w ball_y + $1
 		rts 
 
+; read by: l36E6, l3AC7
 steps_x:
 		.char	0, 8, 8, 8, 0, -8, -8, -8
+; read by: l36E6, l3B00
 steps_y:
 		.char	8, 8, 0, -8, -8, -8, 0, 8
 
 ; unreferenced
+; jumped to by: l383C
 l3B45:
 		rts 
 
@@ -6572,6 +7620,7 @@ read_hex_word:
 		sta pointer_06
 		rts 
 
+; called by: read_hex_word
 read_hex_byte:
 		jsr read_hex_digit
 		asl 
@@ -6583,10 +7632,14 @@ read_hex_byte:
 		ora hex_high_nibble
 		rts 
 
+; read by: read_hex_byte
+; written by: read_hex_byte
 hex_high_nibble:
 		.byte	$81
 
 ; waits for a key 0-9 or A-F, echoes it and returns its value
+; called by: read_hex_byte
+; jumped to by: l3B78
 read_hex_digit:
 		jsr scnkey
 		jsr getin
@@ -6599,6 +7652,7 @@ read_hex_digit:
 		sbc #$30
 		rts 
 
+; jumped to by: read_hex_digit
 l3B78:
 		cmp #$41
 		bcc read_hex_digit
@@ -6609,6 +7663,7 @@ l3B78:
 		sbc #$37
 		rts 
 
+; called by: l3F11, l3F76
 position_ball_sprite:
 		lda #$00
 		sta v417e
@@ -6618,9 +7673,11 @@ position_ball_sprite:
 		jsr l3BEE
 		jmp l3B9C
 
+; jumped to by: position_ball_sprite
 l3B99:
 		jsr l3E04
 
+; jumped to by: position_ball_sprite
 l3B9C:
 		jsr l3C3F
 		lda sprite_expand_x
@@ -6638,6 +7695,7 @@ l3B9C:
 		adc #$0a
 		sta proj_y
 
+; jumped to by: l3B9C
 l3BC0:
 		lda proj_x
 		sta sprite6_x
@@ -6649,11 +7707,13 @@ l3BC0:
 		sta sprites_x_msb
 		bne l3BE0
 
+; jumped to by: l3BC0
 l3BD8:
 		lda sprites_x_msb
 		and #$3f
 		sta sprites_x_msb
 
+; jumped to by: l3BC0
 l3BE0:
 		lda proj_y
 		sta sprite6_y
@@ -6662,6 +7722,7 @@ l3BE0:
 		sta sprite7_y
 		rts 
 
+; called by: position_ball_sprite
 l3BEE:
 		lda v4205
 		clc 
@@ -6676,11 +7737,13 @@ l3BEE:
 		inc v420b
 		jmp l3C16
 
+; jumped to by: l3BEE
 l3C0E:
 		lda v4206
 		bpl l3C16
 		dec v420b
 
+; jumped to by: l3BEE, l3C0E
 l3C16:
 		lda v4207
 		clc 
@@ -6697,11 +7760,18 @@ l3C16:
 		sta proj_y
 		rts 
 
+; read by: l3C8E, l3D17, l3D45
+; written by: l3CFA
 v3c3c:
 		.byte	$29
+; read by: l3D45
+; written by: l3C8E
 v3c3d:		.byte	$56
+; read by: l3F50, l416A
+; written by: l3D54, l3EB0
 ball_landed:		.byte	$00
 
+; called by: l3B9C
 l3C3F:
 		lda green_view
 		beq l3C8E
@@ -6728,10 +7798,12 @@ l3C3F:
 		beq l3C6F
 		jmp l3D54
 
+; jumped to by: l3C3F
 l3C6F:
 		lda sprite_enable
 		ora #$40
 
+; jumped to by: l3C86
 l3C74:
 		and #$7f
 		sta sprite_enable
@@ -6743,11 +7815,13 @@ l3C74:
 		sta proj_y
 		rts 
 
+; jumped to by: l3C3F
 l3C86:
 		lda sprite_enable
 		and #$bf
 		jmp l3C74
 
+; jumped to by: l3C3F
 l3C8E:
 		lda proj_y
 		pha 
@@ -6768,6 +7842,7 @@ l3C8E:
 		jsr l3CB7
 		jmp l3CFA
 
+; called by: l3C8E, l3D17
 l3CB7:
 		and #$fe
 		cmp #$31
@@ -6775,11 +7850,13 @@ l3CB7:
 		cmp #$c0
 		bcc l3CC7
 
+; jumped to by: l3CB7
 l3CC1:
 		ldy #$ff
 		lda #$00
 		beq l3CF7
 
+; jumped to by: l3CB7
 l3CC7:
 		tay 
 		lda screen_rows, y
@@ -6798,24 +7875,32 @@ l3CC7:
 		cmp #$65
 		bcs l3CF1
 
+; jumped to by: l3CC7
 l3CEB:
 		lda #$00
 		ldy #$ff
 		beq l3CF7
 
+; jumped to by: l3CC7
 l3CF1:
 		lsr 
 		lsr 
 		tax 
 		lda irq_hw_vector + $1, x
 
+; jumped to by: l3CC1, l3CEB
 l3CF7:
 		rts 
 
+; read by: l3BE0, l3D61
+; written by: l3C8E, l3D61
 shadow_offset:
 		.byte	$43
+; read by: l3D61
+; written by: l3D17
 v3cf9:		.byte	$41
 
+; jumped to by: l3C8E
 l3CFA:
 		sta v3c3c
 		tya 
@@ -6831,6 +7916,7 @@ l3CFA:
 		sec 
 		sbc #$10
 
+; jumped to by: l3CFA
 l3D17:
 		sta proj_y
 		pla 
@@ -6852,6 +7938,7 @@ l3D17:
 		sta sprite_enable
 		bne l3D61
 
+; jumped to by: l3D17
 l3D45:
 		lda sprite_enable
 		and #$40
@@ -6860,15 +7947,18 @@ l3D45:
 		cmp v3c3c
 		bne l3D59
 
+; jumped to by: l3C3F
 l3D54:
 		lda #$ff
 		sta ball_landed
 
+; jumped to by: l3D45
 l3D59:
 		lda sprite_enable
 		and #$bf
 		sta sprite_enable
 
+; jumped to by: l3D17
 l3D61:
 		lda v3cf9
 		cmp proj_y
@@ -6888,11 +7978,13 @@ l3D61:
 		bcs l3D92
 		bcc l3D92
 
+; jumped to by: l3D61
 l3D8A:
 		lda sprite_enable
 		and #$7f
 		sta sprite_enable
 
+; jumped to by: l3D61
 l3D92:
 		pla 
 		sta proj_x
@@ -6902,6 +7994,7 @@ l3D92:
 		sta proj_y
 		rts 
 
+; called by: l3CFA, l3E04
 l3D9F:
 		lda v359e
 		sta view_x
@@ -6909,9 +8002,11 @@ l3D9F:
 		lda #$00
 		beq l3DAD
 
+; jumped to by: l3D9F
 l3DAB:
 		lda #$ff
 
+; jumped to by: l3D9F
 l3DAD:
 		sta view_x + $1
 		lda v35a0
@@ -6922,6 +8017,7 @@ l3DAD:
 		bne l3DC3
 		jmp project
 
+; jumped to by: l3DAD
 l3DC3:
 		lda view_x
 		jsr l4354
@@ -6952,6 +8048,7 @@ l3DC3:
 		pla 
 		rts 
 
+; called by: l3B99, l42C0
 l3E04:
 		jsr l3D9F
 		lda proj_x
@@ -6973,6 +8070,7 @@ l3E04:
 		sta math_words + $b
 		jmp l3E42
 
+; jumped to by: l3E04
 l3E30:
 		lsr 
 		lsr 
@@ -6984,6 +8082,7 @@ l3E30:
 		lda far_scales + $1, x
 		sta math_words + $b
 
+; jumped to by: l3E04
 l3E42:
 		lda #$e5
 		sec 
@@ -7020,6 +8119,7 @@ l3E42:
 		sta proj_y
 		rts 
 
+; jumped to by: l3562
 ball_flight:
 		jsr l4345
 		lda #$00
@@ -7036,6 +8136,7 @@ ball_flight:
 		lda #$ff
 		sta v359d
 
+; jumped to by: ball_flight
 l3EB0:
 		ldx #$00
 		stx ball_landed
@@ -7061,11 +8162,14 @@ l3EB0:
 		lda #$02
 		sta v35a0
 
+; jumped to by: l3EB0
 l3EEC:
 		stx flight_time
 		lda #$21
 		sta sprite_pointers + $6
 
+; called by: snapshot_pc
+; jumped to by: l3F50, l3F6A
 l3EF4:
 		lda flight_time
 		and #$10
@@ -7073,6 +8177,7 @@ l3EF4:
 		jsr l423D
 		lda flight_time
 
+; jumped to by: l3EF4
 l3F01:
 		cmp #$80
 		bne l3F11
@@ -7082,12 +8187,14 @@ l3F01:
 		lda #$20
 		sta sprite_pointers + $6
 
+; jumped to by: l3F01
 l3F11:
 		lda flight_time
 		and #$01
 		bne l3F1B
 		jsr position_ball_sprite
 
+; jumped to by: l3F11
 l3F1B:
 		lda shot_speed
 		clc 
@@ -7106,6 +8213,7 @@ l3F1B:
 		sta v359e
 		jmp l3F50
 
+; jumped to by: l3F1B
 l3F44:
 		clc 
 		adc v359d
@@ -7113,6 +8221,7 @@ l3F44:
 		bcs l3F50
 		dec v359e
 
+; jumped to by: l3F1B, l3F44
 l3F50:
 		lda flight_time
 		tax 
@@ -7127,15 +8236,18 @@ l3F50:
 		beq l3F6A
 		jmp l3EF4
 
+; jumped to by: l3F50
 l3F6A:
 		lda v4205
 		ora v4207
 		bne l3F75
 		jmp l3EF4
 
+; jumped to by: l3F6A
 l3F75:
 		rts 
 
+; jumped to by: l3F50
 l3F76:
 		ldx #$00
 		stx v417e
@@ -7147,6 +8259,7 @@ l3F76:
 		jsr click_sound
 		jsr position_ball_sprite
 
+; jumped to by: l3F76
 l3F8D:
 		lda #$00
 		sta aim_offset
@@ -7157,6 +8270,7 @@ l3F8D:
 		sta shot_sideways
 		jsr l3711
 
+; jumped to by: l3F50
 l3FA4:
 		jsr l3AC4
 		lda current_player
@@ -7181,6 +8295,7 @@ l3FA4:
 		sta @w ball_x + $1
 		jmp l3FE9
 
+; jumped to by: l3FA4
 l3FDD:
 		clc 
 		adc @w ball_x
@@ -7188,6 +8303,7 @@ l3FDD:
 		bcs l3FE9
 		dec @w ball_x + $1
 
+; jumped to by: l3FA4, l3FDD
 l3FE9:
 		lda v3783
 		bmi l4000
@@ -7199,6 +8315,7 @@ l3FE9:
 		sta @w ball_y + $1
 		jmp l400C
 
+; jumped to by: l3FE9
 l4000:
 		clc 
 		adc @w ball_y
@@ -7206,6 +8323,7 @@ l4000:
 		bcs l400C
 		dec @w ball_y + $1
 
+; jumped to by: l3FE9, l4000
 l400C:
 		lda @w ball_x
 		sec 
@@ -7239,6 +8357,7 @@ l4045:
 		dex 
 		bne l4045
 
+; jumped to by: l400C
 l404E:
 		lda hole_x
 		sta @w ball_x
@@ -7269,6 +8388,7 @@ l404E:
 		bpl l4098
 		eor #$ff
 
+; jumped to by: l404E
 l4098:
 		cmp #$00
 		beq l40A1
@@ -7276,6 +8396,7 @@ l4098:
 		lda #$ff
 		bne l40AC
 
+; jumped to by: l4098
 l40A1:
 		lda v0452
 		plp 
@@ -7284,6 +8405,7 @@ l40A1:
 		eor #$ff
 		adc #$01
 
+; jumped to by: l4098, l40A1
 l40AC:
 		pha 
 		ora hole_distance
@@ -7296,6 +8418,7 @@ l40AC:
 		bpl l40BE
 		eor #$ff
 
+; jumped to by: l40AC
 l40BE:
 		cmp #$00
 		beq l40C7
@@ -7303,6 +8426,7 @@ l40BE:
 		lda #$ff
 		bne l40D2
 
+; jumped to by: l40BE
 l40C7:
 		lda v0454
 		plp 
@@ -7311,6 +8435,7 @@ l40C7:
 		eor #$ff
 		adc #$01
 
+; jumped to by: l40BE, l40C7
 l40D2:
 		pha 
 		ora hole_distance
@@ -7321,9 +8446,11 @@ l40D2:
 		lda #$00
 		beq l40E2
 
+; jumped to by: l40AC, l40D2
 l40E0:
 		lda #$01
 
+; jumped to by: l40D2
 l40E2:
 		sta v0456
 		asl v0453
@@ -7385,6 +8512,7 @@ l4103:
 		lda v046f
 		sta @w ball_y + $1
 
+; jumped to by: l4103
 l416A:
 		lda green_view
 		beq l417C
@@ -7395,16 +8523,23 @@ l416A:
 		bne l417C
 		sta hole_distance
 
+; jumped to by: l416A
 l417C:
 		rts 
 
 ; old text "CAL" under the variables
 unused_417d:
 		.byte	$43
+; read by: l3E42
+; written by: position_ball_sprite, l3F76, l42C0
 v417e:		.byte	$41
+; read by: position_ball_sprite, l3CFA, l3EF4, l3F11, l3F50, l423D, l428D, l42C0
+; written by: l3EEC, l3F50, l3F76
 flight_time:		.byte	$4c
 
 ; colors A characters at text_x/text_y with text_color
+; called by: print_club_name, setup_hole
+; jumped to by: message_line
 color_text:
 		pha 
 		lda text_y
@@ -7450,6 +8585,7 @@ color_text:
 		bne l41C5
 		inc pointer_04 + $1
 
+; jumped to by: color_text
 l41C5:
 		ldx #$03
 
@@ -7469,6 +8605,7 @@ l41C7:
 		bne l41E1
 		dec pointer_04 + $1
 
+; jumped to by: l41C7
 l41E1:
 		dec pointer_04
 		lda text_color
@@ -7495,20 +8632,44 @@ l41EF:
 
 unused_4200:
 		.byte	$00, $00, $00
+; read by: l3EB0
 v4203:		.byte	$ad
+; read by: l3EB0
 v4204:		.byte	$a3
+; read by: l3BEE, l3F6A, l42FD
+; written by: l42C0, l431D
 v4205:		.byte	$21
+; read by: l3BEE, l3C0E
+; written by: l42FD
+; modified by: l42FD, l431D
 v4206:		.byte	$7d
+; read by: l3C16, l3F6A, l42ED
+; written by: l42ED, l42FD
 v4207:		.byte	$10
+; read by: l3C16
+; written by: l42ED
+; modified by: l42ED, l42FD
 v4208:		.byte	$00
+; read by: l3BEE
+; written by: l3BEE, l3EB0
 v4209:		.byte	$00
+; read by: l3BEE, l3C16, l42C0
+; written by: l3BEE, l3EB0
 v420a:		.byte	$43
+; read by: l3C16, l42C0
+; written by: l3EB0
+; modified by: l3BEE, l3C0E, l3EB0
 v420b:		.byte	$41
+; read by: l3C16
+; written by: l3C16, l3EB0
 v420c:		.byte	$4c
+; read by: l3C16, l42C0
+; written by: l3C16, l3EB0
 v420d:		.byte	$43
 unused_420e:
 		.byte	$44, $45
 
+; called by: l42C0
 l4210:
 		lda #$00
 		jsr to_log
@@ -7521,6 +8682,7 @@ l4210:
 		bcc l4225
 		ldx #$00
 
+; jumped to by: l4210
 l4225:
 		jsr to_log
 		jsr log_multiply
@@ -7533,6 +8695,7 @@ l4225:
 		jsr from_log
 		rts 
 
+; called by: l3EF4
 l423D:
 		lda v359e
 		pha 
@@ -7562,6 +8725,7 @@ l423D:
 		bpl l427A
 		dec v4344
 
+; jumped to by: l423D
 l427A:
 		asl 
 		rol v4344
@@ -7573,6 +8737,7 @@ l427A:
 		rol v4344
 		sta v4343
 
+; jumped to by: l423D
 l428D:
 		lda v4341
 		clc 
@@ -7596,6 +8761,7 @@ l428D:
 		eor #$ff
 		adc #$01
 
+; jumped to by: l428D
 l42C0:
 		tax 
 		jsr l4210
@@ -7616,6 +8782,7 @@ l42C0:
 		lda #$00
 		sta v4205
 
+; jumped to by: l42C0
 l42ED:
 		sta v4207
 		lda #$00
@@ -7624,6 +8791,7 @@ l42ED:
 		bpl l42FD
 		dec v4208
 
+; jumped to by: l42ED
 l42FD:
 		asl 
 		rol v4208
@@ -7640,6 +8808,7 @@ l42FD:
 		bpl l431D
 		dec v4206
 
+; jumped to by: l42FD
 l431D:
 		asl 
 		rol v4206
@@ -7660,27 +8829,44 @@ l431D:
 		sta v359e
 		rts 
 
+; read by: l428D
+; written by: l423D
 v4341:
 		.byte	$53
+; read by: l428D
+; written by: l423D
+; modified by: l423D
 v4342:		.byte	$51
+; read by: l428D
+; written by: l427A
 v4343:		.byte	$55
+; read by: l428D
+; written by: l423D
+; modified by: l423D, l427A
 v4344:		.byte	$41
 
+; called by: l30EA, ball_flight
 l4345:
 		jmp (vectors)
 
+; called by: l3843
 l4348:
 		jmp (aA00E)
 
+; called by: l2ED2, l30EA
+; jumped to by: l3819
 l434B:
 		jmp (aA014)
 
+; called by: l2EBC, l30EA, l385B, l386A
 l434E:
 		jmp (aA016)
 
+; called by: l380D
 l4351:
 		jmp (aA01E)
 
+; called by: l3DC3
 l4354:
 		jmp (aA029)
 
@@ -7711,12 +8897,16 @@ unused_47e8:
 		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
 
 .virtual $47f8
+; read by: lA42D, lA4A8
+; written by: check_terrain, l33E5, l3EEC, l3F01, lA379, lA42D, lA4A8, lAE0A, $b4d6, lB55B, lB75C
 sprite_pointers:
 		.fill	8
 .endv
 
 *=$4800
 
+; read by: draw_golfer, l2D3E, l2F9B, l2FD4, l301D, l3048, check_landing, $31c8, l33A5, l33CC
+; written by: draw_golfer, l2D3E, l3048
 sprites:
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $18, $00, $00, $18
@@ -8109,6 +9299,8 @@ unused_5c58:
 
 .virtual $6000
 ; the multicolor bitmap, drawn at run time
+; read by: l3227, lB623
+; written by: l0EB5, lB623
 bitmap:
 		.fill	8000
 .endv
@@ -8116,6 +9308,7 @@ bitmap:
 *=$7f40
 
 ; the tamper check at $aa0b compares this table
+; read by: tamper_check, lAA1C, lAA2D, lAA3E, lAA4F, lAA60, lAA71
 data_pointers:
 		.addr	font, shapes, terrain_pointers, hole_shapes, pointers_9421, pointers_9419, shapes2
 
@@ -8170,12 +9363,14 @@ font:
 		.byte	$00, $00, $14, $28, $00, $00, $00, $00, $fe, $fe, $fe, $fe, $fe, $fe, $fe, $fe
 
 ; 7 rows of 7 pointers; the 8th word of each row is unused
+; read by: find_cell
 terrain_pointers:
 		.word	$931b, $9327, $9340, $934d, $9359, $9382, $93bd, $b3cc, $90bb, $9113, $9171, $919f, $91b8, $91ff, $9272, $1301
 		.word	$8e06, $8e4f, $8e7d, $8f02, $8f4b, $8fc5, $9021, $a8cd, $8b3c, $8b9f, $8c75, $8cd9, $8d29, $8d5d, $8db2, $41f5
 		.word	$88ba, $8904, $896c, $89d6, $8a01, $8a68, $8af0, $c9d1, $863b, $86b6, $8731, $876e, $87a1, $87ff, $8860, $54cc
 		.word	$82bc, $8379, $8413, $8460, $84cd, $852a, $8562
 
+; written by: l082D
 terrain_82bc:
 		.byte	$00, $06, $38, $24, $06, $80, $03, $16, $0b, $03, $1c, $0b, $03, $22, $0b, $03
 		.byte	$28, $05, $03, $30, $05, $03, $37, $0b, $08, $20, $01, $0e, $01, $09, $0d, $0f
@@ -8516,6 +9711,7 @@ terrain_9382:
 		.byte	$10, $08, $10, $2c, $07, $12, $2e, $06, $1c, $34, $0f, $22, $32, $09, $24, $3c
 		.byte	$00, $28, $2f, $06, $32, $24, $0a, $80, $0a, $1e, $03, $10, $1a, $01, $16, $1c
 		.byte	$0a, $16, $25, $11, $80, $05, $80, $80, $0b, $0c, $80
+; read by: l25C9, l39EA
 terrain_93bd:
 		.byte	$06, $00, $28, $14, $06, $80, $34, $0e, $0d, $36, $06, $08, $37, $1a, $0b, $38
 		.byte	$28, $09, $39, $13, $0b, $3a, $3e, $07, $3d, $3c, $06, $3e, $30, $06, $3e, $3e
@@ -8523,6 +9719,7 @@ terrain_93bd:
 		.byte	$12, $80, $05, $80, $80, $0a, $0b, $80
 ; 29 shapes, indexed from 1 through hole_shapes_base: 18 fairways with their greens,
 ; then 4 drawn in color 12 and 7 in color 14
+; read by: l25C9, l39EA
 hole_shapes_base = $93f3
 
 hole_shapes:
@@ -8530,9 +9727,11 @@ hole_shapes:
 		.addr	shape_99a9, shape_9a0f
 pointers_9419:
 		.addr	shape_9c36, shape_9c7b, shape_9c90, shape_9cb1
+; read by: l39EA
 pointers_9421:
 		.addr	shape_9a63, shape_9abc, shape_9b6d, shape_9b8e, shape_9ba9, shape_9bd0, shape_9c19
 ; per hole: two words, indexed from 1 by hole number through hole_positions_base
+; read by: l39EA
 hole_positions_base = $942b
 
 hole_positions:
@@ -8773,46 +9972,64 @@ unused_9cc6:
 leftover_9ff1:
 		.byte	$81, $50, $4e, $45, $57, $20, $30, $3a, $47, $4f, $4c, $47, $4f, $4c, $46
 
+; jumped to by: l2CDC
 lA000:
 		jmp main
 
+; jumped to by: start2
 lA003:
 		lda cpu_port
 		and #$fe
 		sta cpu_port
 		jsr lB5E8
 
+; read by: l4345, random
 vectors:
 		.addr	add_stroke
+; read by: l4348
 aA00E:		.addr	update_scores
+; read by: l32AD
 aA010:		.addr	read_aim_cursor
+; read by: l32B0
 aA012:		.addr	read_joystick
+; read by: l434B
 aA014:		.addr	lB49B
+; read by: l434E
 aA016:		.addr	lB496
+; read by: l32B3
 aA018:		.addr	aim
+; read by: l32B6
 aA01A:		.addr	lB5FC
+; read by: l32B9
 aA01C:		.addr	lB08B
+; read by: l4351
 aA01E:		.addr	lB6F8
 
+; called by: draw_object
 lA020:
 		jmp lB79F
 
+; jumped to by: l1D1B
 lA023:
 		jmp lB7D2
 
+; called by: l1BB6
 lA026:
 		jmp lB805
 
+; read by: l4354
 aA029:
 		.addr	lAE18
 
 ; printed piece by piece through print_char, from digit_text_index on
+; read by: l3A76
 digit_text:
 		.text	" 13694 23664 31743 43694 55585 6"
 		.text	"2353 73424 84504 949251033641121"
 		.text	"33122854133064145955154204161803"
 		.text	"175465183784      "
 
+; jumped to by: lA000, lA63E
 main:
 		jsr install_interrupts
 		lda #$ff
@@ -8855,6 +10072,7 @@ main:
 		lda sprite_multicolor1
 		jsr enable_raster_irq
 
+; jumped to by: lA2C6, lA2E6
 new_game:
 		lda #$00
 		sta leader
@@ -8890,6 +10108,7 @@ lA12B:
 		lda #$01
 		sta ball_y + $1
 
+; jumped to by: lA2D9
 hole_loop:
 		lda hole_number
 		jsr lA95B
@@ -8907,9 +10126,11 @@ hole_loop:
 		jsr lAE92
 		jsr select_player
 
+; jumped to by: lA2BF
 lA175:
 		jmp shot_loop
 
+; called by: shot_loop
 print_score_labels:
 		lda #$ff
 		sta pixel_pattern
@@ -8999,6 +10220,7 @@ text_par:
 		.text	"PAR", $ff
 		rts 
 
+; jumped to by: lA175
 shot_loop:
 		jsr print_score_labels
 		jsr enable_raster_irq
@@ -9059,11 +10281,13 @@ shot_loop:
 		jsr lB458
 		jmp lA2A1
 
+; jumped to by: shot_loop
 lA299:
 		jsr lB5B0
 		ldx #$00
 		jsr lB458
 
+; jumped to by: shot_loop
 lA2A1:
 		jsr lA95E
 		lda sprite_multicolor1
@@ -9079,11 +10303,13 @@ lA2A1:
 		beq lA2BF
 		ora v044d
 
+; jumped to by: lA2A1
 lA2BF:
 		ora #$00
 		beq lA2C6
 		jmp lA175
 
+; jumped to by: lA2BF
 lA2C6:
 		jsr lAC2B
 		lda #$00
@@ -9094,6 +10320,7 @@ lA2C6:
 		bne lA2D9
 		jmp new_game
 
+; jumped to by: lA2C6
 lA2D9:
 		stx hole_number
 		lda game_mode
@@ -9101,9 +10328,11 @@ lA2D9:
 		bne lA2E6
 		jmp hole_loop
 
+; jumped to by: lA2D9
 lA2E6:
 		jmp new_game
 
+; called by: new_game, lA2A1
 clear_screen:
 		lda #$00
 		sta pointer_06
@@ -9115,6 +10344,7 @@ clear_screen:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: lA304
 lA2FB:
 		lda #$00
 		sta (pointer_06), y
@@ -9122,6 +10352,7 @@ lA2FB:
 		bne lA304
 		inc pointer_06 + $1
 
+; jumped to by: lA2FB
 lA304:
 		inc pointer_08
 		bne lA2FB
@@ -9137,6 +10368,7 @@ lA304:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: lA327
 lA31E:
 		lda #$0f
 		sta (pointer_06), y
@@ -9144,6 +10376,7 @@ lA31E:
 		bne lA327
 		inc pointer_06 + $1
 
+; jumped to by: lA31E
 lA327:
 		inc pointer_08
 		bne lA31E
@@ -9159,6 +10392,7 @@ lA327:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: lA34A
 lA341:
 		lda #$00
 		sta (pointer_06), y
@@ -9166,6 +10400,7 @@ lA341:
 		bne lA34A
 		inc pointer_06 + $1
 
+; jumped to by: lA341
 lA34A:
 		inc pointer_08
 		bne lA341
@@ -9181,6 +10416,7 @@ lA34A:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: lA36D
 lA364:
 		lda #$ff
 		sta (pointer_06), y
@@ -9188,6 +10424,7 @@ lA364:
 		bne lA36D
 		inc pointer_06 + $1
 
+; jumped to by: lA364
 lA36D:
 		inc pointer_08
 		bne lA364
@@ -9196,6 +10433,7 @@ lA36D:
 		jsr lA901
 		rts 
 
+; jumped to by: lA5AC
 lA379:
 		lda #$01
 		sta background_color
@@ -9252,6 +10490,7 @@ lA379:
 		sta sprite_multicolor1
 		inx 
 
+; jumped to by: lA379
 lA3F7:
 		lda #$00
 		sta sprite6_color
@@ -9259,6 +10498,7 @@ lA3F7:
 		sta raster
 		jmp lA57B
 
+; jumped to by: lA58A
 lA404:
 		ldy #$05
 		lda raster
@@ -9277,13 +10517,17 @@ lA40B:
 		bne lA426
 		lda #$cb
 
+; jumped to by: lA40B
 lA426:
 		sta raster
 		jmp lA57B
 
+; read by: lA379
+; written by: lA40B, lA4A8
 menu_sprite_flag:
 		.byte	$08
 
+; jumped to by: lA597
 lA42D:
 		ldx #$00
 		lda sprite_pointers
@@ -9324,6 +10568,7 @@ lA42D:
 		beq lA48F
 		lda #$0b
 
+; jumped to by: lA42D
 lA48F:
 		sta sprite_multicolor0
 		inx 
@@ -9336,6 +10581,7 @@ lA48F:
 		sta raster
 		jmp lA57B
 
+; jumped to by: lA59E
 lA4A8:
 		lda #$cb
 		sta raster
@@ -9379,6 +10625,7 @@ lA4A8:
 		beq lA512
 		lda #$0b
 
+; jumped to by: lA4A8
 lA512:
 		sta sprite_multicolor0
 		inx 
@@ -9389,6 +10636,7 @@ lA512:
 		inx 
 		jmp lA57B
 
+; jumped to by: lA5A5
 lA526:
 		lda #$fc
 		sta raster
@@ -9397,10 +10645,13 @@ lA526:
 		jmp lA57B
 
 ; sprite registers saved while a menu sprite is shown, and the values it sets
+; read by: lA379
+; written by: lA42D, lA48F, lA4A8, lA512
 saved_sprite_registers:
 		.byte	$26, $47, $63, $01, $3e, $f9, $f2, $ff, $4b, $48, $6f, $01, $3e, $f2, $f2, $f0
 		.byte	$cd, $51, $7d, $75, $00, $00, $45, $32, $3f, $09, $09, $09, $09, $09, $09, $45
 		.byte	$4e, $44, $0d, $0d, $20, $31, $0d, $0d
+; read by: lA42D, lA48F, lA4A8, lA512
 menu_sprite_registers:
 		.byte	$23, $32, $91, $01, $fe, $01, $00, $00, $24, $32, $a6, $09, $f6, $01, $00, $00
 
@@ -9413,6 +10664,7 @@ irq:
 		and vic_irq_enable
 		bne lA58A
 
+; jumped to by: lA3F7, lA426, lA48F, lA512, lA526
 lA57B:
 		lda cia1_interrupt_control
 		pla 
@@ -9425,6 +10677,7 @@ lA57B:
 		rti 
 		jmp kernal_irq
 
+; jumped to by: irq
 lA58A:
 		sta vic_irq_status
 		lda raster
@@ -9432,24 +10685,29 @@ lA58A:
 		bcs lA597
 		jmp lA404
 
+; jumped to by: lA58A
 lA597:
 		cmp #$9b
 		bcs lA59E
 		jmp lA42D
 
+; jumped to by: lA597
 lA59E:
 		cmp #$cb
 		bcs lA5A5
 		jmp lA4A8
 
+; jumped to by: lA59E
 lA5A5:
 		cmp #$fc
 		bcs lA5AC
 		jmp lA526
 
+; jumped to by: lA5A5
 lA5AC:
 		jmp lA379
 
+; called by: main, lB5E8
 install_interrupts:
 		ldx #$00
 
@@ -9492,6 +10750,7 @@ nmi:
 		bne lA5FA
 		jmp lA680
 
+; jumped to by: nmi
 lA5FA:
 		sta dA687
 		lda cpu_port
@@ -9527,6 +10786,7 @@ lA5FA:
 text_quit_y_n:
 		.text	"QUIT (Y/N) ? ", $ff
 
+; jumped to by: lA64F
 lA63E:
 		jsr scnkey
 		lda kernal_lstx
@@ -9534,11 +10794,13 @@ lA63E:
 		bne lA64A
 		jmp main
 
+; jumped to by: lA63E
 lA64A:
 		cmp #$17
 		bne lA64F
 		brk 
 
+; jumped to by: lA64A
 lA64F:
 		cmp #$27
 		bne lA63E
@@ -9570,6 +10832,7 @@ lA64F:
 		lda #$00
 		sta dA687
 
+; jumped to by: nmi
 lA680:
 		pla 
 		tay 
@@ -9579,9 +10842,12 @@ lA680:
 		plp 
 		rti 
 
+; read by: nmi
+; written by: lA5B1, lA5FA, lA64F
 dA687:
 		brk 
 
+; called by: main, new_game, shot_loop
 enable_raster_irq:
 		lda raster
 		cmp #$14
@@ -9599,6 +10865,7 @@ enable_raster_irq:
 		cli 
 		rts 
 
+; called by: main, new_game
 fill_colors:
 		lda #$c0
 		sta pointer_06
@@ -9610,6 +10877,7 @@ fill_colors:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: lA6C5
 lA6BC:
 		lda #$aa
 		sta (pointer_06), y
@@ -9617,6 +10885,7 @@ lA6BC:
 		bne lA6C5
 		inc pointer_06 + $1
 
+; jumped to by: lA6BC
 lA6C5:
 		inc pointer_08
 		bne lA6BC
@@ -9632,6 +10901,7 @@ lA6C5:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: lA6E8
 lA6DF:
 		lda #$0f
 		sta (pointer_06), y
@@ -9639,6 +10909,7 @@ lA6DF:
 		bne lA6E8
 		inc pointer_06 + $1
 
+; jumped to by: lA6DF
 lA6E8:
 		inc pointer_08
 		bne lA6DF
@@ -9654,6 +10925,7 @@ lA6E8:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: lA70B
 lA702:
 		lda #$cc
 		sta (pointer_06), y
@@ -9661,6 +10933,7 @@ lA702:
 		bne lA70B
 		inc pointer_06 + $1
 
+; jumped to by: lA702
 lA70B:
 		inc pointer_08
 		bne lA702
@@ -9671,6 +10944,7 @@ lA70B:
 		bne lA71D
 		jmp lA8C8
 
+; jumped to by: lA70B
 lA71D:
 		lda #$48
 		sta pointer_06
@@ -9682,6 +10956,7 @@ lA71D:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: lA738
 lA72F:
 		lda #$bb
 		sta (pointer_06), y
@@ -9689,6 +10964,7 @@ lA72F:
 		bne lA738
 		inc pointer_06 + $1
 
+; jumped to by: lA72F
 lA738:
 		inc pointer_08
 		bne lA72F
@@ -9704,6 +10980,7 @@ lA738:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: lA75B
 lA752:
 		lda #$bb
 		sta (pointer_06), y
@@ -9711,6 +10988,7 @@ lA752:
 		bne lA75B
 		inc pointer_06 + $1
 
+; jumped to by: lA752
 lA75B:
 		inc pointer_08
 		bne lA752
@@ -9726,6 +11004,7 @@ lA75B:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: lA77E
 lA775:
 		lda #$bb
 		sta (pointer_06), y
@@ -9733,6 +11012,7 @@ lA775:
 		bne lA77E
 		inc pointer_06 + $1
 
+; jumped to by: lA775
 lA77E:
 		inc pointer_08
 		bne lA775
@@ -9748,6 +11028,7 @@ lA77E:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: lA7A1
 lA798:
 		lda #$bb
 		sta (pointer_06), y
@@ -9755,6 +11036,7 @@ lA798:
 		bne lA7A1
 		inc pointer_06 + $1
 
+; jumped to by: lA798
 lA7A1:
 		inc pointer_08
 		bne lA798
@@ -9770,6 +11052,7 @@ lA7A1:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: lA7C4
 lA7BB:
 		lda #$bb
 		sta (pointer_06), y
@@ -9777,6 +11060,7 @@ lA7BB:
 		bne lA7C4
 		inc pointer_06 + $1
 
+; jumped to by: lA7BB
 lA7C4:
 		inc pointer_08
 		bne lA7BB
@@ -9792,6 +11076,7 @@ lA7C4:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: lA7E7
 lA7DE:
 		lda #$bb
 		sta (pointer_06), y
@@ -9799,6 +11084,7 @@ lA7DE:
 		bne lA7E7
 		inc pointer_06 + $1
 
+; jumped to by: lA7DE
 lA7E7:
 		inc pointer_08
 		bne lA7DE
@@ -9814,6 +11100,7 @@ lA7E7:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: lA80A
 lA801:
 		lda #$bb
 		sta (pointer_06), y
@@ -9821,6 +11108,7 @@ lA801:
 		bne lA80A
 		inc pointer_06 + $1
 
+; jumped to by: lA801
 lA80A:
 		inc pointer_08
 		bne lA801
@@ -9836,6 +11124,7 @@ lA80A:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: lA82D
 lA824:
 		lda #$01
 		sta (pointer_06), y
@@ -9843,6 +11132,7 @@ lA824:
 		bne lA82D
 		inc pointer_06 + $1
 
+; jumped to by: lA824
 lA82D:
 		inc pointer_08
 		bne lA824
@@ -9858,6 +11148,7 @@ lA82D:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: lA850
 lA847:
 		lda #$01
 		sta (pointer_06), y
@@ -9865,6 +11156,7 @@ lA847:
 		bne lA850
 		inc pointer_06 + $1
 
+; jumped to by: lA847
 lA850:
 		inc pointer_08
 		bne lA847
@@ -9880,6 +11172,7 @@ lA850:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: lA873
 lA86A:
 		lda #$01
 		sta (pointer_06), y
@@ -9887,6 +11180,7 @@ lA86A:
 		bne lA873
 		inc pointer_06 + $1
 
+; jumped to by: lA86A
 lA873:
 		inc pointer_08
 		bne lA86A
@@ -9902,6 +11196,7 @@ lA873:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: lA896
 lA88D:
 		lda #$01
 		sta (pointer_06), y
@@ -9909,6 +11204,7 @@ lA88D:
 		bne lA896
 		inc pointer_06 + $1
 
+; jumped to by: lA88D
 lA896:
 		inc pointer_08
 		bne lA88D
@@ -9927,6 +11223,7 @@ lA896:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: lA8C0
 lA8B7:
 		lda #$0c
 		sta (pointer_06), y
@@ -9934,15 +11231,18 @@ lA8B7:
 		bne lA8C0
 		inc pointer_06 + $1
 
+; jumped to by: lA8B7
 lA8C0:
 		inc pointer_08
 		bne lA8B7
 		inc pointer_08 + $1
 		bne lA8B7
 
+; jumped to by: lA70B, lA896
 lA8C8:
 		jmp lA901
 
+; called by: draw_wind
 lA8CB:
 		lda #$1f
 		sta pointer_04
@@ -9950,6 +11250,7 @@ lA8CB:
 		sta pointer_04 + $1
 		ldx #$04
 
+; jumped to by: lA8E7
 lA8D5:
 		lda pointer_04 + $1
 		pha 
@@ -9958,12 +11259,14 @@ lA8D5:
 		ldy #$50
 		lda #$00
 
+; jumped to by: lA8E7
 lA8DF:
 		sta (pointer_04), y
 		cpy #$12
 		bcs lA8E7
 		lda #$aa
 
+; jumped to by: lA8DF
 lA8E7:
 		dey 
 		bne lA8DF
@@ -9982,6 +11285,8 @@ lA8E7:
 		bne lA8D5
 		rts 
 
+; called by: lA36D
+; jumped to by: lA8C8
 lA901:
 		ldx #$00
 		stx seed_count
@@ -10001,12 +11306,14 @@ lA901:
 		jsr draw_line
 		rts 
 
+; called by: main
 lA927:
 		ldx #$2c
 		lda shapes2, x
 		cmp #$02
 		bne lA95A
 
+; jumped to by: lA956
 lA930:
 		lda shape_eb26 + $f, x
 		sta pointer_08
@@ -10035,26 +11342,35 @@ lA93C:
 		iny 
 		bne lA93C
 
+; jumped to by: lA93C
 lA956:
 		dex 
 		dex 
 		bne lA930
 
+; jumped to by: lA927
 lA95A:
 		rts 
 
+; called by: new_game, hole_loop
+; jumped to by: lB336, lB34B
 lA95B:
 		jmp (a2CE5)
 
+; called by: lA2A1
 lA95E:
 		jmp (a2CE7)
 
+; called by: lAC17, lACB2, print_par_result, lB336, aim
+; jumped to by: lB5EE
 lA961:
 		jmp (a2CE9)
 
+; called by: new_game, shot_loop
 lA964:
 		jmp (a2CEB)
 
+; called by: lB4FA
 lA967:
 		jmp (a2CED)
 		jsr lA99A
@@ -10073,15 +11389,18 @@ lA967:
 		jsr lA99A
 		jmp lA98E
 
+; jumped to by: lA967
 lA98E:
 		jsr direction_up
 		jsr direction_up
 		jsr direction_up
 		jmp direction_up
 
+; called by: lA967
 lA99A:
 		jsr lA99D
 
+; called by: lA99A
 lA99D:
 		ldy direction
 		lda steps_x2, y
@@ -10097,6 +11416,7 @@ lA99D:
 		sta ball_x + $1
 		jmp lA9CE
 
+; jumped to by: lA99D
 lA9B6:
 		clc 
 		eor #$ff
@@ -10114,6 +11434,7 @@ lA9B6:
 		sbc #$00
 		sta ball_x + $1
 
+; jumped to by: lA99D
 lA9CE:
 		lda steps_y2, y
 		bmi lA9E2
@@ -10128,6 +11449,7 @@ lA9CE:
 		sta ball_y + $1
 		rts 
 
+; jumped to by: lA9CE
 lA9E2:
 		clc 
 		eor #$ff
@@ -10146,8 +11468,10 @@ lA9E2:
 		sta ball_y + $1
 		rts 
 
+; read by: lA99D
 steps_x2:
 		.char	0, 8, 8, 8, 0, -8, -8, -8
+; read by: lA9CE
 steps_y2:
 		.char	8, 8, 0, -8, -8, -8, 0, 8
 
@@ -10158,10 +11482,12 @@ tamper_check:
 		lda data_pointers + $1
 		cmp #$7f
 
+; jumped to by: tamper_check
 lAA17:
 		beq lAA1C
 		jmp tamper_crash
 
+; jumped to by: lAA17
 lAA1C:
 		lda data_pointers + $2
 		cmp #$00
@@ -10169,10 +11495,12 @@ lAA1C:
 		lda data_pointers + $3
 		cmp #$e0
 
+; jumped to by: lAA1C
 lAA28:
 		beq lAA2D
 		jmp tamper_crash
 
+; jumped to by: lAA28
 lAA2D:
 		lda data_pointers + $4
 		cmp #$4e
@@ -10180,10 +11508,12 @@ lAA2D:
 		lda data_pointers + $5
 		cmp #$82
 
+; jumped to by: lAA2D
 lAA39:
 		beq lAA3E
 		jmp tamper_crash
 
+; jumped to by: lAA39
 lAA3E:
 		lda data_pointers + $6
 		cmp #$f5
@@ -10191,10 +11521,12 @@ lAA3E:
 		lda data_pointers + $7
 		cmp #$93
 
+; jumped to by: lAA3E
 lAA4A:
 		beq lAA4F
 		jmp tamper_crash
 
+; jumped to by: lAA4A
 lAA4F:
 		lda data_pointers + $8
 		cmp #$21
@@ -10202,10 +11534,12 @@ lAA4F:
 		lda data_pointers + $9
 		cmp #$94
 
+; jumped to by: lAA4F
 lAA5B:
 		beq lAA60
 		jmp tamper_crash
 
+; jumped to by: lAA5B
 lAA60:
 		lda data_pointers + $a
 		cmp #$19
@@ -10213,10 +11547,12 @@ lAA60:
 		lda data_pointers + $b
 		cmp #$94
 
+; jumped to by: lAA60
 lAA6C:
 		beq lAA71
 		jmp tamper_crash
 
+; jumped to by: lAA6C
 lAA71:
 		lda data_pointers + $c
 		cmp #$37
@@ -10224,10 +11560,12 @@ lAA71:
 		lda data_pointers + $d
 		cmp #$eb
 
+; jumped to by: lAA71
 lAA7D:
 		beq lAA82
 		jmp tamper_crash
 
+; jumped to by: lAA7D
 lAA82:
 		lda $08c0
 		cmp #$b8
@@ -10235,10 +11573,12 @@ lAA82:
 		lda $08c1
 		cmp #$0d
 
+; jumped to by: lAA82
 lAA8E:
 		beq lAA93
 		jmp tamper_crash2
 
+; jumped to by: lAA8E
 lAA93:
 		lda $08c2
 		cmp #$10
@@ -10246,10 +11586,12 @@ lAA93:
 		lda $08c3
 		cmp #$10
 
+; jumped to by: lAA93
 lAA9F:
 		beq lAAA4
 		jmp tamper_crash2
 
+; jumped to by: lAA9F
 lAAA4:
 		lda $08c4
 		cmp #$73
@@ -10257,10 +11599,12 @@ lAAA4:
 		lda $08c5
 		cmp #$0d
 
+; jumped to by: lAAA4
 lAAB0:
 		beq lAAB5
 		jmp tamper_crash2
 
+; jumped to by: lAAB0
 lAAB5:
 		lda $08c6
 		cmp #$ab
@@ -10268,10 +11612,12 @@ lAAB5:
 		lda $08c7
 		cmp #$18
 
+; jumped to by: lAAB5
 lAAC1:
 		beq lAAC6
 		jmp tamper_crash2
 
+; jumped to by: lAAC1
 lAAC6:
 		lda $08c8
 		cmp #$34
@@ -10279,10 +11625,12 @@ lAAC6:
 		lda $08c9
 		cmp #$10
 
+; jumped to by: lAAC6
 lAAD2:
 		beq lAAD7
 		jmp tamper_crash2
 
+; jumped to by: lAAD2
 lAAD7:
 		lda $08ca
 		cmp #$36
@@ -10290,10 +11638,12 @@ lAAD7:
 		lda $08cb
 		cmp #$25
 
+; jumped to by: lAAD7
 lAAE3:
 		beq lAAE8
 		jmp tamper_crash2
 
+; jumped to by: lAAE3
 lAAE8:
 		lda $08cc
 		cmp #$37
@@ -10301,10 +11651,12 @@ lAAE8:
 		lda $08cd
 		cmp #$25
 
+; jumped to by: lAAE8
 lAAF4:
 		beq lAAF9
 		jmp tamper_crash2
 
+; jumped to by: lAAF4
 lAAF9:
 		lda $08ce
 		cmp #$5f
@@ -10312,10 +11664,12 @@ lAAF9:
 		lda $08cf
 		cmp #$2c
 
+; jumped to by: lAAF9
 lAB05:
 		beq lAB0A
 		jmp tamper_crash2
 
+; jumped to by: lAB05
 lAB0A:
 		lda l08D0
 		cmp #$7c
@@ -10323,10 +11677,12 @@ lAB0A:
 		lda l08D0 + 1
 		cmp #$12
 
+; jumped to by: lAB0A
 lAB16:
 		beq lAB1B
 		jmp tamper_crash2
 
+; jumped to by: lAB16
 lAB1B:
 		lda l08D0 + 2
 		cmp #$b9
@@ -10334,10 +11690,12 @@ lAB1B:
 		lda $08d3
 		cmp #$0d
 
+; jumped to by: lAB1B
 lAB27:
 		beq lAB2C
 		jmp tamper_crash2
 
+; jumped to by: lAB27
 lAB2C:
 		lda $08d4
 		cmp #$75
@@ -10345,10 +11703,12 @@ lAB2C:
 		lda $08d5
 		cmp #$2c
 
+; jumped to by: lAB2C
 lAB38:
 		beq lAB3D
 		jmp tamper_crash2
 
+; jumped to by: lAB38
 lAB3D:
 		lda $08d6
 		cmp #$5f
@@ -10356,10 +11716,12 @@ lAB3D:
 		lda $08d7
 		cmp #$16
 
+; jumped to by: lAB3D
 lAB49:
 		beq lAB4E
 		jmp tamper_crash2
 
+; jumped to by: lAB49
 lAB4E:
 		lda $08d8
 		cmp #$6d
@@ -10367,10 +11729,12 @@ lAB4E:
 		lda $08d9
 		cmp #$13
 
+; jumped to by: lAB4E
 lAB5A:
 		beq lAB5F
 		jmp tamper_crash2
 
+; jumped to by: lAB5A
 lAB5F:
 		lda loader_part
 		cmp #$f3
@@ -10378,10 +11742,12 @@ lAB5F:
 		lda loader_part + $1
 		cmp #$0f
 
+; jumped to by: lAB5F
 lAB6B:
 		beq lAB70
 		jmp tamper_crash2
 
+; jumped to by: lAB6B
 lAB70:
 		lda $08dc
 		cmp #$fb
@@ -10389,10 +11755,12 @@ lAB70:
 		lda $08dd
 		cmp #$0f
 
+; jumped to by: lAB70
 lAB7C:
 		beq lAB81
 		jmp tamper_crash2
 
+; jumped to by: lAB7C
 lAB81:
 		lda $08de
 		cmp #$8b
@@ -10400,10 +11768,12 @@ lAB81:
 		lda $08df
 		cmp #$2c
 
+; jumped to by: lAB81
 lAB8D:
 		beq lAB92
 		jmp tamper_crash2
 
+; jumped to by: lAB8D
 lAB92:
 		lda $08e0
 		cmp #$79
@@ -10411,10 +11781,12 @@ lAB92:
 		lda $08e1
 		cmp #$0d
 
+; jumped to by: lAB92
 lAB9E:
 		beq lABA3
 		jmp tamper_crash2
 
+; jumped to by: lAB9E
 lABA3:
 		lda $08e2
 		cmp #$95
@@ -10422,10 +11794,12 @@ lABA3:
 		lda $08e3
 		cmp #$0b
 
+; jumped to by: lABA3
 lABAF:
 		beq lABB4
 		jmp tamper_crash2
 
+; jumped to by: lABAF
 lABB4:
 		lda $08e4
 		cmp #$db
@@ -10433,10 +11807,12 @@ lABB4:
 		lda $08e5
 		cmp #$24
 
+; jumped to by: lABB4
 lABC0:
 		beq lABC5
 		jmp tamper_crash2
 
+; jumped to by: lABC0
 lABC5:
 		lda $08e6
 		cmp #$57
@@ -10444,10 +11820,12 @@ lABC5:
 		lda $08e7
 		cmp #$10
 
+; jumped to by: lABC5
 lABD1:
 		beq lABD6
 		jmp tamper_crash2
 
+; jumped to by: lABD1
 lABD6:
 		lda $08e8
 		cmp #$08
@@ -10455,28 +11833,33 @@ lABD6:
 		lda $08e9
 		cmp #$20
 
+; jumped to by: lABD6
 lABE2:
 		beq lABE7
 		jmp tamper_crash2
 
+; jumped to by: lABE2
 lABE7:
 		rts 
 
 ; the tamper check at $aa0b ends here when the $7f40 table or the loader at
 ; $08c0 was changed: the jsr runs the old screen as code, so the jmp after it
 ; never runs
+; jumped to by: lAA17, lAA28, lAA39, lAA4A, lAA5B, lAA6C, lAA7D
 tamper_crash:
 		jsr l07C6
 
 never_reached_abeb:
 		.byte	$4c, $00, $0c
 
+; jumped to by: lAA8E, lAA9F, lAAB0, lAAC1, lAAD2, lAAE3, lAAF4, lAB05, lAB16, lAB27, lAB38, lAB49, lAB5A, lAB6B, lAB7C, lAB8D, lAB9E, lABAF, lABC0, lABD1, lABE2
 tamper_crash2:
 		jsr l07C3
 
 never_reached_abf1:
 		.byte	$4c, $00, $0c
 ; start-up sets this to $20
+; written by: main
 vabf4:		.byte	$20
 
 add_stroke:
@@ -10498,6 +11881,7 @@ add_stroke:
 		lda #$27
 		sta text_y
 
+; jumped to by: add_stroke
 lAC17:
 		lda #$02
 		jsr lA961
@@ -10508,6 +11892,7 @@ lAC17:
 		jsr lAD27
 		rts 
 
+; called by: lA12B, lA2C6
 lAC2B:
 		lda #$00
 		sta current_player
@@ -10518,9 +11903,11 @@ lAC2B:
 		bcc lAC3E
 		ldx #$01
 
+; jumped to by: lAC2B
 lAC3E:
 		stx leader
 
+; jumped to by: lAC2B
 lAC41:
 		lda game_mode
 		and #$01
@@ -10528,6 +11915,8 @@ lAC41:
 		jsr update_scores
 		inc current_player
 
+; called by: lAC41
+; jumped to by: lAC41
 update_scores:
 		ldx current_player
 		txa 
@@ -10553,6 +11942,7 @@ update_scores:
 		sta score_vs_par + $1, y
 		jmp lAC91
 
+; jumped to by: update_scores
 lAC82:
 		clc 
 		adc score_vs_par
@@ -10561,6 +11951,7 @@ lAC82:
 		adc #$99
 		sta score_vs_par + $1, y
 
+; jumped to by: update_scores
 lAC91:
 		lda #$00
 		sta strokes, x
@@ -10578,6 +11969,7 @@ lAC91:
 		lda #$27
 		sta text_y
 
+; jumped to by: lAC91
 lACB2:
 		lda #$0b
 		jsr lA961
@@ -10612,6 +12004,7 @@ lACB2:
 		sta vad53
 		cld 
 
+; jumped to by: lACB2
 lACFC:
 		pla 
 		jsr print_char
@@ -10629,12 +12022,14 @@ lACFC:
 		jsr lAD27
 		rts 
 
+; called by: lACB2, lACFC
 lAD21:
 		pha 
 		txa 
 		jsr lAD35
 		pla 
 
+; called by: lAC17, lACFC
 lAD27:
 		pha 
 		lsr 
@@ -10646,6 +12041,7 @@ lAD27:
 		stx bcd_leading_zero
 		pla 
 
+; called by: lAD21, lAD27, lB14A
 lAD35:
 		and #$0f
 		bne lAD3F
@@ -10653,26 +12049,44 @@ lAD35:
 		bne lAD3F
 		rts 
 
+; jumped to by: lAD35
 lAD3F:
 		sta bcd_leading_zero
 		jmp print_nibble
 
+; read by: lAD35
+; written by: lAC17, lACB2, lACFC, lAD27, lAD3F, lB14A
 bcd_leading_zero:
 		.byte	$02
+; read by: lACFC
+; written by: lAC91
 vad46:		.byte	$00
+; read by: lACB2
+; written by: lA12B, lAC91
 vad47:		.byte	$00
+; read by: add_stroke, lAC17, lAC2B, update_scores, lACFC, print_par_result
+; written by: add_stroke, lAC91
 strokes:
 		.byte	$00, $00
 
+; read by: update_scores, lAC82, lACB2
+; written by: update_scores, lAC82
 score_vs_par:
 		.word	$0000, $0000
+; read by: update_scores, lACB2
+; written by: update_scores
 total_strokes:
 		.word	$0000, $0000
 
+; read by: lACB2, lACFC
+; written by: lACB2
 vad52:
 		.byte	$00
+; read by: lACB2, lACFC
+; written by: lACB2
 vad53:		.byte	$00
 
+; called by: shot_loop
 draw_flag:
 		lda #$82
 		sta green_flag_x
@@ -10761,6 +12175,7 @@ draw_flag:
 		ora #$40
 		sta sprites_x_msb
 
+; jumped to by: draw_flag
 lAE0A:
 		lda #$f0
 		sec 
@@ -10770,6 +12185,7 @@ lAE0A:
 		sta sprite_pointers + $6
 		rts 
 
+; called by: draw_flag
 lAE18:
 		ora #$00
 		php 
@@ -10778,6 +12194,7 @@ lAE18:
 		eor #$ff
 		adc #$01
 
+; jumped to by: lAE18
 lAE22:
 		tax 
 		lda #$00
@@ -10799,6 +12216,7 @@ lAE22:
 		eor #$ff
 		adc #$01
 
+; jumped to by: lAE22
 lAE47:
 		rts 
 
@@ -10811,6 +12229,7 @@ read_aim_cursor:
 		beq lAE58
 		inx 
 
+; jumped to by: read_aim_cursor
 lAE58:
 		stx proj_x + $1
 		lda sprite5_y
@@ -10836,16 +12255,19 @@ lAE58:
 		jsr test_pixel
 		rts 
 
+; jumped to by: lAE58
 lAE8F:
 		lda #$00
 		rts 
 
+; called by: hole_loop, shot_loop
 lAE92:
 		lda game_mode
 		and #$01
 		bne lAE9C
 		jmp lAF26
 
+; jumped to by: lAE92
 lAE9C:
 		lda v043f
 		bpl lAEB7
@@ -10862,6 +12284,7 @@ lAE9C:
 		sta v043f
 		stx v043e
 
+; jumped to by: lAE9C
 lAEB7:
 		lda v0441
 		bpl lAED2
@@ -10878,6 +12301,7 @@ lAEB7:
 		sta v0441
 		stx v0440
 
+; jumped to by: lAEB7
 lAED2:
 		lda v0449
 		bpl lAEED
@@ -10894,6 +12318,7 @@ lAED2:
 		sta v0449
 		stx v0448
 
+; jumped to by: lAED2
 lAEED:
 		lda v044b
 		bpl lAF08
@@ -10910,9 +12335,11 @@ lAEED:
 		sta v044b
 		stx v044a
 
+; jumped to by: lAEED
 lAF08:
 		ldx #$01
 
+; jumped to by: lAF27
 lAF0A:
 		lda v043e, x
 		ora v0440, x
@@ -10925,21 +12352,28 @@ lAF0A:
 		lda #$00
 		beq lAF26
 
+; jumped to by: lAF0A
 lAF24:
 		lda #$01
 
+; jumped to by: lAE92, lAF0A
 lAF26:
 		rts 
 
+; jumped to by: lAF0A
 lAF27:
 		dex 
 		beq lAF0A
 		lda leader
 		rts 
 
+; read by: lAF27
+; written by: new_game, lAC3E
 leader:
 		.byte	$00
 
+; called by: hole_loop, shot_loop
+; jumped to by: lAF5D
 select_player:
 		sta current_player
 		ora #$00
@@ -10947,9 +12381,11 @@ select_player:
 		tax 
 		beq lAF3B
 
+; jumped to by: select_player
 lAF39:
 		ldx #$0a
 
+; jumped to by: select_player
 lAF3B:
 		lda v0442, x
 		sta v0456
@@ -10966,11 +12402,13 @@ lAF3B:
 		sta ball_y + $1
 		rts 
 
+; jumped to by: lAF3B
 lAF5D:
 		lda current_player
 		eor #$01
 		jmp select_player
 
+; called by: hole_loop, lA2A1
 save_player:
 		lda hole_distance
 		bne lAF75
@@ -10979,11 +12417,13 @@ save_player:
 		sta v0454
 		sta v0455
 
+; jumped to by: save_player
 lAF75:
 		ldx current_player
 		beq lAF7C
 		ldx #$0a
 
+; jumped to by: lAF75
 lAF7C:
 		lda ball_x
 		sta v043a, x
@@ -11008,6 +12448,7 @@ lAF7C:
 		beq print_par_result
 		rts 
 
+; jumped to by: lAF7C
 print_par_result:
 		lda #$00
 		sta text_x
@@ -11032,6 +12473,7 @@ text_over_par:
 		lda #$03
 		jmp play_tune
 
+; jumped to by: print_par_result
 lAFE9:
 		jsr print_inline
 
@@ -11040,6 +12482,7 @@ text_under_par:
 		lda #$01
 		jmp play_tune
 
+; jumped to by: print_par_result
 lAFFB:
 		jsr print_inline
 
@@ -11049,6 +12492,7 @@ text_level_par:
 		jmp play_tune
 
 ; changes the wind a little at random
+; called by: new_game, hole_loop
 change_wind:
 		ldx hole_number
 		lda text_wind_tilt + $7, x
@@ -11074,12 +12518,14 @@ change_wind:
 		stx wind_strength
 		bcc lB044
 
+; jumped to by: change_wind
 lB03B:
 		ldx wind_strength
 		dex 
 		beq lB044
 		stx wind_strength
 
+; jumped to by: change_wind, lB03B
 lB044:
 		jsr random
 		and #$03
@@ -11090,18 +12536,22 @@ lB044:
 		lda #$01
 		bne lB057
 
+; jumped to by: lB044
 lB055:
 		lda #$ff
 
+; jumped to by: lB044
 lB057:
 		clc 
 		adc wind_direction
 		and #$07
 		sta wind_direction
 
+; jumped to by: lB044
 lB060:
 		rts 
 
+; called by: main, lA12B
 random_wind:
 		jsr random
 		and #$07
@@ -11114,6 +12564,7 @@ random_wind:
 		rts 
 
 ; the wind's push when far from the hole, the green's tilt when near
+; called by: shot_loop
 compute_drift:
 		lda hole_distance
 		cmp #$40
@@ -11125,6 +12576,7 @@ compute_drift:
 		lda #$01
 		bne lB099
 
+; jumped to by: compute_drift
 lB08B:
 		lda tilt_direction
 		sta drift_direction
@@ -11132,6 +12584,7 @@ lB08B:
 		sta drift_strength
 		lda #$05
 
+; jumped to by: compute_drift
 lB099:
 		sta wind_or_tilt
 		lda drift_direction
@@ -11148,6 +12601,7 @@ lB099:
 		sta v0457
 		jmp draw_wind
 
+; called by: lB099, lB0CF
 lB0BE:
 		tay 
 		beq lB0CE
@@ -11158,9 +12612,11 @@ lB0BE:
 		tay 
 		lda strength_scale, y
 
+; jumped to by: lB0BE
 lB0CE:
 		rts 
 
+; jumped to by: lB0BE
 lB0CF:
 		clc 
 		eor #$ff
@@ -11171,20 +12627,34 @@ lB0CF:
 		adc #$01
 		rts 
 
+; read by: lB099
 table_b0dd:
 		.char	10, 7, 0, -7, -10, -7, 0, 7
+; read by: lB099
 table_b0e5:
 		.char	0, 7, 10, 7, 0, -7, -10, -7
 
+; read by: lB0BE
 strength_scale:
 		.byte	$00, $01, $01, $02, $03, $04, $04, $05, $06, $06
+; read by: lB0BE, lB14A
+; written by: compute_drift, lB08B
 drift_strength:		.byte	$02
+; read by: lB099
+; written by: compute_drift, lB08B
 drift_direction:		.byte	$00
+; read by: lB08B
+; written by: change_wind
 tilt_strength:		.byte	$01
+; read by: lB08B
+; written by: change_wind
 tilt_direction:		.byte	$07
 ; 1 to print "WIND", 5 to print "TILT"
+; read by: draw_wind, lB14A
+; written by: lB099
 wind_or_tilt:		.byte	$01
 
+; read by: change_wind
 text_wind_tilt:
 		.text	"WINDTILT"
 
@@ -11194,6 +12664,9 @@ green_tilt:
 		.byte	$63, $52
 
 ; returns the next byte of $a000-$b0ff
+; called by: change_wind, lB044, random_wind
+; read by: lB122
+; written by: lB122
 random:
 		lda vectors
 		pha 
@@ -11201,6 +12674,7 @@ random:
 		bne lB122
 		inc random + 2
 
+; jumped to by: random
 lB122:
 		lda random + 2
 		cmp #$b1
@@ -11210,10 +12684,12 @@ lB122:
 		lda #$a0
 		sta random + 2
 
+; jumped to by: lB122
 lB133:
 		pla 
 		rts 
 
+; jumped to by: lB099
 draw_wind:
 		jsr lA8CB
 		lda #$ff
@@ -11314,6 +12790,7 @@ lB14A:
 		sta pointer_04 + $1
 		ldx #$04
 
+; jumped to by: lB1E6
 lB1E4:
 		ldy #$40
 
@@ -11334,17 +12811,22 @@ lB1E6:
 		bne lB1E4
 		rts 
 
+; read by: lB23A
 arrow_x:
 		.byte	$84
+; read by: lB23A
 arrow_y:		.byte	$10
+; read by: lB14A
 arrow_lines:
 		.byte	$00, $04, $0b, $08, $01, $05, $00, $02, $02, $06, $08, $09, $03, $07, $02, $04
 		.byte	$04, $00, $09, $0a, $05, $01, $04, $06, $06, $02, $0a, $0b, $07, $03, $06, $00
 
+; read by: lB23A
 arrow_points:
 		.char	0, 12, 8, 12, 8, 0, 8, -12, 0, -12, -8, -12, -8, 0, -8, 12
 		.char	4, 6, 4, -6, -4, -6, -4, 6
 
+; called by: lB14A
 lB23A:
 		asl 
 		tax 
@@ -11358,6 +12840,7 @@ lB23A:
 		tax 
 		rts 
 
+; called by: new_game
 title_screen:
 		lda #$48
 		sta pointer_06
@@ -11369,6 +12852,7 @@ title_screen:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: lB268
 lB25F:
 		lda #$cc
 		sta (pointer_06), y
@@ -11376,6 +12860,7 @@ lB25F:
 		bne lB268
 		inc pointer_06 + $1
 
+; jumped to by: lB25F
 lB268:
 		inc pointer_08
 		bne lB25F
@@ -11391,6 +12876,7 @@ lB268:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: lB28B
 lB282:
 		lda #$01
 		sta (pointer_06), y
@@ -11398,6 +12884,7 @@ lB282:
 		bne lB28B
 		inc pointer_06 + $1
 
+; jumped to by: lB282
 lB28B:
 		inc pointer_08
 		bne lB282
@@ -11413,6 +12900,7 @@ lB28B:
 		sta pointer_08 + $1
 		ldy #$00
 
+; jumped to by: lB2AE
 lB2A5:
 		lda #$aa
 		sta (pointer_06), y
@@ -11420,6 +12908,7 @@ lB2A5:
 		bne lB2AE
 		inc pointer_06 + $1
 
+; jumped to by: lB2A5
 lB2AE:
 		inc pointer_08
 		bne lB2A5
@@ -11485,14 +12974,17 @@ lB336:
 		beq lB336
 		jmp lA95B
 
+; jumped to by: lB305
 lB34B:
 		stx game_mode
 		lda #$01
 		jmp lA95B
 
+; called by: lB336
 read_hole_number:
 		lda #$00
 
+; jumped to by: lB360
 lB355:
 		sta hole_number
 
@@ -11523,6 +13015,7 @@ lB360:
 		adc #$0a
 		sta hole_number
 
+; jumped to by: lB360
 lB389:
 		lda hole_number
 		cmp #$13
@@ -11530,10 +13023,12 @@ lB389:
 		ora #$00
 		rts 
 
+; jumped to by: lB360, lB389
 lB393:
 		lda #$00
 		rts 
 
+; called by: draw_flag
 lB396:
 		lda #$c7
 		sta pointer_04
@@ -11550,6 +13045,7 @@ lB396:
 		ldx #$78
 		ldy #$0b
 
+; jumped to by: lB3BF
 lB3B2:
 		tya 
 		pha 
@@ -11624,10 +13120,12 @@ read_joystick:
 		lda cia1_port_a, x
 		jmp lB436
 
+; jumped to by: read_joystick
 lB430:
 		lda cia1_port_a
 		and cia1_port_b
 
+; jumped to by: read_joystick
 lB436:
 		tax 
 		ldy #$3c
@@ -11648,6 +13146,7 @@ lB436:
 		pla 
 		rts 
 
+; jumped to by: lB436
 lB453:
 		pla 
 		tax 
@@ -11655,6 +13154,7 @@ lB453:
 		tya 
 		rts 
 
+; called by: shot_loop, lA299
 lB458:
 		ldy #$00
 
@@ -11667,9 +13167,11 @@ lB45A:
 		bcc lB45A
 		rts 
 
+; read by: lB45A
 aim_limits:
 		.byte	$56, $3c, $92, $0f, $88, $73, $64, $3c
 
+; jumped to by: lB496, lB49B
 beep:
 		ldx #$19
 
@@ -11690,6 +13192,7 @@ lB471:
 		sta voice1_control
 		jmp silence_sid
 
+; jumped to by: lB55B
 lB496:
 		ldy #$1e
 		jmp beep
@@ -11698,9 +13201,11 @@ lB49B:
 		ldy #$3c
 		jmp beep
 
+; called by: lB471
 delay:
 		ldx #$46
 
+; jumped to by: lB4A7
 lB4A2:
 		pha 
 		txa 
@@ -11749,10 +13254,12 @@ text_aim:
 		ora #$80
 		sta sprites_x_msb
 
+; jumped to by: $b4eb
 lB4F5:
 		lda #$50
 		sta aim_offset
 
+; jumped to by: lB508, lB568, lB573, lB581, lB58C, lB5A7
 lB4FA:
 		jsr lA967
 		cmp #$29
@@ -11761,6 +13268,7 @@ lB4FA:
 		bne lB508
 		jmp lB58C
 
+; jumped to by: lB4FA
 lB508:
 		cmp #$3c
 		bne lB4FA
@@ -11777,6 +13285,7 @@ lB508:
 		eor #$ff
 		adc #$01
 
+; jumped to by: lB508
 lB525:
 		tax 
 		lda #$00
@@ -11804,9 +13313,11 @@ lB525:
 		eor #$ff
 		adc #$01
 
+; jumped to by: lB525
 lB558:
 		sta aim_offset
 
+; jumped to by: lB508
 lB55B:
 		lda #$fe
 		sta sprite7_y
@@ -11814,12 +13325,14 @@ lB55B:
 		sta sprite_pointers + $7
 		jmp lB496
 
+; jumped to by: lB4FA
 lB568:
 		lda aim_offset
 		cmp aim_max
 		bcc lB573
 		jmp lB4FA
 
+; jumped to by: lB568
 lB573:
 		inc aim_offset
 		inc sprite7_x
@@ -11827,18 +13340,21 @@ lB573:
 		beq lB581
 		jmp lB4FA
 
+; jumped to by: lB573
 lB581:
 		lda sprites_x_msb
 		ora #$80
 		sta sprites_x_msb
 		jmp lB4FA
 
+; jumped to by: lB4FA
 lB58C:
 		lda aim_offset
 		cmp aim_min
 		bcs lB597
 		jmp lB4FA
 
+; jumped to by: lB58C
 lB597:
 		dec aim_offset
 		lda sprite7_x
@@ -11847,23 +13363,28 @@ lB597:
 		and #$7f
 		sta sprites_x_msb
 
+; jumped to by: lB597
 lB5A7:
 		dec sprite7_x
 		dec sprite7_x
 		jmp lB4FA
 
+; called by: new_game, shot_loop, lA299
 lB5B0:
 		jsr silence_sid
 		jsr bank_out_io
 		jsr draw_view
 		jmp bank_in_io
 
+; called by: main, shot_loop, lB5B0
 bank_out_io:
 		lda cpu_port
 		and #$fd
 		sta cpu_port
 		rts 
 
+; called by: main, shot_loop, irq, lA5FA
+; jumped to by: lB5B0
 bank_in_io:
 		lda cpu_port
 		ora #$02
@@ -11893,10 +13414,12 @@ lB5D8:
 		bne lB5D8
 		jmp l0FF3
 
+; called by: lA003
 lB5E8:
 		jsr install_interrupts
 		jmp lC01A
 
+; called by: lA5FA, lA64F
 lB5EE:
 		lda #$00
 		sta text_x
@@ -11915,6 +13438,7 @@ lB5FC:
 		lda #$73
 		sta pointer_04 + $1
 
+; jumped to by: lB60A
 lB606:
 		lda #$00
 		ldy #$a0
@@ -11964,9 +13488,11 @@ lB623:
 		jsr draw_line
 		jmp (a2CEF)
 
+; read by: lB623
 table_b660:
 		.byte	$ff, $ff, $ff, $ff, $00, $00, $00, $00, $ff, $ff, $ff, $ff, $ff, $00, $00, $00
 		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $00, $00
+; read by: lB623
 table_b678:
 		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $00, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $00
 		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $00, $ff, $ff, $ff, $ff, $ff, $ff, $00, $00
@@ -11982,6 +13508,7 @@ lB6F8:
 		beq lB700
 		jmp lB785
 
+; jumped to by: lB6F8
 lB700:
 		lda hole_x
 		sta point_x
@@ -12021,10 +13548,12 @@ lB700:
 		ora #$80
 		bne lB75C
 
+; jumped to by: lB700
 lB757:
 		lda sprites_x_msb
 		and #$7f
 
+; jumped to by: lB700
 lB75C:
 		sta sprites_x_msb
 		lda #$ee
@@ -12043,15 +13572,18 @@ lB75C:
 		sta sprite7_color
 		jsr lB78E
 
+; jumped to by: lB6F8
 lB785:
 		lda sprite_enable
 		and #$7f
 		sta sprite_enable
 		rts 
 
+; called by: lB75C
 lB78E:
 		ldx #$80
 
+; jumped to by: lB795
 lB790:
 		pha 
 		txa 
@@ -12068,6 +13600,7 @@ lB795:
 		bne lB790
 		rts 
 
+; jumped to by: lA020
 lB79F:
 		ldx #$14
 		stx vb800
@@ -12088,10 +13621,12 @@ lB79F:
 		lda proj_y + $1
 		sta vb804
 
+; jumped to by: lB79F
 lB7CF:
 		ldy #$00
 		rts 
 
+; jumped to by: lA023
 lB7D2:
 		lda vb800
 		bne lB7FD
@@ -12110,16 +13645,28 @@ lB7D2:
 		adc vb804
 		sta proj_y + $1
 
+; jumped to by: lB7D2
 lB7FD:
 		jmp draw_shape
 
+; read by: lB7D2
+; written by: lB79F
 vb800:
 		.byte	$14
+; read by: lB7D2
+; written by: lB79F
 vb801:		.byte	$6b
+; read by: lB7D2
+; written by: lB79F
 vb802:		.byte	$00
+; read by: lB7D2
+; written by: lB79F
 vb803:		.byte	$87
+; read by: lB7D2
+; written by: lB79F
 vb804:		.byte	$00
 
+; jumped to by: lA026
 lB805:
 		jsr test_pixel
 		bne lB852
@@ -12151,6 +13698,7 @@ lB822:
 		inc vb853
 		jmp lB822
 
+; jumped to by: lB822
 lB83D:
 		pla 
 		tay 
@@ -12165,13 +13713,20 @@ lB83D:
 		ora (bitmap_pointer), y
 		sta (bitmap_pointer), y
 
+; jumped to by: lB805, lB83D
 lB852:
 		rts 
 
+; read by: lB83D
+; written by: lB805
+; modified by: lB822
 vb853:
 		.byte	$00
+; read by: lB822
+; written by: lB805
 vb854:		.byte	$76
 
+; called by: lB8A8, lB9CD, lBA19, lBA7A
 music_push:
 		ldx music_voice
 		lda v0479, x
@@ -12187,6 +13742,7 @@ music_push:
 		sta v0479, x
 		rts 
 
+; called by: lB8D7, lBA26
 music_pop:
 		ldx music_voice
 		lda v0479, x
@@ -12202,11 +13758,13 @@ music_pop:
 		sta v0479, x
 		rts 
 
+; called by: lB8A8, lB8D7, music_step, lB988, lB9CD
 next_music_byte:
 		inc pointer_06
 		bne lB895
 		inc pointer_06 + $1
 
+; jumped to by: next_music_byte
 lB895:
 		lda pointer_06 + $1
 		cmp v0410
@@ -12214,14 +13772,17 @@ lB895:
 		lda pointer_06
 		cmp v040f
 
+; jumped to by: lB895
 lB8A1:
 		beq lB8A7
 		ldy #$00
 		lda (pointer_06), y
 
+; jumped to by: lB8A1
 lB8A7:
 		rts 
 
+; called by: lB9CD, lBA7A
 lB8A8:
 		jsr next_music_byte
 		sta v0429
@@ -12266,6 +13827,8 @@ lB8D7:
 		rts 
 
 ; plays tune A until it ends or F1/F3/F5 is pressed
+; called by: lB305
+; jumped to by: $afe6, $aff8, $b00a
 play_tune:
 		jsr music_start
 		pha 
@@ -12273,6 +13836,7 @@ play_tune:
 		pla 
 		rts 
 
+; called by: play_tune
 music_start:
 		tsx 
 		stx music_saved_stack
@@ -12316,14 +13880,18 @@ music_start:
 		sta v047c
 		jmp lBB2F
 
+; called by: lBA26
+; jumped to by: lB988, lB9BE, lBA26, lBAD8, lBAE8, lBBC6
 music_step:
 		jsr next_music_byte
 		sta music_note
 		bne lB988
 
+; jumped to by: $b9ca
 lB987:
 		rts 
 
+; jumped to by: music_step
 lB988:
 		lda music_note
 		bmi lB99B
@@ -12336,6 +13904,7 @@ lB988:
 
 		jmp music_step
 
+; jumped to by: lB988
 lB99B:
 		cmp #$80
 		beq lB9CD
@@ -12343,16 +13912,19 @@ lB99B:
 		bne lB9A6
 		jmp lBA7A
 
+; jumped to by: lB99B
 lB9A6:
 		cmp #$8c
 		bne lB9AD
 		jmp lBAD8
 
+; jumped to by: lB9A6
 lB9AD:
 		cmp #$8d
 		bne lB9B4
 		jmp lBAE8
 
+; jumped to by: lB9AD
 lB9B4:
 		cmp #$82
 		bne lB9C1
@@ -12360,9 +13932,11 @@ lB9B4:
 		bne lB9BE
 		inc pointer_06 + $1
 
+; jumped to by: lB9B4
 lB9BE:
 		jmp music_step
 
+; jumped to by: lB988, lB9B4
 lB9C1:
 		jsr print_inline
 
@@ -12370,6 +13944,7 @@ text_error:
 		.text	"ERROR", $ff
 		jmp lB987
 
+; jumped to by: lB99B
 lB9CD:
 		lda v040d
 		sta v0439
@@ -12398,6 +13973,7 @@ lB9CD:
 		jsr next_music_byte
 		sta v0411
 
+; jumped to by: lBACD
 lBA19:
 		lda pointer_06
 		sta v0439
@@ -12437,6 +14013,7 @@ lBA26:
 		sta v040e
 		jmp music_step
 
+; jumped to by: lB99B
 lBA7A:
 		lda v040d
 		sta v0439
@@ -12467,12 +14044,14 @@ lBA7A:
 		bne lBACD
 		dec v0410
 
+; jumped to by: lBA7A
 lBACD:
 		dec v040f
 		lda #$01
 		sta v0411
 		jmp lBA19
 
+; jumped to by: lB9A6
 lBAD8:
 		lda #$09
 		sta voice2_attack_decay
@@ -12481,6 +14060,7 @@ lBAD8:
 		sta v0432
 		jmp music_step
 
+; jumped to by: lB9AD
 lBAE8:
 		lda #$59
 		sta voice2_attack_decay
@@ -12504,9 +14084,11 @@ lBAE8:
 		pha 
 		ldx music_duration
 
+; jumped to by: lBB1C
 lBB14:
 		ldy music_tempo
 
+; jumped to by: lBB1C
 lBB17:
 		pha 
 		txa 
@@ -12528,10 +14110,12 @@ lBB1C:
 		sta voice2_control
 		rts 
 
+; jumped to by: music_start, lBB93
 lBB2F:
 		lda #$01
 		sta music_voice
 
+; jumped to by: lBB77
 lBB34:
 		ldx music_voice
 		dec v0434, x
@@ -12544,6 +14128,7 @@ lBB34:
 		sta voice1_control, x
 		jmp lBBBD
 
+; jumped to by: lBBF2
 lBB4F:
 		lda music_note
 		asl 
@@ -12561,6 +14146,7 @@ lBB4F:
 		ldx music_voice
 		sta v0434, x
 
+; jumped to by: lBB34
 lBB77:
 		inc music_voice
 		lda music_voice
@@ -12570,12 +14156,15 @@ lBB77:
 		jsr getin
 		bne lBBA2
 
+; jumped to by: lBBA2
 lBB89:
 		ldx #$01
 
+; jumped to by: lBB93
 lBB8B:
 		ldy music_tempo
 
+; jumped to by: lBB93
 lBB8E:
 		pha 
 		txa 
@@ -12594,6 +14183,7 @@ lBB93:
 		bne lBB8B
 		jmp lBB2F
 
+; jumped to by: lBB77
 lBBA2:
 		cmp #$85
 		beq lBBAE
@@ -12602,6 +14192,7 @@ lBBA2:
 		cmp #$87
 		bne lBB89
 
+; jumped to by: lBBA2
 lBBAE:
 		pha 
 		jsr silence_sid
@@ -12610,9 +14201,11 @@ lBBAE:
 		txs 
 		rts 
 
+; read by: lBB34, lBBBD, lBBDF
 voice_offsets:
 		.byte	$00, $00, $07, $0e, $15
 
+; jumped to by: lBB34
 lBBBD:
 		ldx music_voice
 		lda voice_offsets + $1, x
@@ -12632,6 +14225,7 @@ lBBC6:
 		sta pointer_06 + $1
 		jmp music_step
 
+; jumped to by: lB988
 lBBDF:
 		ldx music_voice
 		lda voice_offsets + $1, x
@@ -12651,6 +14245,8 @@ lBBF2:
 		bcc lBBF2
 		jmp lBB4F
 
+; called by: lB5B0, play_tune, lBBAE, init_sid
+; jumped to by: lB471
 silence_sid:
 		ldx #$19
 		lda #$00
@@ -12661,6 +14257,7 @@ lBC05:
 		bne lBC05
 		rts 
 
+; called by: music_start
 init_sid:
 		jsr silence_sid
 		lda #$09
@@ -12690,6 +14287,7 @@ init_sid:
 		sta music_tempo
 		rts 
 
+; called by: music_start
 select_tune:
 		cmp #$00
 		beq lBC61
@@ -12700,9 +14298,11 @@ select_tune:
 		cmp #$03
 		beq lBCDC
 
+; jumped to by: select_tune
 lBC61:
 		rts 
 
+; jumped to by: select_tune
 lBC62:
 		lda #$92
 		sta v0424
@@ -12730,6 +14330,7 @@ lBC62:
 		sta v041a
 		rts 
 
+; jumped to by: select_tune
 lBC9F:
 		lda #$be
 		sta v0424
@@ -12757,6 +14358,7 @@ lBC9F:
 		sta v041a
 		rts 
 
+; jumped to by: select_tune
 lBCDC:
 		lda #$00
 		sta v0424
@@ -12821,6 +14423,7 @@ music_data:
 		.byte	$02, $34, $02, $40, $04, $20, $04, $20, $04, $20, $04, $25, $04
 
 ; SID frequencies: 16 words per octave, 12 of them used
+; read by: lBAE8, lBB4F
 note_frequencies:
 		.word	$010c, $011c, $012d, $013e, $0151, $0166, $017b, $0191, $01a9, $01c3, $01dd, $01fa, $0000, $0000, $0000, $0000
 		.word	$0218, $0238, $025a, $027d, $02a3, $02cc, $02f6, $0323, $0353, $0386, $03bb, $03f4, $0000, $0000, $0000, $0000
@@ -12831,25 +14434,37 @@ note_frequencies:
 		.word	$430f, $470c, $4b45, $4fbf, $547d, $5983, $5ed6, $6479, $6a73, $70c7, $777c, $7e97, $0000, $0000, $0000, $0000
 		.word	$861e, $8e18, $968b, $9f7e, $a8fa, $b306, $bdac, $c8f3, $d4e6, $e18f, $eef8, $fd2e
 
+; read by: lC0F3
+; written by: lC03B
 vc00e:
 		.byte	$08
 
 unused_golf:
 		.text	"GOLF"
 
+; written by: lC13B
 vc013:
 		.byte	$34
+; read by: lC129
 vc014:		.byte	$05
 
+; read by: lC13B
+; written by: lC059, lC0D4
 vc015:
 		.word	$7f40
 
+; read by: lC13B
+; written by: lC0F3
+; modified by: lC13B
 vc017:
 		.byte	$34
 
+; read by: lC13B
+; written by: lC059, lC0D4
 vc018:
 		.word	$c17d
 
+; jumped to by: lB5E8
 lC01A:
 		lda #$ea
 		sta $a64e
@@ -12865,10 +14480,12 @@ lC01A:
 		cmp #$4d
 		bne lC01A
 
+; jumped to by: lC01A
 lC036:
 		lda #$00
 		sta $a64e
 
+; jumped to by: lC01A
 lC03B:
 		stx vc00e
 		jsr lC0F3
@@ -12938,6 +14555,7 @@ lC059:
 		jsr lC13B
 		jmp lC0EB
 
+; jumped to by: lC059
 lC0D4:
 		lda #$40
 		sta vc015
@@ -12949,11 +14567,13 @@ lC0D4:
 		sta vc018 + $1
 		jsr lC13B
 
+; jumped to by: lC059
 lC0EB:
 		lda #$00
 		sta $a64e
 		jmp start
 
+; called by: lC03B
 lC0F3:
 		lda cpu_port
 		and #$fe
@@ -12975,6 +14595,7 @@ text_error_in_setlfs:
 lC126:
 		jmp lC126
 
+; jumped to by: lC0F3
 lC129:
 		lda vc014
 		ldx #$0f
@@ -12986,9 +14607,11 @@ lC129:
 lC137:
 		jmp lC137
 
+; jumped to by: lC129
 lC13A:
 		rts 
 
+; called by: lC059, lC0D4
 lC13B:
 		inc vc017
 		lda vc017
@@ -13008,6 +14631,7 @@ lC13B:
 text_save_routine_error:
 		.text	" SAVE ROUTINE ERROR", $0d, $ff
 
+; jumped to by: lC13B
 lC176:
 		rts 
 
@@ -13172,6 +14796,8 @@ unused_nops:
 		.byte	$ea, $ea, $ea
 ; unreferenced leftover data
 ; per screen cell, the depth of the nearest object drawn there; rebuilt each frame
+; read by: lB5D8
+; written by: lB5CC
 cell_depths:
 		.byte	$7e, $7e, $7e, $7e, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
 		.byte	$ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff, $ff
@@ -13258,76 +14884,147 @@ unused_nops2:
 
 .virtual $d000
 ; ---- VIC-II ----
+; read by: lA42D
+; written by: l33E5, lA379, lA42D
 sprite0_x:		.byte	?
+; read by: lA42D
+; written by: l33E5, lA379, lA42D
 sprite0_y:		.byte	?
 sprite1_x:		.byte	?
 sprite1_y:		.byte	?
 sprite2_x:		.byte	?
 sprite2_y:		.byte	?
+; read by: lA4A8
+; written by: lA379, lA4A8
 sprite3_x:		.byte	?
+; read by: lA4A8
+; written by: lA379, lA4A8
 sprite3_y:		.byte	?
 sprite4_x:		.byte	?
 sprite4_y:		.byte	?
+; read by: read_aim_cursor
 sprite5_x:		.byte	?
+; read by: lAE58
 sprite5_y:		.byte	?
+; written by: check_terrain, l3BC0, draw_flag
 sprite6_x:		.byte	?
+; written by: l3011, check_terrain, l3BE0, lAE0A
 sprite6_y:		.byte	?
+; read by: lB597
+; written by: l3BC0, $b4e8, lB700
+; modified by: lB573, lB5A7
 sprite7_x:		.byte	?
+; written by: l3011, l30B7, l3BE0, $b4e1, lB55B, lB75C
 sprite7_y:		.byte	?
+; read by: l2D04, l3BC0, l3BD8, draw_flag, read_aim_cursor, $b4ed, lB581, lB597, lB700, lB757
+; written by: l2D04, l3011, l3BC0, l3BD8, draw_flag, $b4f2, lB581, lB597, lB75C
 sprites_x_msb:		.byte	?
+; read by: old_loader, screen_off, screen_on, bitmap_mode, text_mode, enable_raster_irq
+; written by: old_loader, screen_off, screen_on, bitmap_mode, text_mode, enable_raster_irq
 vic_control1:		.byte	?
+; read by: set_golfer_colors, l2EEF, snapshot_pc, l32CE, l32D3, l33C0, lA404, lA40B, lA58A, enable_raster_irq
+; written by: lA3F7, lA426, lA48F, lA4A8, lA526, enable_raster_irq
 raster:		.byte	?
 light_pen_x:		.byte	?
 light_pen_y:		.byte	?
+; read by: l321D, l3C6F, l3C86, l3D17, l3D45, l3D59, l3D61, l3D8A, $b4cc, lB75C, lB785
+; written by: l2EBC, l30CD, l314F, l321D, l3C74, l3D17, l3D59, l3D61, l3D8A, new_game, lA2C6, $b4d1, lB75C, lB785
 sprite_enable:		.byte	?
+; read by: old_loader, bitmap_mode, text_mode
+; written by: old_loader, bitmap_mode, text_mode
 vic_control2:		.byte	?
+; read by: l3323, l333B, lA42D, lA4A8
+; written by: l3323, l333B, lA379, lA42D, lA4A8
 sprite_expand_y:		.byte	?
+; read by: bitmap_mode, text_mode
+; written by: old_loader, bitmap_mode, text_mode
 vic_memory:		.byte	?
+; read by: irq
+; written by: lA58A
 vic_irq_status:		.byte	?
+; read by: irq, enable_raster_irq
+; written by: enable_raster_irq
 vic_irq_enable:		.byte	?
 sprite_priority:		.byte	?
+; read by: l3300, l3323, lA42D, lA4A8
+; written by: l3300, l3323, lA379, lA42D, lA4A8
 sprite_multicolor:		.byte	?
+; read by: l333B, l3353, l3B9C
+; written by: l333B, l3353
 sprite_expand_x:		.byte	?
 sprite_sprite_collision:		.byte	?
 sprite_background_collision:		.byte	?
+; written by: main
+; modified by: lC177
 border_color:		.byte	?
+; written by: old_loader, lA379, lA40B, lA526
 background_color:		.byte	?
 background_color1:		.byte	?
 background_color2:		.byte	?
 background_color3:		.byte	?
+; read by: lA42D, lA4A8
+; written by: main, lA379, lA48F, lA512
 sprite_multicolor0:		.byte	?
+; read by: main, lA2A1, lA48F, lA512
+; written by: main, lA379, lA48F, lA512
 sprite_multicolor1:		.byte	?
+; read by: lA42D
+; written by: l2D31, lA379, lA42D
 sprite0_color:		.byte	?
 sprite1_color:		.byte	?
 sprite2_color:		.byte	?
+; read by: lA4A8
+; written by: lA379, lA4A8
 sprite3_color:		.byte	?
 sprite4_color:		.byte	?
 sprite5_color:		.byte	?
+; written by: lA3F7, lA40B
 sprite6_color:		.byte	?
+; written by: $b4db, lB75C
 sprite7_color:		.byte	?
 vic_unused_2f:		.byte	?
 ; the C128's clock speed register; the decruncher runs at 2 MHz on a C128
+; modified by: l0193, decrunch
 c128_clock:		.byte	?
+; written by: lB471
 vic_mirrors:
 		.fill	975
 ; ---- SID ----
+; written by: swing_sound, l2F79, lB471, lBB4F, lBC05
 voice1_frequency:		.word	?
+; written by: init_sid
 voice1_pulse_width:		.word	?
+; written by: silence_voices, swing_sound, l2F5A, l2F79, l2F9B, lB471, lBB34, lBB4F
 voice1_control:		.byte	?
+; written by: swing_sound, l2F79, lB471, init_sid
 voice1_attack_decay:		.byte	?
+; written by: swing_sound, l2F79, init_sid
 voice1_sustain_release:		.byte	?
+; written by: swing_sound, lBAE8
 voice2_frequency:		.word	?
+; written by: init_sid
 voice2_pulse_width:		.word	?
+; written by: silence_voices, swing_sound, click_sound, lBAE8, lBB1C
 voice2_control:		.byte	?
+; written by: swing_sound, lBAD8, lBAE8, init_sid
 voice2_attack_decay:		.byte	?
+; written by: swing_sound, lBAD8, lBAE8, init_sid
 voice2_sustain_release:		.byte	?
 voice3_frequency:		.word	?
+; written by: init_sid
 voice3_pulse_width:		.word	?
+; written by: silence_voices
 voice3_control:		.byte	?
+; written by: init_sid
 voice3_attack_decay:		.byte	?
+; written by: init_sid
 voice3_sustain_release:		.byte	?
+; written by: l2F60, l2F79
 filter_cutoff:		.word	?
+; written by: swing_sound, l2F79
 filter_control:		.byte	?
+; read by: lA5FA
+; written by: swing_sound, l2F79, lA5FA, lA64F, lB471, init_sid
 volume_filter_mode:		.byte	?
 sid_mirrors:
 		.fill	999
@@ -13335,15 +15032,22 @@ sid_mirrors:
 color_ram:
 		.fill	1024
 ; ---- CIAs ----
+; read by: read_joystick, lB430
 cia1_port_a:		.byte	?
+; read by: lB430
 cia1_port_b:		.byte	?
 cia1_unused:
 		.fill	11
+; read by: lA57B
 cia1_interrupt_control:		.byte	?
 cia1_rest:
 		.fill	242
+; read by: old_loader, main
+; written by: old_loader, main
 cia2_port_a:		.byte	?
 cia2_port_b:		.byte	?
+; read by: main
+; written by: main
 cia2_direction_a:		.byte	?
 cia2_rest:
 		.fill	253
@@ -13355,6 +15059,8 @@ io_expansion:
 
 ; ---- shape data, read with all RAM banked in ----
 ; lists of x/y steps, each ending with $80
+; read by: l1FA1, shot_loop, lB5CC, lB79F
+; written by: shot_loop
 shapes:
 		.addr	shape_e026, shape_e0b1, shape_e11c, shape_e1d0, shape_e2a6, shape_e2bd, shape_e35c, shape_e3c5, shape_e3fe, shape_e443, shape_e4e4, shape_e8ef, shape_e9a0, shape_ea63, shape_ea86, shape_eb0d
 		.addr	shape_eb26, shape_eb36, shape_eb0d
@@ -13543,6 +15249,7 @@ shape_e9a0:
 		.byte	$fc, $01, $fd, $03, $80, $0c, $00, $00, $02, $05, $04, $04, $06, $02, $06, $00
 		.byte	$03, $fd, $01, $fc, $ff, $fc, $fd, $fd, $fa, $00, $fa, $02, $fc, $04, $fe, $05
 		.byte	$80, $00, $80
+; jumped to by: lA57B
 kernal_irq = $ea31
 
 shape_ea63:
@@ -13564,10 +15271,13 @@ kernal_scnkey = $ea87
 shape_eb0d:
 		.byte	$00, $18, $07, $00, $ff, $fc, $ff, $e8, $ff, $04, $80, $02, $ff, $e8, $02, $00
 		.byte	$00, $fe, $fe, $00, $00, $02, $80, $00, $80
+; read by: l2571, lA930
 shape_eb26:
 		.byte	$00, $00, $14, $0a, $1e, $00, $14, $f6, $ec, $f6, $e2, $00, $ec, $0a, $80, $00
+; read by: l2571, lA930
 shape_eb36:		.byte	$80
 
+; read by: lA927
 shapes2:
 		.addr	shape_eb63, shape_eb70, shape_eb7d, shape_eb8a, shape_eb97, shape_eba8, shape_ebb9, shape_ebca, shape_ebdb, shape_ebf0, shape_ec05, shape_ec1a, shape_ec2f, shape_ec44, shape_ec59, shape_ec6e
 		.addr	shape_ec83, shape_ec94, shape_eca5, shape_ecc4, shape_ecdd, shape_ecf2
@@ -13637,8 +15347,11 @@ shape_ecf2:
 
 .virtual $ed07
 ; never written: still the RAM's power-on pattern
+; read by: decrunch_get_byte
 unused_ed07:
 		.fill	4345
+; read by: lA5B1
+; written by: lA5B1
 kernal_copy:
 		.fill	385
 cint:
@@ -13661,6 +15374,7 @@ memtop:
 		.fill	3
 membot:
 		.fill	3
+; called by: l0FF3, l2EEF, read_hex_digit, lA63E, lB358, lB360, lBB77
 scnkey:
 		.fill	3
 settmo:
@@ -13679,8 +15393,10 @@ talk:
 		.fill	3
 readst:
 		.fill	3
+; called by: lC0F3
 setlfs:
 		.fill	3
+; called by: $08de, lC129
 setnam:
 		.fill	3
 open:
@@ -13697,8 +15413,10 @@ chrin:
 		.fill	3
 chrout:
 		.fill	3
+; called by: $08e3
 load:
 		.fill	3
+; called by: lC13B
 save:
 		.fill	3
 settim:
@@ -13707,8 +15425,10 @@ rdtim:
 		.fill	3
 stop:
 		.fill	3
+; called by: l0FF3, read_hex_digit, lB358, lB360, lBB77
 getin:
 		.fill	3
+; called by: lC0F3
 clall:
 		.fill	3
 udtim:
@@ -13723,5 +15443,6 @@ unused_fff6:
 		.fill	4
 nmi_hw_vector:		.addr	?
 reset_hw_vector:		.addr	?
+; read by: l3CF1
 irq_hw_vector:		.addr	?
 .endv

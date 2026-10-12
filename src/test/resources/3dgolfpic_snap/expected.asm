@@ -7,16 +7,21 @@
 ; pattern.
 ; ---- zero page ----
 cpu_port_direction:		.byte	?
+; written by: decrunch_done, decrunch
 cpu_port:		.byte	?
 basic_zero_page:
 		.fill	43
 ; where a match copies from; at the end, the end of the unpacked data, handed to
 ; BASIC as the end of the program
+; read by: l015C, l0177, l0189
+; written by: decrunch_loop, l0177, decrunch_done
 decrunch_pointer:		.word	?
 basic_kernal_zero_page:
 		.fill	150
 ; the KERNAL's last key pressed
+; read by: wait_for_space
 kernal_lstx:		.byte	?
+; written by: l0822
 kernal_zero_page:
 		.fill	49
 .endv
@@ -24,13 +29,19 @@ kernal_zero_page:
 *=$00f7
 
 ; the decruncher's bits not read yet, shifted out to the left
+; written by: decrunch_get_byte
+; modified by: l0213, get_bits
 bit_buffer:
 		.byte	$20
 ; the 2-bit code that starts a match; any other 2 bits start a literal byte
+; read by: new_escape_code, decrunch_loop
+; written by: new_escape_code
 escape_code:		.byte	$02
 
 ; ---- decruncher, copied from decruncher_source by decrunch ----
 ; stores A at the output pointer, the operand at $fa, and counts down X
+; called by: store_literal, l015F, l0189
+; read by: l0177, decrunch_done
 store_byte:
 		sta packed_data_end
 output_pointer = $00fa
@@ -38,11 +49,13 @@ output_pointer = $00fa
 		bne l0102
 		inc store_byte + 2
 
+; jumped to by: store_byte
 l0102:
 		dex 
 		rts 
 
 ; reads a new escape_code, then stores a literal byte that starts with the old one
+; jumped to by: decrunch_loop
 new_escape_code:
 		ldy escape_code
 		ldx #$02
@@ -51,11 +64,13 @@ new_escape_code:
 		tya 
 
 ; reads 6 more bits after the 2 in A, and stores the 8 as a literal byte
+; jumped to by: decrunch_loop
 store_literal:
 		ldx #$06
 		jsr l022F
 		jsr @w store_byte
 
+; jumped to by: l0167, l082D
 decrunch_loop:
 		ldy #$00
 		tya 
@@ -84,6 +99,7 @@ decrunch_loop:
 		jsr get_gamma
 		tay 
 
+; jumped to by: decrunch_loop
 l014B:
 		jsr get_gamma
 		tax 
@@ -94,6 +110,7 @@ l014B:
 		ldx #$03
 		jsr get_bits
 
+; jumped to by: l014B
 l015C:
 		ldx decrunch_pointer
 		inx 
@@ -104,9 +121,11 @@ l015F:
 		dey 
 		bne l015F
 
+; jumped to by: l0189
 l0167:
 		beq decrunch_loop
 
+; jumped to by: decrunch_loop
 l0169:
 		jsr get_gamma
 		cmp #$ff
@@ -115,6 +134,7 @@ l0169:
 		ldx #$00
 		jsr l022F
 
+; jumped to by: decrunch_loop
 l0177:
 		sta decrunch_pointer + $1
 		jsr get_8_bits
@@ -133,6 +153,7 @@ l0189:
 		bne l0189
 		beq l0167
 
+; jumped to by: l0169
 decrunch_done:
 		lda #$37
 		sta cpu_port
@@ -154,10 +175,12 @@ unused_stack:
 		.byte	$00, $00, $00, $00, $ff, $ff, $ff, $ff, $00, $00, $00, $00, $ff, $ff, $ff, $7d
 		.byte	$7d, $ea, $00, $01, $05, $20, $29, $b9, $64, $7d, $ea, $00, $00, $40, $21, $82
 		.byte	$7f
+; written by: l0817
 stack:
 		.byte	$46, $e1, $e9, $a7, $a7, $79, $a6, $9c, $e3
 
 ; returns the next packed byte in bit_buffer, from the input pointer at $0202
+; called by: l0213, get_bits
 decrunch_get_byte:
 		pha 
 		lda untouched_7f92
@@ -169,21 +192,25 @@ d0203 = $0203
 		bne l020F
 		inc $0203
 
+; jumped to by: decrunch_get_byte
 l020F:
 		pla 
 		rts 
 
 ; reads a number: counts 1 bits up to a 0 (at most 7), then reads that many bits
 ; into A after a leading 1
+; called by: decrunch_loop, l014B, l0169
 get_gamma:
 		inx 
 		txa 
 
+; jumped to by: l021A
 l0213:
 		asl bit_buffer
 		bne l021A
 		jsr decrunch_get_byte
 
+; jumped to by: l0213
 l021A:
 		bcc l022E
 		inx 
@@ -191,24 +218,31 @@ l021A:
 		bne l0213
 		beq l022E
 
+; called by: l0177
 get_8_bits:
 		ldx #$07
 
+; called by: decrunch_loop
 l0225:
 		inx 
 
 ; reads X bits into A
+; called by: decrunch_loop, l014B
+; jumped to by: l022F
 get_bits:
 		asl bit_buffer
 		bne l022D
 		jsr decrunch_get_byte
 
+; jumped to by: get_bits
 l022D:
 		rol 
 
+; jumped to by: l021A
 l022E:
 		dex 
 
+; called by: new_escape_code, store_literal, decrunch_loop, l0169
 l022F:
 		bne get_bits
 		clc 
@@ -277,6 +311,7 @@ d0833 = $0833
 		bne l082D
 		jmp decrunch_loop
 
+; read by: l0822
 get_byte_source:
 		.byte	$48, $ad, $c4, $6e, $2a, $85, $f7, $ee, $02, $02, $d0, $03, $ee, $03, $02, $68
 		.byte	$60, $e8, $8a, $06, $f7, $d0, $03, $20, $00, $02, $90, $12, $e8, $e0, $08, $d0
@@ -577,6 +612,7 @@ untouched_1a12:
 
 ; ---- the picture: multicolor bitmap in VIC bank 1 ----
 ; copied to color RAM
+; read by: l7F65
 picture_colors:
 		.byte	$e0, $eb, $e0, $e1, $e1, $e1, $e1, $e1, $e1, $e1, $e1, $e1, $e1, $e5, $e5, $eb
 		.byte	$e0, $ec, $e7, $ec, $e9, $e7, $e7, $e7, $e7, $e7, $e7, $eb, $e0, $eb, $eb, $eb
@@ -711,6 +747,7 @@ picture_screen:
 unused_5fe8:
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00
+; written by: l082D
 picture_bitmap:
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $ff, $ef, $fb, $fd, $fd, $fd
@@ -1214,6 +1251,7 @@ picture_bitmap:
 		.byte	$e8, $a8, $a8, $a8, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 
 ; shows the picture, then waits for space and resets the machine
+; jumped to by: decrunch_done
 show_picture:
 		lda #$3f
 		sta cia2_direction_a
@@ -1243,6 +1281,7 @@ l7F65:
 		dex 
 		bne l7F65
 
+; jumped to by: snapshot_pc
 wait_for_space:
 		lda kernal_lstx
 		cmp #$3c
@@ -1253,10 +1292,12 @@ snapshot_pc:
 		jmp kernal_reset
 
 ; the end of the packed data, not overwritten by the unpacked data
+; written by: store_byte
 packed_data_end:
 		.byte	$27, $9a, $1f, $49, $9c, $5f, $95, $ff, $fc
 
 .virtual $7f92
+; read by: decrunch_get_byte
 untouched_7f92:
 		.fill	20590
 ; ---- VIC-II ----
@@ -1277,13 +1318,16 @@ sprite6_y:		.byte	?
 sprite7_x:		.byte	?
 sprite7_y:		.byte	?
 sprites_x_msb:		.byte	?
+; written by: show_picture
 vic_control1:		.byte	?
 raster:		.byte	?
 light_pen_x:		.byte	?
 light_pen_y:		.byte	?
 sprite_enable:		.byte	?
+; written by: show_picture
 vic_control2:		.byte	?
 sprite_expand_y:		.byte	?
+; written by: show_picture
 vic_memory:		.byte	?
 vic_irq_status:		.byte	?
 vic_irq_enable:		.byte	?
@@ -1292,7 +1336,9 @@ sprite_multicolor:		.byte	?
 sprite_expand_x:		.byte	?
 sprite_sprite_collision:		.byte	?
 sprite_background_collision:		.byte	?
+; written by: show_picture
 border_color:		.byte	?
+; written by: show_picture
 background_color:		.byte	?
 background_color1:		.byte	?
 background_color2:		.byte	?
@@ -1309,6 +1355,7 @@ sprite6_color:		.byte	?
 sprite7_color:		.byte	?
 vic_unused_2f:		.byte	?
 ; the C128's clock speed register; the decruncher runs at 2 MHz on a C128
+; modified by: decrunch_done, decrunch
 c128_clock:		.byte	?
 vic_mirrors:
 		.fill	975
@@ -1334,6 +1381,7 @@ volume_filter_mode:		.byte	?
 sid_mirrors:
 		.fill	999
 ; ---- color RAM ----
+; written by: l7F65
 color_ram:
 		.fill	1024
 ; ---- CIAs ----
@@ -1344,8 +1392,10 @@ cia1_unused:
 cia1_interrupt_control:		.byte	?
 cia1_rest:
 		.fill	242
+; written by: show_picture
 cia2_port_a:		.byte	?
 cia2_port_b:		.byte	?
+; written by: show_picture
 cia2_direction_a:		.byte	?
 cia2_rest:
 		.fill	253
@@ -1356,6 +1406,7 @@ untouched_e000:
 kernal_irq:
 		.fill	4785
 ; KERNAL reset, in ROM; the RAM under it is untouched
+; jumped to by: snapshot_pc
 kernal_reset:
 		.fill	357
 kernal_nmi:

@@ -1,5 +1,7 @@
 package com.laamella.deflower;
 
+import java.util.List;
+
 /**
  * One annotation line of a {@code .flo} file, as parsed: what to mark at
  * which address. Applied to memory by {@link Subject#annotate}.
@@ -15,11 +17,10 @@ final class Annotation {
     // "byte[40*21]". Ignored when addressEnd is given.
     final int amount;
     final String name;
-    // The standalone comment lines right above this line, joined with
-    // newlines, or null when there are none.
-    final String comment;
+    // The standalone comment lines right above this line, if any.
+    final List<String> comment;
 
-    Annotation(int address, Integer addressEnd, LineType type, boolean virtual, int amount, String name, String comment) {
+    Annotation(int address, Integer addressEnd, LineType type, boolean virtual, int amount, String name, List<String> comment) {
         this.address = address;
         this.addressEnd = addressEnd;
         this.type = type;

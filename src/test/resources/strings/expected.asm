@@ -5,6 +5,7 @@ entry:
 		lda plain, x
 		rts 
 
+; read by: entry
 plain:
 		.text	"HELLO"
 nulled:

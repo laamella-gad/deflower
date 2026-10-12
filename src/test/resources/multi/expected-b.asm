@@ -15,6 +15,7 @@ marker_b:
 		.byte	$85, $ff, $ae, $3f
 *=$c40e
 
+; called by: entry_b
 lC40E:
 		lda #$29
 		sta $fc

@@ -10,6 +10,7 @@ entry:
 
 waveform:
 		.byte	$21
+; read by: entry
 notes:
 		.byte	$10, $20, $30
 
@@ -19,9 +20,11 @@ freq1:		.word	?
 .endv
 
 .virtual $d404
+; written by: entry
 control1:		.byte	?
 .endv
 
 .virtual $d418
+; written by: entry
 volume:		.byte	?
 .endv

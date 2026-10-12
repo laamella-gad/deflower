@@ -5,6 +5,7 @@ entry:
 		lda greeting, x
 		rts 
 
+; read by: entry
 greeting:
 		.enc	"screen"
 		.text	"HELLO, World!"

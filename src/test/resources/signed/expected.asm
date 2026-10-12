@@ -9,6 +9,7 @@ start:
 		lda deltas
 		rts 
 
+; read by: start
 deltas:
 		.char	-3, 3, -128, 127
 

@@ -1,6 +1,8 @@
 
 .virtual $0010
+; read by: entry
 counter:		.byte	?
+; read by: entry
 pair:
 		.fill	2
 .endv

@@ -11,7 +11,8 @@ class MemoryLocation {
     final int data;
     Area area = null;
     String label = null;
-    String comment = null;
+    // The comment lines from the .flo file, if any.
+    List<String> comment = List.of();
 
     MemoryLocation(int address, int data) {
         this.address = address;
@@ -78,7 +79,7 @@ class Subject {
         if (annotation.name != null) {
             memory[address].label = annotation.name;
         }
-        if (annotation.comment != null) {
+        if (!annotation.comment.isEmpty()) {
             memory[address].comment = annotation.comment;
         }
         LineType type = annotation.type;
@@ -125,7 +126,7 @@ class Subject {
      * True when a label or comment is attached to `address`.
      */
     boolean isAnnotated(int address) {
-        return memory[address].label != null || memory[address].comment != null;
+        return memory[address].label != null || !memory[address].comment.isEmpty();
     }
 
     /**
@@ -164,7 +165,7 @@ class Subject {
      * comment without a label still does.
      */
     boolean continuesArray(DataArea area, int address) {
-        if (address >= memory.length || (memory[address].comment != null && memory[address].label == null)) {
+        if (address >= memory.length || (!memory[address].comment.isEmpty() && memory[address].label == null)) {
             return false;
         }
         Area next = peek(address);

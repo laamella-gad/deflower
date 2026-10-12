@@ -8,6 +8,7 @@ entry:
 screen:
 		.byte	$20, $20, $30, $30, $30, $30, $20, $20
 ; the high score sits inside the screen
+; read by: entry
 hiscore = $c006
 
 vector:

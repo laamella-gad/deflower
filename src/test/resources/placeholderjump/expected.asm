@@ -5,6 +5,7 @@ entry:
 		jsr blob
 		rts 
 
+; called by: entry
 blob:
 		lda #$01
 		rts 

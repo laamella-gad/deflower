@@ -106,6 +106,15 @@ class DeflowerTest {
     }
 
     /**
+     * Issue 0076: each label lists the code that calls, jumps to, reads,
+     * writes or modifies it, named by the nearest label before it.
+     */
+    @Test
+    void printsCrossReferences() throws IOException, URISyntaxException {
+        assertDeflowered("xref");
+    }
+
+    /**
      * AssemblyFileFormat.print(DataArea, ...) used to only handle BYTE,
      * silently skipping WORD/DWORD/CHAR areas (issue 0002). Covers all three:
      * two WORDs, one DWORD, and three CHARs (printed as one .text

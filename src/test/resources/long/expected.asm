@@ -9,6 +9,7 @@ start:
 		lda scores
 		rts 
 
+; read by: start
 scores:
 		.long	$123456, $ffffff
 

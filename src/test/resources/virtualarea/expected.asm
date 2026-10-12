@@ -1,5 +1,6 @@
 
 .virtual $00fb
+; written by: entry
 ptr:		.word	?
 .endv
 
@@ -15,10 +16,12 @@ entry:
 
 .virtual $d020
 ; VIC-II border colour
+; written by: entry
 border_color:		.byte	?
 .endv
 
 .virtual $d800
+; written by: entry
 color_ram:		.byte	?
 second_color:
 		.fill	3

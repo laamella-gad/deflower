@@ -64,4 +64,11 @@ abstract class Area {
     }
 
     public abstract String labelFor(int address, Subject subject);
+
+    /**
+     * The address of the label {@link #labelFor} names `address` by, or -1
+     * when it has none: the place a reference to `address` is listed as a
+     * cross-reference (issue 0076).
+     */
+    public abstract int labelAddressFor(int address, Subject subject);
 }

@@ -157,7 +157,7 @@ class FloReader {
         public void exitLine(FloParser.LineContext ctx) {
             assertState(run != null, "Start the file with a 'deflower <file>' line.", ctx.getStart().getLine(), ctx.getText());
             int line = ctx.getStart().getLine();
-            String comment = pendingComments.isEmpty() ? null : String.join("\n", pendingComments);
+            List<String> comment = List.copyOf(pendingComments);
             pendingComments.clear();
             if (blockBase != null) {
                 address += blockBase;
@@ -182,7 +182,7 @@ class FloReader {
          * 'virtual', which then applies to every line inside. It covers
          * no memory itself; a comment above it goes onto the base address.
          */
-        private void openBlock(FloParser.LineContext ctx, int line, String comment) {
+        private void openBlock(FloParser.LineContext ctx, int line, List<String> comment) {
             if (blockBase != null) {
                 errors.add(String.format("line %d: blocks can't be nested (the open one starts at line %d)", line, blockLine));
                 return;
@@ -194,7 +194,7 @@ class FloReader {
             blockBase = address;
             blockVirtual = isVirtual;
             blockLine = line;
-            if (comment != null) {
+            if (!comment.isEmpty()) {
                 run.annotations.add(new Annotation(address, null, UNKNOWN_LINE, false, 1, null, comment));
             }
         }
