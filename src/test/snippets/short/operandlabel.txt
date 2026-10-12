@@ -1,0 +1,47 @@
+>>> Issue 0067: an operand pointing at a labelled byte inside an
+unlabelled instruction prints that label, whether the analysis or
+the .flo file put it there. Without one, it falls back to "label +
+offset" from the instruction's own label. <<<
+
+*=$c000
+
+entry:
+		lda #$05
+		lda #$00
+dC003 = $c003
+		ldx #$03
+count = $c005
+		dec dC003
+		dec count
+		inc entry + 1
+		rts 
+===
+deflower test.prg
+$c000 code entry
+$c005 count
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Will disassemble from C000
+Starting flow analysis.
+Unnamed target: dC003 from address $c006
+Writing out/test.asm
+~~~
+
+*=$c000
+
+entry:
+		lda #$05
+		lda #$00
+; modified by: entry
+dC003 = $c003
+		ldx #$03
+; modified by: entry
+count = $c005
+		dec dC003
+		dec count
+		inc entry + 1
+		rts 
+~~~
+vvv

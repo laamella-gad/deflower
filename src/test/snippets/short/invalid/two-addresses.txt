@@ -1,0 +1,10 @@
+>>> Rejects two addresses on one line. <<<
+===
+deflower t.prg
+$0800 $0900 byte label
+^^^
+Failed to parse test.flo:
+line 2:6 missing NEWLINE at '$0900'
+~~~
+~~~
+vvv

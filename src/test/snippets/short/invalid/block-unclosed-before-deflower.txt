@@ -1,0 +1,14 @@
+>>> Rejects block not closed before next deflower line. <<<
+===
+deflower t.prg
+$d400 virtual {
+    $00 byte freq1
+deflower u.prg
+}
+^^^
+Failed to parse test.flo:
+line 2: block is not closed with '}'
+line 5: '}' without an open block
+~~~
+~~~
+vvv

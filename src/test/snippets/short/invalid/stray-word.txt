@@ -1,0 +1,10 @@
+>>> Rejects stray word. <<<
+===
+deflower t.prg
+$1234 data16 foo
+^^^
+Failed to parse test.flo:
+line 2:13 extraneous input 'foo' expecting NEWLINE
+~~~
+~~~
+vvv

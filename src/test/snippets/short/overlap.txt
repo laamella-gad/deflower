@@ -1,0 +1,27 @@
+>>> registerArea collects an error when one area overwrites a genuinely
+different one (Subject.errors), and Deflower refuses to write an
+(illegal) asm file for a subject that has any (issue 0018).
+overlap.flo declares a 2-byte word at $C000, then a byte at $C001
+landing inside it: the second annotation disagrees with the first, so
+it must be reported (naming both areas and the address) on stderr,
+and overlap.asm must not be written. <<<
+; Not in the disassembly:
+*=$c000
+		.byte	$34, $12
+===
+deflower test.prg
+$c000 word a_word
+$c001 byte b_byte
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Marking area of 1 word at C000 "a_word"
+Marking area of 1 byte at C001 "b_byte"
+Starting flow analysis.
+No entry points defined, nothing to do.
+Area conflict at $c001: $c001 1 byte overwrites $c000 2 word
+Errors detected for test.asm, not writing output.
+~~~
+~~~
+vvv

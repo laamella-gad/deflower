@@ -1,8 +1,0 @@
-deflower export.prg
-$c000 code entry
-; the character set
-$c020-$c030 font export font.bin
-; letter B
-$c028 glyph_b
-$c030 word[2] table export table.prg
-$c034-$c036 tail

@@ -1,0 +1,1896 @@
+>>> Deflower tcmine. <<<
+tcmine/tcmine.flo
+^^^
+Reading tcmine.prg
+Reading prg tcmine.prg
+load address 49152
+Marking area of 1 word at FA "level_pointer"
+Marking area of 1 word at FC "screen_pointer"
+Marking area of 1 byte at FE "draw_column"
+Marking area of 1 byte at FF "draw_row"
+Marking area of 1 byte at 8E "stray_8e"
+Marking area of 1 word at DA "voice1_music"
+Marking area of 1 byte at DC "voice2_duration"
+Marking area of 1 byte at DD "voice1_duration"
+Marking area of 1 word at DE "voice2_music"
+Marking area of 1 word at E4 "air_pointer"
+Marking area of 1 byte at 33F "level"
+Marking area of 10 byte at 341 "enemies"
+Marking area of 1 byte at 34B "unused_034b"
+Marking area of 4 byte at 34C "enemy_steps"
+Marking area of 16 byte at 3238 "animated_chars"
+Marking area of 8 byte at 3248 "conveyor_char_1"
+Marking area of 8 byte at 3250 "conveyor_char_2"
+Marking area of 90 byte at 8407 "jump_table"
+Will disassemble from C000
+Marking area of 2 byte at C074 "unused_c074"
+Marking area of 10 char at C076 "tile_chars_left"
+Marking area of 10 char at C080 "tile_chars_right"
+Will disassemble from C08A
+Will disassemble from C0B0
+Will disassemble from C0C5
+Will disassemble from C0E7
+Marking area of 4 byte at C152 "char_animation_bits"
+Marking area of 6 byte at C156 "unused_c156"
+Will disassemble from C15C
+Marking area of 1 byte at C174 "controls"
+Will disassemble from C175
+Marking area of 1 byte at C1CE "unused_c1ce"
+Will disassemble from C1CF
+Will disassemble from C201
+Marking area of 1 byte at C20F "unused_c20f"
+Will disassemble from C210
+Will disassemble from C233
+Will disassemble from C24B
+Will disassemble from C24E
+Will disassemble from C25E
+Will disassemble from C276
+Marking area of 1 byte at C2C8 "jump_direction"
+Marking area of 1 byte at C2C9 "jump_step"
+Will disassemble from C2CA
+Will disassemble from C2DD
+Will disassemble from C2ED
+Will disassemble from C30D
+Will disassemble from C322
+Marking area of 7 byte at C349 "unused_c349"
+Will disassemble from C350
+Will disassemble from C385
+Marking area of 1 byte at C38E "falling"
+Will disassemble from C38F
+Will disassemble from C397
+Will disassemble from C3A0
+Will disassemble from C3C1
+Will disassemble from C3CE
+Will disassemble from C40E
+Marking area of 1 byte at C417 "unused_c417"
+Will disassemble from C418
+Will disassemble from C41F
+Will disassemble from C43B
+Will disassemble from C451
+Marking area of 2 byte at C459 "unused_c459"
+Marking area of 1 byte at C45B "music_divider"
+Will disassemble from C45C
+Will disassemble from C471
+Will disassemble from C4F4
+Marking area of 1 byte at C51D "items_collected"
+Will disassemble from C51E
+Will disassemble from C535
+Will disassemble from C548
+Will disassemble from C550
+Will disassemble from C553
+Marking area of 1 byte at C586 "air_divider"
+Will disassemble from C587
+Will disassemble from C5C2
+Marking area of 1 byte at C5DA "sprite_collisions"
+Will disassemble from C5DB
+Will disassemble from C5FD
+Will disassemble from C614
+Will disassemble from C61A
+Will disassemble from C666
+Marking area of 1 byte at C6D1 "animation_divider"
+Will disassemble from C6D2
+Will disassemble from C707
+Marking area of 1 byte at C719 "air_empty"
+Will disassemble from C71A
+Will disassemble from C750
+Marking area of 1 byte at C794 "bonus_sound_frequency"
+Will disassemble from C795
+Will disassemble from C7B1
+Marking area of 7 byte at C7B9 "unused_c7b9"
+Marking area of 1 byte at CFFF "frame_counter"
+Marking area of 1 byte at 0 "cpu_port_direction"
+Marking area of 1 byte at 1 "cpu_port"
+Marking area of 41 byte at 2 "null"
+Marking area of 1 word at 2B "basic_start"
+Marking area of 1 word at 2D "basic_variables"
+Marking area of 1 word at 2F "basic_arrays"
+Marking area of 1 word at 31 "basic_arrays_end"
+Marking area of 1 word at 33 "basic_strings"
+Marking area of 2 byte at 35 "null"
+Marking area of 1 word at 37 "basic_memory_end"
+Marking area of 1 word at 39 "basic_line_number"
+Marking area of 56 byte at 3B "null"
+Marking area of 24 byte at 73 "chrget"
+Marking area of 5 byte at 8B "null"
+Marking area of 1 byte at 90 "io_status"
+Marking area of 1 byte at 91 "stop_key"
+Marking area of 14 byte at 92 "null"
+Marking area of 3 byte at A0 "jiffy_clock"
+Marking area of 34 byte at A3 "null"
+Marking area of 1 byte at C5 "last_key"
+Marking area of 1 byte at C6 "keyboard_buffer_length"
+Marking area of 10 byte at C7 "null"
+Marking area of 1 word at D1 "screen_line"
+Marking area of 1 byte at D3 "cursor_column"
+Marking area of 2 byte at D4 "null"
+Marking area of 1 byte at D6 "cursor_row"
+Marking area of 28 byte at D7 "null"
+Marking area of 1 word at F3 "color_line"
+Marking area of 11 byte at F5 "null"
+Marking area of 256 byte at 100 "stack"
+Marking area of 89 byte at 200 "basic_input_buffer"
+Marking area of 30 byte at 259 "null"
+Marking area of 10 byte at 277 "keyboard_buffer"
+Marking area of 5 byte at 281 "null"
+Marking area of 1 byte at 286 "text_color"
+Marking area of 1 byte at 287 "null"
+Marking area of 1 byte at 288 "screen_page"
+Marking area of 119 byte at 289 "null"
+Marking area of 1 addr at 300 "basic_error_vector"
+Marking area of 1 addr at 302 "basic_main_vector"
+Marking area of 16 byte at 304 "null"
+Marking area of 1 addr at 314 "irq_vector"
+Marking area of 1 addr at 316 "brk_vector"
+Marking area of 1 addr at 318 "nmi_vector"
+Marking area of 1 addr at 31A "open_vector"
+Marking area of 1 addr at 31C "close_vector"
+Marking area of 1 addr at 31E "chkin_vector"
+Marking area of 1 addr at 320 "chkout_vector"
+Marking area of 1 addr at 322 "clrchn_vector"
+Marking area of 1 addr at 324 "chrin_vector"
+Marking area of 1 addr at 326 "chrout_vector"
+Marking area of 1 addr at 328 "stop_vector"
+Marking area of 1 addr at 32A "getin_vector"
+Marking area of 1 addr at 32C "clall_vector"
+Marking area of 1 addr at 32E "user_vector"
+Marking area of 1 addr at 330 "load_vector"
+Marking area of 1 addr at 332 "save_vector"
+Marking area of 8 byte at 334 "null"
+Marking area of 192 byte at 33C "tape_buffer"
+Marking area of 4 byte at 3FC "null"
+Marking area of 1000 byte at 400 "screen_ram"
+Marking area of 16 byte at 7E8 "null"
+Marking area of 8 byte at 7F8 "sprite_pointers"
+Marking area of 1 addr at A000 "basic_cold_start_vector"
+Marking area of 1 addr at A002 "basic_warm_start_vector"
+Marking area of 8188 byte at A004 "null"
+Marking area of 16 byte at D000 "vic_sprite_coords"
+Marking area of 1 byte at D010 "vic_sprite_x_high_bits"
+Marking area of 1 byte at D011 "vic_control_1"
+Marking area of 1 byte at D012 "vic_raster"
+Marking area of 1 byte at D013 "vic_light_pen_x"
+Marking area of 1 byte at D014 "vic_light_pen_y"
+Marking area of 1 byte at D015 "vic_sprite_enable"
+Marking area of 1 byte at D016 "vic_control_2"
+Marking area of 1 byte at D017 "vic_sprite_double_height"
+Marking area of 1 byte at D018 "vic_memory_setup"
+Marking area of 1 byte at D019 "vic_irq_status"
+Marking area of 1 byte at D01A "vic_irq_enable"
+Marking area of 1 byte at D01B "vic_sprite_priority"
+Marking area of 1 byte at D01C "vic_sprite_multicolor"
+Marking area of 1 byte at D01D "vic_sprite_double_width"
+Marking area of 1 byte at D01E "vic_sprite_collision"
+Marking area of 1 byte at D01F "vic_background_collision"
+Marking area of 1 byte at D020 "border_color"
+Marking area of 1 byte at D021 "background_color"
+Marking area of 1 byte at D022 "background_color_1"
+Marking area of 1 byte at D023 "background_color_2"
+Marking area of 1 byte at D024 "background_color_3"
+Marking area of 1 byte at D025 "sprite_multicolor_1"
+Marking area of 1 byte at D026 "sprite_multicolor_2"
+Marking area of 8 byte at D027 "vic_sprite_colors"
+Marking area of 977 byte at D02F "null"
+Marking area of 1 word at D400 "voice1_frequency"
+Marking area of 1 word at D402 "voice1_pulse_width"
+Marking area of 1 byte at D404 "voice1_control"
+Marking area of 1 byte at D405 "voice1_attack_decay"
+Marking area of 1 byte at D406 "voice1_sustain_release"
+Marking area of 1 word at D407 "voice2_frequency"
+Marking area of 1 word at D409 "voice2_pulse_width"
+Marking area of 1 byte at D40B "voice2_control"
+Marking area of 1 byte at D40C "voice2_attack_decay"
+Marking area of 1 byte at D40D "voice2_sustain_release"
+Marking area of 1 word at D40E "voice3_frequency"
+Marking area of 1 word at D410 "voice3_pulse_width"
+Marking area of 1 byte at D412 "voice3_control"
+Marking area of 1 byte at D413 "voice3_attack_decay"
+Marking area of 1 byte at D414 "voice3_sustain_release"
+Marking area of 1 word at D415 "filter_cutoff"
+Marking area of 1 byte at D417 "filter_control"
+Marking area of 1 byte at D418 "sid_vol_filter"
+Marking area of 1 byte at D419 "paddle_x"
+Marking area of 1 byte at D41A "paddle_y"
+Marking area of 1 byte at D41B "voice3_oscillator"
+Marking area of 1 byte at D41C "voice3_envelope"
+Marking area of 995 byte at D41D "null"
+Marking area of 1000 byte at D800 "color_ram"
+Marking area of 24 byte at DBE8 "null"
+Marking area of 1 byte at DC00 "cia1_port_a"
+Marking area of 1 byte at DC01 "cia1_port_b"
+Marking area of 1 byte at DC02 "cia1_direction_a"
+Marking area of 1 byte at DC03 "cia1_direction_b"
+Marking area of 1 word at DC04 "cia1_timer_a"
+Marking area of 1 word at DC06 "cia1_timer_b"
+Marking area of 1 byte at DC08 "cia1_tod_tenths"
+Marking area of 1 byte at DC09 "cia1_tod_seconds"
+Marking area of 1 byte at DC0A "cia1_tod_minutes"
+Marking area of 1 byte at DC0B "cia1_tod_hours"
+Marking area of 1 byte at DC0C "cia1_serial"
+Marking area of 1 byte at DC0D "cia1_irq_control"
+Marking area of 1 byte at DC0E "cia1_timer_a_control"
+Marking area of 1 byte at DC0F "cia1_timer_b_control"
+Marking area of 240 byte at DC10 "null"
+Marking area of 1 byte at DD00 "cia2_port_a"
+Marking area of 1 byte at DD01 "cia2_port_b"
+Marking area of 1 byte at DD02 "cia2_direction_a"
+Marking area of 1 byte at DD03 "cia2_direction_b"
+Marking area of 1 word at DD04 "cia2_timer_a"
+Marking area of 1 word at DD06 "cia2_timer_b"
+Marking area of 1 byte at DD08 "cia2_tod_tenths"
+Marking area of 1 byte at DD09 "cia2_tod_seconds"
+Marking area of 1 byte at DD0A "cia2_tod_minutes"
+Marking area of 1 byte at DD0B "cia2_tod_hours"
+Marking area of 1 byte at DD0C "cia2_serial"
+Marking area of 1 byte at DD0D "cia2_irq_control"
+Marking area of 1 byte at DD0E "cia2_timer_a_control"
+Marking area of 1 byte at DD0F "cia2_timer_b_control"
+Marking area of 240 byte at DD10 "null"
+Marking area of 256 byte at DE00 "io_area_1"
+Marking area of 256 byte at DF00 "io_area_2"
+Marking area of 8186 byte at E000 "null"
+Marking area of 1 addr at FFFA "nmi_hardware_vector"
+Marking area of 1 addr at FFFC "reset_hardware_vector"
+Marking area of 1 addr at FFFE "irq_hardware_vector"
+Starting flow analysis.
+Unnamed target: lC7B7 from address $c7b3
+Unnamed target: lC738 from address $c728
+Unnamed target: lC735 from address $c731
+Unnamed target: lC74F from address $c73c
+Unnamed target: lC76F from address $c765
+Unnamed target: lC75A from address $c76d
+Unnamed target: lC755 from address $c791
+Unnamed target: lC716 from address $c70c
+Unnamed target: lC19C from address $c18a
+Unnamed target: lC1B8 from address $c191
+Unnamed target: lC1B5 from address $c199
+Unnamed target: lC1CD from address $c1c2
+Unnamed target: lC353 from address $c358
+Unnamed target: lC368 from address $c35d
+Unnamed target: lC220 from address $c215
+Unnamed target: lC200 from address $c1ef
+Unnamed target: lC1FC from address $c1f8
+Unnamed target: lC1EF from address $c1fd
+Unnamed target: lC20D from address $c205
+Unnamed target: lC245 from address $c23b
+Unnamed target: lC230 from address $c225
+Unnamed target: lC44D from address $c444
+Unnamed target: lC25F from address $c254
+Unnamed target: lC26E from address $c261
+Unnamed target: lC271 from address $c265
+Unnamed target: lC2B6 from address $c27a
+Unnamed target: lC299 from address $c281
+Unnamed target: lC294 from address $c28b
+Unnamed target: lC2B1 from address $c2a8
+Unnamed target: lC2C7 from address $c2bd
+Unnamed target: lC26C from address $c273
+Unnamed target: lC39F from address $c39a
+Unnamed target: lC2DC from address $c2cf
+Unnamed target: lC36E from address $c365
+Unnamed target: lC43A from address $c426
+Unnamed target: lC433 from address $c42e
+Unnamed target: lC378 from address $c373
+Unnamed target: lC382 from address $c37d
+Unnamed target: lC46E from address $c464
+Unnamed target: lC4B4 from address $c475
+Unnamed target: lC4E4 from address $c4b8
+Unnamed target: lC4F3 from address $c4e8
+Unnamed target: lC5F4 from address $c5ea
+Unnamed target: lC5DF from address $c5f2
+Unnamed target: lC5DD from address $c5f7
+Unnamed target: lC5AF from address $c59f
+Unnamed target: lC5AC from address $c5a8
+Unnamed target: lC5D7 from address $c5c6
+Unnamed target: lC5D4 from address $c5d0
+Unnamed target: lC611 from address $c605
+Unnamed target: lC40A from address $c3d5
+Unnamed target: lC400 from address $c3f7
+Unnamed target: lC343 from address $c32b
+Unnamed target: lC2FA from address $c2f5
+Unnamed target: lC3B0 from address $c3a5
+Unnamed target: lC3C0 from address $c3b5
+Unnamed target: lC317 from address $c312
+Unnamed target: lC321 from address $c31c
+Unnamed target: lC30C from address $c305
+Unnamed target: lC704 from address $c6da
+Unnamed target: lC6F9 from address $c6f1
+Unnamed target: lC6E5 from address $c702
+Unnamed target: lC67E from address $c671
+Unnamed target: lC671 from address $c67b
+Unnamed target: lC681 from address $c689
+Unnamed target: lC6B1 from address $c6b9
+Unnamed target: lC6BD from address $c6c5
+Unnamed target: lC628 from address $c623
+Unnamed target: lC62F from address $c62a
+Unnamed target: lC636 from address $c631
+Unnamed target: lC63D from address $c638
+Unnamed target: lC658 from address $c646
+Unnamed target: lC61E from address $c661
+Unnamed target: lC56E from address $c56a
+Unnamed target: lC563 from address $c575
+Unnamed target: lC458 from address $c453
+Unnamed target: lC14F from address $c122
+Unnamed target: lC0AD from address $c0b2
+Unnamed target: lC0C0 from address $c0bc
+Unnamed target: lC0AA from address $c0c2
+Unnamed target: lC095 from address $c0ad
+Unnamed target: lC0A8 from address $c095
+Unnamed target: lC028 from address $c015
+Unnamed target: lC015 from address $c025
+Unnamed target: lC058 from address $c054
+Unnamed target: lC02A from address $c05a
+Unnamed target: lC069 from address $c065
+Writing out/tcmine.asm
+~~~
+
+.virtual $008e
+; written by: fall
+stray_8e:		.byte	?
+.endv
+
+.virtual $00da
+; read by: play_music
+; written by: play_music, init_music
+; modified by: play_music
+voice1_music:		.word	?
+; read by: play_music
+; written by: play_music, init_music
+; modified by: play_music
+voice2_duration:		.byte	?
+; read by: play_music
+; written by: play_music, init_music
+; modified by: play_music
+voice1_duration:		.byte	?
+; read by: play_music
+; written by: play_music, init_music
+; modified by: play_music
+voice2_music:		.word	?
+.endv
+
+.virtual $00e4
+; read by: play_level, drain_air_step, drain_air_once
+; written by: play_level, drain_air_step, drain_air_once
+; modified by: play_level, drain_air_step, drain_air_once
+air_pointer:		.word	?
+.endv
+
+.virtual $00fa
+; TC Mine by Anthony Crowther, a Manic Miner like game. This is its machine code part,
+; loaded at $c000 and driven by a BASIC program through SYS calls. The level data
+; ($4000, $159 bytes per level), the enemy table ($2580, $12 bytes per level), the jump
+; table ($8407) and the music ($8500 and $8b84) are loaded separately, so they are not
+; in this file.
+; ---- zero page ----
+; the level data while drawing, the screen cell of the player otherwise
+; read by: draw_level, unused_c08a, unused_c0b0, find_player_cell, is_wall, check_floor, unused_c25e, check_landing, jump_height, check_conveyor, check_slope, check_pickup, collect_item, init_enemies
+; written by: draw_level, unused_c08a, unused_c0b0, find_player_cell, init_draw_pointers, init_enemies, add_to_level_pointer
+; modified by: draw_level, unused_c0b0, find_player_cell, add_to_level_pointer
+level_pointer:		.word	?
+; the screen address while drawing; $fc is also the player's row
+; read by: draw_level, find_player_cell
+; written by: draw_level, find_player_cell, init_draw_pointers
+; modified by: draw_level
+screen_pointer:		.word	?
+; read by: draw_level
+; written by: draw_level
+; modified by: draw_level
+draw_column:		.byte	?
+; read by: draw_level
+; written by: draw_level
+; modified by: draw_level
+draw_row:		.byte	?
+.endv
+
+.virtual $0314
+; written by: install_irq, remove_irq
+irq_vector:		.addr	?
+.endv
+
+.virtual $033f
+; set by the BASIC program
+; read by: draw_level, unused_c08a, init_enemies
+level:		.byte	?
+.endv
+
+.virtual $0341
+; the enemy table entry of the level: per enemy x, y, direction, first frame, steps
+; read by: move_enemies, init_enemies, animate_enemies
+; written by: move_enemies, init_enemies
+enemies:
+		.fill	10
+unused_034b:		.byte	?
+; read by: move_enemies
+; written by: move_enemies, init_enemies
+; modified by: move_enemies
+enemy_steps:
+		.fill	4
+.endv
+
+.virtual $0400
+; read by: add_score, count_air_bonus
+; written by: add_score, count_air_bonus
+screen_ram:
+		.fill	1000
+.endv
+
+.virtual $07f8
+; read by: animate_player, animate_portal, animate_enemies
+; written by: init_player, animate_player, animate_portal, init_enemies, animate_enemies
+; modified by: animate_player, animate_enemies
+sprite_pointers:
+		.fill	8
+.endv
+
+.virtual $3238
+; the animated characters of the character set
+; written by: irq
+animated_chars:
+		.fill	16
+; written by: irq
+conveyor_char_1:
+		.fill	8
+; written by: irq
+conveyor_char_2:
+		.fill	8
+.endv
+
+.virtual $8407
+; pairs of a flag and a height change, one pair per step of a jump
+; read by: jump, next_jump_step, jump_height
+jump_table:
+		.fill	90
+.endv
+
+*=$c000
+
+; ---- draws the level from the level data onto the screen ----
+; each level byte holds two tiles, each nibble indexing tile_chars_left/right
+draw_level:
+		lda #$40
+		sta level_pointer + $1
+		lda #$04
+		sta screen_pointer + $1
+		lda #$00
+		jsr init_draw_pointers
+		nop 
+		sta draw_column
+		sta draw_row
+		ldx level
+; jumped to by: draw_level
+lC015:
+		beq lC028
+		lda level_pointer
+		clc 
+		adc #$59
+		sta level_pointer
+		lda level_pointer + $1
+		adc #$01
+		sta level_pointer + $1
+		dex 
+		jmp lC015
+
+; jumped to by: draw_level
+lC028:
+		ldx #$00
+; jumped to by: draw_level
+lC02A:
+		ldy #$00
+		lda (level_pointer), y
+		lsr 
+		lsr 
+		lsr 
+		lsr 
+		tay 
+		lda tile_chars_left, y
+		ldy draw_column
+		sta (screen_pointer), y
+		ldy #$00
+		lda (level_pointer), y
+		and #$0f
+		tay 
+		lda tile_chars_right, y
+		inc draw_column
+		ldy draw_column
+		sta (screen_pointer), y
+		inc draw_column
+		inx 
+		lda level_pointer
+		clc 
+		adc #$01
+		sta level_pointer
+		bcc lC058
+		inc level_pointer + $1
+; jumped to by: draw_level
+lC058:
+		cpx #$0e
+		bcc lC02A
+		inc draw_row
+		lda screen_pointer
+		clc 
+		adc #$28
+		sta screen_pointer
+		bcc lC069
+		inc screen_pointer + $1
+; jumped to by: draw_level
+lC069:
+		ldx #$00
+		stx draw_column
+		ldx draw_row
+		cpx #$18
+		bcc lC028
+		rts 
+
+unused_c074:
+		.byte	$00, $00
+
+; read by: draw_level
+tile_chars_left:
+		.text	" ACEIKGHMU"
+; read by: draw_level
+tile_chars_right:
+		.text	" BDFJLGHMU"
+
+; an older copy of draw_level's start that was patched over; nothing calls it
+unused_c08a:
+		lda #$00
+		sta level_pointer
+		lda #$40
+		sta level_pointer + $1
+		ldx level
+; jumped to by: unused_c08a
+lC095:
+		beq lC0A8
+		lda level_pointer
+		clc 
+		adc #$59
+		sta level_pointer
+		lda level_pointer + $1
+		adc #$01
+		sta level_pointer + $1
+		dex 
+		jmp lC095
+
+; jumped to by: unused_c08a
+lC0A8:
+		adc #$01
+; jumped to by: unused_c0b0
+lC0AA:
+		sta level_pointer + $1
+		dex 
+; jumped to by: unused_c0b0
+lC0AD:
+		jmp lC095
+
+unused_c0b0:
+		cpy #$0e
+		bne lC0AD
+		inx 
+		lda level_pointer
+		clc 
+		adc #$0e
+		sta level_pointer
+		bcc lC0C0
+		inc level_pointer + $1
+; jumped to by: unused_c0b0
+lC0C0:
+		cpx #$19
+		bne lC0AA
+		rts 
+
+install_irq:
+		lda #$00
+		sta cia1_timer_a_control
+		sei 
+		lda #$01
+		sta vic_irq_status
+		sta vic_irq_enable
+		lda #$00
+		sta vic_raster
+		sta vic_control_1
+		lda #$e7
+		sta irq_vector
+		lda #$c0
+		sta irq_vector + $1
+		cli 
+		rts 
+
+; animates the characters and the enemies, then continues in the KERNAL
+irq:
+		lda #$01
+		sta vic_irq_status
+		lda #$00
+		sta vic_raster
+		lda #$1b
+		sta vic_control_1
+		dec frame_counter
+		lda frame_counter
+		and #$07
+		sta frame_counter
+		tax 
+		lda #$ea
+		sta conveyor_char_1, x
+		lda #$aa
+		sta conveyor_char_2, x
+		txa 
+		clc 
+		adc #$01
+		and #$07
+		tax 
+		lda #$e0
+		sta conveyor_char_1, x
+		lda #$0e
+		sta conveyor_char_2, x
+		lda frame_counter
+		lsr 
+		nop 
+		bcc lC14F
+		lda frame_counter
+		lsr 
+		tax 
+		lda char_animation_bits, x
+		sta animated_chars
+		sta animated_chars + $1
+		sta animated_chars + $f
+		sta animated_chars + $e
+		lda #$07
+		sec 
+		sbc frame_counter
+		lsr 
+		tax 
+		lda char_animation_bits, x
+		sta animated_chars + $6
+		sta animated_chars + $7
+		sta animated_chars + $8
+		sta animated_chars + $9
+; jumped to by: irq
+lC14F:
+		jmp move_enemies
+
+; read by: irq
+char_animation_bits:
+		.byte	$80, $20, $08, $02
+unused_c156:
+		.byte	$ff, $bf, $ff, $00, $ff, $00
+
+init_player:
+		lda #$d4
+		sta vic_sprite_coords
+		lda #$55
+		sta vic_sprite_coords + $1
+		lda #$ff
+		sta vic_sprite_multicolor
+		sta vic_sprite_enable
+		lda #$80
+		sta sprite_pointers
+		rts 
+
+; joystick port 2, or Z for left, X for right and right shift for jump
+; read by: read_controls, walk, animate_player, start_jump, jump_sideways, main_loop, jump_sideways_checked, jump_direction_controls, conveyor
+; written by: read_controls, check_walls, check_floor, animate_player, next_jump_step, jump_direction_controls
+controls:
+		.byte	$0b
+
+; called by: main_loop
+read_controls:
+		lda #$ff
+		sta cia1_port_a
+		lda cia1_port_a
+		sta controls
+		lda #$fd
+		sta cia1_port_a
+		lda cia1_port_b
+		and #$10
+		bne lC19C
+		lda controls
+		and #$04
+		beq lC1B8
+		lda controls
+		sec 
+		sbc #$04
+		jmp lC1B5
+
+; jumped to by: read_controls
+lC19C:
+		lda #$fb
+		sta cia1_port_a
+		lda cia1_port_b
+		and #$80
+		bne lC1B8
+		lda controls
+		and #$08
+		beq lC1B8
+		lda controls
+		sec 
+		sbc #$08
+; jumped to by: read_controls
+lC1B5:
+		sta controls
+; jumped to by: read_controls
+lC1B8:
+		lda #$bf
+		sta cia1_port_a
+		lda cia1_port_b
+		and #$10
+		bne lC1CD
+		lda controls
+		clc 
+		adc #$10
+		sta controls
+; jumped to by: read_controls
+lC1CD:
+		rts 
+
+unused_c1ce:
+		.byte	$ea
+
+; points level_pointer at the screen cell of the player
+; called by: check_walls, check_landing, jump_height, check_slope
+find_player_cell:
+		lda #$00
+		sta level_pointer
+		lda #$04
+		sta level_pointer + $1
+		lda vic_sprite_coords
+		sec 
+		sbc #$14
+		lsr 
+		lsr 
+		lsr 
+		sta level_pointer
+		lda vic_sprite_coords + $1
+		sec 
+		sbc #$35
+		lsr 
+		lsr 
+		lsr 
+		sta screen_pointer
+		ldx screen_pointer
+; jumped to by: find_player_cell
+lC1EF:
+		beq lC200
+		lda level_pointer
+		clc 
+		adc #$28
+		sta level_pointer
+		bcc lC1FC
+		inc level_pointer + $1
+; jumped to by: find_player_cell
+lC1FC:
+		dex 
+		jmp lC1EF
+
+; jumped to by: find_player_cell
+lC200:
+		rts 
+
+; C set when the character at (level_pointer),y is a wall
+; called by: check_walls
+is_wall:
+		lda (level_pointer), y
+		cmp #$41
+		beq lC20D
+		cmp #$42
+		beq lC20D
+		clc 
+		rts 
+
+; jumped to by: is_wall
+lC20D:
+		sec 
+		rts 
+
+unused_c20f:
+		.byte	$ea
+
+; called by: main_loop
+walk:
+		lda controls
+		and #$04
+		bne lC220
+		dec vic_sprite_coords
+		jsr check_walls
+		inc vic_sprite_coords
+; jumped to by: walk
+lC220:
+		lda controls
+		and #$08
+		bne lC230
+		inc vic_sprite_coords
+		jsr check_walls
+		dec vic_sprite_coords
+; jumped to by: walk
+lC230:
+		jmp continue_walk
+
+; called by: walk, jump_sideways_checked
+check_walls:
+		jsr find_player_cell
+		ldy #$29
+		jsr is_wall
+		bcs lC245
+		ldy #$51
+		jsr is_wall
+		bcs lC245
+		rts 
+
+; jumped to by: check_walls
+lC245:
+		lda #$ff
+		sta controls
+		rts 
+
+; jumped to by: walk
+continue_walk:
+		jmp check_slope
+
+; jumped to by: check_slope
+check_floor:
+		ldy #$79
+		lda (level_pointer), y
+		cmp #$20
+		bne lC25F
+		lda #$ff
+		sta controls
+		jmp fall
+
+unused_c25e:
+		rts 
+
+; jumped to by: check_floor
+lC25F:
+		cmp #$4d
+		bcc lC26E
+		cmp #$54
+		beq lC271
+		bcs lC26E
+		clc 
+		adc #$01
+; jumped to by: unused_c25e
+lC26C:
+		sta (level_pointer), y
+; jumped to by: unused_c25e
+lC26E:
+		jmp not_falling
+
+; jumped to by: unused_c25e
+lC271:
+		lda #$20
+		jmp lC26C
+
+; jumped to by: not_falling
+animate_player:
+		lda frame_counter
+		lsr 
+		bcc lC2B6
+		lda controls
+		and #$04
+		bne lC299
+		inc sprite_pointers
+		lda sprite_pointers
+		cmp #$80
+		bcc lC294
+		cmp #$84
+		bcs lC294
+		jmp lC299
+
+; jumped to by: animate_player
+lC294:
+		lda #$80
+		sta sprite_pointers
+; jumped to by: animate_player
+lC299:
+		lda controls
+		and #$08
+		bne lC2B6
+		dec sprite_pointers
+		lda sprite_pointers
+		cmp #$84
+		bcc lC2B1
+		cmp #$88
+		bcs lC2B1
+		jmp lC2B6
+
+; jumped to by: animate_player
+lC2B1:
+		lda #$87
+		sta sprite_pointers
+; jumped to by: animate_player
+lC2B6:
+		lda vic_sprite_coords + $1
+		and #$07
+		cmp #$05
+		beq lC2C7
+		lda #$ff
+		sta controls
+		inc vic_sprite_coords + $1
+; jumped to by: animate_player
+lC2C7:
+		rts 
+
+; read by: jump_direction_controls
+; written by: start_jump
+jump_direction:
+		.byte	$0b
+; 0 when not jumping, otherwise the index into jump_table
+; read by: jump, next_jump_step, check_landing, main_loop, jump_height
+; written by: start_jump, next_jump_step, check_landing
+; modified by: next_jump_step
+jump_step:		.byte	$35
+
+; jumped to by: check_jump
+start_jump:
+		lda controls
+		and #$10
+		bne lC2DC
+		lda #$01
+		sta jump_step
+		lda controls
+		sta jump_direction
+; jumped to by: start_jump
+lC2DC:
+		rts 
+
+; called by: main_loop
+jump:
+		ldx jump_step
+		jsr jump_height
+		sec 
+		sbc jump_table + $1, x
+		sta vic_sprite_coords + $1
+		jmp check_landing
+
+; jumped to by: check_landing
+next_jump_step:
+		lda #$00
+		sta controls
+		lda jump_table, x
+		beq lC2FA
+		jsr jump_sideways
+; jumped to by: next_jump_step
+lC2FA:
+		inc jump_step
+		inc jump_step
+		lda jump_step
+		cmp #$59
+		bcc lC30C
+		lda #$00
+		sta jump_step
+; jumped to by: next_jump_step
+lC30C:
+		rts 
+
+; called by: next_jump_step
+jump_sideways:
+		jsr jump_direction_controls
+		and #$08
+		bne lC317
+		inc vic_sprite_coords
+; jumped to by: jump_sideways
+lC317:
+		lda controls
+		and #$04
+		bne lC321
+		dec vic_sprite_coords
+; jumped to by: jump_sideways
+lC321:
+		rts 
+
+; jumped to by: jump
+check_landing:
+		jsr find_player_cell
+		ldy #$79
+		lda (level_pointer), y
+		cmp #$20
+		beq lC343
+		lda vic_sprite_coords + $1
+		and #$07
+		cmp #$05
+		bne lC343
+		lda jump_step
+		cmp #$26
+		bcc lC343
+		lda #$00
+		sta jump_step
+		rts 
+
+; jumped to by: check_landing
+lC343:
+		ldx jump_step
+		jmp next_jump_step
+
+unused_c349:
+		.byte	$00, $ff, $00, $ff, $00, $ff, $00
+
+; plays the level until the player dies, the air runs out, or the level is done
+; jumped to by: play_level, check_enemy_collision
+main_loop:
+		jsr read_controls
+; jumped to by: main_loop
+lC353:
+		lda vic_raster
+		cmp #$ff
+		bne lC353
+		lda jump_step
+		bne lC368
+		jsr walk
+		jsr check_jump
+		jmp lC36E
+
+; jumped to by: main_loop
+lC368:
+		jsr jump
+		jmp lC382
+
+; jumped to by: main_loop
+lC36E:
+		jsr conveyor
+		and #$08
+		bne lC378
+		inc vic_sprite_coords
+; jumped to by: main_loop
+lC378:
+		lda controls
+		and #$04
+		bne lC382
+		dec vic_sprite_coords
+; jumped to by: main_loop
+lC382:
+		jmp tick_music
+
+; jumped to by: check_floor
+fall:
+		inc vic_sprite_coords + $1
+		lda #$01
+		sta @w stray_8e
+		rts 
+
+; never set: fall stores into $008e instead of here
+; read by: check_jump
+; written by: not_falling
+falling:
+		.byte	$00
+
+; jumped to by: unused_c25e
+not_falling:
+		lda #$00
+		sta falling
+		jmp animate_player
+
+; called by: main_loop
+check_jump:
+		lda falling
+		bne lC39F
+		jmp start_jump
+
+; jumped to by: check_jump
+lC39F:
+		rts 
+
+; called by: jump_direction_controls
+jump_sideways_checked:
+		lda controls
+		and #$04
+		bne lC3B0
+		dec vic_sprite_coords
+		jsr check_walls
+		inc vic_sprite_coords
+; jumped to by: jump_sideways_checked
+lC3B0:
+		lda controls
+		and #$08
+		bne lC3C0
+		inc vic_sprite_coords
+		jsr check_walls
+		dec vic_sprite_coords
+; jumped to by: jump_sideways_checked
+lC3C0:
+		rts 
+
+; called by: jump_sideways
+jump_direction_controls:
+		lda jump_direction
+		sta controls
+		jsr jump_sideways_checked
+		lda controls
+		rts 
+
+; called by: jump
+jump_height:
+		lda vic_sprite_coords + $1
+		and #$07
+		cmp #$05
+		bne lC40A
+		lda vic_sprite_coords + $1
+		sec 
+		sbc jump_table + $1, x
+		sta vic_sprite_coords + $1
+		jsr find_player_cell
+		ldx jump_step
+		lda vic_sprite_coords + $1
+		clc 
+		adc jump_table + $1, x
+		sta vic_sprite_coords + $1
+		ldy #$29
+		lda (level_pointer), y
+		cmp #$41
+		beq lC400
+		cmp #$42
+		beq lC400
+		jmp lC40A
+
+; jumped to by: jump_height
+lC400:
+		lda vic_sprite_coords + $1
+		clc 
+		adc jump_table + $1, x
+		sta vic_sprite_coords + $1
+; jumped to by: jump_height
+lC40A:
+		lda vic_sprite_coords + $1
+		rts 
+
+; called by: draw_level
+init_draw_pointers:
+		lda #$29
+		sta screen_pointer
+		lda #$00
+		sta level_pointer
+		rts 
+
+unused_c417:
+		.byte	$ea
+
+; called by: main_loop
+conveyor:
+		jsr check_conveyor
+		lda controls
+		rts 
+
+; called by: conveyor
+check_conveyor:
+		lda vic_sprite_coords + $1
+		and #$07
+		cmp #$05
+		bne lC43A
+		ldy #$79
+		lda (level_pointer), y
+		cmp #$47
+		bne lC433
+		dec vic_sprite_coords
+; jumped to by: check_conveyor
+lC433:
+		cmp #$48
+		bne lC43A
+		inc vic_sprite_coords
+; jumped to by: check_conveyor
+lC43A:
+		rts 
+
+; jumped to by: continue_walk
+check_slope:
+		jsr find_player_cell
+		ldy #$51
+		lda (level_pointer), y
+		cmp #$49
+		beq lC44D
+		cmp #$4a
+		beq lC44D
+		jmp check_floor
+
+; jumped to by: check_slope
+lC44D:
+		dec vic_sprite_coords + $1
+		rts 
+
+unused_c451:
+		cmp #$05
+		beq lC458
+		dec vic_sprite_coords + $1
+; jumped to by: unused_c451
+lC458:
+		rts 
+
+unused_c459:
+		.byte	$ea, $ea
+; read by: tick_music
+; written by: tick_music
+; modified by: tick_music
+music_divider:		.byte	$03
+
+; jumped to by: main_loop
+tick_music:
+		inc music_divider
+		lda music_divider
+		cmp #$04
+		bcc lC46E
+		lda #$00
+		sta music_divider
+		jsr play_music
+; jumped to by: tick_music
+lC46E:
+		jmp check_pickups
+
+; called by: tick_music
+play_music:
+		dec voice2_duration
+		lda voice2_duration
+		bne lC4B4
+		ldy #$00
+		sty voice2_control
+		sty voice3_control
+		lda #$3a
+		sta voice2_attack_decay
+		lda #$1d
+		sta voice3_attack_decay
+		lda (voice2_music), y
+		sta voice2_frequency + $1
+		sta voice3_frequency + $1
+		iny 
+		lda (voice2_music), y
+		sta voice2_frequency
+		sta voice3_frequency
+		iny 
+		lda (voice2_music), y
+		sta voice2_duration
+		lda #$41
+		sta voice3_control
+		lda #$47
+		sta voice2_control
+		lda voice2_music
+		clc 
+		adc #$03
+		sta voice2_music
+		bcc lC4B4
+		inc voice2_music + $1
+; jumped to by: play_music
+lC4B4:
+		dec voice1_duration
+		lda voice1_duration
+		bne lC4E4
+		ldy #$00
+		sty voice1_control
+		lda #$28
+		sta voice1_attack_decay
+		lda (voice1_music), y
+		sta voice1_frequency + $1
+		iny 
+		lda (voice1_music), y
+		sta voice1_frequency
+		lda #$25
+		sta voice1_control
+		iny 
+		lda (voice1_music), y
+		sta voice1_duration
+		lda voice1_music
+		clc 
+		adc #$03
+		sta voice1_music
+		bcc lC4E4
+		inc voice1_music + $1
+; jumped to by: play_music
+lC4E4:
+		lda voice2_music + $1
+		cmp #$8b
+		bne lC4F3
+		lda voice2_music
+		cmp #$84
+		bne lC4F3
+		jsr init_music
+; jumped to by: play_music
+lC4F3:
+		rts 
+
+; called by: play_music
+init_music:
+		lda #$00
+		sta voice2_music
+		lda #$85
+		sta voice2_music + $1
+		lda #$84
+		sta voice1_music
+		lda #$8b
+		sta voice1_music + $1
+		lda #$01
+		sta voice2_duration
+		sta voice1_duration
+		lda sid_vol_filter
+		lda #$01
+		sta voice3_pulse_width + $1
+		lda #$07
+		sta voice1_pulse_width + $1
+		lda #$07
+		sta voice2_pulse_width + $1
+		rts 
+
+; read by: check_collisions
+; written by: level_done
+; modified by: add_score
+items_collected:
+		.byte	$00
+
+; jumped to by: tick_music
+check_pickups:
+		ldy #$29
+		jsr check_pickup
+		ldy #$29
+		jsr check_pickup
+		ldy #$51
+		jsr check_pickup
+		ldy #$79
+		jsr check_pickup
+		jmp drain_air
+
+; called by: check_pickups
+check_pickup:
+		lda (level_pointer), y
+		cmp #$4b
+		beq collect_item
+		cmp #$4c
+		beq collect_item
+		cmp #$45
+		beq die
+		cmp #$46
+		beq die
+		rts 
+
+; jumped to by: check_pickup
+collect_item:
+		lda #$20
+		sta (level_pointer), y
+		jsr add_score
+		rts 
+
+; leaves main_loop: the player touched something deadly
+; jumped to by: check_pickup
+die:
+		pla 
+		pla 
+		rts 
+
+; draws the air bar and starts the level
+play_level:
+		lda #$46
+		sta air_pointer
+		lda #$04
+		sta air_pointer + $1
+		ldy #$00
+		lda #$60
+		sta (air_pointer), y
+		ldx #$00
+; jumped to by: play_level
+lC563:
+		lda air_pointer
+		clc 
+		adc #$28
+		sta air_pointer
+		bcc lC56E
+		inc air_pointer + $1
+; jumped to by: play_level
+lC56E:
+		lda #$56
+		sta (air_pointer), y
+		inx 
+		cpx #$17
+		bne lC563
+		lda #$61
+		sta (air_pointer), y
+		lda #$6e
+		sta air_pointer
+		lda #$04
+		sta air_pointer + $1
+		jmp main_loop
+
+; read by: drain_air
+; written by: drain_air_step, drain_air_once
+; modified by: drain_air
+air_divider:
+		.byte	$09
+
+; jumped to by: check_pickups
+drain_air:
+		inc air_divider
+		lda air_divider
+		cmp #$14
+		bcc animate_portal
+; loads itself, but does nothing with it
+; read by: drain_air_once
+drain_air_step:
+		ldy #$00
+		sty air_divider
+		lda (air_pointer), y
+		clc 
+		adc #$01
+		sta (air_pointer), y
+		cmp #$5f
+		bcc lC5AF
+		lda air_pointer
+		clc 
+		adc #$28
+		sta air_pointer
+		bcc lC5AC
+		inc air_pointer + $1
+; jumped to by: drain_air_step
+lC5AC:
+		lda drain_air_step
+; jumped to by: drain_air_step
+lC5AF:
+		lda air_pointer + $1
+		cmp #$07
+		bne animate_portal
+		lda air_pointer
+		cmp #$b4
+		bcc animate_portal
+		lda (air_pointer), y
+		cmp #$61
+		bne animate_portal
+		rts 
+
+; jumped to by: drain_air, drain_air_step
+animate_portal:
+		lda frame_counter
+		nop 
+		bne lC5D7
+		lda sprite_pointers + $1
+		clc 
+		sbc #$00
+		cmp #$88
+		bcs lC5D4
+		lda #$8b
+; jumped to by: animate_portal
+lC5D4:
+		sta sprite_pointers + $1
+; jumped to by: animate_portal
+lC5D7:
+		jmp check_collisions
+
+; read by: check_enemy_collision
+; written by: check_collisions
+sprite_collisions:
+		.byte	$05
+
+; called by: collect_item
+add_score:
+		ldy #$00
+; jumped to by: add_score
+lC5DD:
+		ldx #$04
+; jumped to by: add_score
+lC5DF:
+		lda screen_ram + $6f, x
+		clc 
+		adc #$01
+		sta screen_ram + $6f, x
+		cmp #$3a
+		bcc lC5F4
+		lda #$30
+		sta screen_ram + $6f, x
+		dex 
+		bne lC5DF
+; jumped to by: add_score
+lC5F4:
+		iny 
+		cpy #$02
+		bne lC5DD
+		inc items_collected
+		rts 
+
+; jumped to by: animate_portal
+check_collisions:
+		lda vic_sprite_collision
+		sta sprite_collisions
+		and #$02
+		beq lC611
+		lda items_collected
+		cmp #$07
+		bne lC611
+		jmp level_done
+
+; jumped to by: check_collisions
+lC611:
+		jmp check_enemy_collision
+
+; jumped to by: check_collisions
+level_done:
+		lda #$ff
+		sta items_collected
+		rts 
+
+; jumped to by: irq
+move_enemies:
+		ldx #$00
+		ldy #$00
+; jumped to by: move_enemies
+lC61E:
+		lda enemies + $2, y
+		cmp #$01
+		bne lC628
+		inc vic_sprite_coords + $4, x
+; jumped to by: move_enemies
+lC628:
+		cmp #$02
+		bne lC62F
+		dec vic_sprite_coords + $5, x
+; jumped to by: move_enemies
+lC62F:
+		cmp #$03
+		bne lC636
+		dec vic_sprite_coords + $4, x
+; jumped to by: move_enemies
+lC636:
+		cmp #$00
+		bne lC63D
+		inc vic_sprite_coords + $5, x
+; jumped to by: move_enemies
+lC63D:
+		inc enemy_steps, x
+		lda enemy_steps, x
+		cmp enemies + $4, y
+		bcc lC658
+		lda enemies + $2, y
+		clc 
+		adc #$02
+		and #$03
+		sta enemies + $2, y
+		lda #$00
+		sta enemy_steps, x
+; jumped to by: move_enemies
+lC658:
+		inx 
+		inx 
+		tya 
+		clc 
+		adc #$05
+		tay 
+		cpx #$04
+		bcc lC61E
+		jmp animate_enemies
+
+; sets up the enemies of the level from the enemy table
+init_enemies:
+		lda #$80
+		sta level_pointer
+		lda #$25
+		sta level_pointer + $1
+		ldx level
+; jumped to by: init_enemies
+lC671:
+		beq lC67E
+		lda level_pointer
+		clc 
+		adc #$12
+		jsr add_to_level_pointer
+		jmp lC671
+
+; jumped to by: init_enemies
+lC67E:
+		sei 
+		ldy #$00
+; jumped to by: init_enemies
+lC681:
+		lda (level_pointer), y
+		sta enemies, y
+		iny 
+		cpy #$0a
+		bne lC681
+		lda enemies
+		sta vic_sprite_coords + $4
+		lda enemies + $1
+		sta vic_sprite_coords + $5
+		lda enemies + $3
+		sta sprite_pointers + $2
+		lda enemies + $8
+		sta sprite_pointers + $3
+		lda enemies + $5
+		sta vic_sprite_coords + $6
+		lda enemies + $6
+		sta vic_sprite_coords + $7
+		ldy #$0a
+; jumped to by: init_enemies
+lC6B1:
+		lda (level_pointer), y
+		sta sprite4_coords_base, y
+		iny 
+		cpy #$12
+		bne lC6B1
+		ldy #$00
+; jumped to by: init_enemies
+lC6BD:
+		lda #$95
+		sta sprite_pointers + $4, y
+		iny 
+		cpy #$04
+		bne lC6BD
+		lda #$01
+		sta enemy_steps
+		sta enemy_steps + $2
+		cli 
+		rts 
+
+; read by: animate_enemies
+; written by: animate_enemies
+; modified by: animate_enemies
+animation_divider:
+		.byte	$06
+
+; jumped to by: move_enemies
+animate_enemies:
+		inc animation_divider
+		lda animation_divider
+		cmp #$08
+		bcc lC704
+		lda #$00
+		sta animation_divider
+		ldx #$00
+		ldy #$00
+; jumped to by: animate_enemies
+lC6E5:
+		inc sprite_pointers + $2, x
+		lda enemies + $3, y
+		clc 
+		adc #$03
+		cmp sprite_pointers + $2, x
+		bcs lC6F9
+		lda enemies + $3, y
+		sta sprite_pointers + $2, x
+; jumped to by: animate_enemies
+lC6F9:
+		inx 
+		nop 
+		tya 
+		clc 
+		adc #$05
+		tay 
+		cpx #$02
+		bcc lC6E5
+; jumped to by: animate_enemies
+lC704:
+		jmp kernal_irq
+
+; jumped to by: check_collisions
+check_enemy_collision:
+		lda sprite_collisions
+		and #$02
+		bne lC716
+		lda sprite_collisions
+		and #$01
+		beq lC716
+		rts 
+
+; jumped to by: check_enemy_collision
+lC716:
+		jmp main_loop
+
+; read by: count_air_bonus
+; written by: drain_air_once, count_air_bonus
+air_empty:
+		.byte	$01
+
+; called by: count_air_bonus
+drain_air_once:
+		ldy #$00
+		sty air_divider
+		lda (air_pointer), y
+		clc 
+		adc #$01
+		sta (air_pointer), y
+		cmp #$5f
+		bcc lC738
+		lda air_pointer
+		clc 
+		adc #$28
+		sta air_pointer
+		bcc lC735
+		inc air_pointer + $1
+; jumped to by: drain_air_once
+lC735:
+		lda drain_air_step
+; jumped to by: drain_air_once
+lC738:
+		lda air_pointer + $1
+		cmp #$07
+		bne lC74F
+		lda air_pointer
+		cmp #$b4
+		bcc lC74F
+		lda (air_pointer), y
+		cmp #$61
+		bne lC74F
+		lda #$01
+		sta air_empty
+; jumped to by: drain_air_once
+lC74F:
+		rts 
+
+; turns the air left into score at the end of a level
+count_air_bonus:
+		lda #$00
+		sta air_empty
+; jumped to by: count_air_bonus
+lC755:
+		jsr drain_air_once
+		ldx #$05
+; jumped to by: count_air_bonus
+lC75A:
+		lda screen_ram + $6f, x
+		clc 
+		adc #$01
+		sta screen_ram + $6f, x
+		cmp #$3a
+		bcc lC76F
+		lda #$30
+		sta screen_ram + $6f, x
+		dex 
+		bne lC75A
+; jumped to by: count_air_bonus
+lC76F:
+		lda vic_raster
+		cmp #$ff
+		bne lC76F
+		inc bonus_sound_frequency
+		lda #$00
+		sta voice1_control
+		lda bonus_sound_frequency
+		sta voice1_frequency + $1
+		lda #$04
+		sta voice1_attack_decay
+		lda #$21
+		sta voice1_control
+		lda air_empty
+		beq lC755
+		rts 
+
+; read by: count_air_bonus
+; modified by: count_air_bonus
+bonus_sound_frequency:
+		.byte	$f5
+
+remove_irq:
+		sei 
+		lda #$31
+		sta irq_vector
+		lda #$ea
+		sta irq_vector + $1
+		lda #$01
+		sta cia1_timer_a_control
+		lda #$79
+		sta vic_irq_status
+		lda #$f0
+		sta vic_irq_enable
+		cli 
+		rts 
+
+; called by: init_enemies
+add_to_level_pointer:
+		sta level_pointer
+		bcc lC7B7
+		inc level_pointer + $1
+; jumped to by: add_to_level_pointer
+lC7B7:
+		dex 
+		rts 
+
+unused_c7b9:
+		.byte	$ff, $00, $ff, $00, $ff, $00, $ff
+; the sprite 4-7 coordinates, read through init_enemies' $cffe + $0a, y
+; written by: init_enemies
+sprite4_coords_base = $cffe
+
+.virtual $cfff
+; read by: irq, animate_player, animate_portal
+; written by: irq
+; modified by: irq
+frame_counter:		.byte	?
+; x and y of sprites 0-7
+; read by: find_player_cell, animate_player, check_landing, jump_height, check_conveyor
+; written by: init_player, jump, jump_height, init_enemies
+; modified by: walk, animate_player, jump_sideways, main_loop, fall, jump_sideways_checked, check_conveyor, check_slope, unused_c451, move_enemies
+vic_sprite_coords:
+		.fill	16
+.endv
+
+.virtual $d011
+; written by: install_irq, irq
+vic_control_1:		.byte	?
+; read by: main_loop, count_air_bonus
+; written by: install_irq, irq
+vic_raster:		.byte	?
+.endv
+
+.virtual $d015
+; written by: init_player
+vic_sprite_enable:		.byte	?
+.endv
+
+.virtual $d019
+; written by: install_irq, irq, remove_irq
+vic_irq_status:		.byte	?
+; written by: install_irq, remove_irq
+vic_irq_enable:		.byte	?
+.endv
+
+.virtual $d01c
+; written by: init_player
+vic_sprite_multicolor:		.byte	?
+.endv
+
+.virtual $d01e
+; read by: check_collisions
+vic_sprite_collision:		.byte	?
+.endv
+
+.virtual $d400
+; written by: play_music, count_air_bonus
+voice1_frequency:		.word	?
+; written by: init_music
+voice1_pulse_width:		.word	?
+; written by: play_music, count_air_bonus
+voice1_control:		.byte	?
+; written by: play_music, count_air_bonus
+voice1_attack_decay:		.byte	?
+.endv
+
+.virtual $d407
+; written by: play_music
+voice2_frequency:		.word	?
+; written by: init_music
+voice2_pulse_width:		.word	?
+; written by: play_music
+voice2_control:		.byte	?
+; written by: play_music
+voice2_attack_decay:		.byte	?
+.endv
+
+.virtual $d40e
+; written by: play_music
+voice3_frequency:		.word	?
+; written by: init_music
+voice3_pulse_width:		.word	?
+; written by: play_music
+voice3_control:		.byte	?
+; written by: play_music
+voice3_attack_decay:		.byte	?
+.endv
+
+.virtual $d418
+; read by: init_music
+sid_vol_filter:		.byte	?
+.endv
+
+.virtual $dc00
+; keyboard columns, joystick port 2
+; read by: read_controls
+; written by: read_controls
+cia1_port_a:		.byte	?
+; keyboard rows, joystick port 1
+; read by: read_controls
+cia1_port_b:		.byte	?
+.endv
+
+.virtual $dc0e
+; written by: install_irq, remove_irq
+cia1_timer_a_control:		.byte	?
+.endv
+; the KERNAL interrupt handler: cursor, jiffy clock, keyboard
+; jumped to by: animate_enemies
+kernal_irq = $ea31
+~~~
+vvv

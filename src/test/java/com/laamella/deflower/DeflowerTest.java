@@ -1,744 +1,259 @@
 package com.laamella.deflower;
 
+import com.laamella.mpu6502.Segment;
+import com.laamella.mpu6502.assembler.SourceParser;
+import com.laamella.snippets_test_junit5.core.BasePath;
+import com.laamella.snippets_test_junit5.core.SnippetFileFormat;
+import com.laamella.snippets_test_junit5.core.SnippetTestFactory;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static com.laamella.snippets_test_junit5.core.Snipsertions.snipsert;
+import static com.laamella.snippets_test_junit5.core.TestCaseFilenameFilter.filesWithExtension;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
+/**
+ * Runs the snippet files in {@code src/test/snippets} (issue 0062). Every
+ * snippet has three expectations: what Deflower printed (stdout and stderr
+ * together), the generated {@code .asm} files, and the exported binaries as
+ * hex dumps.
+ * <p>
+ * A short snippet ({@code short/}) holds its whole test: assembly source,
+ * assembled into {@code test.prg}, then the {@code .flo} file, written as
+ * {@code test.flo}. More input parts are more files, each starting with a
+ * {@code ; file: <name>} line; a {@code .prg} one is assembled. Every
+ * generated {@code .asm} must reassemble to the bytes of the {@code .prg}
+ * with its name.
+ * <p>
+ * A large snippet ({@code large/}) names a {@code .flo} file on the test
+ * classpath, for programs too big to keep as source in a snippet.
+ */
 class DeflowerTest {
-    @Test
-    void deflowerSquirm() throws IOException, URISyntaxException {
-        assertDeflowered("squirm");
+    private static final SnippetFileFormat FORMAT = new SnippetFileFormat(
+            ">>>", "<<<\n", "===\n", "^^^\n", "~~~\n", "vvv\n");
+    private static final String FILE_HEADER = "; file: ";
+
+    @TestFactory
+    Stream<DynamicTest> shortSnippets() throws IOException {
+        return new SnippetTestFactory(FORMAT, snippets("short"), filesWithExtension("txt"), DeflowerTest::runShort).stream();
     }
 
-    @Test
-    void deflowerTCMine() throws IOException, URISyntaxException {
-        assertDeflowered("tcmine");
-    }
-
-    @Test
-    void deflowerZwark() throws IOException, URISyntaxException {
-        assertDeflowered("zwark");
-    }
-
-    @Test
-    void deflowerBigMac() throws IOException, URISyntaxException {
-        assertDeflowered("bigmac");
-    }
-
-    @Test
-    void deflower2KRace() throws IOException, URISyntaxException {
-        assertDeflowered("2krace");
-    }
-
-    @Test
-    void deflower3DGolf() throws IOException, URISyntaxException {
-        assertDeflowered("3dgolf");
-    }
-
-    @Test
-    void deflower3DGolfPic() throws IOException, URISyntaxException {
-        assertDeflowered("3dgolfpic");
-    }
-
-    @Test
-    void deflower1nvader() throws IOException, URISyntaxException {
-        assertDeflowered("1nvader");
-    }
-
-    @Test
-    void deflower2KRaceSnapshot() throws IOException, URISyntaxException {
-        assertDeflowered("2krace_snap");
-    }
-
-    @Test
-    void deflower3DGolfSnapshot() throws IOException, URISyntaxException {
-        assertDeflowered("3dgolf_snap");
-    }
-
-    @Test
-    void deflower3DGolfPicSnapshot() throws IOException, URISyntaxException {
-        assertDeflowered("3dgolfpic_snap");
-    }
-
-    @Test
-    void deflower1nvaderSnapshot() throws IOException, URISyntaxException {
-        assertDeflowered("1nvader_snap");
+    @TestFactory
+    Stream<DynamicTest> largeSnippets() throws IOException {
+        return new SnippetTestFactory(FORMAT, snippets("large"), filesWithExtension("txt"), DeflowerTest::runLarge).stream();
     }
 
     /**
-     * Every 'deflower' line starts a fresh decompilation run (issue 0010):
-     * its own memory, its own flow analysis, its own output file named after
-     * the binary it loads. multi.flo loads a.prg then b.prg, each with its
-     * own code entry and (for b.prg) its own extra data annotation, and the
-     * two runs must not leak labels, data areas or memory into each other.
+     * The one case a snippet can't hold: every snippet part ends in a newline.
      */
     @Test
-    void secondDeflowerLineStartsAFreshIndependentRun() throws IOException, URISyntaxException {
-        String flowerFile = "multi/multi.flo";
-        new Deflower().deflower(flowerFile);
-        Path out = outDir(flowerFile);
-        String a = Files.readString(out.resolve("a.asm"));
-        String b = Files.readString(out.resolve("b.asm"));
+    void rejectsMissingTrailingNewline() throws IOException {
+        Path dir = Files.createTempDirectory("deflower");
+        try {
+            Path flowerFile = dir.resolve("test.flo");
+            Files.writeString(flowerFile, "deflower t.prg\n$0800 byte label1");
+            List<String> outputs = deflower(flowerFile);
+            assertThat(outputs.get(0)).contains("Failed to parse");
+            assertThat(outputs.get(1)).isEmpty();
+        } finally {
+            deleteRecursively(dir);
+        }
+    }
 
-        snipsert(a, "src/test/resources/multi/expected-a.asm");
-        snipsert(b, "src/test/resources/multi/expected-b.asm");
+    private static BasePath snippets(String kind) {
+        return BasePath.fromMavenModuleRoot(DeflowerTest.class).inSubDirectory("src/test/snippets/" + kind);
+    }
+
+    private static List<String> runShort(List<String> parts) throws IOException {
+        assertThat(parts).as("input parts: assembly, then the .flo file").hasSizeGreaterThanOrEqualTo(2);
+        Path dir = Files.createTempDirectory("deflower");
+        try {
+            if (!parts.get(0).isBlank()) {
+                writeFile(dir, "test.prg", parts.get(0));
+            }
+            Files.writeString(dir.resolve("test.flo"), parts.get(1));
+            for (String part : parts.subList(2, parts.size())) {
+                assertThat(part).as("extra input part").startsWith(FILE_HEADER);
+                int endOfHeader = part.indexOf('\n');
+                writeFile(dir, part.substring(FILE_HEADER.length(), endOfHeader).trim(), part.substring(endOfHeader + 1));
+            }
+            List<String> outputs = deflower(dir.resolve("test.flo"));
+            assertReassembles(dir);
+            return outputs;
+        } finally {
+            deleteRecursively(dir);
+        }
+    }
+
+    private static List<String> runLarge(List<String> parts) throws IOException, URISyntaxException {
+        assertThat(parts).as("input: one .flo path on the test classpath").hasSize(1);
+        String flowerFile = parts.get(0).trim();
+        return deflower(Paths.get(DeflowerTest.class.getResource("/" + flowerFile).toURI()));
     }
 
     /**
-     * JMP (indirect)'s operand is where the destination address is
-     * stored, not the destination (issue
-     * 0011): the fixture's entry does JMP ($C010), where $C010-$C011 holds
-     * $C020, the real target. The analyser must follow $C020 (and decode
-     * the LDA/RTS there), not try to decode the stored address as code.
+     * Writes a file for a short snippet: a .prg is assembled from the text,
+     * anything else is written as it is.
      */
-    @Test
-    void followsIndirectJmpTarget() throws IOException, URISyntaxException {
-        assertDeflowered("indirectjmp");
+    private static void writeFile(Path dir, String name, String text) throws IOException {
+        Path file = dir.resolve(name);
+        if (name.endsWith(".prg")) {
+            Files.write(file, prg(SourceParser.assemble(text, fileName -> null)));
+        } else {
+            Files.writeString(file, text);
+        }
     }
 
     /**
-     * Issue 0076: each label lists the code that calls, jumps to, reads,
-     * writes or modifies it, named by the nearest label before it.
+     * The segments as one .prg: the load address, then everything from the
+     * lowest to the highest byte, with zeroes in the gaps.
      */
-    @Test
-    void printsCrossReferences() throws IOException, URISyntaxException {
-        assertDeflowered("xref");
+    private static byte[] prg(List<Segment> segments) {
+        int start = segments.stream().mapToInt(s -> s.loadAddress).min().orElse(0);
+        int end = segments.stream().mapToInt(s -> s.loadAddress + s.data.length).max().orElse(0);
+        byte[] prg = new byte[2 + end - start];
+        prg[0] = (byte) start;
+        prg[1] = (byte) (start >> 8);
+        for (Segment segment : segments) {
+            for (int i = 0; i < segment.data.length; i++) {
+                prg[2 + segment.loadAddress - start + i] = (byte) segment.data[i];
+            }
+        }
+        return prg;
     }
 
     /**
-     * Issue 0084: a cross-reference names the routine its instruction is
-     * in, skipping the local labels of branch and jmp targets on the way.
-     * A jsr target is a routine even when a branch reaches it too.
+     * Runs Deflower on the .flo file and returns the three outputs.
      */
-    @Test
-    void crossReferencesNameTheRoutine() throws IOException, URISyntaxException {
-        assertDeflowered("routines");
-    }
-
-    /**
-     * Issue 0067: an operand pointing at a labelled byte inside an
-     * unlabelled instruction prints that label, whether the analysis or
-     * the .flo file put it there. Without one, it falls back to "label +
-     * offset" from the instruction's own label.
-     */
-    @Test
-    void operandInsideInstructionUsesLabelThere() throws IOException, URISyntaxException {
-        assertDeflowered("operandlabel");
-    }
-
-    /**
-     * Issue 0065: memory the .prg doesn't load is unknown, not zeros. A
-     * jsr, a branch or a .flo code entry there gets a label but decodes
-     * nothing, and an instruction running past the loaded end isn't
-     * decoded either.
-     */
-    @Test
-    void traceStopsAtMemoryTheImageDoesNotContain() throws IOException, URISyntaxException {
-        assertDeflowered("unloaded");
-    }
-
-    /**
-     * Issue 0078: a local include, which includes the built-in c64.flo.
-     * The program's own lines win over included ones, and only the
-     * included names the code uses are printed.
-     */
-    @Test
-    void includesSharedDefinitions() throws IOException, URISyntaxException {
-        assertDeflowered("include");
-    }
-
-    /**
-     * AssemblyFileFormat.print(DataArea, ...) used to only handle BYTE,
-     * silently skipping WORD/DWORD/CHAR areas (issue 0002). Covers all three:
-     * two WORDs, one DWORD, and three CHARs (printed as one .text
-     * string, issue 0039).
-     */
-    @Test
-    void emitsWordDwordAndCharData() throws IOException, URISyntaxException {
-        assertDeflowered("datatypes");
-    }
-
-    /**
-     * Issue 0041: an addr line prints .addr with the label of the address
-     * each element holds, or the hex address when it has none.
-     */
-    @Test
-    void emitsUserDeclaredAddrWithLabels() throws IOException, URISyntaxException {
-        assertDeflowered("addrtype");
-    }
-
-    /**
-     * Issue 0037: sbyte, sword and sdword print their two's-complement
-     * value under 64tass's .char, .sint and .dint.
-     */
-    @Test
-    void emitsSignedNumbers() throws IOException, URISyntaxException {
-        assertDeflowered("signed");
-    }
-
-    /**
-     * Issue 0064: long and slong are 24-bit, printed under 64tass's .long
-     * (hex) and .lint (signed decimal).
-     */
-    @Test
-    void emitsLongs() throws IOException, URISyntaxException {
-        assertDeflowered("long");
-    }
-
-    /**
-     * registerArea collects an error when one area overwrites a genuinely
-     * different one (Subject.errors), and Deflower refuses to write an
-     * (illegal) asm file for a subject that has any (issue 0018).
-     * overlap.flo declares a 2-byte word at $C000, then a byte at $C001
-     * landing inside it: the second annotation disagrees with the first, so
-     * it must be reported (naming both areas and the address) on stderr,
-     * and overlap.asm must not be written.
-     */
-    @Test
-    void reportsAreaConflictAndSkipsOutputOnOverlap() throws IOException, URISyntaxException {
-        String flowerFile = "overlap/overlap.flo";
-        ByteArrayOutputStream capturedErr = new ByteArrayOutputStream();
+    private static List<String> deflower(Path flowerFile) throws IOException {
+        ByteArrayOutputStream printed = new ByteArrayOutputStream();
+        PrintStream originalOut = System.out;
         PrintStream originalErr = System.err;
-        System.setErr(new PrintStream(capturedErr));
+        PrintStream capture = new PrintStream(printed, true, UTF_8);
+        System.setOut(capture);
+        System.setErr(capture);
         try {
             new Deflower().deflower(flowerFile);
         } finally {
+            System.setOut(originalOut);
             System.setErr(originalErr);
         }
-        assertThat(capturedErr.toString())
-                .contains("Area conflict at $c001")
-                .contains("byte", "word")
-                .contains("Errors detected");
-        assertThat(isEmpty(outDir(flowerFile))).as("output directory for a subject with an area conflict").isTrue();
-    }
-
-    /**
-     * Issue 0043: one label defined at two addresses would make the
-     * assembler reject the output, or resolve references to the wrong
-     * address, so it is reported and no output is written.
-     */
-    @Test
-    void reportsDuplicateLabelAndSkipsOutput() throws IOException, URISyntaxException {
-        String flowerFile = "duplicatelabel/duplicatelabel.flo";
-        ByteArrayOutputStream capturedErr = new ByteArrayOutputStream();
-        PrintStream originalErr = System.err;
-        System.setErr(new PrintStream(capturedErr));
-        try {
-            new Deflower().deflower(flowerFile);
-        } finally {
-            System.setErr(originalErr);
+        Path out = flowerFile.getParent().resolve("out");
+        List<Path> asmFiles = outFiles(out, true);
+        StringBuilder asm = new StringBuilder();
+        for (Path file : asmFiles) {
+            if (asmFiles.size() > 1) {
+                asm.append("--- ").append(file.getFileName()).append('\n');
+            }
+            asm.append(Files.readString(file));
         }
-        assertThat(capturedErr.toString())
-                .contains("Duplicate label twin at $c001, already defined at $c000")
-                .contains("Errors detected");
-        assertThat(isEmpty(outDir(flowerFile))).as("output directory for a subject with a duplicate label").isTrue();
-    }
-
-    /**
-     * Issue 0028: a single address without a type covers no memory, so
-     * `virtual` on it would do nothing; it is reported instead.
-     */
-    @Test
-    void reportsVirtualOnPlainAddress() throws IOException, URISyntaxException {
-        String flowerFile = "virtualaddress/virtualaddress.flo";
-        ByteArrayOutputStream capturedErr = new ByteArrayOutputStream();
-        PrintStream originalErr = System.err;
-        System.setErr(new PrintStream(capturedErr));
-        try {
-            new Deflower().deflower(flowerFile);
-        } finally {
-            System.setErr(originalErr);
+        StringBuilder binaries = new StringBuilder();
+        for (Path file : outFiles(out, false)) {
+            binaries.append("--- ").append(file.getFileName()).append('\n').append(hexDump(Files.readAllBytes(file)));
         }
-        assertThat(capturedErr.toString())
-                .contains("Virtual address $d020 needs a type or a range")
-                .contains("Errors detected");
-        assertThat(isEmpty(outDir(flowerFile))).as("output directory for a subject with a virtual plain address").isTrue();
+        return List.of(endLine(printed.toString(UTF_8)), endLine(asm.toString()), binaries.toString());
     }
 
     /**
-     * Issue 0014: a .prg whose load address plus length runs past $FFFF is
-     * rejected with a message naming the file and load address, instead of
-     * an ArrayIndexOutOfBoundsException.
+     * Ends the text with a newline, so the snippet separator after it
+     * starts a line of its own.
      */
-    @Test
-    void rejectsPrgRunningPastEndOfMemory() throws IOException, URISyntaxException {
-        String flowerFile = "toolong/toolong.flo";
-        ByteArrayOutputStream capturedErr = new ByteArrayOutputStream();
-        PrintStream originalErr = System.err;
-        System.setErr(new PrintStream(capturedErr));
-        try {
-            new Deflower().deflower(flowerFile);
-        } finally {
-            System.setErr(originalErr);
+    private static String endLine(String text) {
+        return text.isEmpty() || text.endsWith("\n") ? text : text + "\n";
+    }
+
+    private static List<Path> outFiles(Path out, boolean asm) throws IOException {
+        if (!Files.exists(out)) {
+            return List.of();
         }
-        assertThat(capturedErr.toString())
-                .contains("toolong.prg: 32 bytes loaded at $fff0 run past $ffff");
-        assertThat(isEmpty(outDir(flowerFile))).as("output directory for an oversized prg").isTrue();
-    }
-
-    /**
-     * Areas that describe themselves identically (same address, size and
-     * kind) are a redundant re-annotation, not a disagreement, so they must
-     * not be reported as a conflict.
-     */
-    @Test
-    void doesNotLogIdenticalReRegistration() throws IOException, URISyntaxException {
-        ByteArrayOutputStream capturedErr = new ByteArrayOutputStream();
-        PrintStream originalErr = System.err;
-        System.setErr(new PrintStream(capturedErr));
-        try {
-            new Deflower().deflower("datatypes/datatypes.flo");
-        } finally {
-            System.setErr(originalErr);
+        try (Stream<Path> files = Files.list(out)) {
+            return files
+                    .filter(file -> file.toString().endsWith(".asm") == asm)
+                    .sorted()
+                    .collect(Collectors.toList());
         }
-        assertThat(capturedErr.toString()).doesNotContain("Area conflict");
     }
 
-    /**
-     * `byte[48] screen` at $400 registers 48 separate one-element
-     * DataAreas (issue 0024), so an operand pointing into the middle of
-     * the array, e.g. `STA $422` (offset $22), must still resolve against
-     * the array's label - "screen + $22" - instead of falling back to a
-     * bare hex address just because that particular element has no label
-     * of its own.
-     */
-    @Test
-    void resolvesAnOperandInsideALabeledArrayToLabelPlusOffset() throws IOException, URISyntaxException {
-        assertDeflowered("blockoffset");
-    }
-
-    /**
-     * A 3-byte LDA_ABS at $C000 would run into a single-byte DataArea
-     * declared at $C002 (its last operand byte), so the entry point must
-     * not be disassembled at all (issue 0023) - the mirror case of jumping
-     * straight into a non-code area. guard's .BYTE must come through
-     * untouched, and nothing gets printed as code at $C000/$C001.
-     */
-    @Test
-    void doesNotDisassembleIntoAnExistingArea() throws IOException, URISyntaxException {
-        assertDeflowered("partialoverlap");
-    }
-
-    /**
-     * A standalone ';'/'#' comment line attaches to the address of the
-     * annotation line that follows it (issue 0003): it's printed as a
-     * "; ..." line right above the label/data it documents. Consecutive
-     * comment lines attach as one multi-line comment.
-     */
-    @Test
-    void carriesCommentsToOutput() throws IOException, URISyntaxException {
-        assertDeflowered("comments");
-    }
-
-    /**
-     * A label landing on an address that merely continues a contiguous
-     * same-type data run (issue 0027) must not fragment the run into
-     * separate, blank-line-separated .BYTE runs: the dump keeps running
-     * as one run, with each label on its own line right above the data
-     * that continues beneath it.
-     */
-    @Test
-    void labelInsideDataRunDoesNotFragmentIt() throws IOException, URISyntaxException {
-        assertDeflowered("midblocklabel");
-    }
-
-    /**
-     * A line with no explicit type keyword is a placeholder (issue 0031):
-     * narrowing it later with a more specific annotation - a word, or a
-     * code entry point - must not be reported as an area conflict, and
-     * must not stop the subject's output from being written. The carved
-     * word and the carved code entry (one RTS) both take over cleanly in
-     * the middle of what's otherwise still a plain placeholder dump.
-     */
-    @Test
-    void carvingASpecificTypeOutOfAPlaceholderDoesNotConflict() throws IOException, URISyntaxException {
-        ByteArrayOutputStream capturedErr = new ByteArrayOutputStream();
-        PrintStream originalErr = System.err;
-        System.setErr(new PrintStream(capturedErr));
-        try {
-            assertDeflowered("narrowplaceholder");
-        } finally {
-            System.setErr(originalErr);
+    private static String hexDump(byte[] bytes) {
+        StringBuilder dump = new StringBuilder();
+        for (int line = 0; line < bytes.length; line += 16) {
+            dump.append(String.format("%04x:", line));
+            for (int i = line; i < Math.min(line + 16, bytes.length); i++) {
+                dump.append(String.format(" %02x", bytes[i] & 0xff));
+            }
+            dump.append('\n');
         }
-        assertThat(capturedErr.toString()).doesNotContain("Area conflict");
+        return dump.toString();
     }
 
     /**
-     * Issue 0033: each array element now carries its own label/offset
-     * baked in at creation, instead of resolving it by scanning backward
-     * through neighboring MemoryLocations for the nearest label. my_array
-     * spans $C000-$C00F as an unnamed-per-element placeholder; carving a
-     * word (mid_ptr) out of its middle ($C006-$C007, issue 0031's
-     * narrowing) must not orphan the elements on either side of the cut -
-     * $C005 (before) and $C008 (after) must still resolve to "my_array +
-     * $5" / "my_array + $8" respectively, and $C006 itself to "mid_ptr",
-     * regardless of what now sits between them.
+     * Every byte an out/X.asm assembles to lies inside X.prg and equals the
+     * byte there. Bytes the .asm leaves out, like memory the tracer never
+     * reached, aren't checked.
      */
-    @Test
-    void arrayElementsOnBothSidesOfACarvedOutMiddleStillResolveToTheArrayLabel() throws IOException, URISyntaxException {
-        assertDeflowered("partialarraycarve");
-    }
-
-    /**
-     * Issues 0045/0046: a `virtual` area's contents are not dumped; it
-     * becomes a .virtual reservation keeping its labels, type and size, and
-     * code referencing it - including an element inside a virtual array -
-     * still resolves by name.
-     */
-    @Test
-    void virtualAreaBecomesVirtualBlockInsteadOfData() throws IOException, URISyntaxException {
-        assertDeflowered("virtualarea");
-    }
-
-    /**
-     * Issue 0028: a label inside a declared array or a word is printed as
-     * an address define after it, so the array's dump stays unbroken.
-     */
-    @Test
-    void labelInsideArrayBecomesAddressDefine() throws IOException, URISyntaxException {
-        assertDeflowered("arraylabel");
-    }
-
-    /**
-     * Issue 0055: a JSR into a placeholder range is traced, and the rest
-     * of the range still prints as placeholder bytes.
-     */
-    @Test
-    void jumpIntoPlaceholderIsTraced() throws IOException, URISyntaxException {
-        assertDeflowered("placeholderjump");
-    }
-
-    /**
-     * Issue 0053: an absolute-mode operand below $100, label or number,
-     * carries `@w`, so 64tass doesn't shorten it to zero page. The same
-     * operands in zero-page form stay without it.
-     */
-    @Test
-    void absoluteOperandBelow100KeepsAbsoluteForm() throws IOException, URISyntaxException {
-        assertDeflowered("absolutezeropage");
-    }
-
-    /**
-     * Issue 0039: consecutive CHAR values print as `.text` lines, printable
-     * characters sharing a double-quoted literal and anything else
-     * (control codes, double quotes) as hex items, wrapping every 32
-     * values. Issue 0047: a null-terminated string ends with a `.null`
-     * line, and a length-prefixed one prints as `.ptext`.
-     */
-    @Test
-    void charRunsBecomeTextStrings() throws IOException, URISyntaxException {
-        assertDeflowered("strings");
-    }
-
-    /**
-     * Issue 0040: each declared char array is read as ASCII or as
-     * Commodore screen codes, whichever has more uppercase letters in it
-     * (a tie keeps the encoding in effect), and the output switches 64tass's
-     * `.enc` wherever that changes - including between two adjacent arrays
-     * with no label in between.
-     */
-    @Test
-    void charArraysPickAsciiOrScreenCodeEncoding() throws IOException, URISyntaxException {
-        assertDeflowered("screencodes");
-    }
-
-    /**
-     * Issue 0044: an array size can be hex, and can use * and + (with *
-     * binding tighter), matching the plain [n] form. 1+2*2 must be 5
-     * elements, not 6.
-     */
-    @Test
-    void arraySizeAcceptsHexAndArithmetic() throws IOException, URISyntaxException {
-        assertDeflowered("arraysize");
-    }
-
-    /**
-     * Issue 0044: a size of 0, from [...] or from a range too short to hold
-     * one element ($c006-$c007 is one byte: the end is exclusive), is
-     * reported as an error, and no output is written for that subject.
-     */
-    @Test
-    void reportsZeroSizeAndSkipsOutput() throws IOException, URISyntaxException {
-        String flowerFile = "zerosize/zerosize.flo";
-        ByteArrayOutputStream capturedErr = new ByteArrayOutputStream();
-        PrintStream originalErr = System.err;
-        System.setErr(new PrintStream(capturedErr));
-        try {
-            new Deflower().deflower(flowerFile);
-        } finally {
-            System.setErr(originalErr);
+    private static void assertReassembles(Path dir) throws IOException {
+        Path out = dir.resolve("out");
+        for (Path asmFile : outFiles(out, true)) {
+            String baseName = asmFile.getFileName().toString().replaceFirst("\\.asm$", "");
+            Path prgFile = dir.resolve(baseName + ".prg");
+            if (!Files.exists(prgFile)) {
+                continue;
+            }
+            byte[] prg = Files.readAllBytes(prgFile);
+            int load = (prg[0] & 0xff) | (prg[1] & 0xff) << 8;
+            List<Segment> segments;
+            try {
+                segments = SourceParser.assemble(Files.readString(asmFile), fileName -> {
+                    try {
+                        return Files.readAllBytes(out.resolve(fileName));
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                });
+            } catch (RuntimeException e) {
+                throw new AssertionError(asmFile.getFileName() + " doesn't reassemble: " + e.getMessage(), e);
+            }
+            List<String> differences = new ArrayList<>();
+            for (Segment segment : segments) {
+                for (int i = 0; i < segment.data.length; i++) {
+                    int address = segment.loadAddress + i;
+                    int offset = 2 + address - load;
+                    if (offset < 2 || offset >= prg.length) {
+                        differences.add(String.format("$%04x: %02x, outside %s", address, segment.data[i], prgFile.getFileName()));
+                    } else if ((prg[offset] & 0xff) != segment.data[i]) {
+                        differences.add(String.format("$%04x: %02x, should be %02x", address, segment.data[i], prg[offset] & 0xff));
+                    }
+                }
+            }
+            if (!differences.isEmpty()) {
+                String shown = String.join("\n", differences.subList(0, Math.min(10, differences.size())));
+                String more = differences.size() > 10 ? String.format("%n... %d more", differences.size() - 10) : "";
+                fail("%s doesn't reassemble to %s:%n%s%s", asmFile.getFileName(), prgFile.getFileName(), shown, more);
+            }
         }
-        assertThat(capturedErr.toString())
-                .contains("Zero-size byte at $c000")
-                .contains("Zero-size word at $c006")
-                .contains("Errors detected");
-        assertThat(isEmpty(outDir(flowerFile))).as("output directory for a subject with a zero size").isTrue();
     }
 
-    /**
-     * Issue 0044: arithmetic lives only inside [ ]; the top-level n*m and
-     * n+m forms are gone.
-     */
-    @Test
-    void rejectsTopLevelMultiplier() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/top-level-multiplier.flo");
-    }
-
-    @Test
-    void rejectsTopLevelPlus() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/top-level-plus.flo");
-    }
-
-    /**
-     * Issue 0050: an annotation line has a fixed shape - address or
-     * range, then optionally virtual, a type and a label, in that order
-     * and each at most once - so anything else is a parse error instead
-     * of silently keeping the last value or swallowing a stray word.
-     */
-    @Test
-    void rejectsTwoLabelsOnOneLine() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/two-labels.flo");
-    }
-
-    @Test
-    void rejectsTwoTypesOnOneLine() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/two-types.flo");
-    }
-
-    @Test
-    void rejectsTwoAddressesOnOneLine() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/two-addresses.flo");
-    }
-
-    @Test
-    void rejectsTypeAfterLabel() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/type-after-label.flo");
-    }
-
-    @Test
-    void rejectsStrayWord() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/stray-word.flo");
-    }
-
-    @Test
-    void rejectsLineWithoutAddress() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/no-address.flo");
-    }
-
-    @Test
-    void rejectsUnrecognizedTokens() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/garbage-tokens.flo");
-    }
-
-    @Test
-    void rejectsMissingTrailingNewline() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/missing-trailing-newline.flo");
-    }
-
-    /**
-     * Issue 0035: inside a { } block, every address is an offset from the
-     * opening line's address, and 'virtual' on the opening line applies to
-     * every line inside. The output is the same as with absolute addresses.
-     */
-    @Test
-    void resolvesBlockOffsetsFromTheBase() throws IOException, URISyntaxException {
-        assertDeflowered("block");
-    }
-
-    @Test
-    void rejectsLabelOnBlockOpeningLine() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/block-label.flo", "line 2: a block's opening line takes only an address and 'virtual'");
-    }
-
-    @Test
-    void rejectsTypeOnBlockOpeningLine() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/block-type.flo", "line 2: a block's opening line takes only an address and 'virtual'");
-    }
-
-    @Test
-    void rejectsRangeOnBlockOpeningLine() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/block-range.flo", "line 2: a block's opening line takes only an address and 'virtual'");
-    }
-
-    @Test
-    void rejectsNestedBlock() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/block-nested.flo", "line 3: blocks can't be nested (the open one starts at line 2)");
-    }
-
-    @Test
-    void rejectsBlockNotClosedAtEndOfFile() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/block-unclosed.flo", "line 2: block is not closed with '}'");
-    }
-
-    @Test
-    void rejectsBlockNotClosedBeforeNextDeflowerLine() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/block-unclosed-before-deflower.flo", "line 2: block is not closed with '}'");
-    }
-
-    @Test
-    void rejectsCloseWithoutOpenBlock() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/block-unopened.flo", "line 3: '}' without an open block");
-    }
-
-    @Test
-    void rejectsBlockOffsetPastFFFF() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/block-past-ffff.flo", "line 3: the block's base plus this offset runs past $ffff");
-    }
-
-    /**
-     * Issue 0022: a data line with "export <name>.bin" writes its bytes to
-     * out/<name>.bin, or to out/<name>.prg after its start address, and
-     * the assembly includes that file with .binary instead of printing
-     * the data. Labels inside an exported region
-     * become defines after it, and operands into it still name it.
-     */
-    @Test
-    void exportsRegionToBinaryFile() throws IOException, URISyntaxException {
-        assertDeflowered("export");
-        Path out = outDir("export/export.flo");
-        byte[] prg = Files.readAllBytes(Paths.get(DeflowerTest.class.getResource("/export/export.prg").toURI()));
-        assertThat(Files.readAllBytes(out.resolve("font.bin"))).isEqualTo(Arrays.copyOfRange(prg, 2 + 0x20, 2 + 0x30));
-        assertThat(Files.readAllBytes(out.resolve("table.prg"))).isEqualTo(new byte[]{0x30, (byte) 0xc0, 0x34, 0x12, 0x00, (byte) 0xc0});
-    }
-
-    @Test
-    void rejectsExportOfCode() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/export-code.flo", "line 2: code can't be exported");
-    }
-
-    @Test
-    void rejectsExportWithoutBinOrPrgExtension() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/export-extension.flo", "line 2: export font.asm needs a file name ending in .bin or .prg");
-    }
-
-    @Test
-    void rejectsExportOfPlainAddress() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/export-address.flo", "line 2: export needs a type or a range");
-    }
-
-    @Test
-    void rejectsSameExportFileTwice() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/export-duplicate.flo", "line 4: font.bin is already exported on line 2");
-    }
-
-    /**
-     * Issue 0022: an exported region must hold bytes the image loaded.
-     */
-    @Test
-    void reportsExportOfUnloadedMemory() throws IOException, URISyntaxException {
-        String flowerFile = "exportunloaded/exportunloaded.flo";
-        ByteArrayOutputStream capturedErr = new ByteArrayOutputStream();
-        PrintStream originalErr = System.err;
-        System.setErr(new PrintStream(capturedErr));
-        try {
-            new Deflower().deflower(flowerFile);
-        } finally {
-            System.setErr(originalErr);
+    private static void deleteRecursively(Path dir) throws IOException {
+        try (Stream<Path> files = Files.walk(dir)) {
+            for (Path file : files.sorted(Comparator.reverseOrder()).collect(Collectors.toList())) {
+                Files.delete(file);
+            }
         }
-        assertThat(capturedErr.toString())
-                .contains("Exported table.bin at $c030 holds memory the image doesn't load, at $c036")
-                .contains("Errors detected");
-        assertThat(isEmpty(outDir(flowerFile))).as("output directory for an export of unloaded memory").isTrue();
-    }
-
-    /**
-     * Issue 0078: an include that leads back to a file being read, a file
-     * that can't be found and an included file that starts a run of its
-     * own are reported, and nothing is written.
-     */
-    @Test
-    void rejectsIncludeCycle() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/include-cycle.flo", "line 1: include cycle: invalid/include-cycle.flo -> include_cycle_a.flo -> include_cycle_b.flo -> include_cycle_a.flo");
-    }
-
-    @Test
-    void rejectsMissingInclude() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/include-missing.flo", "line 2: no file no_such_file.flo to include");
-    }
-
-    @Test
-    void rejectsRunInIncludedFile() throws IOException, URISyntaxException {
-        assertFailsToParse("invalid/include-run.flo", "line 1: an included file can't start a run");
-    }
-
-    /**
-     * Issue 0017: the whole .flo file is parsed before any memory image is
-     * loaded or annotated, so an annotation line before the first
-     * 'deflower' line is reported up front (no NullPointerException, as in
-     * issue 0009) and nothing is written.
-     */
-    @Test
-    void rejectsAnnotationBeforeDeflowerLine() throws IOException, URISyntaxException {
-        String flowerFile = "invalid/annotation-before-deflower.flo";
-        ByteArrayOutputStream capturedErr = new ByteArrayOutputStream();
-        PrintStream originalErr = System.err;
-        System.setErr(new PrintStream(capturedErr));
-        try {
-            new Deflower().deflower(flowerFile);
-        } finally {
-            System.setErr(originalErr);
-        }
-        assertThat(capturedErr.toString()).contains("Start the file with a 'deflower <file>' line.");
-        assertThat(isEmpty(outDir(flowerFile))).as("output directory for an annotation before 'deflower'").isTrue();
-    }
-
-    /**
-     * deflower() catches a parse failure, logs it to stderr, and returns
-     * without writing any output (issue 0021) rather than throwing, so a
-     * malformed .flo file is checked by its effects: an error logged to
-     * stderr, and nothing written to its output directory.
-     */
-    private void assertFailsToParse(String flowerFile) throws IOException, URISyntaxException {
-        assertFailsToParse(flowerFile, "Failed to parse");
-    }
-
-    private void assertFailsToParse(String flowerFile, String expectedError) throws IOException, URISyntaxException {
-        ByteArrayOutputStream capturedErr = new ByteArrayOutputStream();
-        PrintStream originalErr = System.err;
-        System.setErr(new PrintStream(capturedErr));
-        try {
-            new Deflower().deflower(flowerFile);
-        } finally {
-            System.setErr(originalErr);
-        }
-        assertThat(capturedErr.toString()).contains("Failed to parse").contains(expectedError);
-        assertThat(isEmpty(outDir(flowerFile))).as("output directory for a file that failed to parse").isTrue();
-    }
-
-    /**
-     * Runs the pipeline on src/test/resources/<fixture>/<fixture>.flo and
-     * compares the generated assembly with the versioned expectation at
-     * src/test/resources/<fixture>/expected.asm. If the expectation file
-     * doesn't exist yet, it's created from the actual output and the test
-     * fails so the new expectation gets reviewed before it's trusted.
-     *
-     * Each fixture's .flo has a single 'deflower' line for a binary named
-     * after the fixture itself, so its output is named <fixture>.asm (every
-     * 'deflower' line's run is named after the binary it loads).
-     */
-    private void assertDeflowered(String fixture) throws IOException, URISyntaxException {
-        String flowerFile = fixture + "/" + fixture + ".flo";
-        new Deflower().deflower(flowerFile);
-        String actual = Files.readString(outDir(flowerFile).resolve(fixture + ".asm"));
-        snipsert(actual, "src/test/resources/" + fixture + "/expected.asm");
-    }
-
-    private Path outDir(String flowerFile) throws URISyntaxException {
-        Path floPath = Paths.get(DeflowerTest.class.getResource("/" + flowerFile).toURI());
-        return floPath.getParent().resolve("out");
-    }
-
-    private boolean isEmpty(Path dir) throws IOException {
-        return !Files.exists(dir) || Files.list(dir).findAny().isEmpty();
     }
 }

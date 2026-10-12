@@ -1,0 +1,34 @@
+>>> A 3-byte LDA_ABS at $C000 would run into a single-byte DataArea
+declared at $C002 (its last operand byte), so the entry point must
+not be disassembled at all (issue 0023) - the mirror case of jumping
+straight into a non-code area. guard's .BYTE must come through
+untouched, and nothing gets printed as code at $C000/$C001. <<<
+entry = $c000
+*=$c002
+
+guard:
+		.byte	$42
+; Not in the disassembly:
+*=$c000
+		.byte	$ad, $34
+===
+deflower test.prg
+$c002 byte guard
+$c000 code entry
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Marking area of 1 byte at C002 "guard"
+Will disassemble from C000
+Starting flow analysis.
+Instruction at $c000 would run into $c002 1 byte, not disassembling
+Writing out/test.asm
+~~~
+entry = $c000
+*=$c002
+
+guard:
+		.byte	$42
+~~~
+vvv

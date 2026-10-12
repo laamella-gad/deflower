@@ -1,0 +1,46 @@
+>>> A standalone ';'/'#' comment line attaches to the address of the
+annotation line that follows it (issue 0003): it's printed as a
+"; ..." line right above the label/data it documents. Consecutive
+comment lines attach as one multi-line comment. <<<
+
+*=$c000
+
+; a lone comment
+val:
+		.byte	$42
+
+; entry point
+; second line of same comment
+entry_point:
+		lda #$01
+		rts 
+===
+deflower test.prg
+; a lone comment
+$c000 byte val
+; entry point
+; second line of same comment
+$c001 code entry_point
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Marking area of 1 byte at C000 "val"
+Will disassemble from C001
+Starting flow analysis.
+Writing out/test.asm
+~~~
+
+*=$c000
+
+; a lone comment
+val:
+		.byte	$42
+
+; entry point
+; second line of same comment
+entry_point:
+		lda #$01
+		rts 
+~~~
+vvv

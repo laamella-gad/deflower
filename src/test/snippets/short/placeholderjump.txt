@@ -1,0 +1,40 @@
+>>> Issue 0055: a JSR into a placeholder range is traced, and the rest
+of the range still prints as placeholder bytes. <<<
+
+*=$c000
+
+entry:
+		jsr blob
+		rts 
+
+blob:
+		lda #$01
+		rts 
+		.byte	$11, $22
+===
+deflower test.prg
+$c000 code entry
+$c004-$c009 blob
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Will disassemble from C000
+Marking area of 5 unknown at C004 "blob"
+Starting flow analysis.
+Writing out/test.asm
+~~~
+
+*=$c000
+
+entry:
+		jsr blob
+		rts 
+
+; called by: entry
+blob:
+		lda #$01
+		rts 
+		.byte	$11, $22
+~~~
+vvv

@@ -1,7 +1,0 @@
-deflower virtualarea.prg
-; VIC-II border colour
-$d020 virtual byte border_color
-$d800 virtual byte[4] color_ram
-$d801 virtual byte second_color
-$00fb virtual word ptr
-$c000 code entry

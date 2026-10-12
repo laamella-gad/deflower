@@ -1,0 +1,10 @@
+>>> Rejects missing include. <<<
+===
+deflower t.prg
+include no_such_file.flo
+^^^
+Failed to parse test.flo:
+line 2: no file no_such_file.flo to include
+~~~
+~~~
+vvv

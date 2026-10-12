@@ -1,0 +1,40 @@
+>>> `byte[48] screen` at $400 registers 48 separate one-element
+DataAreas (issue 0024), so an operand pointing into the middle of
+the array, e.g. `STA $422` (offset $22), must still resolve against
+the array's label - "screen + $22" - instead of falling back to a
+bare hex address just because that particular element has no label
+of its own. <<<
+
+screen = $0400
+*=$c000
+
+entry:
+		sta screen + $22
+		rts 
+===
+deflower test.prg
+$400 virtual byte[48] screen
+$c000 code entry
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Marking area of 48 byte at 400 "screen"
+Will disassemble from C000
+Starting flow analysis.
+Writing out/test.asm
+~~~
+
+.virtual $0400
+; written by: entry
+screen:
+		.fill	48
+.endv
+
+*=$c000
+
+entry:
+		sta screen + $22
+		rts 
+~~~
+vvv

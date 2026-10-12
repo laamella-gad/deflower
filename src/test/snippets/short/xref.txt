@@ -1,0 +1,156 @@
+>>> Issue 0076: each label lists the code that calls, jumps to, reads,
+writes or modifies it, named by the nearest label before it. <<<
+
+.virtual $0002
+counter:		.byte	?
+.endv
+
+.virtual $00fb
+pointer:		.word	?
+.endv
+
+*=$c000
+
+entry:
+		jsr sub
+		jsr sub
+		jmp lC009
+
+lC009:
+		lda value
+		sta value
+		inc value
+		lda table + $2, x
+		lda (pointer), y
+		sta (pointer), y
+		sta border
+		jsr chrout
+lC01F:
+		dex 
+		bne lC01F
+		jmp (aC02B)
+
+sub:
+		inc counter
+		beq lC009
+		rts 
+
+lC02A:
+		rts 
+
+aC02B:
+		.addr	lC02A
+
+value:
+		.byte	$00
+table:
+		.byte	$01, $02, $03, $04
+
+; reached from no label: listed by address
+		sta value
+		rts 
+border = $d020
+
+.virtual $ffd2
+chrout:
+		.fill	3
+.endv
+===
+deflower test.prg
+$02 virtual byte counter
+$fb virtual word pointer
+$c000 code entry
+$c025 sub
+$c02d byte value
+$c02e byte[4] table
+; reached from no label: listed by address
+$c032 code
+$d020 border
+$ffd2 virtual byte[3] chrout
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Marking area of 1 byte at 2 "counter"
+Marking area of 1 word at FB "pointer"
+Will disassemble from C000
+Marking area of 1 byte at C02D "value"
+Marking area of 4 byte at C02E "table"
+Will disassemble from C032
+Marking area of 3 byte at FFD2 "chrout"
+Starting flow analysis.
+Unnamed target: lC009 from address $c027
+Unnamed target: lC01F from address $c020
+Unnamed target: aC02B from address $c022
+Unnamed target: lC02A from address $c022
+Writing out/test.asm
+~~~
+
+.virtual $0002
+; modified by: sub
+counter:		.byte	?
+.endv
+
+.virtual $00fb
+; read by: entry
+pointer:		.word	?
+.endv
+
+*=$c000
+
+entry:
+		jsr sub
+		jsr sub
+		jmp lC009
+
+; jumped to by: entry, sub
+lC009:
+		lda value
+		sta value
+		inc value
+		lda table + $2, x
+		lda (pointer), y
+		sta (pointer), y
+		sta border
+		jsr chrout
+; jumped to by: entry
+lC01F:
+		dex 
+		bne lC01F
+		jmp (aC02B)
+
+; called by: entry
+sub:
+		inc counter
+		beq lC009
+		rts 
+
+lC02A:
+		rts 
+
+; read by: entry
+aC02B:
+		.addr	lC02A
+
+; read by: entry
+; written by: entry, $c032
+; modified by: entry
+value:
+		.byte	$00
+; read by: entry
+table:
+		.byte	$01, $02, $03, $04
+
+; reached from no label: listed by address
+		sta value
+		rts 
+; written by: entry
+border = $d020
+
+.virtual $ffd2
+; called by: entry
+chrout:
+		.fill	3
+.endv
+~~~
+vvv

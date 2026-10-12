@@ -1,0 +1,88 @@
+>>> Issue 0035: inside a { } block, every address is an offset from the
+opening line's address, and 'virtual' on the opening line applies to
+every line inside. The output is the same as with absolute addresses. <<<
+
+*=$c000
+
+entry:
+		lda #$0f
+		sta volume
+		lda notes + $1
+		sta control1
+		rts 
+
+waveform:
+		.byte	$21
+notes:
+		.byte	$10, $20, $30
+
+.virtual $d400
+; the SID chip's registers
+freq1:		.word	?
+.endv
+
+.virtual $d404
+control1:		.byte	?
+.endv
+
+.virtual $d418
+volume:		.byte	?
+.endv
+===
+deflower test.prg
+$c000 code entry
+; the SID chip's registers
+$d400 virtual {
+    $00 word freq1
+    $04 byte control1
+    $18 byte volume
+}
+$c00c {
+    $00 byte waveform
+    $01 byte[3] notes
+}
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Will disassemble from C000
+Marking area of 1 word at D400 "freq1"
+Marking area of 1 byte at D404 "control1"
+Marking area of 1 byte at D418 "volume"
+Marking area of 1 byte at C00C "waveform"
+Marking area of 3 byte at C00D "notes"
+Starting flow analysis.
+Writing out/test.asm
+~~~
+
+*=$c000
+
+entry:
+		lda #$0f
+		sta volume
+		lda notes + $1
+		sta control1
+		rts 
+
+waveform:
+		.byte	$21
+; read by: entry
+notes:
+		.byte	$10, $20, $30
+
+.virtual $d400
+; the SID chip's registers
+freq1:		.word	?
+.endv
+
+.virtual $d404
+; written by: entry
+control1:		.byte	?
+.endv
+
+.virtual $d418
+; written by: entry
+volume:		.byte	?
+.endv
+~~~
+vvv

@@ -25,7 +25,7 @@ class ViceSnapshotReader {
     }
 
     void read(Path c64File, Subject subject) {
-        System.out.println("Reading snapshot " + c64File);
+        System.out.println("Reading snapshot " + subject.basePath.relativize(c64File));
         try {
             ByteBuffer c64Dump = ByteBuffer.wrap(readAllBytes(c64File));
             ViceVcfFile vcfFile = new ViceVcfFileReader().read(c64Dump, new C64MemModuleHandler());
@@ -39,7 +39,7 @@ class ViceSnapshotReader {
                     .map(C64MemModule.class::cast)
                     .map(module -> module.ram)
                     .findAny()
-                    .orElseThrow(() -> new IllegalArgumentException("No C64MEM found.")), c64File);
+                    .orElseThrow(() -> new IllegalArgumentException("No C64MEM found.")), subject.basePath.relativize(c64File));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -1,0 +1,19 @@
+>>> Issue 0028: a single address without a type covers no memory, so
+`virtual` on it would do nothing; it is reported instead. <<<
+; Not in the disassembly:
+*=$c000
+		.byte	$60
+===
+deflower test.prg
+$d020 virtual border_color
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Starting flow analysis.
+No entry points defined, nothing to do.
+Virtual address $d020 needs a type or a range
+Errors detected for test.asm, not writing output.
+~~~
+~~~
+vvv

@@ -1,7 +1,6 @@
 ---
 title: Replace the fixture tests with two SnippetTestFactories
-status: open
-priority: medium
+status: done
 labels: test
 ---
 
@@ -112,3 +111,16 @@ vvv
 Done when: the mpu6502 text parser exists; every existing fixture is a snippet in one of the two factories, with the same `.asm` output as its current `expected.asm`; the existing error tests (area conflict, duplicate label, zero size, image past `$FFFF`, …) are short-test snippets; every short test passes the round trip; the per-fixture `@Test` methods, the hand-built `.prg` files of the small fixtures and the old `expected.asm` files are gone; and CLAUDE.md's test section describes the new layout.
 
 Relation to [0059](0059-convert-to-nim.md): the Nim port plans to convert snippets-test's core and mpu6502 to Nim too. Doing this first means the port carries over snippet files rather than fixture directories.
+
+## Closing note
+
+`DeflowerTest` now has two `@TestFactory` methods, `shortSnippets` and `largeSnippets`, over `src/test/snippets/short/` and `src/test/snippets/large/`. Each case is one `.txt` file named after its old fixture, and the error cases are in `short/invalid/`. The separators are the ones above. The outputs are the printed text, the `.asm` files, and hex dumps of the exported binaries. In the second and third, a `--- <name>` line heads each file, but in the second only when there are several `.asm` files. CLAUDE.md describes the format.
+
+- **Short snippets.** The assembly part is assembled into `test.prg` and the `.flo` part is written as `test.flo`, in a temporary directory. Extra parts begin with `; file: <name>` (`include` needs `machine.flo`, and `multi` needs `a.prg` and `b.prg`). The round trip is a plain assertion: every byte a generated `.asm` assembles to must be in the `.prg` of the same name and equal it. A failure fails the test instead of becoming an expectation.
+- **Conversion.** Each small fixture's source is its old `expected.asm`, without the cross-reference comments. Where the disassembly leaves bytes out, the source has `.byte` lines under `; Not in the disassembly:`. The `export` fixture's `.binary` lines became `.byte` lines. Every converted `.asm` expectation equals its old `expected.asm`, except `blockoffset`'s (below), and every short snippet passes the round trip.
+- **Deflower.** `Deflower.deflower(Path)` takes a file-system path, and the classpath version calls it. Printed paths are relative to the `.flo` file's directory: `Reading test.prg`, `Writing out/test.asm`, and `include cycle: test.flo -> …`.
+- **What didn't convert.**
+  - `rejectsMissingTrailingNewline` stays a `@Test`, because every snippet part ends in a newline.
+  - `doesNotLogIdenticalReRegistration` and the "no area conflict" check of `narrowplaceholder` are gone: the printed text of `datatypes` and `narrowplaceholder` is now in their expectations.
+- **`blockoffset`.** The round trip found a bug: `byte[48] screen` at `$0400` lies outside the `.prg`, and Deflower printed it as 48 `$00` bytes. The snippet now declares it `virtual`, which is what the test is about anyway, and the bug is [0087](0087-data-on-unloaded-memory-prints-zeroes.md).
+- **JUnit.** `junit-jupiter-engine` went from 5.1.0 to 5.10.1, because the snippet factory uses `DynamicTest.dynamicTest(String, URI, Executable)`, which 5.1 doesn't have.

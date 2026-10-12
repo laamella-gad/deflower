@@ -1,0 +1,52 @@
+>>> A line with no explicit type keyword is a placeholder (issue 0031):
+narrowing it later with a more specific annotation - a word, or a
+code entry point - must not be reported as an area conflict, and
+must not stop the subject's output from being written. The carved
+word and the carved code entry (one RTS) both take over cleanly in
+the middle of what's otherwise still a plain placeholder dump. <<<
+
+*=$c000
+
+unknown_block:
+		.byte	$11, $22, $33, $44
+
+carved_word:
+		.word	$beef
+		.byte	$55, $66
+
+carved_code:
+		rts 
+		.byte	$77, $88, $99, $aa, $bb, $cc
+; Not in the disassembly:
+*=$c00f
+		.byte	$dd
+===
+deflower test.prg
+$c000-$c00f unknown_block
+$c004 word carved_word
+$c008 code carved_code
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Marking area of 15 unknown at C000 "unknown_block"
+Marking area of 1 word at C004 "carved_word"
+Will disassemble from C008
+Starting flow analysis.
+Writing out/test.asm
+~~~
+
+*=$c000
+
+unknown_block:
+		.byte	$11, $22, $33, $44
+
+carved_word:
+		.word	$beef
+		.byte	$55, $66
+
+carved_code:
+		rts 
+		.byte	$77, $88, $99, $aa, $bb, $cc
+~~~
+vvv

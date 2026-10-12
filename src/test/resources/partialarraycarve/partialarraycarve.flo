@@ -1,4 +1,0 @@
-deflower partialarraycarve.prg
-$c000-$c010 my_array
-$c006-$c008 word mid_ptr
-$c010 code entry

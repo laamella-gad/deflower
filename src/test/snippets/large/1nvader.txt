@@ -1,0 +1,82 @@
+>>> Deflower 1nvader. <<<
+1nvader/1nvader.flo
+^^^
+Reading 1nvader.prg
+Reading prg 1nvader.prg
+load address 2049
+Marking area of 12 byte at 801 "basic_stub"
+Will disassemble from 80D
+Starting flow analysis.
+Unnamed target: l0810 from address $0817
+Unnamed target: l2452 from address $0819
+Unnamed target: l2475 from address $245f
+Unnamed target: l2466 from address $246a
+Unnamed target: l0100 from address $247e
+Jumping into memory the image doesn't contain: $0100
+Unnamed target: l245B from address $2487
+Unnamed target: l0147 from address $248b
+Jumping into memory the image doesn't contain: $0147
+Writing out/1nvader.asm
+~~~
+; called by: $247e
+l0100 = $0100
+; jumped to by: $248b
+l0147 = $0147
+*=$0801
+
+; BASIC stub: SYS 2061
+basic_stub:
+		.byte	$0b, $08, $14, $00, $9e, $32, $30, $36, $31, $00, $00, $00
+
+start:
+		ldy #$1e
+		tsx 
+; jumped to by: start
+l0810:
+		lda $248d, x
+		sta @w $00fc, x
+		dex 
+		bne l0810
+		jmp l2452
+*=$2452
+
+; jumped to by: start, $2459
+l2452:
+		lda $255d, y
+		sta $07fd, y
+		dey 
+		bne l2452
+; jumped to by: $2487
+l245B:
+		inx 
+		tya 
+		and #$0f
+		beq l2475
+		txa 
+		lsr 
+		ldx $0333, y
+; jumped to by: $246a
+l2466:
+		rol 
+		rol $9f
+		dex 
+		bpl l2466
+		adc $0367, y
+		tax 
+		lda $9f
+		adc $039b, y
+; jumped to by: $245f
+l2475:
+		sta $039c, y
+		txa 
+		sta $0368, y
+		ldx #$04
+		jsr l0100
+		sta $0334, y
+		iny 
+		cpy #$34
+		bne l245B
+		ldy #$00
+		jmp l0147
+~~~
+vvv

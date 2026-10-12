@@ -1,0 +1,64 @@
+>>> Deflower 3dgolf pic. <<<
+3dgolfpic/3dgolfpic.flo
+^^^
+Reading 3dgolfpic.prg
+Reading prg 3dgolfpic.prg
+load address 2049
+Marking area of 12 byte at 801 "basic_stub"
+Will disassemble from 80D
+Starting flow analysis.
+Unnamed target: l0817 from address $081e
+Unnamed target: l0822 from address $0829
+Unnamed target: l082D from address $0835
+Unnamed target: d0833 from address $0837
+Unnamed target: d0830 from address $083a
+Unnamed target: l0116 from address $0840
+Jumping into memory the image doesn't contain: $0116
+Writing out/3dgolfpic.asm
+~~~
+; jumped to by: start
+l0116 = $0116
+*=$0801
+
+; BASIC stub: SYS 2061
+basic_stub:
+		.byte	$0b, $08, $ef, $00, $9e, $32, $30, $36, $31, $00, $00, $00
+
+start:
+		sei 
+		inc $d030
+		lda #$38
+		sta $01
+		ldx #$34
+; jumped to by: start
+l0817:
+		lda $0842, x
+		sta $01ff, x
+		dex 
+		bne l0817
+		ldx #$cf
+; jumped to by: start
+l0822:
+		lda $0875, x
+		sta @w $00f6, x
+		dex 
+		bne l0822
+		ldy #$11
+; jumped to by: start
+l082D:
+		dex 
+		lda $1912, x
+; modified by: start
+d0830 = $0830
+		sta $7e92, x
+; modified by: start
+d0833 = $0833
+		txa 
+		bne l082D
+		dec d0833
+		dec d0830
+		dey 
+		bne l082D
+		jmp l0116
+~~~
+vvv

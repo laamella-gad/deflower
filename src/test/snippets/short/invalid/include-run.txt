@@ -1,0 +1,13 @@
+>>> Rejects run in included file. <<<
+===
+deflower t.prg
+include include_run.flo
+===
+; file: include_run.flo
+deflower other.prg
+^^^
+Failed to parse include_run.flo:
+line 1: an included file can't start a run
+~~~
+~~~
+vvv

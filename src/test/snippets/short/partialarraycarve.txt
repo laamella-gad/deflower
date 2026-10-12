@@ -1,0 +1,58 @@
+>>> Issue 0033: each array element now carries its own label/offset
+baked in at creation, instead of resolving it by scanning backward
+through neighboring MemoryLocations for the nearest label. my_array
+spans $C000-$C00F as an unnamed-per-element placeholder; carving a
+word (mid_ptr) out of its middle ($C006-$C007, issue 0031's
+narrowing) must not orphan the elements on either side of the cut -
+$C005 (before) and $C008 (after) must still resolve to "my_array +
+$5" / "my_array + $8" respectively, and $C006 itself to "mid_ptr",
+regardless of what now sits between them. <<<
+
+*=$c000
+
+my_array:
+		.byte	$11, $22, $33, $44, $55, $66
+
+mid_ptr:
+		.word	$bbaa
+		.byte	$77, $88, $99, $aa, $bb, $cc, $dd, $ee
+
+entry:
+		sta my_array + $5
+		sta my_array + $8
+		sta mid_ptr
+		rts 
+===
+deflower test.prg
+$c000-$c010 my_array
+$c006-$c008 word mid_ptr
+$c010 code entry
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Marking area of 16 unknown at C000 "my_array"
+Marking area of 1 word at C006 "mid_ptr"
+Will disassemble from C010
+Starting flow analysis.
+Writing out/test.asm
+~~~
+
+*=$c000
+
+; written by: entry
+my_array:
+		.byte	$11, $22, $33, $44, $55, $66
+
+; written by: entry
+mid_ptr:
+		.word	$bbaa
+		.byte	$77, $88, $99, $aa, $bb, $cc, $dd, $ee
+
+entry:
+		sta my_array + $5
+		sta my_array + $8
+		sta mid_ptr
+		rts 
+~~~
+vvv

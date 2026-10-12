@@ -1,0 +1,12 @@
+>>> Rejects unrecognized tokens. <<<
+===
+deflower t.prg
+$0800 ~~~ byte
+^^^
+Failed to parse test.flo:
+line 2:6 token recognition error at: '~'
+line 2:7 token recognition error at: '~'
+line 2:8 token recognition error at: '~'
+~~~
+~~~
+vvv

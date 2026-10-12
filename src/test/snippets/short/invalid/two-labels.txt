@@ -1,0 +1,13 @@
+>>> Issue 0050: an annotation line has a fixed shape - address or
+range, then optionally virtual, a type and a label, in that order
+and each at most once - so anything else is a parse error instead
+of silently keeping the last value or swallowing a stray word. <<<
+===
+deflower t.prg
+$0800 byte first second
+^^^
+Failed to parse test.flo:
+line 2:17 extraneous input 'second' expecting NEWLINE
+~~~
+~~~
+vvv

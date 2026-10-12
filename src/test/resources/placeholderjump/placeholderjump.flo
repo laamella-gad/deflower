@@ -1,3 +1,0 @@
-deflower placeholderjump.prg
-$c000 code entry
-$c004-$c009 blob

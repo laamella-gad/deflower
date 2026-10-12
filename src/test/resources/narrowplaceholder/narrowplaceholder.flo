@@ -1,4 +1,0 @@
-deflower narrowplaceholder.prg
-$c000-$c00f unknown_block
-$c004 word carved_word
-$c008 code carved_code

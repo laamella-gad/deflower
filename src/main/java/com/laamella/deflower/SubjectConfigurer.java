@@ -1,7 +1,6 @@
 package com.laamella.deflower;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -18,13 +17,13 @@ class SubjectConfigurer {
     private final ViceSnapshotReader viceSnapshotReader = new ViceSnapshotReader();
     private final PrgReader prgReader = new PrgReader();
 
-    List<Subject> configure(String flowerFile) throws URISyntaxException, IOException {
-        Path path = Paths.get(Deflower.class.getResource("/" + flowerFile).toURI()).toAbsolutePath();
+    List<Subject> configure(Path flowerFile) throws IOException {
+        Path path = flowerFile.toAbsolutePath();
         Path basePath = path.getParent();
         List<Subject> subjects = new ArrayList<>();
-        for (DeflowerRun run : floReader.read(path, flowerFile)) {
+        for (DeflowerRun run : floReader.read(path, path.getFileName().toString())) {
             Path filename = basePath.resolve(run.targetName);
-            System.out.println("Reading " + filename);
+            System.out.println("Reading " + run.targetName);
             Subject subject = new Subject(basePath);
             subject.outputFileName = outputFileNameFor(run.targetName);
             subjects.add(subject);

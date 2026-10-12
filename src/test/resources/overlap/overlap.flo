@@ -1,3 +1,0 @@
-deflower overlap.prg
-$c000 word a_word
-$c001 byte b_byte

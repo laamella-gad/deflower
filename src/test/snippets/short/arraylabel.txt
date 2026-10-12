@@ -1,0 +1,53 @@
+>>> Issue 0028: a label inside a declared array or a word is printed as
+an address define after it, so the array's dump stays unbroken. <<<
+
+*=$c000
+
+entry:
+		lda hiscore
+		rts 
+
+screen:
+		.byte	$20, $20, $30, $30, $30, $30, $20, $20
+; the high score sits inside the screen
+hiscore = $c006
+
+vector:
+		.word	$c000
+vector_hi = $c00d
+===
+deflower test.prg
+$c000 code entry
+$c004 byte[8] screen
+; the high score sits inside the screen
+$c006 hiscore
+$c00c word vector
+$c00d vector_hi
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Will disassemble from C000
+Marking area of 8 byte at C004 "screen"
+Marking area of 1 word at C00C "vector"
+Starting flow analysis.
+Writing out/test.asm
+~~~
+
+*=$c000
+
+entry:
+		lda hiscore
+		rts 
+
+screen:
+		.byte	$20, $20, $30, $30, $30, $30, $20, $20
+; the high score sits inside the screen
+; read by: entry
+hiscore = $c006
+
+vector:
+		.word	$c000
+vector_hi = $c00d
+~~~
+vvv

@@ -1,2 +1,0 @@
-deflower export.prg
-$c030 byte[8] table export table.bin

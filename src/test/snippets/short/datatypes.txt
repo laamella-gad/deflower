@@ -1,0 +1,44 @@
+>>> AssemblyFileFormat.print(DataArea, ...) used to only handle BYTE,
+silently skipping WORD/DWORD/CHAR areas (issue 0002). Covers all three:
+two WORDs, one DWORD, and three CHARs (printed as one .text
+string, issue 0039). <<<
+
+*=$c000
+
+two_words:
+		.word	$1234, $5678
+
+dword_val:
+		.dword	$44332211
+
+greeting:
+		.text	"Hi!"
+===
+deflower test.prg
+$c000 word[2] two_words
+$c004 dword dword_val
+$c008 char[3] greeting
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Marking area of 2 word at C000 "two_words"
+Marking area of 1 dword at C004 "dword_val"
+Marking area of 3 char at C008 "greeting"
+Starting flow analysis.
+No entry points defined, nothing to do.
+Writing out/test.asm
+~~~
+
+*=$c000
+
+two_words:
+		.word	$1234, $5678
+
+dword_val:
+		.dword	$44332211
+
+greeting:
+		.text	"Hi!"
+~~~
+vvv

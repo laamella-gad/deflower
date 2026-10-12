@@ -1,4 +1,0 @@
-deflower absolutezeropage.prg
-$10 virtual byte counter
-$11 virtual byte[2] pair
-$c000 code entry

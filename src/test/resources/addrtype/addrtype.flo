@@ -1,4 +1,0 @@
-deflower addrtype.prg
-$c000 addr[3] vectors
-$c006 code first
-$c007 code second

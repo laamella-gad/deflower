@@ -1,5 +1,0 @@
-deflower long.prg
-$04 virtual long timer
-$c000 code start
-$c004 long[2] scores
-$c00a slong[2] offsets

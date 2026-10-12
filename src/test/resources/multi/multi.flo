@@ -1,6 +1,0 @@
-deflower a.prg
-$c000 code entry_a
-
-deflower b.prg
-$c000 code entry_b
-$c010 byte[4] marker_b

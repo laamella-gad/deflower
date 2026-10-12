@@ -1,0 +1,94 @@
+>>> Issue 0022: a data line with "export <name>.bin" writes its bytes to
+out/<name>.bin, or to out/<name>.prg after its start address, and
+the assembly includes that file with .binary instead of printing
+the data. Labels inside an exported region
+become defines after it, and operands into it still name it. <<<
+
+*=$c000
+
+entry:
+		ldx #$07
+lC002:
+		lda glyph_b, x
+		sta $0400, x
+		dex 
+		bpl lC002
+		lda font + $c
+		jmp (aC032)
+*=$c020
+
+; the character set
+font:
+		.byte	$00, $3c, $66, $7e, $66, $66, $66, $00, $00, $7c, $66, $7c, $66, $66, $7c, $00
+; letter B
+glyph_b = $c028
+
+table:
+		.byte	$34, $12, $00, $c0
+aC032 = $c032
+
+tail:
+		.byte	$01, $02
+; Not in the disassembly:
+*=$c011
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+===
+deflower test.prg
+$c000 code entry
+; the character set
+$c020-$c030 font export font.bin
+; letter B
+$c028 glyph_b
+$c030 word[2] table export table.prg
+$c034-$c036 tail
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Will disassemble from C000
+Marking area of 16 unknown at C020 "font"
+Marking area of 2 word at C030 "table"
+Marking area of 2 unknown at C034 "tail"
+Starting flow analysis.
+Unnamed target: lC002 from address $c009
+Unnamed target: aC032 from address $c00e
+Writing out/test.asm
+Writing out/font.bin
+Writing out/table.prg
+~~~
+
+*=$c000
+
+entry:
+		ldx #$07
+; jumped to by: entry
+lC002:
+		lda glyph_b, x
+		sta $0400, x
+		dex 
+		bpl lC002
+		lda font + $c
+		jmp (aC032)
+*=$c020
+
+; the character set
+; read by: entry
+font:
+		.binary	"font.bin"
+; letter B
+; read by: entry
+glyph_b = $c028
+
+table:
+		.binary	"table.prg", 2
+; read by: entry
+aC032 = $c032
+
+tail:
+		.byte	$01, $02
+~~~
+--- font.bin
+0000: 00 3c 66 7e 66 66 66 00 00 7c 66 7c 66 66 7c 00
+--- table.prg
+0000: 30 c0 34 12 00 c0
+vvv

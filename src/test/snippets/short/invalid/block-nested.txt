@@ -1,0 +1,14 @@
+>>> Rejects nested block. <<<
+===
+deflower t.prg
+$d400 virtual {
+    $00 {
+    }
+}
+^^^
+Failed to parse test.flo:
+line 3: blocks can't be nested (the open one starts at line 2)
+line 5: '}' without an open block
+~~~
+~~~
+vvv

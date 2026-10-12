@@ -1,0 +1,11 @@
+>>> Rejects block not closed at end of file. <<<
+===
+deflower t.prg
+$d400 virtual {
+    $00 byte freq1
+^^^
+Failed to parse test.flo:
+line 2: block is not closed with '}'
+~~~
+~~~
+vvv

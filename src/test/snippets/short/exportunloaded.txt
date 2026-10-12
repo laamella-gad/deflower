@@ -1,0 +1,22 @@
+>>> Issue 0022: an exported region must hold bytes the image loaded. <<<
+; Not in the disassembly:
+*=$c000
+		.byte	$a2, $07, $bd, $28, $c0, $9d, $00, $04, $ca, $10, $f7, $ad, $2c, $c0, $6c, $32
+		.byte	$c0, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $3c, $66, $7e, $66, $66, $66, $00, $00, $7c, $66, $7c, $66, $66, $7c, $00
+		.byte	$34, $12, $00, $c0, $01, $02
+===
+deflower test.prg
+$c030 byte[8] table export table.bin
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Marking area of 8 byte at C030 "table"
+Starting flow analysis.
+No entry points defined, nothing to do.
+Exported table.bin at $c030 holds memory the image doesn't load, at $c036
+Errors detected for test.asm, not writing output.
+~~~
+~~~
+vvv

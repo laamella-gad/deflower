@@ -1,0 +1,10 @@
+>>> Rejects type after label. <<<
+===
+deflower t.prg
+$0800 label byte
+^^^
+Failed to parse test.flo:
+line 2:12 extraneous input 'byte' expecting NEWLINE
+~~~
+~~~
+vvv

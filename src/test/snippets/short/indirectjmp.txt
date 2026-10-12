@@ -1,0 +1,54 @@
+>>> JMP (indirect)'s operand is where the destination address is
+stored, not the destination (issue
+0011): the fixture's entry does JMP ($C010), where $C010-$C011 holds
+$C020, the real target. The analyser must follow $C020 (and decode
+the LDA/RTS there), not try to decode the stored address as code. <<<
+
+*=$c000
+
+entry:
+		jmp (aC010)
+*=$c010
+
+aC010:
+		.addr	lC020
+*=$c020
+
+lC020:
+		lda #$42
+		rts 
+; Not in the disassembly:
+*=$c003
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+*=$c012
+		.byte	$ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea, $ea
+===
+deflower test.prg
+$c000 code entry
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Will disassemble from C000
+Starting flow analysis.
+Unnamed target: aC010 from address $c000
+Unnamed target: lC020 from address $c000
+Writing out/test.asm
+~~~
+
+*=$c000
+
+entry:
+		jmp (aC010)
+*=$c010
+
+; read by: entry
+aC010:
+		.addr	lC020
+*=$c020
+
+lC020:
+		lda #$42
+		rts 
+~~~
+vvv

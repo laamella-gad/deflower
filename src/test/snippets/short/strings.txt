@@ -1,0 +1,65 @@
+>>> Issue 0039: consecutive CHAR values print as `.text` lines, printable
+characters sharing a double-quoted literal and anything else
+(control codes, double quotes) as hex items, wrapping every 32
+values. Issue 0047: a null-terminated string ends with a `.null`
+line, and a length-prefixed one prints as `.ptext`. <<<
+
+*=$c000
+
+entry:
+		lda plain, x
+		rts 
+
+plain:
+		.text	"HELLO"
+nulled:
+		.null	"BYE"
+counted:
+		.ptext	"ABC"
+mixed:
+		.text	"HI", $0d, $22, "Q", $22
+long_nulled:
+		.text	"THE QUICK BROWN FOX JUMPS OVER T"
+		.null	"HE LAZY "
+===
+deflower test.prg
+$c000 code entry
+$c004 char[5] plain
+$c009 char[4] nulled
+$c00d char[4] counted
+$c011 char[6] mixed
+$c017 char[41] long_nulled
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Will disassemble from C000
+Marking area of 5 char at C004 "plain"
+Marking area of 4 char at C009 "nulled"
+Marking area of 4 char at C00D "counted"
+Marking area of 6 char at C011 "mixed"
+Marking area of 41 char at C017 "long_nulled"
+Starting flow analysis.
+Writing out/test.asm
+~~~
+
+*=$c000
+
+entry:
+		lda plain, x
+		rts 
+
+; read by: entry
+plain:
+		.text	"HELLO"
+nulled:
+		.null	"BYE"
+counted:
+		.ptext	"ABC"
+mixed:
+		.text	"HI", $0d, $22, "Q", $22
+long_nulled:
+		.text	"THE QUICK BROWN FOX JUMPS OVER T"
+		.null	"HE LAZY "
+~~~
+vvv

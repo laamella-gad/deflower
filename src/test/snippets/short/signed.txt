@@ -1,0 +1,62 @@
+>>> Issue 0037: sbyte, sword and sdword print their two's-complement
+value under 64tass's .char, .sint and .dint. <<<
+
+.virtual $0002
+velocity:		.char	?
+.endv
+
+*=$c000
+
+start:
+		lda deltas
+		rts 
+
+deltas:
+		.char	-3, 3, -128, 127
+
+speeds:
+		.sint	-32768, -1
+
+offset:
+		.dint	-2
+===
+deflower test.prg
+$02 virtual sbyte velocity
+$c000 code start
+$c004 sbyte[4] deltas
+$c008 sword[2] speeds
+$c00c sdword offset
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Marking area of 1 sbyte at 2 "velocity"
+Will disassemble from C000
+Marking area of 4 sbyte at C004 "deltas"
+Marking area of 2 sword at C008 "speeds"
+Marking area of 1 sdword at C00C "offset"
+Starting flow analysis.
+Writing out/test.asm
+~~~
+
+.virtual $0002
+velocity:		.char	?
+.endv
+
+*=$c000
+
+start:
+		lda deltas
+		rts 
+
+; read by: start
+deltas:
+		.char	-3, 3, -128, 127
+
+speeds:
+		.sint	-32768, -1
+
+offset:
+		.dint	-2
+~~~
+vvv

@@ -1,0 +1,66 @@
+>>> Issue 0053: an absolute-mode operand below $100, label or number,
+carries `@w`, so 64tass doesn't shorten it to zero page. The same
+operands in zero-page form stay without it. <<<
+
+.virtual $0010
+counter:		.byte	?
+pair:
+		.fill	2
+.endv
+
+*=$c000
+
+entry:
+		lda @w counter
+		sta @w $00ff, x
+		ldx @w $0020, y
+		lda counter
+		sta $ff, x
+		ldx $20, y
+		lda ($30, x)
+		lda ($40), y
+		lda pair
+		lda pair + $1
+		lda @w pair + $1
+		jmp entry
+===
+deflower test.prg
+$10 virtual byte counter
+$11 virtual byte[2] pair
+$c000 code entry
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Marking area of 1 byte at 10 "counter"
+Marking area of 2 byte at 11 "pair"
+Will disassemble from C000
+Starting flow analysis.
+Writing out/test.asm
+~~~
+
+.virtual $0010
+; read by: entry
+counter:		.byte	?
+; read by: entry
+pair:
+		.fill	2
+.endv
+
+*=$c000
+
+entry:
+		lda @w counter
+		sta @w $00ff, x
+		ldx @w $0020, y
+		lda counter
+		sta $ff, x
+		ldx $20, y
+		lda ($30, x)
+		lda ($40), y
+		lda pair
+		lda pair + $1
+		lda @w pair + $1
+		jmp entry
+~~~
+vvv

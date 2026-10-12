@@ -1,0 +1,100 @@
+>>> Issue 0084: a cross-reference names the routine its instruction is
+in, skipping the local labels of branch and jmp targets on the way.
+A jsr target is a routine even when a branch reaches it too. <<<
+
+*=$c000
+
+entry:
+		ldx #$03
+lC002:
+		jsr lC016
+		dex 
+		bne lC002
+		bmi lC021
+		lda #$00
+		beq lC00F
+		nop 
+lC00F:
+		sta value
+		jsr lC021
+		rts 
+
+lC016:
+		ldy #$00
+lC018:
+		lda value
+		iny 
+		bne lC018
+		jmp lC024
+
+lC021:
+		inc value
+lC024:
+		rts 
+
+value:
+		.byte	$00
+===
+deflower test.prg
+$c000 code entry
+$c025 byte value
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Will disassemble from C000
+Marking area of 1 byte at C025 "value"
+Starting flow analysis.
+Unnamed target: lC016 from address $c002
+Unnamed target: lC018 from address $c01c
+Unnamed target: lC024 from address $c01e
+Unnamed target: lC002 from address $c006
+Unnamed target: lC021 from address $c008
+Unnamed target: lC00F from address $c00c
+Writing out/test.asm
+~~~
+
+*=$c000
+
+entry:
+		ldx #$03
+; jumped to by: entry
+lC002:
+		jsr lC016
+		dex 
+		bne lC002
+		bmi lC021
+		lda #$00
+		beq lC00F
+		nop 
+; jumped to by: entry
+lC00F:
+		sta value
+		jsr lC021
+		rts 
+
+; called by: entry
+lC016:
+		ldy #$00
+; jumped to by: lC016
+lC018:
+		lda value
+		iny 
+		bne lC018
+		jmp lC024
+
+; called by: entry
+; jumped to by: entry
+lC021:
+		inc value
+; jumped to by: lC016
+lC024:
+		rts 
+
+; read by: lC016
+; written by: entry
+; modified by: lC021
+value:
+		.byte	$00
+~~~
+vvv

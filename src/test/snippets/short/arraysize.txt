@@ -1,0 +1,53 @@
+>>> Issue 0044: an array size can be hex, and can use * and + (with *
+binding tighter), matching the plain [n] form. 1+2*2 must be 5
+elements, not 6. <<<
+
+*=$c000
+
+plain:
+		.byte	$10, $11, $12, $13
+hex:
+		.byte	$14, $15, $16, $17
+product:
+		.byte	$18, $19, $1a, $1b
+precedence:
+		.byte	$1c, $1d, $1e, $1f, $20
+
+sum:
+		.word	$2221, $2423
+===
+deflower test.prg
+$c000 byte[4] plain
+$c004 byte[$4] hex
+$c008 byte[2*2] product
+$c00c byte[1+2*2] precedence
+$c011 word[1+1] sum
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Marking area of 4 byte at C000 "plain"
+Marking area of 4 byte at C004 "hex"
+Marking area of 4 byte at C008 "product"
+Marking area of 5 byte at C00C "precedence"
+Marking area of 2 word at C011 "sum"
+Starting flow analysis.
+No entry points defined, nothing to do.
+Writing out/test.asm
+~~~
+
+*=$c000
+
+plain:
+		.byte	$10, $11, $12, $13
+hex:
+		.byte	$14, $15, $16, $17
+product:
+		.byte	$18, $19, $1a, $1b
+precedence:
+		.byte	$1c, $1d, $1e, $1f, $20
+
+sum:
+		.word	$2221, $2423
+~~~
+vvv

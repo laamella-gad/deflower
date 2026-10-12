@@ -1,4 +1,0 @@
-deflower datatypes.prg
-$c000 word[2] two_words
-$c004 dword dword_val
-$c008 char[3] greeting

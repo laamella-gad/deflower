@@ -1,6 +1,0 @@
-deflower arraysize.prg
-$c000 byte[4] plain
-$c004 byte[$4] hex
-$c008 byte[2*2] product
-$c00c byte[1+2*2] precedence
-$c011 word[1+1] sum

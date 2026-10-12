@@ -1,0 +1,10 @@
+>>> Rejects export of code. <<<
+===
+deflower export.prg
+$c000-$c010 code entry export entry.bin
+^^^
+Failed to parse test.flo:
+line 2: code can't be exported
+~~~
+~~~
+vvv

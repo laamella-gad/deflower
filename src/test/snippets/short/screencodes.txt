@@ -1,0 +1,84 @@
+>>> Issue 0040: each declared char array is read as ASCII or as
+Commodore screen codes, whichever has more uppercase letters in it
+(a tie keeps the encoding in effect), and the output switches 64tass's
+`.enc` wherever that changes - including between two adjacent arrays
+with no label in between. <<<
+
+*=$c000
+
+entry:
+		lda greeting, x
+		rts 
+
+greeting:
+		.enc	"screen"
+		.text	"HELLO, World!"
+; reverse video "HEI", a double quote, then "@A"
+odd_codes:
+		.text	$88, $85, $89, $22, "@A"
+; lowercase only: no uppercase letters either way, a tie
+ascii_text:
+		.text	$61, $62, $63
+ok_text:
+		.text	"OK"
+; digits read the same either way: a tie keeps the encoding in effect
+digits:
+		.text	"123HI"
+upper_ascii:
+		.enc	"none"
+		.text	"XYZ"
+===
+deflower test.prg
+$c000 code entry
+$c004 char[13] greeting
+; reverse video "HEI", a double quote, then "@A"
+$c011 char[6] odd_codes
+; lowercase only: no uppercase letters either way, a tie
+$c017 char[3] ascii_text
+$c01a char[2] ok_text
+; digits read the same either way: a tie keeps the encoding in effect
+$c01c char[3] digits
+$c01f char[2]
+$c021 char[3] upper_ascii
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Will disassemble from C000
+Marking area of 13 char at C004 "greeting"
+Marking area of 6 char at C011 "odd_codes"
+Marking area of 3 char at C017 "ascii_text"
+Marking area of 2 char at C01A "ok_text"
+Marking area of 3 char at C01C "digits"
+Marking area of 2 char at C01F "null"
+Marking area of 3 char at C021 "upper_ascii"
+Starting flow analysis.
+Writing out/test.asm
+~~~
+
+*=$c000
+
+entry:
+		lda greeting, x
+		rts 
+
+; read by: entry
+greeting:
+		.enc	"screen"
+		.text	"HELLO, World!"
+; reverse video "HEI", a double quote, then "@A"
+odd_codes:
+		.text	$88, $85, $89, $22, "@A"
+; lowercase only: no uppercase letters either way, a tie
+ascii_text:
+		.text	$61, $62, $63
+ok_text:
+		.text	"OK"
+; digits read the same either way: a tie keeps the encoding in effect
+digits:
+		.text	"123HI"
+upper_ascii:
+		.enc	"none"
+		.text	"XYZ"
+~~~
+vvv

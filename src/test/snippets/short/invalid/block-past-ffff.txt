@@ -1,0 +1,12 @@
+>>> Rejects block offset past ffff. <<<
+===
+deflower t.prg
+$ff00 {
+    $100 byte past
+}
+^^^
+Failed to parse test.flo:
+line 3: the block's base plus this offset runs past $ffff
+~~~
+~~~
+vvv

@@ -1,3 +1,0 @@
-deflower partialoverlap.prg
-$c002 byte guard
-$c000 code entry

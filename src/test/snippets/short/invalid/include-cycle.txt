@@ -1,0 +1,18 @@
+>>> Issue 0078: an include that leads back to a file being read, a file
+that can't be found and an included file that starts a run of its
+own are reported, and nothing is written. <<<
+===
+deflower t.prg
+include include_cycle_a.flo
+===
+; file: include_cycle_a.flo
+include include_cycle_b.flo
+===
+; file: include_cycle_b.flo
+include include_cycle_a.flo
+^^^
+Failed to parse include_cycle_b.flo:
+line 1: include cycle: test.flo -> include_cycle_a.flo -> include_cycle_b.flo -> include_cycle_a.flo
+~~~
+~~~
+vvv

@@ -1,0 +1,22 @@
+>>> Issue 0044: a size of 0, from [...] or from a range too short to hold
+one element ($c006-$c007 is one byte: the end is exclusive), is
+reported as an error, and no output is written for that subject. <<<
+; Not in the disassembly:
+*=$c000
+		.byte	$00, $01, $02, $03, $04, $05, $06, $07, $08, $09, $0a, $0b, $0c, $0d, $0e, $0f
+===
+deflower test.prg
+$c000 byte[0] empty
+$c006-$c007 word too_short
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Starting flow analysis.
+No entry points defined, nothing to do.
+Zero-size byte at $c000
+Zero-size word at $c006
+Errors detected for test.asm, not writing output.
+~~~
+~~~
+vvv

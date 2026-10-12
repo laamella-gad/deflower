@@ -1,0 +1,79 @@
+>>> Issues 0045/0046: a `virtual` area's contents are not dumped; it
+becomes a .virtual reservation keeping its labels, type and size, and
+code referencing it - including an element inside a virtual array -
+still resolves by name. <<<
+
+.virtual $00fb
+ptr:		.word	?
+.endv
+
+*=$c000
+
+entry:
+		lda #$00
+		sta border_color
+		sta color_ram + $2
+		sta $d400
+		sta ptr
+		rts 
+
+.virtual $d020
+; VIC-II border colour
+border_color:		.byte	?
+.endv
+
+.virtual $d800
+color_ram:		.byte	?
+second_color:
+		.fill	3
+.endv
+===
+deflower test.prg
+; VIC-II border colour
+$d020 virtual byte border_color
+$d800 virtual byte[4] color_ram
+$d801 virtual byte second_color
+$00fb virtual word ptr
+$c000 code entry
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Marking area of 1 byte at D020 "border_color"
+Marking area of 4 byte at D800 "color_ram"
+Marking area of 1 byte at D801 "second_color"
+Marking area of 1 word at FB "ptr"
+Will disassemble from C000
+Starting flow analysis.
+Writing out/test.asm
+~~~
+
+.virtual $00fb
+; written by: entry
+ptr:		.word	?
+.endv
+
+*=$c000
+
+entry:
+		lda #$00
+		sta border_color
+		sta color_ram + $2
+		sta $d400
+		sta ptr
+		rts 
+
+.virtual $d020
+; VIC-II border colour
+; written by: entry
+border_color:		.byte	?
+.endv
+
+.virtual $d800
+; written by: entry
+color_ram:		.byte	?
+second_color:
+		.fill	3
+.endv
+~~~
+vvv

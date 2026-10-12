@@ -1,4 +1,0 @@
-deflower unloaded.prg
-$c000 code entry
-; copied here at run time
-$0200 code relocated

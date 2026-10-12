@@ -1,0 +1,12 @@
+>>> Rejects same export file twice. <<<
+===
+deflower export.prg
+$c020-$c028 font export font.bin
+deflower export.prg
+$c028-$c030 font2 export font.bin
+^^^
+Failed to parse test.flo:
+line 4: font.bin is already exported on line 2
+~~~
+~~~
+vvv

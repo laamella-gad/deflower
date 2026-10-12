@@ -1,3 +1,0 @@
-deflower duplicatelabel.prg
-$c000 byte twin
-$c001 byte twin

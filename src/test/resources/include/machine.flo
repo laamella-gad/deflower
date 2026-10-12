@@ -1,3 +1,0 @@
-; found next to include.flo, so it wins over a built-in file of the same name
-include c64.flo
-$c100 virtual byte mine

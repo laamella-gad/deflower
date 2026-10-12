@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
@@ -29,7 +30,18 @@ public class Deflower {
         new Deflower().deflower(args[0]);
     }
 
+    /**
+     * Runs the .flo file at this classpath-relative path.
+     */
     public void deflower(String flowerFile) throws IOException, URISyntaxException {
+        deflower(Paths.get(Deflower.class.getResource("/" + flowerFile).toURI()));
+    }
+
+    /**
+     * Runs the .flo file at this path. Messages name files relative to
+     * its directory.
+     */
+    public void deflower(Path flowerFile) throws IOException {
         try {
             List<Subject> subjects = subjectConfigurer.configure(flowerFile);
             if (subjects.isEmpty()) {
@@ -54,13 +66,13 @@ public class Deflower {
 
     private void write(Subject subject) throws IOException {
         Path asmFile = subject.outputPath.resolve(subject.outputFileName);
-        System.out.println("Writing " + asmFile);
+        System.out.println("Writing " + subject.basePath.relativize(asmFile));
         try (Writer w = new BufferedWriter(new FileWriter(asmFile.toFile()))) {
             resultWriter.write(subject, w);
         }
         for (ExportRegion export : subject.exports) {
             Path binFile = subject.outputPath.resolve(export.fileName);
-            System.out.println("Writing " + binFile);
+            System.out.println("Writing " + subject.basePath.relativize(binFile));
             Files.write(binFile, subject.bytesOf(export));
         }
     }

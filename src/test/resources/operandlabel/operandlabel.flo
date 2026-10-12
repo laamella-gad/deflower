@@ -1,3 +1,0 @@
-deflower operandlabel.prg
-$c000 code entry
-$c005 count

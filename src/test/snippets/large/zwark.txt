@@ -1,0 +1,2923 @@
+>>> Deflower zwark. <<<
+zwark/zwark.flo
+^^^
+Reading zwark.vsf
+Reading snapshot zwark.vsf
+Vice dump found, format C64SC 2.0.
+Vice version 2307, SVN revision 45460.
+Found MAINCPU 1.4 block of size 103.
+Found C64MEM 0.1 block of size 65555.
+Found C64CART 0.1 block of size 1.
+Found CIA1 2.5 block of size 77.
+Found CIA2 2.5 block of size 77.
+Found SID 1.5 block of size 36.
+Found SIDEXTENDED 1.4 block of size 133.
+Found DRIVE8 2.0 block of size 145.
+Found DRIVE9 2.0 block of size 145.
+Found DRIVE10 2.0 block of size 145.
+Found DRIVE11 2.0 block of size 145.
+Found DRIVECPU0 1.3 block of size 2152.
+Found 1541VIA1D0 2.2 block of size 28.
+Found VIA2D0 2.2 block of size 28.
+Found FSDRIVE 0.0 block of size 258.
+Found VIC-II 1.3 block of size 123415.
+Found GLUE 1.0 block of size 3.
+Found C64MEMHACKS 0.0 block of size 1.
+Found TAPEPORT 1.0 block of size 2.
+Found DATASETTE 1.5 block of size 78.
+Found KEYBOARD 1.1 block of size 96.
+Found JOYPORT0 0.0 block of size 1.
+Found JOYSTICK0 1.2 block of size 2.
+Found JOYPORT1 0.0 block of size 1.
+Found JOYSTICK1 1.2 block of size 2.
+Found USERPORT 1.0 block of size 2.
+Vice VCF: C64SC 2.0 [MAINCPU 1.4, C64MEM 0.1, C64CART 0.1, CIA1 2.5, CIA2 2.5, SID 1.5, SIDEXTENDED 1.4, DRIVE8 2.0, DRIVE9 2.0, DRIVE10 2.0, DRIVE11 2.0, DRIVECPU0 1.3, 1541VIA1D0 2.2, VIA2D0 2.2, FSDRIVE 0.0, VIC-II 1.3, GLUE 1.0, C64MEMHACKS 0.0, TAPEPORT 1.0, DATASETTE 1.5, KEYBOARD 1.1, JOYPORT0 0.0, JOYSTICK0 1.2, JOYPORT1 0.0, JOYSTICK1 1.2, USERPORT 1.0]
+Marking area of 1 byte at 2 "decrunch_count"
+Marking area of 1 byte at 3 "decrunch_bits"
+Marking area of 1 word at 2D "basic_end"
+Marking area of 1 word at 50 "clear_pointer"
+Marking area of 1 word at 57 "sprite_source"
+Marking area of 1 word at 59 "sprite_destination"
+Marking area of 3 byte at 73 "chrget"
+Marking area of 1 word at AE "decrunch_output"
+Marking area of 1 byte at FB "decrunch_byte"
+Marking area of 1 word at FC "decrunch_input"
+Marking area of 1 word at FE "decrunch_end"
+Marking area of 205 unknown at 100 "null"
+Will disassemble from 100
+Marking area of 4 byte at 1CD "decrunch_table"
+Marking area of 30 byte at 1D1 "unused_stack"
+Marking area of 17 byte at 1EF "stack"
+Marking area of 63 byte at 340 "player_image"
+Marking area of 1 byte at 37F "unused_037f"
+Marking area of 63 byte at 380 "bullet_image"
+Marking area of 1 byte at 3BF "unused_03bf"
+Marking area of 63 byte at 3C0 "enemy_image_2"
+Marking area of 1 byte at 3FF "unused_03ff"
+Marking area of 63 byte at 800 "enemy_image_3"
+Marking area of 1 byte at 83F "unused_083f"
+Marking area of 63 byte at 840 "enemy_image_4"
+Marking area of 1 byte at 87F "unused_087f"
+Marking area of 63 byte at 880 "enemy_image_5"
+Marking area of 1 byte at 8BF "unused_08bf"
+Marking area of 63 byte at 8C0 "enemy_image_6"
+Marking area of 1 byte at 8FF "unused_08ff"
+Marking area of 2327 byte at 900 "packed_data"
+Marking area of 205 byte at 1217 "decruncher_source"
+Marking area of 32028 byte at 12E4 "untouched_12e4"
+Will disassemble from 9000
+Marking area of 3 char at 9003 "signature"
+Marking area of 3 byte at 9006 "unused_9006"
+Will disassemble from 9009
+Will disassemble from 9010
+Marking area of 1 byte at 9049 "player_state"
+Marking area of 63 byte at 904A "player_sprite"
+Marking area of 63 byte at 9089 "bullet_sprite"
+Marking area of 63 byte at 90C8 "enemy_sprite"
+Marking area of 63 byte at 9107 "explosion_sprite_1"
+Marking area of 63 byte at 9146 "explosion_sprite_2"
+Marking area of 63 byte at 9185 "explosion_sprite_3"
+Will disassemble from 91C4
+Will disassemble from 9201
+Will disassemble from 9205
+Will disassemble from 9216
+Will disassemble from 9226
+Will disassemble from 924E
+Marking area of 1 byte at 92F9 "bullet_hit"
+Will disassemble from 92FA
+Will disassemble from 93B6
+Will disassemble from 93D8
+Will disassemble from 93F9
+Will disassemble from 944D
+Will disassemble from 9486
+Will disassemble from 94BD
+Will disassemble from 94DE
+Will disassemble from 94FD
+Will disassemble from 9530
+Will disassemble from 9541
+Will disassemble from 9549
+Will disassemble from 9563
+Will disassemble from 9570
+Will disassemble from 96B5
+Will disassemble from 9753
+Will disassemble from 9773
+Will disassemble from 978B
+Will disassemble from 9803
+Will disassemble from 9819
+Will disassemble from 982D
+Will disassemble from 9841
+Marking area of 34 char at 984A "robert_copyright"
+Marking area of 40 char at 986C "top_score_line"
+Marking area of 8 char at 9894 "turns_text"
+Will disassemble from 989C
+Will disassemble from 993C
+Will disassemble from 9985
+Will disassemble from 999A
+Will disassemble from 99BD
+Will disassemble from 9A4B
+Marking area of 20 char at 9AB7 "f1_1_player_text"
+Marking area of 20 char at 9ACB "f3_2_player_text"
+Will disassemble from 9ADF
+Will disassemble from 9AF7
+Will disassemble from 9B02
+Marking area of 1 byte at 9B41 "show_player_countdown"
+Marking area of 11 char at 9B42 "game_over_text"
+Will disassemble from 9B4D
+Will disassemble from 9BCC
+Marking area of 28 byte at 9C45 "logo0"
+Marking area of 28 byte at 9C61 "logo1"
+Marking area of 27 byte at 9C7D "logo2"
+Marking area of 31 byte at 9C98 "logo3"
+Marking area of 30 byte at 9CB7 "logo4"
+Will disassemble from 9CD5
+Will disassemble from 9D0C
+Will disassemble from 9D0D
+Marking area of 8 byte at 9D2A "sprite_images_lo"
+Marking area of 8 byte at 9D32 "sprite_images_hi"
+Marking area of 8 byte at 9D3A "sprite_pointer_values"
+Marking area of 8 byte at 9D42 "explosion_timers"
+Marking area of 16 byte at 9D4A "sprite_coords"
+Marking area of 1 byte at 9D5A "sprite_x_high_bits"
+Marking area of 1 byte at 9D5B "sprite_enable"
+Marking area of 16 byte at 9D5C "saved_sprite_colors"
+Marking area of 2 byte at 9D6C "saved_sprite_enable"
+Marking area of 8 byte at 9D6E "enemy_directions"
+Marking area of 8 byte at 9D76 "direction_timers"
+Marking area of 8 byte at 9D7E "explosion_steps"
+Marking area of 1 byte at 9D86 "exploding"
+Marking area of 1 byte at 9D87 "fire_state"
+Marking area of 1 byte at 9D88 "joystick_state"
+Marking area of 1 byte at 9D89 "sprite_coll_state"
+Marking area of 2 byte at 9D8A "lives"
+Marking area of 1 byte at 9D8C "current_player"
+Marking area of 2 byte at 9D8D "score_lo"
+Marking area of 2 byte at 9D8F "score_hi"
+Marking area of 1 byte at 9D91 "high_score_lo"
+Marking area of 1 byte at 9D92 "high_score_hi"
+Marking area of 1 byte at 9D93 "two_players"
+Marking area of 1 byte at 9D94 "delay_outer"
+Marking area of 1 byte at 9D95 "delay_inner"
+Marking area of 1 byte at 9D96 "copy_source_lo"
+Marking area of 1 byte at 9D97 "copy_index"
+Marking area of 1 byte at 9D98 "sprite_mask"
+Marking area of 1 byte at 9D99 "sprite_index"
+Marking area of 1 byte at 9D9A "sprite_coord_index"
+Marking area of 1 byte at 9D9B "move_result"
+Marking area of 1 byte at 9D9C "move_count"
+Marking area of 1 byte at 9D9D "unused_9d9d"
+Marking area of 1 byte at 9D9E "digit"
+Marking area of 1 byte at 9D9F "score_player"
+Marking area of 1 byte at 9DA0 "score_column"
+Marking area of 1 byte at 9DA1 "unused_9da1"
+Marking area of 1 byte at 9DA2 "title_countdown_lo"
+Marking area of 1 byte at 9DA3 "title_countdown_hi"
+Marking area of 47 byte at 9DA4 "vic_init"
+Marking area of 1 byte at 9DD3 "shot_attack_decay"
+Marking area of 1 byte at 9DD4 "shot_sustain_release"
+Marking area of 1 byte at 9DD5 "shot_frequency_hi"
+Marking area of 1 byte at 9DD6 "shot_frequency_lo"
+Marking area of 1 byte at 9DD7 "shot_sweep_hi"
+Marking area of 1 byte at 9DD8 "shot_sweep_lo"
+Marking area of 1 byte at 9DD9 "explosion_attack_decay"
+Marking area of 1 byte at 9DDA "explosion_sustain_release"
+Marking area of 37 byte at 9DDB "unused_9ddb"
+Will disassemble from 9E00
+Will disassemble from 9E2C
+Marking area of 12 byte at 9E34 "unused_9e34"
+Marking area of 105 char at 9E40 "crack_trainer_msg"
+Marking area of 2 byte at 9EA9 "unused_9ea9"
+Marking area of 12629 byte at 9EAB "untouched_9eab"
+Marking area of 1 byte at 0 "cpu_port_direction"
+Marking area of 1 byte at 1 "cpu_port"
+Marking area of 41 byte at 2 "null"
+Marking area of 1 word at 2B "basic_start"
+Marking area of 1 word at 2D "basic_variables"
+Marking area of 1 word at 2F "basic_arrays"
+Marking area of 1 word at 31 "basic_arrays_end"
+Marking area of 1 word at 33 "basic_strings"
+Marking area of 2 byte at 35 "null"
+Marking area of 1 word at 37 "basic_memory_end"
+Marking area of 1 word at 39 "basic_line_number"
+Marking area of 56 byte at 3B "null"
+Marking area of 24 byte at 73 "chrget"
+Marking area of 5 byte at 8B "null"
+Marking area of 1 byte at 90 "io_status"
+Marking area of 1 byte at 91 "stop_key"
+Marking area of 14 byte at 92 "null"
+Marking area of 3 byte at A0 "jiffy_clock"
+Marking area of 34 byte at A3 "null"
+Marking area of 1 byte at C5 "last_key"
+Marking area of 1 byte at C6 "keyboard_buffer_length"
+Marking area of 10 byte at C7 "null"
+Marking area of 1 word at D1 "screen_line"
+Marking area of 1 byte at D3 "cursor_column"
+Marking area of 2 byte at D4 "null"
+Marking area of 1 byte at D6 "cursor_row"
+Marking area of 28 byte at D7 "null"
+Marking area of 1 word at F3 "color_line"
+Marking area of 11 byte at F5 "null"
+Marking area of 256 byte at 100 "stack"
+Marking area of 89 byte at 200 "basic_input_buffer"
+Marking area of 30 byte at 259 "null"
+Marking area of 10 byte at 277 "keyboard_buffer"
+Marking area of 5 byte at 281 "null"
+Marking area of 1 byte at 286 "text_color"
+Marking area of 1 byte at 287 "null"
+Marking area of 1 byte at 288 "screen_page"
+Marking area of 119 byte at 289 "null"
+Marking area of 1 addr at 300 "basic_error_vector"
+Marking area of 1 addr at 302 "basic_main_vector"
+Marking area of 16 byte at 304 "null"
+Marking area of 1 addr at 314 "irq_vector"
+Marking area of 1 addr at 316 "brk_vector"
+Marking area of 1 addr at 318 "nmi_vector"
+Marking area of 1 addr at 31A "open_vector"
+Marking area of 1 addr at 31C "close_vector"
+Marking area of 1 addr at 31E "chkin_vector"
+Marking area of 1 addr at 320 "chkout_vector"
+Marking area of 1 addr at 322 "clrchn_vector"
+Marking area of 1 addr at 324 "chrin_vector"
+Marking area of 1 addr at 326 "chrout_vector"
+Marking area of 1 addr at 328 "stop_vector"
+Marking area of 1 addr at 32A "getin_vector"
+Marking area of 1 addr at 32C "clall_vector"
+Marking area of 1 addr at 32E "user_vector"
+Marking area of 1 addr at 330 "load_vector"
+Marking area of 1 addr at 332 "save_vector"
+Marking area of 8 byte at 334 "null"
+Marking area of 192 byte at 33C "tape_buffer"
+Marking area of 4 byte at 3FC "null"
+Marking area of 1000 byte at 400 "screen_ram"
+Marking area of 16 byte at 7E8 "null"
+Marking area of 8 byte at 7F8 "sprite_pointers"
+Marking area of 1 addr at A000 "basic_cold_start_vector"
+Marking area of 1 addr at A002 "basic_warm_start_vector"
+Marking area of 8188 byte at A004 "null"
+Marking area of 16 byte at D000 "vic_sprite_coords"
+Marking area of 1 byte at D010 "vic_sprite_x_high_bits"
+Marking area of 1 byte at D011 "vic_control_1"
+Marking area of 1 byte at D012 "vic_raster"
+Marking area of 1 byte at D013 "vic_light_pen_x"
+Marking area of 1 byte at D014 "vic_light_pen_y"
+Marking area of 1 byte at D015 "vic_sprite_enable"
+Marking area of 1 byte at D016 "vic_control_2"
+Marking area of 1 byte at D017 "vic_sprite_double_height"
+Marking area of 1 byte at D018 "vic_memory_setup"
+Marking area of 1 byte at D019 "vic_irq_status"
+Marking area of 1 byte at D01A "vic_irq_enable"
+Marking area of 1 byte at D01B "vic_sprite_priority"
+Marking area of 1 byte at D01C "vic_sprite_multicolor"
+Marking area of 1 byte at D01D "vic_sprite_double_width"
+Marking area of 1 byte at D01E "vic_sprite_collision"
+Marking area of 1 byte at D01F "vic_background_collision"
+Marking area of 1 byte at D020 "border_color"
+Marking area of 1 byte at D021 "background_color"
+Marking area of 1 byte at D022 "background_color_1"
+Marking area of 1 byte at D023 "background_color_2"
+Marking area of 1 byte at D024 "background_color_3"
+Marking area of 1 byte at D025 "sprite_multicolor_1"
+Marking area of 1 byte at D026 "sprite_multicolor_2"
+Marking area of 8 byte at D027 "vic_sprite_colors"
+Marking area of 977 byte at D02F "null"
+Marking area of 1 word at D400 "voice1_frequency"
+Marking area of 1 word at D402 "voice1_pulse_width"
+Marking area of 1 byte at D404 "voice1_control"
+Marking area of 1 byte at D405 "voice1_attack_decay"
+Marking area of 1 byte at D406 "voice1_sustain_release"
+Marking area of 1 word at D407 "voice2_frequency"
+Marking area of 1 word at D409 "voice2_pulse_width"
+Marking area of 1 byte at D40B "voice2_control"
+Marking area of 1 byte at D40C "voice2_attack_decay"
+Marking area of 1 byte at D40D "voice2_sustain_release"
+Marking area of 1 word at D40E "voice3_frequency"
+Marking area of 1 word at D410 "voice3_pulse_width"
+Marking area of 1 byte at D412 "voice3_control"
+Marking area of 1 byte at D413 "voice3_attack_decay"
+Marking area of 1 byte at D414 "voice3_sustain_release"
+Marking area of 1 word at D415 "filter_cutoff"
+Marking area of 1 byte at D417 "filter_control"
+Marking area of 1 byte at D418 "sid_vol_filter"
+Marking area of 1 byte at D419 "paddle_x"
+Marking area of 1 byte at D41A "paddle_y"
+Marking area of 1 byte at D41B "voice3_oscillator"
+Marking area of 1 byte at D41C "voice3_envelope"
+Marking area of 995 byte at D41D "null"
+Marking area of 1000 byte at D800 "color_ram"
+Marking area of 24 byte at DBE8 "null"
+Marking area of 1 byte at DC00 "cia1_port_a"
+Marking area of 1 byte at DC01 "cia1_port_b"
+Marking area of 1 byte at DC02 "cia1_direction_a"
+Marking area of 1 byte at DC03 "cia1_direction_b"
+Marking area of 1 word at DC04 "cia1_timer_a"
+Marking area of 1 word at DC06 "cia1_timer_b"
+Marking area of 1 byte at DC08 "cia1_tod_tenths"
+Marking area of 1 byte at DC09 "cia1_tod_seconds"
+Marking area of 1 byte at DC0A "cia1_tod_minutes"
+Marking area of 1 byte at DC0B "cia1_tod_hours"
+Marking area of 1 byte at DC0C "cia1_serial"
+Marking area of 1 byte at DC0D "cia1_irq_control"
+Marking area of 1 byte at DC0E "cia1_timer_a_control"
+Marking area of 1 byte at DC0F "cia1_timer_b_control"
+Marking area of 240 byte at DC10 "null"
+Marking area of 1 byte at DD00 "cia2_port_a"
+Marking area of 1 byte at DD01 "cia2_port_b"
+Marking area of 1 byte at DD02 "cia2_direction_a"
+Marking area of 1 byte at DD03 "cia2_direction_b"
+Marking area of 1 word at DD04 "cia2_timer_a"
+Marking area of 1 word at DD06 "cia2_timer_b"
+Marking area of 1 byte at DD08 "cia2_tod_tenths"
+Marking area of 1 byte at DD09 "cia2_tod_seconds"
+Marking area of 1 byte at DD0A "cia2_tod_minutes"
+Marking area of 1 byte at DD0B "cia2_tod_hours"
+Marking area of 1 byte at DD0C "cia2_serial"
+Marking area of 1 byte at DD0D "cia2_irq_control"
+Marking area of 1 byte at DD0E "cia2_timer_a_control"
+Marking area of 1 byte at DD0F "cia2_timer_b_control"
+Marking area of 240 byte at DD10 "null"
+Marking area of 256 byte at DE00 "io_area_1"
+Marking area of 256 byte at DF00 "io_area_2"
+Marking area of 8186 byte at E000 "null"
+Marking area of 1 addr at FFFA "nmi_hardware_vector"
+Marking area of 1 addr at FFFC "reset_hardware_vector"
+Marking area of 1 addr at FFFE "irq_hardware_vector"
+Starting flow analysis.
+Unnamed target: l9CF4 from address $9ce0
+Unnamed target: l9D00 from address $9d04
+Unnamed target: l901A from address $900e
+Unnamed target: l901D from address $9013
+Unnamed target: l99F7 from address $99a1
+Unnamed target: l99AB from address $99a3
+Unnamed target: l96C6 from address $96cf
+Unnamed target: l94EA from address $94ef
+Unnamed target: l94F3 from address $94fa
+Unnamed target: l96D3 from address $96ee
+Unnamed target: l96FF from address $96fa
+Unnamed target: l96F2 from address $9702
+Unnamed target: l9712 from address $9718
+Unnamed target: l9805 from address $9815
+Unnamed target: l9D16 from address $9d12
+Unnamed target: l9D24 from address $9d20
+Unnamed target: l97A5 from address $97a1
+Unnamed target: l97C8 from address $97ba
+Unnamed target: l97FF from address $97f1
+Unnamed target: l9795 from address $97fd
+Unnamed target: l995F from address $9945
+Unnamed target: l9953 from address $9947
+Unnamed target: l996C from address $9968
+Unnamed target: l9762 from address $9770
+Unnamed target: l99BA from address $99a8
+Unnamed target: l9BCE from address $9bdc
+Unnamed target: l9BE0 from address $9bee
+Unnamed target: l9BF2 from address $9c00
+Unnamed target: l9C04 from address $9c12
+Unnamed target: l9C16 from address $9c24
+Unnamed target: l9C2A from address $9c42
+Unnamed target: l99CC from address $99c7
+Unnamed target: l9A47 from address $99ce
+Unnamed target: l9A3B from address $99d2
+Unnamed target: l9A42 from address $99d6
+Unnamed target: l9569 from address $956a
+Unnamed target: l9566 from address $956d
+Unnamed target: l99C9 from address $99de
+Unnamed target: l9AA4 from address $9a68
+Unnamed target: l9785 from address $9778
+Unnamed target: l9775 from address $9788
+Unnamed target: l951B from address $94ff
+Unnamed target: l9510 from address $9507
+Unnamed target: l9506 from address $950c
+Unnamed target: l9526 from address $9519
+Unnamed target: l93F6 from address $93db
+Unnamed target: l93F2 from address $93e0
+Unnamed target: l93F8 from address $93f4
+Unnamed target: l9345 from address $9303
+Unnamed target: l9338 from address $932b
+Unnamed target: l931E from address $9343
+Unnamed target: l98F6 from address $989e
+Unnamed target: l98DA from address $98a2
+Unnamed target: l993B from address $98d8
+Unnamed target: l98FE from address $98dc
+Unnamed target: l9932 from address $9900
+Unnamed target: l9352 from address $934d
+Unnamed target: l93D5 from address $934f
+Unnamed target: l9365 from address $935a
+Unnamed target: l93CA from address $9363
+Unnamed target: l9372 from address $9367
+Unnamed target: l937F from address $9374
+Unnamed target: l93C0 from address $93a7
+Unnamed target: l93D7 from address $93c8
+Unnamed target: l9223 from address $91d7
+Unnamed target: l91FD from address $91df
+Unnamed target: l9225 from address $91fb
+Unnamed target: l942F from address $93fb
+Unnamed target: l9417 from address $9409
+Unnamed target: l942B from address $9415
+Unnamed target: l9425 from address $941a
+Unnamed target: l9431 from address $942d
+Unnamed target: l9440 from address $943a
+Unnamed target: l9442 from address $943e
+Unnamed target: l946B from address $945d
+Unnamed target: l9480 from address $9473
+Unnamed target: l94AB from address $9488
+Unnamed target: l949E from address $9495
+Unnamed target: l94A7 from address $949c
+Unnamed target: l94AD from address $94a9
+Unnamed target: l9240 from address $9231
+Unnamed target: l92B6 from address $923e
+Unnamed target: l9286 from address $9245
+Unnamed target: l92AE from address $924c
+Unnamed target: l92F8 from address $929f
+Unnamed target: l92EA from address $92e0
+Unnamed target: l92EF from address $92e8
+Unnamed target: l95B8 from address $957b
+Unnamed target: l9588 from address $9583
+Unnamed target: l960F from address $9585
+Unnamed target: l963A from address $9614
+Unnamed target: l9635 from address $961a
+Unnamed target: l962D from address $9624
+Unnamed target: l9572 from address $9637
+Unnamed target: l9665 from address $963f
+Unnamed target: l9660 from address $9645
+Unnamed target: l9658 from address $964f
+Unnamed target: l96B4 from address $9656
+Unnamed target: l9690 from address $966a
+Unnamed target: l968B from address $9670
+Unnamed target: l9683 from address $967a
+Unnamed target: l96AF from address $969b
+Unnamed target: l95AF from address $959f
+Unnamed target: l95D9 from address $95bd
+Unnamed target: l95D1 from address $95c4
+Unnamed target: l95EA from address $95de
+Unnamed target: l94D5 from address $94cc
+Unnamed target: l95FB from address $95ef
+Unnamed target: l9551 from address $955a
+Unnamed target: l9A65 from address $9aa2
+Unnamed target: l9AE3 from address $9af5
+Unnamed target: l9B40 from address $9b23
+Unnamed target: l9B1D from address $9b37
+Unnamed target: l99EB from address $99b8
+Unnamed target: l99EF from address $99f5
+Unnamed target: l9B89 from address $9b50
+Unnamed target: l9B5D from address $9b68
+Unnamed target: l9B7C from address $9b87
+Unnamed target: l9B8B from address $9b94
+Unnamed target: l9BA3 from address $9bbe
+Unnamed target: l9A19 from address $9a22
+Unnamed target: l9E0D from address $9e19
+Unnamed target: l9E1C from address $9e25
+Unnamed target: l019F from address $010b
+Unnamed target: l01AC from address $01a1
+Unnamed target: l01AD from address $01a4
+Unnamed target: l01B5 from address $01b1
+Unnamed target: l0117 from address $0111
+Unnamed target: l012C from address $0115
+Unnamed target: l010B from address $011a
+Unnamed target: l01C5 from address $0120
+Unnamed target: l011D from address $0124
+Unnamed target: l0197 from address $0135
+Unnamed target: l013E from address $0137
+Unnamed target: l0131 from address $013c
+Unnamed target: l0147 from address $0140
+Unnamed target: l0191 from address $0144
+Unnamed target: l015B from address $0153
+Unnamed target: l0161 from address $0169
+Unnamed target: l0155 from address $016d
+Unnamed target: l0183 from address $017f
+Unnamed target: l01B8 from address $0187
+Unnamed target: l01C3 from address $01bf
+Unnamed target: l0187 from address $018c
+Unnamed target: l0108 from address $018e
+Writing out/zwark.asm
+~~~
+
+.virtual $0001
+; which ROMs and I/O are banked in
+; written by: decrunch
+cpu_port:		.byte	?
+; Zwark (C) 1982 Robert Wentworth, cracked by Manik, taken while the game runs.
+; The cracked PRG was crunched: the decruncher still sits in the stack page and its
+; source and the remains of the packed data at $0900-$12e4. Memory marked untouched
+; still has VICE's power-on pattern.
+; ---- zero page ----
+; read by: decrunch
+; written by: decrunch
+; modified by: decrunch
+decrunch_count:		.byte	?
+; read by: decrunch
+; written by: decrunch
+; modified by: decrunch
+decrunch_bits:		.byte	?
+.endv
+
+.virtual $002d
+; the end of the BASIC program; the protection check expects $0844
+; read by: check_protection
+basic_end:		.word	?
+.endv
+
+.virtual $0050
+; read by: check_protection
+; written by: check_protection
+; modified by: check_protection
+clear_pointer:		.word	?
+.endv
+
+.virtual $0057
+; read by: copy_sprite
+; written by: copy_sprite
+sprite_source:		.word	?
+; read by: copy_sprite
+; written by: copy_sprite
+; modified by: copy_sprite
+sprite_destination:		.word	?
+.endv
+
+.virtual $0073
+; BASIC's CHRGET, patched by init_game to jump to actual_start_game
+; read by: check_protection
+; written by: init_game
+chrget:
+		.fill	3
+.endv
+
+.virtual $00ae
+; read by: decrunch, l01B8
+; written by: decrunch
+; modified by: decrunch, l01B8
+decrunch_output:		.word	?
+.endv
+
+.virtual $00fb
+; written by: l019F
+; modified by: l019F
+decrunch_byte:		.byte	?
+; read by: decrunch, l01AD
+; modified by: l01AD
+decrunch_input:		.word	?
+; read by: decrunch, l01C5
+; modified by: l01C5
+decrunch_end:		.word	?
+.endv
+
+*=$0100
+
+; ---- decruncher, copied from decruncher_source ----
+decrunch:
+		lda (decrunch_input), y
+		sta screen_ram + $31c, y
+		iny 
+		bne decrunch
+; jumped to by: decrunch
+l0108:
+		tya 
+		sta decrunch_bits
+; jumped to by: decrunch
+l010B:
+		jsr l019F
+		rol 
+		rol decrunch_bits
+		bne l0117
+		cmp decrunch_bits
+		beq l012C
+; jumped to by: decrunch
+l0117:
+		jsr l019F
+		bcs l010B
+		tax 
+; jumped to by: decrunch
+l011D:
+		jsr l01AD
+		jsr l01C5
+		dex 
+		bne l011D
+		dec decrunch_bits
+		bpl l011D
+		sty decrunch_bits
+; jumped to by: decrunch
+l012C:
+		tya 
+		sty decrunch_output
+		sty decrunch_output + $1
+; jumped to by: decrunch
+l0131:
+		jsr l019F
+		rol 
+		bcs l0197
+		beq l013E
+		jsr l019F
+		bcs l0131
+; jumped to by: decrunch
+l013E:
+		sta decrunch_count
+		beq l0147
+		cmp #$01
+		beq l0191
+		bit $02e6
+; jumped to by: decrunch
+l0147 = $0147
+		jsr l019F
+		rol decrunch_bits
+		jsr l019F
+		rol decrunch_bits
+		bcc l015B
+; jumped to by: decrunch
+l0155:
+		inc decrunch_output
+		bne l015B
+		inc decrunch_output + $1
+; jumped to by: decrunch
+l015B:
+		ldx decrunch_bits
+		lda decrunch_table + $3, x
+		tax 
+; jumped to by: decrunch
+l0161:
+		jsr l019F
+		rol decrunch_output
+		rol decrunch_output + $1
+		dex 
+		bne l0161
+		dec decrunch_bits
+		bpl l0155
+		lda decrunch_end
+		clc 
+		adc decrunch_output
+		tax 
+		lda decrunch_end + $1
+		adc decrunch_output + $1
+		sta decrunch_output + $1
+		txa 
+		sec 
+		adc decrunch_count
+		bcc l0183
+		inc decrunch_output + $1
+; jumped to by: decrunch
+l0183:
+		sta decrunch_output
+		inc decrunch_count
+; jumped to by: decrunch
+l0187:
+		jsr l01B8
+		dec decrunch_count
+		bne l0187
+		jmp l0108
+
+; jumped to by: decrunch
+l0191:
+		sty decrunch_count
+		ldx #$04
+		bne l0161
+; jumped to by: decrunch
+l0197:
+		lda #$37
+		sta cpu_port
+		cli 
+		jmp start
+
+; called by: decrunch
+l019F:
+		asl decrunch_byte
+		bne l01AC
+		pha 
+		jsr l01AD
+		sec 
+		rol 
+		sta decrunch_byte
+		pla 
+; jumped to by: l019F
+l01AC:
+		rts 
+
+; called by: decrunch, l019F
+l01AD:
+		lda (decrunch_input), y
+		cpy decrunch_input
+		bne l01B5
+		dec decrunch_input + $1
+; jumped to by: l01AD
+l01B5:
+		dec decrunch_input
+		rts 
+
+; called by: decrunch
+l01B8:
+		lda (decrunch_output), y
+		inc screen_ram
+		cpy decrunch_output
+		bne l01C3
+		dec decrunch_output + $1
+; jumped to by: l01B8
+l01C3:
+		dec decrunch_output
+; called by: decrunch
+l01C5:
+		sta (decrunch_end), y
+		cpy decrunch_end
+		bne decrunch_table
+		dec decrunch_end + $1
+
+; jumped to by: l01C5
+; read by: decrunch
+decrunch_table:
+		.byte	$c6, $fe, $60, $04
+unused_stack:
+		.byte	$02, $02, $03, $ff, $ff, $00, $00, $00, $00, $ff, $ff, $ff, $ff, $00, $00, $00
+		.byte	$00, $ff, $7d, $ea, $12, $04, $7d, $ea, $7d, $ea, $04, $02, $ff, $a0
+stack:
+		.byte	$ce, $91, $8c, $9a, $e7, $99, $1c, $90, $00, $00, $00, $ff, $a7, $79, $a6, $9c
+		.byte	$e3
+*=$0340
+
+; ---- sprite images, copied there by copy_sprite ----
+; pointer $0d
+player_image:
+		.byte	$00, $30, $00, $00, $30, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00, $00
+		.byte	$fc, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc
+		.byte	$00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00
+		.byte	$15, $55, $50, $55, $55, $54, $00, $a8, $00, $00, $a8, $00, $02, $aa, $00
+unused_037f:		.byte	$00
+; pointer $0e
+bullet_image:
+		.byte	$00, $00, $00, $00, $30, $00, $00, $fc, $00, $00, $30, $00, $00, $48, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+unused_03bf:		.byte	$02
+; pointer $0f, for sprites 2 and 7
+enemy_image_2:
+		.byte	$02, $00, $20, $00, $80, $80, $00, $2a, $00, $08, $b3, $88, $22, $88, $a2, $2f
+		.byte	$ea, $fe, $2f, $e2, $fe, $2f, $80, $be, $08, $80, $88, $08, $80, $88, $08, $22
+		.byte	$08, $08, $22, $08, $02, $22, $20, $02, $22, $20, $08, $22, $08, $08, $80, $88
+		.byte	$20, $00, $02, $20, $00, $02, $20, $00, $02, $20, $00, $02, $20, $00, $02
+unused_03ff:		.byte	$00
+
+.virtual $0400
+; written by: decrunch, draw_scores, draw_turns, show_top_score_line, show_copyright, update_high_score, hi_score_draw, title_screen, show_game_over, show_top_score_row_14, draw_logo, start
+; modified by: l01B8
+screen_ram:
+		.fill	1000
+.endv
+
+.virtual $07f8
+; read by: explode
+; written by: init_game
+sprite_pointers:
+		.fill	8
+.endv
+
+*=$0800
+
+; pointers $20-$23, for sprites 3-6; the BASIC stub was here
+; read by: check_protection
+; written by: no_trainer
+enemy_image_3:
+		.byte	$02, $00, $20, $00, $80, $80, $00, $2a, $00, $08, $b3, $88, $22, $88, $a2, $2f
+		.byte	$ea, $fe, $2f, $e2, $fe, $2f, $80, $be, $08, $80, $88, $08, $80, $88, $08, $22
+		.byte	$08, $08, $22, $08, $02, $22, $20, $02, $22, $20, $08, $22, $08, $08, $80, $88
+		.byte	$20, $00, $02, $20, $00, $02, $20, $00, $02, $20, $00, $02, $20, $00, $02
+unused_083f:		.byte	$00
+enemy_image_4:
+		.byte	$02, $00, $20, $00, $80, $80, $00, $2a, $00, $08, $b3, $88, $22, $88, $a2, $2f
+		.byte	$ea, $fe, $2f, $e2, $fe, $2f, $80, $be, $08, $80, $88, $08, $80, $88, $08, $22
+		.byte	$08, $08, $22, $08, $02, $22, $20, $02, $22, $20, $08, $22, $08, $08, $80, $88
+		.byte	$20, $00, $02, $20, $00, $02, $20, $00, $02, $20, $00, $02, $20, $00, $02
+unused_087f:		.byte	$00
+enemy_image_5:
+		.byte	$02, $00, $20, $00, $80, $80, $00, $2a, $00, $08, $b3, $88, $22, $88, $a2, $2f
+		.byte	$ea, $fe, $2f, $e2, $fe, $2f, $80, $be, $08, $80, $88, $08, $80, $88, $08, $22
+		.byte	$08, $08, $22, $08, $02, $22, $20, $02, $22, $20, $08, $22, $08, $08, $80, $88
+		.byte	$20, $00, $02, $20, $00, $02, $20, $00, $02, $20, $00, $02, $20, $00, $02
+unused_08bf:		.byte	$00
+enemy_image_6:
+		.byte	$02, $00, $20, $00, $80, $80, $00, $2a, $00, $08, $b3, $88, $22, $88, $a2, $2f
+		.byte	$ea, $fe, $2f, $e2, $fe, $2f, $80, $be, $08, $80, $88, $08, $80, $88, $08, $22
+		.byte	$08, $08, $22, $08, $02, $22, $20, $02, $22, $20, $08, $22, $08, $08, $80, $88
+		.byte	$20, $00, $02, $20, $00, $02, $20, $00, $02, $20, $00, $02, $20, $00, $02
+unused_08ff:		.byte	$00
+; the remains of the packed data, behind what the decruncher overwrote
+packed_data:
+		.byte	$ee, $17, $2f, $64, $60, $da, $0b, $8f, $f8, $ea, $da, $98, $94, $06, $45, $9a
+		.byte	$99, $84, $e6, $28, $68, $93, $35, $66, $d8, $2c, $24, $8e, $27, $ac, $6a, $76
+		.byte	$05, $f8, $ab, $08, $a3, $11, $4e, $cc, $67, $66, $64, $9b, $99, $53, $cd, $90
+		.byte	$cc, $cd, $e0, $cd, $26, $08, $f2, $63, $f8, $12, $e9, $d9, $a9, $9c, $e2, $31
+		.byte	$de, $90, $36, $32, $8e, $d5, $93, $fe, $d9, $03, $7e, $4c, $ef, $32, $3b, $6c
+		.byte	$2a, $85, $65, $15, $e1, $0c, $a1, $46, $55, $58, $c9, $03, $d8, $a9, $64, $89
+		.byte	$a2, $85, $a0, $91, $d0, $4b, $f9, $1e, $4d, $d9, $2b, $cd, $02, $a4, $16, $bb
+		.byte	$fa, $cc, $0e, $e8, $b3, $1b, $cf, $f8, $67, $d6, $c5, $fe, $20, $9c, $48, $1f
+		.byte	$d5, $2d, $31, $43, $17, $52, $41, $32, $db, $d2, $39, $34, $c9, $98, $0d, $1e
+		.byte	$fe, $b1, $bd, $01, $a5, $29, $0f, $3c, $4e, $f6, $9d, $e8, $36, $89, $f0, $0d
+		.byte	$8e, $8f, $b3, $db, $c6, $1e, $6c, $7b, $66, $16, $9e, $91, $04, $34, $ed, $98
+		.byte	$c1, $10, $35, $fc, $25, $18, $09, $2a, $03, $2c, $ca, $f1, $9c, $31, $8e, $6a
+		.byte	$5f, $ff, $b3, $cc, $01, $e8, $32, $d6, $f1, $3c, $90, $73, $1f, $8f, $14, $74
+		.byte	$4d, $e6, $c0, $c9, $c1, $d6, $0e, $ce, $74, $47, $a4, $86, $c5, $04, $5b, $85
+		.byte	$c9, $90, $2f, $69, $aa, $6c, $39, $e0, $74, $cf, $de, $ca, $b0, $19, $3b, $63
+		.byte	$6c, $cc, $65, $0c, $46, $76, $b0, $08, $f1, $c3, $2c, $0a, $f0, $c0, $61, $30
+		.byte	$56, $d5, $dd, $59, $85, $6c, $66, $d2, $5a, $63, $a2, $c7, $25, $21, $63, $ad
+		.byte	$a8, $32, $56, $68, $de, $f3, $cb, $a7, $9f, $29, $cd, $cc, $43, $14, $84, $bc
+		.byte	$5c, $24, $f6, $ad, $9b, $70, $88, $cc, $66, $ea, $88, $8e, $58, $27, $8a, $a2
+		.byte	$9b, $ee, $4f, $07, $b3, $30, $c9, $fa, $b0, $d2, $fe, $b2, $6d, $26, $43, $ee
+		.byte	$90, $df, $86, $57, $84, $58, $cc, $8f, $4e, $65, $85, $2c, $bd, $66, $06, $aa
+		.byte	$26, $5a, $9c, $f9, $22, $67, $b1, $57, $91, $59, $45, $73, $74, $14, $30, $21
+		.byte	$62, $b6, $1a, $d9, $27, $96, $4a, $c7, $65, $b9, $c5, $b0, $b4, $8e, $aa, $8a
+		.byte	$0b, $49, $31, $09, $64, $92, $25, $46, $28, $88, $14, $8d, $06, $f0, $b1, $0a
+		.byte	$ac, $59, $05, $81, $c1, $b4, $06, $2c, $12, $66, $0b, $6a, $21, $0a, $48, $45
+		.byte	$7b, $cc, $8a, $68, $60, $ad, $31, $57, $90, $ad, $4e, $88, $d9, $35, $61, $57
+		.byte	$ce, $69, $a6, $9c, $8d, $d5, $df, $b0, $ac, $46, $61, $ae, $4e, $61, $ca, $8a
+		.byte	$88, $4e, $f7, $5b, $93, $04, $31, $fd, $94, $4b, $26, $d8, $93, $d0, $3b, $9c
+		.byte	$8e, $20, $fa, $92, $f0, $03, $4c, $0f, $96, $62, $6a, $86, $e8, $a9, $28, $3d
+		.byte	$61, $54, $bd, $ec, $ae, $9a, $16, $06, $e5, $c9, $17, $ce, $5e, $9a, $85, $49
+		.byte	$ff, $2d, $fd, $a0, $4c, $b8, $79, $73, $f3, $0d, $c5, $49, $ce, $50, $30, $70
+		.byte	$e0, $6c, $73, $1a, $26, $10, $46, $0b, $ae, $7f, $2a, $10, $43, $d8, $74, $3e
+		.byte	$e6, $80, $1d, $c9, $01, $53, $d8, $02, $4d, $a0, $01, $7c, $76, $ff, $20, $79
+		.byte	$19, $13, $c7, $41, $f9, $93, $ae, $99, $4f, $87, $cb, $3d, $ae, $60, $f0, $0a
+		.byte	$ad, $ae, $a2, $01, $60, $02, $4c, $a6, $94, $66, $b4, $08, $51, $15, $ef, $89
+		.byte	$ec, $44, $c5, $43, $f5, $60, $08, $b1, $42, $d4, $40, $90, $5c, $bb, $01, $15
+		.byte	$8f, $74, $e5, $10, $5e, $24, $b9, $56, $19, $b4, $53, $b0, $07, $3e, $7f, $cb
+		.byte	$c9, $80, $90, $31, $b4, $41, $13, $8f, $14, $c5, $82, $cd, $a5, $12, $e6, $1d
+		.byte	$0a, $2c, $f5, $87, $79, $ac, $ce, $1b, $29, $95, $ad, $62, $84, $3a, $0d, $06
+		.byte	$03, $a6, $b4, $40, $7b, $72, $5a, $bc, $01, $f0, $6c, $4c, $74, $73, $74, $09
+		.byte	$74, $74, $a9, $e4, $85, $75, $96, $15, $46, $c4, $f8, $07, $ca, $75, $2e, $40
+		.byte	$23, $b6, $ed, $37, $b4, $6d, $7b, $82, $b4, $b0, $03, $71, $cf, $a6, $2f, $0d
+		.byte	$16, $d6, $cc, $ed, $0d, $32, $42, $6e, $48, $f8, $0b, $32, $c7, $8e, $6c, $80
+		.byte	$39, $90, $66, $ed, $b5, $13, $d9, $6c, $63, $bb, $8b, $8d, $ec, $46, $d4, $25
+		.byte	$ab, $d2, $83, $03, $98, $58, $2d, $ad, $b9, $33, $83, $6b, $e7, $97, $99, $e8
+		.byte	$c0, $5c, $cd, $d4, $60, $15, $ca, $19, $4f, $5e, $fa, $30, $d1, $8d, $3a, $f1
+		.byte	$33, $5b, $e2, $8c, $6f, $13, $47, $c0, $99, $96, $6a, $fe, $36, $33, $f0, $62
+		.byte	$8f, $de, $ec, $d0, $0b, $82, $6b, $30, $0b, $a9, $66, $72, $32, $76, $a1, $b9
+		.byte	$9a, $39, $6a, $eb, $72, $65, $57, $21, $02, $5b, $21, $13, $72, $55, $b4, $61
+		.byte	$6b, $50, $2c, $8a, $ac, $7d, $b9, $98, $84, $f1, $c2, $8e, $ac, $12, $6c, $d8
+		.byte	$0c, $ae, $19, $bc, $8c, $2e, $98, $33, $6c, $ac, $0b, $46, $e3, $ad, $4c, $d9
+		.byte	$39, $5c, $98, $1e, $02, $8a, $76, $7d, $35, $dd, $a2, $9b, $51, $2c, $06, $53
+		.byte	$30, $ba, $e1, $c7, $9f, $ac, $32, $8d, $a0, $66, $c6, $c3, $f4, $63, $3c, $99
+		.byte	$5c, $a7, $94, $5d, $20, $47, $9a, $d3, $96, $6e, $10, $bb, $d2, $00, $b9, $ca
+		.byte	$ec, $3c, $b9, $08, $fb, $c9, $99, $92, $ee, $bb, $a0, $4a, $98, $99, $07, $07
+		.byte	$3a, $69, $c0, $db, $66, $21, $85, $4d, $da, $a9, $02, $9d, $7d, $24, $a4, $d9
+		.byte	$16, $60, $1a, $17, $01, $66, $ba, $e5, $ca, $28, $03, $29, $d9, $31, $39, $38
+		.byte	$32, $49, $fa, $8d, $91, $02, $ea, $45, $86, $94, $1a, $05, $0e, $19, $23, $12
+		.byte	$14, $08, $20, $33, $7d, $c4, $73, $4e, $4d, $6c, $49, $47, $48, $a2, $97, $53
+		.byte	$43, $4f, $be, $4a, $15, $73, $50, $4c, $41, $59, $45, $da, $36, $2e, $15, $57
+		.byte	$4f, $54, $55, $52, $4e, $53, $3d, $a9, $bb, $31, $23, $3c, $56, $c9, $8c, $d0
+		.byte	$36, $53, $5e, $d5, $0d, $08, $a3, $d6, $36, $e0, $cb, $87, $d3, $7a, $80, $20
+		.byte	$0c, $a5, $53, $8c, $94, $40, $10, $0d, $52, $03, $6d, $7f, $2c, $8a, $61, $c9
+		.byte	$02, $d1, $b3, $ce, $37, $03, $d7, $50, $0f, $a6, $28, $08, $bd, $d8, $e2, $15
+		.byte	$a8, $07, $84, $69, $45, $6c, $1b, $4b, $97, $7d, $c9, $05, $d0, $30, $ad, $04
+		.byte	$dc, $f1, $0b, $10, $0e, $4a, $ae, $0f, $e8, $01, $c1, $d9, $83, $13, $07, $0f
+		.byte	$05, $ee, $da, $ca, $32, $14, $02, $06, $cb, $11, $81, $0e, $5b, $81, $95, $95
+		.byte	$81, $60, $3e, $fe, $d0, $37, $d6, $15, $52, $61, $95, $0d, $63, $76, $c4, $52
+		.byte	$48, $a4, $18, $d0, $0a, $7e, $cd, $b0, $90, $0e, $08, $7e, $c4, $94, $42, $04
+		.byte	$49, $bd, $8f, $f8, $4a, $02, $ad, $2e, $f1, $8a, $b0, $0f, $2b, $11, $72, $8d
+		.byte	$ad, $91, $98, $85, $0d, $e4, $98, $c9, $30, $e9, $09, $ac, $92, $9d, $c0, $00
+		.byte	$d0, $02, $26, $35, $86, $a0, $12, $38, $8a, $70, $05, $a9, $30, $e7, $80, $c8
+		.byte	$99, $28, $04, $e9, $6f, $cc, $6e, $c9, $fe, $90, $54, $64, $fa, $3e, $f3, $24
+		.byte	$4c, $ba, $99, $bb, $55, $9a, $e6, $12, $07, $76, $eb, $c9, $65, $95, $35, $ad
+		.byte	$22, $24, $94, $32, $25, $38, $65, $49, $03, $ec, $92, $77, $b6, $4e, $67, $b2
+		.byte	$4e, $6a, $b2, $5d, $8c, $e4, $1a, $e9, $ce, $a3, $38, $4b, $00, $83, $4b, $9a
+		.byte	$4c, $bd, $99, $da, $5a, $58, $71, $c5, $b2, $f8, $5c, $4d, $9b, $91, $8b, $45
+		.byte	$77, $f7, $9a, $c4, $f0, $aa, $08, $4b, $d0, $fd, $08, $b6, $0a, $b6, $7d, $a9
+		.byte	$20, $cc, $3b, $22, $f2, $9d, $93, $99, $02, $82, $28, $09, $82, $a2, $0f, $71
+		.byte	$8b, $ac, $40, $c6, $30, $02, $11, $04, $0d, $0b, $28, $2a, $12, $d4, $f9, $85
+		.byte	$80, $59, $af, $0c, $4b, $01, $ba, $6e, $25, $60, $60, $b5, $96, $20, $cc, $9b
+		.byte	$45, $9b, $1d, $34, $5a, $c6, $82, $21, $2a, $1d, $0c, $48, $2b, $d0, $a9, $0e
+		.byte	$8d, $da, $7f, $9c, $e9, $3a, $96, $69, $33, $8b, $26, $2f, $8b, $26, $2b, $7b
+		.byte	$6e, $4a, $49, $08, $72, $88, $a9, $a0, $1e, $7c, $d1, $89, $24, $73, $97, $12
+		.byte	$97, $c4, $91, $8d, $de, $20, $26, $92, $b2, $70, $68, $00, $b8, $c4, $c8, $ad
+		.byte	$49, $3c, $6a, $03, $2d, $90, $c1, $39, $0d, $18, $d4, $92, $1d, $4f, $15, $d0
+		.byte	$45, $26, $55, $a2, $0a, $8e, $95, $9d, $60, $06, $31, $89, $3a, $88, $13, $09
+		.byte	$0e, $07, $e9, $91, $8c, $28, $3c, $06, $33, $91, $2d, $43, $14, $17, $47, $c6
+		.byte	$c8, $10, $0c, $b8, $19, $d4, $43, $36, $a1, $23, $72, $00, $bd, $42, $9b, $7b
+		.byte	$bc, $6c, $89, $e1, $4b, $88, $e0, $09, $90, $ec, $68, $6e, $0f, $ad, $99, $0b
+		.byte	$f0, $02, $a2, $1e, $44, $83, $98, $29, $bf, $c8, $b1, $08, $75, $b5, $a5, $c0
+		.byte	$19, $90, $ed, $a9, $ed, $95, $68, $09, $27, $86, $9f, $95, $49, $e1, $4a, $32
+		.byte	$1b, $1d, $cd, $0d, $ee, $14, $e8, $85, $28, $4c, $c9, $86, $f0, $0c, $ce, $41
+		.byte	$9b, $d0, $e4, $66, $4d, $32, $8d, $94, $9d, $d2, $5a, $60, $00, $07, $01, $0d
+		.byte	$ec, $11, $0f, $a9, $80, $12, $66, $0d, $93, $66, $85, $37, $ae, $c4, $49, $60
+		.byte	$c8, $42, $4a, $34, $b9, $11, $8a, $90, $12, $48, $a9, $01, $38, $ed, $3c, $1d
+		.byte	$60, $8c, $3a, $aa, $7a, $6c, $2a, $c5, $1d, $32, $18, $5c, $57, $99, $27, $d0
+		.byte	$d7, $41, $c8, $c0, $08, $ad, $b3, $f3, $16, $a4, $b1, $a0, $4a, $d0, $2b, $10
+		.byte	$90, $e6, $9f, $0c, $46, $5a, $66, $86, $40, $87, $83, $24, $2c, $2a, $56, $8d
+		.byte	$54, $bc, $32, $c1, $bd, $3a, $22, $8b, $8e, $1e, $94, $96, $06, $de, $94, $ae
+		.byte	$97, $a1, $4f, $4c, $07, $90, $e3, $ad, $e8, $29, $fd, $8d, $5b, $01, $9d, $20
+		.byte	$49, $95, $60, $d2, $0f, $45, $0b, $04, $c9, $c8, $71, $13, $61, $6a, $81, $20
+		.byte	$6d, $63, $80, $28, $d8, $55, $7d, $7c, $81, $20, $39, $18, $6e, $42, $98, $2d
+		.byte	$10, $24, $c7, $40, $55, $7c, $42, $9c, $1c, $68, $a9, $06, $9d, $68, $d9, $6d
+		.byte	$26, $1c, $90, $f0, $a2, $34, $a1, $10, $b7, $24, $50, $05, $bd, $cb, $9a, $69
+		.byte	$06, $a9, $04, $83, $8b, $d9, $99, $30, $da, $c8, $e8, $e0, $14, $90, $e6, $60
+		.byte	$5f, $4c, $7a, $0f, $dd, $81, $cc, $c8, $16, $6a, $72, $25, $3a, $87, $09, $51
+		.byte	$2b, $e2, $a5, $0e, $74, $62, $34, $25, $5b, $11, $ad, $71, $65, $3c, $52, $e1
+		.byte	$80, $98, $c0, $c1, $c6, $d8, $10, $13, $82, $89, $87, $01, $b4, $c0, $39, $8c
+		.byte	$e9, $88, $00, $a0, $94, $10, $03, $48, $69, $6d, $00, $00, $00, $a0, $68, $5f
+		.byte	$df, $45, $5e, $c1, $ad, $ec, $01, $a6, $9e, $f0, $30, $f4, $73, $d2, $4c, $d2
+		.byte	$12, $d2, $74, $d2, $09, $d2, $0c, $d2, $2d, $d2, $44, $d0, $06, $a5, $2e, $c9
+		.byte	$92, $3f, $f0, $18, $d9, $60, $94, $1a, $08, $85, $79, $95, $c5, $8a, $91, $0c
+		.byte	$8d, $50, $8e, $fa, $e6, $51, $d0, $f6, $b6, $98, $60, $a8, $29, $0f, $68, $c3
+		.byte	$aa, $98, $67, $00, $10, $c9, $0a, $90, $02, $4b, $87, $06, $69, $30, $a8, $f4
+		.byte	$a1, $60, $4a, $89, $1c, $60, $20, $c8, $50, $c0, $01, $80, $90, $0d, $0e, $4e
+		.byte	$20, $21, $22, $23, $0f, $da, $45, $74, $ad, $f0, $20, $40, $60, $80, $a0, $b7
+		.byte	$01, $ab, $29, $e9, $6d, $48, $0a, $de, $26, $d8, $a0, $d4, $42, $07, $40, $30
+		.byte	$39, $d0, $34, $70, $34, $d4, $0a, $80, $10, $d9, $1b, $34, $22, $56, $05, $c8
+		.byte	$a4, $15, $7f, $f0, $47, $0f, $59, $8a, $87, $0e, $00, $64, $12, $81, $07, $92
+		.byte	$08, $0a, $0c, $02, $27, $f0, $64, $27, $47, $1f, $40, $88, $f0, $40, $35, $c0
+		.byte	$07, $38, $c0, $99, $01, $ff, $a9, $f2, $4b, $44, $12, $8d, $21, $d0, $20, $44
+		.byte	$e5, $a2, $68, $bd, $40, $9e, $bd, $07, $04, $a9, $0f, $9d, $00, $d8, $ca, $10
+		.byte	$f2, $58, $20, $e4, $ff, $f6, $4e, $f0, $09, $c9, $59, $d0, $f5, $a3, $4f, $2c
+		.byte	$4a, $dc, $91, $a9, $9e, $8d, $05, $08, $4c, $52, $87, $90, $02, $36, $80, $81
+		.byte	$00, $40, $12, $45, $03, $53, $55, $7f, $02, $19, $cc, $0d, $01, $0e, $09, $0b
+		.byte	$a5, $0d, $e4, $37, $c0, $07, $38, $00, $63, $50, $c0, $1b, $60, $03, $18, $08
+		.byte	$94, $15, $0e, $b2, $0d, $c1, $14, $d2, $04, $20, $0c, $09, $16, $05, $13, $d2
+		.byte	$07, $00, $81, $2e, $1b, $19, $2f, $0e, $1d, $00, $57, $d4, $ff, $ff, $4c, $09
+		.byte	$90, $42, $54, $b6, $16, $c6, $5d, $d5, $9c, $4c, $96, $c4, $a8, $62, $e1, $4c
+		.byte	$35, $08, $f0, $f2, $31, $17, $41, $65, $9a, $99, $c2, $01, $dc, $25, $97, $2a
+		.byte	$31, $4a, $9a, $a1, $ca, $34, $73, $a2, $40, $c4, $91, $8d, $1c, $08, $26, $92
+		.byte	$91, $70, $45, $03, $50, $a5, $d7, $ce, $20, $63, $cc, $c1, $49, $39, $d0, $d4
+		.byte	$b2, $ba, $66, $6d, $b4, $34, $1b, $60, $35, $80, $5a, $40, $3b, $72, $46, $15
+		.byte	$0c, $50, $05, $55, $54, $19, $60, $a8, $a1, $70, $aa, $54, $68, $03, $fc, $6b
+		.byte	$26, $0b, $a0, $95, $01, $7c, $03, $bc, $a5, $48, $ed, $8d, $b1, $c1, $05, $80
+		.byte	$68, $2a, $28, $9d, $b3, $0c, $22, $65, $a2, $15, $ea, $0d, $e2, $fe, $2f, $b8
+		.byte	$be, $28, $c0, $1e, $86, $b8, $03, $80, $a9, $ee, $24, $22, $14, $08, $80, $88
+		.byte	$74, $c0, $06, $30, $80, $15, $c1, $c5, $c0, $8c, $68, $0f, $da, $90, $91, $33
+		.byte	$a6, $5f, $2b, $d8, $66, $d8, $36, $4c, $26, $2c, $23, $ea, $05, $1b, $6c, $cb
+		.byte	$c6, $01, $44, $39, $44, $41, $40, $e4, $80, $b9, $01, $38, $80, $33, $5a, $30
+		.byte	$8c, $02, $19, $6f, $88, $e3, $15, $6b, $03, $6e, $10, $6d, $80, $04, $52, $2c
+		.byte	$44, $20, $7f, $32, $26, $0b, $02, $28, $29, $6d, $24, $8a, $6a, $40, $63, $1b
+		.byte	$a8, $36, $0a, $42, $50, $db, $18, $b5, $21, $a0, $46, $53, $4d, $30, $83, $01
+		.byte	$f1, $20, $40, $0b, $0c, $c6, $50, $80, $0d, $15, $37, $80, $0b, $11, $aa, $9e
+		.byte	$b1, $fc, $99, $1c, $07, $c8, $d0
+decruncher_source:
+		.byte	$f8, $98, $85, $03, $20, $9f, $01, $2a, $26, $03, $d0, $04, $c5, $03, $f0, $15
+		.byte	$20, $9f, $01, $b0, $ef, $aa, $20, $ad, $01, $20, $c5, $01, $ca, $d0, $f7, $c6
+		.byte	$03, $10, $f3, $84, $03, $98, $84, $ae, $84, $af, $20, $9f, $01, $2a, $b0, $60
+		.byte	$f0, $05, $20, $9f, $01, $b0, $f3, $85, $02, $f0, $05, $c9, $01, $f0, $4b, $2c
+		.byte	$e6, $02, $20, $9f, $01, $26, $03, $20, $9f, $01, $26, $03, $90, $06, $e6, $ae
+		.byte	$d0, $02, $e6, $af, $a6, $03, $bd, $d0, $01, $aa, $20, $9f, $01, $26, $ae, $26
+		.byte	$af, $ca, $d0, $f6, $c6, $03, $10, $e6, $a5, $fe, $18, $65, $ae, $aa, $a5, $ff
+		.byte	$65, $af, $85, $af, $8a, $38, $65, $02, $90, $02, $e6, $af, $85, $ae, $e6, $02
+		.byte	$20, $b8, $01, $c6, $02, $d0, $f9, $4c, $08, $01, $84, $02, $a2, $04, $d0, $ca
+		.byte	$a9, $37, $85, $01, $58, $4c, $00, $9e, $06, $fb, $d0, $09, $48, $20, $ad, $01
+		.byte	$38, $2a, $85, $fb, $68, $60, $b1, $fc, $c4, $fc, $d0, $02, $c6, $fd, $c6, $fc
+		.byte	$60, $b1, $ae, $ee, $00, $04, $c4, $ae, $d0, $02, $c6, $af, $c6, $ae, $91, $fe
+		.byte	$c4, $fe, $d0, $02, $c6, $ff, $c6, $fe, $60, $04, $02, $02, $03
+
+.virtual $12e4
+untouched_12e4:
+		.fill	32028
+.endv
+
+*=$9000
+
+; ---- the game ----
+; jumped to by: no_trainer
+start_game:
+		jmp actual_start_game
+
+signature:
+		.text	"BTD"
+
+unused_9006:
+		.byte	$01, $04, $00
+
+; jumped to by: start_game, main_loop
+actual_start_game:
+		jsr check_protection
+		lda #$fe
+		bne l901A
+main_loop:
+		jsr stop
+		bne l901D
+		beq actual_start_game
+		jsr sound_off
+; jumped to by: actual_start_game, main_loop
+l901A:
+		jsr next_turn
+; jumped to by: main_loop
+l901D:
+		lda cia1_port_b
+		sta joystick_state
+		lda vic_sprite_collision
+		sta sprite_coll_state
+		jsr update_directions
+		jsr move_player
+		sta player_state
+		jsr move_bullet
+		jsr move_enemies
+		jsr update_vic_sprite_positions
+		jsr draw_scores
+		jsr delay
+		lda player_state
+		bne l901A
+		clc 
+		bcc main_loop
+
+; what move_player returned: 0 while alive, 1 after losing a life, $ff when game over
+; read by: main_loop, demo
+; written by: main_loop, demo
+player_state:
+		.byte	$00
+player_sprite:
+		.byte	$00, $30, $00, $00, $30, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00, $00
+		.byte	$fc, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc
+		.byte	$00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00, $00, $fc, $00
+		.byte	$15, $55, $50, $55, $55, $54, $00, $a8, $00, $00, $a8, $00, $02, $aa, $00
+bullet_sprite:
+		.byte	$00, $00, $00, $00, $30, $00, $00, $fc, $00, $00, $30, $00, $00, $48, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+enemy_sprite:
+		.byte	$02, $00, $20, $00, $80, $80, $00, $2a, $00, $08, $b3, $88, $22, $88, $a2, $2f
+		.byte	$ea, $fe, $2f, $e2, $fe, $2f, $80, $be, $08, $80, $88, $08, $80, $88, $08, $22
+		.byte	$08, $08, $22, $08, $02, $22, $20, $02, $22, $20, $08, $22, $08, $08, $80, $88
+		.byte	$20, $00, $02, $20, $00, $02, $20, $00, $02, $20, $00, $02, $20, $00, $02
+explosion_sprite_1:
+		.byte	$00, $00, $00, $00, $00, $00, $00, $8c, $00, $03, $00, $88, $08, $10, $50, $80
+		.byte	$0d, $00, $03, $10, $20, $00, $a6, $00, $04, $52, $00, $10, $66, $d0, $02, $4c
+		.byte	$26, $00, $23, $20, $00, $24, $10, $20, $6c, $40, $08, $00, $00, $01, $02, $00
+		.byte	$00, $41, $40, $00, $00, $00, $10, $00, $00, $00, $00, $00, $00, $00, $00
+explosion_sprite_2:
+		.byte	$00, $04, $00, $04, $00, $00, $30, $8c, $02, $0b, $00, $88, $04, $10, $50, $80
+		.byte	$0d, $00, $03, $10, $20, $00, $84, $04, $04, $52, $00, $10, $44, $d0, $02, $40
+		.byte	$26, $0b, $02, $28, $00, $24, $10, $20, $0c, $40, $08, $00, $04, $01, $12, $10
+		.byte	$10, $41, $42, $00, $22, $04, $10, $10, $00, $04, $41, $00, $00, $04, $00
+explosion_sprite_3:
+		.byte	$04, $08, $20, $30, $83, $01, $00, $00, $40, $0b, $00, $04, $20, $10, $50, $80
+		.byte	$0d, $00, $08, $10, $04, $00, $84, $01, $48, $00, $00, $20, $00, $34, $02, $00
+		.byte	$43, $8b, $02, $0a, $00, $44, $08, $20, $0c, $00, $08, $00, $44, $01, $12, $00
+		.byte	$10, $41, $09, $00, $22, $20, $10, $10, $02, $04, $41, $00, $00, $04, $00
+
+; moves the player with the joystick, and handles it being hit
+; called by: main_loop, demo
+move_player:
+		lda #$01
+		jsr select_sprite
+		lda sprite_mask
+		jsr check_hit
+		bne check_joystick
+		lda sprite_mask
+		jsr explode
+		bne l9223
+		ldx current_player
+; the trainer turns this dec into a bit, so lives never go down
+; written by: start
+lose_life:
+		dec lives, x
+		bmi l91FD
+		ldx #$00
+		lda vic_init, x
+		sta sprite_coords, x
+		inx 
+		lda vic_init, x
+		sta sprite_coords, x
+		lda #$fe
+		and sprite_x_high_bits
+		sta sprite_x_high_bits
+		lda #$01
+		clc 
+		bcc l9225
+; jumped to by: lose_life
+l91FD:
+		lda #$ff
+		bne l9225
+; jumped to by: move_player
+check_joystick:
+		ldx #$01
+		ldy #$00
+check_right:
+		lda #$08
+		bit joystick_state
+		bne check_left
+		lda sprite_mask
+		jsr move_right
+		ldx #$01
+		ldy #$00
+; jumped to by: check_right
+check_left:
+		lda #$04
+		bit joystick_state
+		bne l9223
+		lda sprite_mask
+		jsr move_left
+; jumped to by: move_player, check_left
+l9223:
+		lda #$00
+; jumped to by: lose_life
+l9225:
+		rts 
+
+; fires and moves the bullet
+; called by: main_loop, demo
+move_bullet:
+		lda #$02
+		jsr select_sprite
+		lda sprite_mask
+		jsr check_hit
+		bne l9240
+		lda #$01
+		eor #$ff
+		and fire_state
+		sta fire_state
+		clc 
+		bcc l92B6
+; jumped to by: move_bullet
+l9240:
+		lda #$01
+		bit fire_state
+		bne l9286
+		lda #$10
+		bit joystick_state
+		bne l92AE
+fire_pressed:
+		lda #$02
+		bit fire_state
+		beq l92B6
+		lda #$01
+		jsr select_sprite
+		lda #$01
+		jsr check_hit
+		sta bullet_hit
+		lda #$02
+		jsr select_sprite
+		lda bullet_hit
+		beq l92B6
+		ora fire_state
+		lda #$01
+		ora fire_state
+		sta fire_state
+		lda #$02
+		eor #$ff
+		and fire_state
+		sta fire_state
+		lda #$01
+		jsr play_sound
+; jumped to by: move_bullet
+l9286:
+		lda #$02
+		ora sprite_enable
+		sta sprite_enable
+		lda sprite_mask
+		ldx #$ff
+		ldy #$02
+		jsr move_up
+		lda #$02
+		jsr play_sound
+		cpy #$0a
+		bcs l92F8
+		lda #$01
+		eor #$ff
+		and fire_state
+		sta fire_state
+		clc 
+		bcc l92F8
+; jumped to by: move_bullet
+l92AE:
+		lda #$02
+		ora fire_state
+		sta fire_state
+; jumped to by: move_bullet, fire_pressed
+l92B6:
+		lda #$fd
+		and sprite_enable
+		sta sprite_enable
+		ldx #$00
+		lda sprite_coords, x
+		ldx #$02
+		sta sprite_coords, x
+		dex 
+		ldy sprite_coords, x
+		dey 
+		dey 
+		dey 
+		dey 
+		tya 
+		ldx #$03
+		sta sprite_coords, x
+		lda #$ff
+		jsr play_sound
+		lda #$01
+		bit sprite_x_high_bits
+		bne l92EA
+		lda #$fd
+		and sprite_x_high_bits
+		clc 
+		bcc l92EF
+; jumped to by: fire_pressed
+l92EA:
+		lda #$02
+		ora sprite_x_high_bits
+; jumped to by: fire_pressed
+l92EF:
+		sta sprite_x_high_bits
+		clc 
+		bcc l92F8
+		inc unused_9d9d
+; jumped to by: fire_pressed
+l92F8:
+		rts 
+
+; read by: fire_pressed
+; written by: fire_pressed
+bullet_hit:
+		.byte	$00
+
+; explodes the selected sprite in three steps, scoring a point for an enemy
+; called by: move_player, move_enemies
+explode:
+		ldx sprite_index
+		lda sprite_mask
+		bit exploding
+		bne l9345
+		ora exploding
+		sta exploding
+		lda #$00
+		sta explosion_steps, x
+		lda #$01
+		sta explosion_timers, x
+		ldx #$01
+		lda #$01
+		bit sprite_mask
+		bne l9345
+; jumped to by: explode
+l931E:
+		ldy current_player
+		lda score_lo, y
+		clc 
+		sed 
+		adc #$01
+		sta score_lo, y
+		bcc l9338
+		lda score_hi, y
+		clc 
+		adc #$01
+		sta score_hi, y
+		bcc l9338
+; jumped to by: explode
+l9338:
+		cld 
+		cpx #$01
+		bne l9345
+		inx 
+		lda #$f8
+		bit exploding
+		bne l931E
+; jumped to by: explode
+l9345:
+		lda #$05
+		jsr play_sound
+		dec explosion_timers, x
+		beq l9352
+		jmp l93D5
+
+; jumped to by: explode
+l9352:
+		inc explosion_steps, x
+		lda explosion_steps, x
+		cmp #$01
+		bne l9365
+		lda sprite_pointers, x
+		ldx #$07
+		ldy #$91
+		bne l93CA
+; jumped to by: explode
+l9365:
+		cmp #$02
+		bne l9372
+		lda sprite_pointers, x
+		ldx #$46
+		ldy #$91
+		bne l93CA
+; jumped to by: explode
+l9372:
+		cmp #$03
+		bne l937F
+		lda sprite_pointers, x
+		ldx #$85
+		ldy #$91
+		bne l93CA
+; jumped to by: explode
+l937F:
+		lda sprite_mask
+		eor exploding
+		sta exploding
+		ldx sprite_index
+		lda sprite_images_lo, x
+		sta copy_index
+		ldy sprite_images_hi, x
+		lda sprite_pointers, x
+		ldx copy_index
+		jsr copy_sprite
+		lda #$fe
+		jsr play_sound
+		lda #$03
+		and sprite_mask
+		bne l93C0
+		ldy current_player
+		lda #$0f
+		and score_lo, y
+		bne l93C0
+		ldx sprite_index
+flash_sprite:
+		inc vic_sprite_colors, x
+		lda vic_sprite_colors, x
+		and #$0f
+		beq flash_sprite
+; jumped to by: explode
+l93C0:
+		lda vic_sprite_collision
+		lda #$00
+		sta vic_sprite_collision
+		beq l93D7
+; jumped to by: explode
+l93CA:
+		jsr copy_sprite
+		ldx sprite_index
+		lda #$1e
+		sta explosion_timers, x
+; jumped to by: explode
+l93D5:
+		lda #$01
+; jumped to by: flash_sprite
+l93D7:
+		rts 
+
+; Z set when the selected sprite is hit or already exploding
+; called by: move_player, move_bullet, fire_pressed, move_enemies
+check_hit:
+		bit exploding
+		bne l93F6
+		bit sprite_coll_state
+		beq l93F2
+		lda #$fc
+		bit sprite_coll_state
+		beq l93F2
+		lda #$03
+		bit sprite_coll_state
+		bne l93F6
+		beq l93F2
+; jumped to by: check_hit
+l93F2:
+		lda #$ff
+		bne l93F8
+; jumped to by: check_hit
+l93F6:
+		lda #$00
+; jumped to by: check_hit
+l93F8:
+		rts 
+
+; move the selected sprite X pixels right, left, up or down; A = 1 at the edge
+; called by: check_right, move_enemies
+move_right:
+		cpx #$00
+		beq l942F
+		dex 
+		stx move_count
+		ldx sprite_coord_index
+		lda sprite_coords, x
+		cpy #$ff
+		beq l9417
+		cmp #$3c
+		bcc l9417
+		lda sprite_mask
+		bit sprite_x_high_bits
+		bne l942B
+; jumped to by: move_right
+l9417:
+		inc sprite_coords, x
+		bne l9425
+		lda sprite_mask
+		ora sprite_x_high_bits
+		sta sprite_x_high_bits
+; jumped to by: move_right
+l9425:
+		ldx move_count
+		clc 
+		bcc move_right
+; jumped to by: move_right, move_left
+l942B:
+		lda #$01
+		bne l9431
+; jumped to by: move_right, move_left
+l942F:
+		lda #$00
+; jumped to by: move_right
+l9431:
+		sta move_result
+		lda sprite_mask
+		bit sprite_x_high_bits
+		beq l9440
+		ldy #$01
+		bne l9442
+; jumped to by: move_right
+l9440:
+		ldy #$00
+; jumped to by: move_right
+l9442:
+		ldx sprite_coord_index
+		lda sprite_coords, x
+		tax 
+		lda move_result
+		rts 
+
+; called by: check_left, move_enemies
+move_left:
+		cpx #$00
+		beq l942F
+		dex 
+		stx move_count
+		ldx sprite_coord_index
+		lda sprite_coords, x
+		cpy #$ff
+		beq l946B
+		cmp #$17
+		bcs l946B
+		lda sprite_mask
+		bit sprite_x_high_bits
+		beq l942B
+; jumped to by: move_left
+l946B:
+		dec sprite_coords, x
+		lda #$ff
+		cmp sprite_coords, x
+		bne l9480
+		lda sprite_mask
+		eor #$ff
+		and sprite_x_high_bits
+		sta sprite_x_high_bits
+; jumped to by: move_left
+l9480:
+		ldx move_count
+		clc 
+		bcc move_left
+; called by: fire_pressed
+move_up:
+		cpy #$00
+		beq l94AB
+		dey 
+		stx move_count
+		txa 
+		ldx sprite_coord_index
+		inx 
+		cmp #$ff
+		beq l949E
+		lda sprite_coords, x
+		cmp #$32
+		bcc l94A7
+; jumped to by: move_up
+l949E:
+		dec sprite_coords, x
+		ldx move_count
+		clc 
+		bcc move_up
+; jumped to by: move_up, move_down
+l94A7:
+		lda #$01
+		bne l94AD
+; jumped to by: move_up, move_down
+l94AB:
+		lda #$00
+; jumped to by: move_up
+l94AD:
+		sta move_result
+		ldx sprite_coord_index
+		inx 
+		ldy sprite_coords, x
+		ldx #$00
+		lda move_result
+		rts 
+
+; called by: move_enemies
+move_down:
+		cpy #$00
+		beq l94AB
+		dey 
+		stx move_count
+		txa 
+		ldx sprite_coord_index
+		inx 
+		cmp #$ff
+		beq l94D5
+		lda sprite_coords, x
+		cmp #$fa
+		bcs l94A7
+; jumped to by: move_down
+l94D5:
+		inc sprite_coords, x
+		ldx move_count
+		clc 
+		bcc move_down
+; copies a sprite image from X/Y (low/high) to the sprite pointer in A
+; called by: explode, flash_sprite, init_game, switch_player
+copy_sprite:
+		stx sprite_source
+		sty sprite_source + $1
+		sta sprite_destination
+		lda #$00
+		sta sprite_destination + $1
+		ldx #$06
+; jumped to by: copy_sprite
+l94EA:
+		asl sprite_destination
+		rol sprite_destination + $1
+		dex 
+		bne l94EA
+		ldy #$00
+; jumped to by: copy_sprite
+l94F3:
+		lda (sprite_source), y
+		sta (sprite_destination), y
+		iny 
+		cpy #$40
+		bcc l94F3
+		rts 
+
+; makes the sprite with the mask in A the selected one
+; called by: move_player, move_bullet, fire_pressed, move_enemies
+select_sprite:
+		cmp #$00
+		beq l951B
+		sta sprite_mask
+		ldx #$00
+; jumped to by: select_sprite
+l9506:
+		lsr 
+		bcs l9510
+		inx 
+		cpx #$08
+		bcc l9506
+		bcs l951B
+; jumped to by: select_sprite
+l9510:
+		stx sprite_index
+		txa 
+		asl 
+		sta sprite_coord_index
+		clc 
+		bcc l9526
+; jumped to by: select_sprite
+l951B:
+		lda #$00
+		sta sprite_index
+		sta sprite_coord_index
+		sta sprite_mask
+; jumped to by: select_sprite
+l9526:
+		lda sprite_mask
+		ldx sprite_index
+		ldy sprite_coord_index
+		rts 
+
+; unreferenced: clears the screen, turns sprites and sound off
+reset_screen:
+		jsr kernal_clear_screen
+		lda #$00
+		sta vic_sprite_enable
+		sta sid_vol_filter
+		lda #$0b
+		sta background_color
+		rts 
+
+; called by: main_loop
+sound_off:
+		pha 
+		lda #$00
+		sta sid_vol_filter
+		pla 
+		rts 
+
+; called by: main_loop, demo, switch_player
+update_vic_sprite_positions:
+		lda sprite_x_high_bits
+		sta vic_sprite_x_high_bits
+		ldx #$00
+; jumped to by: update_vic_sprite_positions
+l9551:
+		lda sprite_coords, x
+		sta vic_sprite_coords, x
+		inx 
+		cpx #$10
+		bcc l9551
+		lda sprite_enable
+		sta vic_sprite_enable
+		rts 
+
+; waits delay_outer times delay_inner loops
+; called by: main_loop, title_screen, demo, show_top_score_row_14
+delay:
+		ldy delay_outer
+; jumped to by: delay
+l9566:
+		ldx delay_inner
+; jumped to by: delay
+l9569:
+		dex 
+		bne l9569
+		dey 
+		bne l9566
+		rts 
+
+; moves the enemies in their directions, adding one more as the score grows
+; called by: main_loop, demo
+move_enemies:
+		lda #$04
+; jumped to by: move_enemies
+l9572:
+		jsr select_sprite
+		lda sprite_mask
+		jsr check_hit
+		bne l95B8
+		lda sprite_mask
+		jsr explode
+		beq l9588
+		jmp l960F
+
+; jumped to by: move_enemies
+l9588:
+		ldx sprite_coord_index
+		inx 
+		lda #$28
+		sta sprite_coords, x
+		ldx sprite_index
+		lda enemy_directions, x
+		ldx sprite_coord_index
+		sta sprite_coords, x
+		cmp #$17
+		bcc l95AF
+		lda sprite_mask
+		eor #$ff
+		and sprite_x_high_bits
+		sta sprite_x_high_bits
+		jmp l95B8
+
+; jumped to by: move_enemies
+l95AF:
+		lda sprite_mask
+		ora sprite_x_high_bits
+		sta sprite_x_high_bits
+; jumped to by: move_enemies
+l95B8:
+		ldx sprite_index
+		cpx #$02
+		bne l95D9
+		lda #$80
+		and enemy_directions, x
+		beq l95D1
+		lda #$7f
+		and enemy_directions, x
+		sta enemy_directions, x
+		clc 
+		bcc l960F
+; jumped to by: move_enemies
+l95D1:
+		lda #$80
+		ora enemy_directions, x
+		sta enemy_directions, x
+; jumped to by: move_enemies
+l95D9:
+		lda #$02
+		and enemy_directions, x
+		beq l95EA
+		lda sprite_mask
+		ldy #$01
+		ldx #$ff
+		jsr move_down
+; jumped to by: move_enemies
+l95EA:
+		lda #$08
+		and enemy_directions, x
+		beq l95FB
+		lda sprite_mask
+		ldx #$01
+		ldy #$00
+		jsr move_right
+; jumped to by: move_enemies
+l95FB:
+		ldx sprite_index
+		lda #$04
+		and enemy_directions, x
+		beq l960F
+		lda sprite_mask
+		ldx #$01
+		ldy #$00
+		jsr move_left
+; jumped to by: move_enemies
+l960F:
+		lda #$04
+		cmp sprite_mask
+		bcc l963A
+		asl 
+		bit sprite_enable
+		bne l9635
+		ldy current_player
+		lda score_hi, y
+		cmp #$01
+		bcs l962D
+		lda score_lo, y
+		cmp #$15
+		bcc l963A
+; jumped to by: move_enemies
+l962D:
+		lda #$08
+		ora sprite_enable
+		sta sprite_enable
+; jumped to by: move_enemies
+l9635:
+		lda #$08
+		jmp l9572
+
+; jumped to by: move_enemies
+l963A:
+		lda #$08
+		cmp sprite_mask
+		bcc l9665
+		asl 
+		bit sprite_enable
+		bne l9660
+		ldy current_player
+		lda score_hi, y
+		cmp #$01
+		bcs l9658
+		lda score_lo, y
+		cmp #$40
+		bcc l96B4
+; jumped to by: move_enemies
+l9658:
+		lda #$10
+		ora sprite_enable
+		sta sprite_enable
+; jumped to by: move_enemies
+l9660:
+		lda #$10
+		jmp l9572
+
+; jumped to by: move_enemies
+l9665:
+		lda #$10
+		cmp sprite_mask
+		bcc l9690
+		asl 
+		bit sprite_enable
+		bne l968B
+		ldy current_player
+		lda score_hi, y
+		cmp #$01
+		bcs l9683
+		lda score_lo, y
+		cmp #$80
+		bcc l96B4
+; jumped to by: move_enemies
+l9683:
+		lda #$20
+		ora sprite_enable
+		sta sprite_enable
+; jumped to by: move_enemies
+l968B:
+		lda #$20
+		jmp l9572
+
+; jumped to by: move_enemies
+l9690:
+		lda #$20
+		cmp sprite_mask
+		bcc l96B4
+		asl 
+		bit sprite_enable
+		bne l96AF
+		ldy current_player
+		lda score_hi, y
+		cmp #$01
+		bcc l96B4
+		lda #$40
+		ora sprite_enable
+		sta sprite_enable
+; jumped to by: move_enemies
+l96AF:
+		lda #$40
+		jmp l9572
+
+; jumped to by: move_enemies
+l96B4:
+		rts 
+
+; called by: next_turn, title_screen, demo
+init_game:
+		jsr kernal_clear_screen
+		lda #$4c
+		sta chrget
+		lda #$09
+		sta chrget + $1
+		lda #$90
+		sta chrget + $2
+		ldx #$00
+; jumped to by: init_game
+l96C6:
+		lda sprite_pointer_values, x
+		sta sprite_pointers, x
+		inx 
+		cpx #$08
+		bcc l96C6
+		ldx #$00
+; jumped to by: init_game
+l96D3:
+		lda sprite_images_lo, x
+		sta copy_source_lo
+		ldy sprite_images_hi, x
+		lda sprite_pointer_values, x
+		stx copy_index
+		ldx copy_source_lo
+		jsr copy_sprite
+		ldx copy_index
+		inx 
+		cpx #$07
+		bcc l96D3
+		ldx #$00
+; jumped to by: init_game
+l96F2:
+		lda vic_init, x
+		sta vic_sprite_coords, x
+		cpx #$10
+		bcs l96FF
+		sta sprite_coords, x
+; jumped to by: init_game
+l96FF:
+		inx 
+		cpx #$2f
+		bcc l96F2
+		lda #$32
+		sta delay_outer
+		lda #$0a
+		sta delay_inner
+		lda #$00
+		ldx #$00
+; jumped to by: init_game
+l9712:
+		sta explosion_timers, x
+		inx 
+		cpx #$08
+		bcc l9712
+		sta score_lo
+		sta score_lo + $1
+		sta score_hi
+		sta score_hi + $1
+		sta current_player
+		sta fire_state
+		sta exploding
+		sta sprite_x_high_bits
+		lda #$04
+		sta lives
+		sta lives + $1
+		jsr draw_turns
+		jsr draw_scores
+		lda vic_init + $15
+		sta sprite_enable
+		ldx #$00
+		sta saved_sprite_enable, x
+		inx 
+		sta saved_sprite_enable, x
+		lda #$00
+		ldx #$15
+sid_clear_loop:
+		dex 
+		sta voice1_frequency, x
+		bne sid_clear_loop
+		lda #$0f
+		sta sid_vol_filter
+		ldx #$00
+		ldy #$00
+; jumped to by: sid_clear_loop
+l9762:
+		lda vic_init + $27, x
+		sta saved_sprite_colors, y
+		iny 
+		sta saved_sprite_colors, y
+		iny 
+		inx 
+		cpx #$08
+		bcc l9762
+		rts 
+
+; picks a random direction for an enemy when its timer runs out
+; called by: main_loop, demo
+update_directions:
+		ldx #$00
+; jumped to by: update_directions
+l9775:
+		dec direction_timers, x
+		bne l9785
+		lda cia1_timer_a
+		sta enemy_directions, x
+		lda #$32
+		sta direction_timers, x
+; jumped to by: update_directions
+l9785:
+		inx 
+		cpx #$08
+		bcc l9775
+		rts 
+
+; called by: main_loop, init_game, title_screen
+draw_scores:
+		lda #$00
+		sta score_player
+		lda #$02
+		sta score_column
+; jumped to by: draw_scores
+l9795:
+		ldy score_player
+		lda score_hi, y
+		jsr to_digits
+		txa 
+		cmp #$30
+		bne l97A5
+		lda #$20
+; jumped to by: draw_scores
+l97A5:
+		ldy score_column
+		sta screen_ram + $28, y
+		ldy score_player
+		lda score_lo, y
+		jsr to_digits
+		stx digit
+		tya 
+		cmp #$30
+		bne l97C8
+		ldx score_player
+		ldy score_hi, x
+		cpy #$00
+		bne l97C8
+		lda #$20
+; jumped to by: draw_scores
+l97C8:
+		ldy score_column
+		iny 
+		sta screen_ram + $28, y
+		iny 
+		lda digit
+		sta screen_ram + $28, y
+		iny 
+		lda #$30
+		sta screen_ram + $28, y
+		iny 
+		sta screen_ram + $28, y
+		ldx current_player
+		lda lives, x
+		clc 
+		adc #$30
+		ldx #$06
+		sta screen_ram + $96, x
+		lda score_player
+		bne l97FF
+		lda #$01
+		sta score_player
+		lda #$20
+		sta score_column
+		bne l9795
+; jumped to by: draw_scores
+l97FF:
+		jsr update_high_score
+		rts 
+
+; called by: init_game
+draw_turns:
+		ldx #$00
+; jumped to by: draw_turns
+l9805:
+		lda turns_text, x
+		and #$bf
+		sta screen_ram + $96, x
+		lda #$06
+		sta color_ram + $96, x
+		inx 
+		cpx #$07
+		bcc l9805
+		ldx #$00
+show_top_score_line:
+		lda top_score_line, x
+		and #$bf
+		sta screen_ram, x
+		lda #$08
+		sta color_ram, x
+		inx 
+		cpx #$28
+		bcc show_top_score_line
+		ldx #$00
+show_copyright:
+		lda robert_copyright, x
+		sta screen_ram + $3c0, x
+		lda #$06
+		sta color_ram + $3c0, x
+		inx 
+		cpx #$21
+		bcc show_copyright
+		ldx #$00
+		lda #$02
+make_scores_red:
+		sta color_ram + $28, x
+		inx 
+		cpx #$28
+		bcc make_scores_red
+		rts 
+
+; read by: show_copyright
+robert_copyright:
+		.enc	"screen"
+		.text	"ZWARK  (C) 1982  ROBERT WENTWORT"
+		.text	"H "
+; read by: show_top_score_line, show_top_score_row_14
+top_score_line:
+		.enc	"none"
+		.text	"PLAYER.ONE.....HIGH.SCORE.....PL"
+		.text	"AYER.TWO"
+; read by: draw_turns
+turns_text:
+		.text	"TURNS=  "
+
+; A: 1 starts the shot sound, 2 sweeps it, $ff stops it, 5 starts the explosion, $fe stops it
+; called by: fire_pressed, explode
+play_sound:
+		cmp #$ff
+		beq l98F6
+		cmp #$01
+		bne l98DA
+		lda shot_frequency_hi
+		sta shot_sweep_hi
+		sta voice1_frequency + $1
+		sta voice2_frequency + $1
+		lda shot_frequency_lo
+		sta shot_sweep_lo
+		sta voice1_frequency
+		sta voice2_frequency
+		lda shot_attack_decay
+		sta voice1_attack_decay
+		sta voice2_attack_decay
+		lda shot_sustain_release
+		sta voice1_sustain_release
+		sta voice2_sustain_release
+		lda #$81
+		sta voice1_control
+		lda #$11
+		sta voice2_control
+		bne l993B
+; jumped to by: play_sound
+l98DA:
+		cmp #$02
+		bne l98FE
+		dec shot_sweep_hi
+		lda shot_sweep_hi
+		sta voice1_frequency + $1
+		sta voice2_frequency + $1
+		lda shot_sweep_lo
+		sta voice1_frequency
+		sta voice2_frequency
+		clc 
+		bcc l993B
+; jumped to by: play_sound
+l98F6:
+		lda #$00
+		sta voice2_control
+		sta voice1_control
+; jumped to by: play_sound
+l98FE:
+		cmp #$05
+		bne l9932
+		lda cia1_timer_a
+		lsr 
+		sta voice3_pulse_width
+		sta voice1_frequency + $1
+		lsr 
+		sta voice3_frequency + $1
+		sta voice1_frequency + $1
+		lda explosion_attack_decay
+		sta voice3_attack_decay
+		sta voice1_attack_decay
+		lda explosion_sustain_release
+		sta voice3_sustain_release
+		sta voice1_sustain_release
+		lda #$11
+		sta voice3_control
+		lda #$81
+		sta voice1_control
+		clc 
+		bcc l993B
+; jumped to by: play_sound
+l9932:
+		cmp #$fe
+		bne l993B
+		lda #$00
+		sta voice3_control
+; jumped to by: play_sound
+l993B:
+		rts 
+
+; called by: draw_scores
+update_high_score:
+		ldx current_player
+		lda score_hi, x
+		cmp high_score_hi
+		bcc l995F
+		bne l9953
+		lda score_lo, x
+		cmp high_score_lo
+		bcc l995F
+		beq l995F
+; jumped to by: update_high_score
+l9953:
+		lda score_lo, x
+		sta high_score_lo
+		lda score_hi, x
+		sta high_score_hi
+; jumped to by: update_high_score
+l995F:
+		lda high_score_hi
+		jsr to_digits
+		txa 
+		cmp #$30
+		bne l996C
+		lda #$20
+; jumped to by: update_high_score
+l996C:
+		ldy #$11
+		sta screen_ram + $28, y
+		lda high_score_lo
+		jsr to_digits
+		tya 
+		cmp #$30
+		bne hi_score_draw
+		ldy high_score_hi
+		cpy #$00
+		bne hi_score_draw
+		lda #$20
+; jumped to by: update_high_score
+hi_score_draw:
+		ldy #$12
+		sta screen_ram + $28, y
+		iny 
+		txa 
+		sta screen_ram + $28, y
+		iny 
+		lda #$30
+		sta screen_ram + $28, y
+		iny 
+		sta screen_ram + $28, y
+		rts 
+
+; after move_player: next turn, game over, or the title screen with A = $fe
+; called by: main_loop
+next_turn:
+		ldx #$00
+		stx sid_vol_filter
+		cmp #$fe
+		bcc l99F7
+		bne l99AB
+		jsr init_game
+		jmp l99BA
+
+; jumped to by: next_turn
+l99AB:
+		jsr show_game_over
+		lda two_players
+		beq l99BA
+		lda current_player
+		cmp #$00
+		beq l99EB
+; jumped to by: next_turn
+l99BA:
+		jsr draw_logo
+title_screen:
+		ldx #$00
+		stx title_countdown_lo
+		ldx #$0a
+		stx title_countdown_hi
+		bne l99CC
+; jumped to by: title_screen
+l99C9:
+		jsr getin
+; jumped to by: title_screen
+l99CC:
+		cmp #$0d
+		beq l9A47
+		cmp #$85
+		beq l9A3B
+		cmp #$86
+		beq l9A42
+		jsr delay
+		dec title_countdown_lo
+		bne l99C9
+		dec title_countdown_hi
+		bne l99C9
+		jsr demo
+		jmp title_screen
+
+; jumped to by: next_turn
+l99EB:
+		ldx #$00
+		lda #$20
+; jumped to by: title_screen
+l99EF:
+		sta screen_ram + $1e0, x
+		inx 
+		cpx #$28
+		bcc l99EF
+; jumped to by: next_turn
+l99F7:
+		jsr switch_player
+		jsr draw_scores
+		jsr show_player
+		lda #$f0
+		sta delay_outer
+		sta delay_inner
+		jsr delay
+		lda #$32
+		sta delay_outer
+		lda #$0a
+		sta delay_inner
+		lda #$20
+		ldx #$00
+; jumped to by: title_screen
+l9A19:
+		sta screen_ram + $1e0, x
+		sta screen_ram + $230, x
+		inx 
+		cpx #$28
+		bcc l9A19
+		ldx #$0f
+		stx sid_vol_filter
+		lda vic_sprite_collision
+		lda #$00
+		sta sprite_coll_state
+		sta voice1_control
+		sta voice2_control
+		sta voice3_control
+		rts 
+
+; jumped to by: title_screen
+l9A3B:
+		lda #$00
+		sta two_players
+		beq l9A47
+; jumped to by: title_screen
+l9A42:
+		lda #$01
+		sta two_players
+; jumped to by: title_screen
+l9A47:
+		jsr init_game
+		rts 
+
+; plays the game by itself, steering with an enemy's random direction
+; called by: title_screen
+demo:
+		jsr init_game
+		jsr draw_logo
+		lda #$1d
+		sta sprite_enable
+		lda #$06
+		sta vic_sprite_colors + $3
+		lda #$0c
+		sta vic_sprite_colors + $4
+		lda #$0e
+		sta delay_inner
+; jumped to by: demo
+l9A65:
+		jsr stop
+		beq l9AA4
+		jsr getin
+		cmp #$0d
+		beq l9AA4
+		cmp #$85
+		beq l9AA4
+		cmp #$86
+		beq l9AA4
+		lda enemy_directions
+		eor #$08
+		sta joystick_state
+		lda vic_sprite_collision
+		sta sprite_coll_state
+		jsr update_directions
+		jsr move_player
+		sta player_state
+		jsr move_bullet
+		jsr move_enemies
+		jsr update_vic_sprite_positions
+		jsr delay
+		lda player_state
+		bne l9AA4
+		clc 
+		bcc l9A65
+; jumped to by: demo
+l9AA4:
+		ldx #$00
+		stx sid_vol_filter
+		ldx #$1d
+		stx vic_sprite_enable
+		stx sprite_enable
+		ldx #$0a
+		stx delay_inner
+		rts 
+
+; read by: draw_logo
+f1_1_player_text:
+		.enc	"screen"
+		.text	"F1 - SINGLE PLAYER  "
+; read by: draw_logo
+f3_2_player_text:
+		.text	"F3 - TWO PLAYER GAME"
+
+; called by: next_turn
+show_game_over:
+		ldx #$00
+		ldy #$0f
+; jumped to by: show_game_over
+l9AE3:
+		lda game_over_text, x
+		lda game_over_text, x
+		sta screen_ram + $1e0, y
+		lda #$08
+		sta color_ram + $1e0, y
+		inx 
+		iny 
+		cpx #$09
+		bcc l9AE3
+; shows whose turn it is, and waits for a key or a while
+; called by: title_screen
+show_player:
+		ldx #$00
+		ldy #$0f
+		lda current_player
+		beq show_top_score_row_14
+		ldx #$1e
+; jumped to by: show_player
+show_top_score_row_14:
+		lda top_score_line, x
+		and #$bf
+		sta screen_ram + $230, y
+		lda #$08
+		sta color_ram + $230, y
+		iny 
+		inx 
+		cpy #$19
+		bcc show_top_score_row_14
+		lda #$ff
+		sta show_player_countdown
+		sta delay_outer
+; jumped to by: show_top_score_row_14
+l9B1D:
+		jsr delay
+		jsr stop
+		beq l9B40
+		jsr getin
+		cmp #$0d
+		beq l9B40
+		cmp #$85
+		beq l9B40
+		cmp #$86
+		beq l9B40
+		dec show_player_countdown
+		bne l9B1D
+		lda #$32
+		sta delay_outer
+		lda #$01
+; jumped to by: show_top_score_row_14
+l9B40:
+		rts 
+
+; written by: show_top_score_row_14
+; modified by: show_top_score_row_14
+show_player_countdown:
+		.byte	$00
+
+; read by: show_game_over
+game_over_text:
+		.text	"GAME OVER  "
+
+; in a two player game, saves the sprites of one player and restores the other's
+; called by: title_screen
+switch_player:
+		lda two_players
+		beq l9B89
+		ldx current_player
+		lda sprite_enable
+		sta saved_sprite_enable, x
+		ldy #$00
+; jumped to by: switch_player
+l9B5D:
+		lda vic_sprite_colors, y
+		sta saved_sprite_colors, x
+		inx 
+		inx 
+		iny 
+		cpy #$08
+		bcc l9B5D
+		lda #$01
+		sec 
+		sbc current_player
+		sta current_player
+		tax 
+		lda saved_sprite_enable, x
+		sta sprite_enable
+		ldy #$00
+; jumped to by: switch_player
+l9B7C:
+		lda saved_sprite_colors, x
+		sta vic_sprite_colors, y
+		inx 
+		inx 
+		iny 
+		cpy #$08
+		bcc l9B7C
+; jumped to by: switch_player
+l9B89:
+		ldx #$00
+; jumped to by: switch_player
+l9B8B:
+		lda vic_init, x
+		sta sprite_coords, x
+		inx 
+		cpx #$10
+		bcc l9B8B
+		lda #$00
+		sta sprite_x_high_bits
+		sta exploding
+		sta fire_state
+		ldx #$00
+; jumped to by: switch_player
+l9BA3:
+		lda sprite_images_lo, x
+		sta copy_source_lo
+		ldy sprite_images_hi, x
+		lda sprite_pointer_values, x
+		stx copy_index
+		ldx copy_source_lo
+		jsr copy_sprite
+		ldx copy_index
+		inx 
+		cpx #$07
+		bcc l9BA3
+		lda sprite_enable
+		and #$fd
+		sta sprite_enable
+		jsr update_vic_sprite_positions
+		rts 
+
+; called by: next_turn, demo
+draw_logo:
+		ldx #$00
+; jumped to by: draw_logo
+l9BCE:
+		lda logo0, x
+		sta screen_ram + $c8, x
+		lda #$06
+		sta color_ram + $c8, x
+		inx 
+		cpx #$1c
+		bcc l9BCE
+		ldx #$00
+; jumped to by: draw_logo
+l9BE0:
+		lda logo1, x
+		sta screen_ram + $f0, x
+		lda #$06
+		sta color_ram + $f0, x
+		inx 
+		cpx #$1c
+		bcc l9BE0
+		ldx #$00
+; jumped to by: draw_logo
+l9BF2:
+		lda logo2, x
+		sta screen_ram + $118, x
+		lda #$06
+		sta color_ram + $118, x
+		inx 
+		cpx #$1c
+		bcc l9BF2
+		ldx #$00
+; jumped to by: draw_logo
+l9C04:
+		lda logo3, x
+		sta screen_ram + $140, x
+		lda #$06
+		sta color_ram + $140, x
+		inx 
+		cpx #$1c
+		bcc l9C04
+		ldx #$00
+; jumped to by: draw_logo
+l9C16:
+		lda logo4, x
+		sta screen_ram + $168, x
+		lda #$06
+		sta color_ram + $168, x
+		inx 
+		cpx #$1c
+		bcc l9C16
+		ldx #$00
+		ldy #$05
+; jumped to by: draw_logo
+l9C2A:
+		lda f1_1_player_text, x
+		sta screen_ram + $1e0, y
+		lda f3_2_player_text, x
+		sta screen_ram + $230, y
+		lda #$04
+		sta color_ram + $1e0, y
+		sta color_ram + $230, y
+		iny 
+		inx 
+		cpx #$14
+		bcc l9C2A
+		rts 
+
+; draw_logo reads 28 bytes from each row, but from $9c98 and $9cb7 for the last two
+; read by: draw_logo
+logo0:
+		.byte	$5f, $a0, $a0, $a0, $a0, $69, $20, $a0, $20, $20, $20, $20, $a0, $20, $20, $df
+		.byte	$20, $20, $a0, $df, $20, $20, $20, $a0, $20, $e9, $69, $20
+; read by: draw_logo
+logo1:
+		.byte	$20, $20, $20, $e9, $69, $20, $20, $a0, $20, $20, $20, $20, $a0, $20, $e9, $5f
+		.byte	$df, $20, $a0, $5f, $df, $20, $20, $a0, $e9, $69, $20, $20
+; read by: draw_logo
+logo2:
+		.byte	$20, $20, $e9, $69, $20, $20, $20, $a0, $20, $20, $20, $20, $a0, $20, $a0, $20
+		.byte	$a0, $20, $a0, $e9, $69, $20, $20, $a0, $a0, $20, $20
+; read by: draw_logo
+logo3:
+		.byte	$20, $e9, $69, $20, $20, $20, $20, $5f, $df, $e9, $df, $e9, $69, $20, $a0, $a0
+		.byte	$a0, $20, $a0, $5f, $df, $20, $20, $a0, $5f, $df, $20, $20, $a0, $5f, $df
+; read by: draw_logo
+logo4:
+		.byte	$e9, $a0, $a0, $a0, $a0, $df, $20, $20, $5f, $69, $5f, $69, $20, $20, $a0, $20
+		.byte	$a0, $20, $a0, $20, $5f, $df, $20, $a0, $20, $5f, $df, $20, $20, $20
+
+; wipes all memory from $0800 unless the crack's start ran, or CHRGET is patched
+; called by: actual_start_game
+check_protection:
+		lda enemy_image_3 + $5
+		cmp #$9e
+		beq nothing_just_rts
+		lda chrget
+		cmp #$4c
+		bne l9CF4
+		lda chrget + $1
+		cmp #$09
+		bne l9CF4
+		lda basic_end
+		cmp #$44
+		bne l9CF4
+		lda basic_end + $1
+		cmp #$08
+		beq nothing_just_rts
+; jumped to by: check_protection
+l9CF4:
+		lda #$00
+		sta clear_pointer
+		lda #$08
+		sta clear_pointer + $1
+		lda #$00
+		ldy #$00
+; jumped to by: check_protection
+l9D00:
+		sta (clear_pointer), y
+		inc clear_pointer
+		bne l9D00
+		inc clear_pointer + $1
+		bne l9D00
+		beq nothing_just_rts
+; jumped to by: check_protection
+nothing_just_rts:
+		rts 
+
+; turns the BCD byte in A into screen code digits: X the low one, Y the high one
+; called by: draw_scores, update_high_score
+to_digits:
+		tay 
+		and #$0f
+		cmp #$0a
+		bcc l9D16
+		adc #$06
+; jumped to by: to_digits
+l9D16:
+		adc #$30
+		tax 
+		tya 
+		lsr 
+		lsr 
+		lsr 
+		lsr 
+		cmp #$0a
+		bcc l9D24
+		adc #$06
+; jumped to by: to_digits
+l9D24:
+		adc #$30
+		tay 
+		lda #$00
+		rts 
+
+; read by: explode, init_game, switch_player
+sprite_images_lo:
+		.byte	$4a, $89, $c8, $c8, $c8, $c8, $c8, $c8
+; read by: explode, init_game, switch_player
+sprite_images_hi:
+		.byte	$90, $90, $90, $90, $90, $90, $90, $90
+; read by: init_game, switch_player
+sprite_pointer_values:
+		.byte	$0d, $0e, $0f, $20, $21, $22, $23, $0f
+; counts down while a sprite explodes
+; written by: explode, flash_sprite, init_game
+; modified by: explode
+explosion_timers:
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00
+; x/y per sprite, copied to the VIC each frame
+; read by: fire_pressed, move_right, move_left, move_up, move_down, update_vic_sprite_positions
+; written by: lose_life, fire_pressed, move_enemies, init_game, switch_player
+; modified by: move_right, move_left, move_up, move_down
+sprite_coords:
+		.byte	$16, $d8, $16, $d4, $16, $8b, $52, $4e, $ec, $a6, $70, $10, $f0, $10, $80, $10
+; read by: lose_life, fire_pressed, move_right, move_left, update_vic_sprite_positions, move_enemies
+; written by: lose_life, fire_pressed, move_right, move_left, move_enemies, init_game, switch_player
+sprite_x_high_bits:		.byte	$00
+; read by: fire_pressed, update_vic_sprite_positions, move_enemies, switch_player
+; written by: fire_pressed, move_enemies, init_game, demo, switch_player
+sprite_enable:		.byte	$1d
+; per sprite, its color for player 1 and player 2
+; read by: switch_player
+; written by: sid_clear_loop, switch_player
+saved_sprite_colors:
+		.byte	$07, $07, $07, $07, $02, $02, $08, $08, $0a, $0a, $0c, $0c, $09, $09, $02, $02
+; read by: switch_player
+; written by: init_game, switch_player
+saved_sprite_enable:
+		.byte	$05, $05
+; per sprite, bits 1-3 say down, right, left; from the CIA timer
+; read by: move_enemies, demo
+; written by: move_enemies, update_directions
+enemy_directions:
+		.byte	$76, $fa, $ea, $92, $01, $c8, $c8, $a3
+; written by: update_directions
+; modified by: update_directions
+direction_timers:
+		.byte	$2a, $12, $32, $20, $0e, $2e, $2a, $2a
+; read by: explode
+; written by: explode
+; modified by: explode
+explosion_steps:
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00
+; read by: explode, check_hit
+; written by: explode, init_game, switch_player
+exploding:		.byte	$00
+; bit 0: the bullet is flying, bit 1: fire was released
+; read by: move_bullet, fire_pressed
+; written by: move_bullet, fire_pressed, init_game, switch_player
+fire_state:		.byte	$02
+; read by: check_right, check_left, move_bullet
+; written by: main_loop, demo
+joystick_state:		.byte	$7e
+; read by: check_hit
+; written by: main_loop, title_screen, demo
+sprite_coll_state:		.byte	$00
+; read by: draw_scores
+; written by: init_game
+; modified by: lose_life
+lives:
+		.byte	$04, $04
+; read by: move_player, explode, move_enemies, draw_scores, update_high_score, next_turn, show_player, switch_player
+; written by: init_game, switch_player
+current_player:		.byte	$00
+; BCD
+; read by: explode, move_enemies, draw_scores, update_high_score
+; written by: explode, init_game
+score_lo:
+		.byte	$00, $00
+; read by: explode, move_enemies, draw_scores, update_high_score
+; written by: explode, init_game
+score_hi:
+		.byte	$00, $00
+; read by: update_high_score
+; written by: update_high_score
+high_score_lo:		.byte	$00
+; read by: update_high_score
+; written by: update_high_score
+high_score_hi:		.byte	$00
+; read by: next_turn, switch_player
+; written by: title_screen
+two_players:		.byte	$00
+; read by: delay
+; written by: init_game, title_screen, show_top_score_row_14
+delay_outer:		.byte	$32
+; read by: delay
+; written by: init_game, title_screen, demo
+delay_inner:		.byte	$0e
+; read by: init_game, switch_player
+; written by: init_game, switch_player
+copy_source_lo:		.byte	$c8
+; read by: explode, init_game, switch_player
+; written by: explode, init_game, switch_player
+copy_index:		.byte	$06
+; read by: move_player, check_right, check_left, move_bullet, fire_pressed, explode, move_right, move_left, select_sprite, move_enemies
+; written by: select_sprite
+sprite_mask:		.byte	$01
+; read by: explode, flash_sprite, select_sprite, move_enemies
+; written by: select_sprite
+sprite_index:		.byte	$00
+; read by: move_right, move_left, move_up, move_down, select_sprite, move_enemies
+; written by: select_sprite
+sprite_coord_index:		.byte	$00
+; read by: move_right, move_up
+; written by: move_right, move_up
+move_result:		.byte	$00
+; read by: move_right, move_left, move_up, move_down
+; written by: move_right, move_left, move_up, move_down
+move_count:		.byte	$ff
+; only increased by unreachable code
+; modified by: fire_pressed
+unused_9d9d:		.byte	$00
+; read by: draw_scores
+; written by: draw_scores
+digit:		.byte	$30
+; read by: draw_scores
+; written by: draw_scores
+score_player:		.byte	$01
+; read by: draw_scores
+; written by: draw_scores
+score_column:		.byte	$20
+unused_9da1:		.byte	$0a
+; written by: title_screen
+; modified by: title_screen
+title_countdown_lo:		.byte	$00
+; written by: title_screen
+; modified by: title_screen
+title_countdown_hi:		.byte	$00
+; copied to $d000-$d02e: sprite positions, enable at +$15, colors at +$27
+; read by: lose_life, init_game, sid_clear_loop, switch_player
+vic_init:
+		.byte	$a0, $d8, $a0, $d4, $40, $40, $30, $10, $d0, $10, $70, $10, $f0, $10, $80, $10
+		.byte	$00, $1b, $56, $22, $56, $05, $c8, $00, $15, $7f, $f0, $00, $1d, $00, $00, $00
+		.byte	$00, $00, $0c, $0c, $0c, $0c, $02, $07, $07, $02, $08, $0a, $0c, $09, $02
+; read by: play_sound
+shot_attack_decay:		.byte	$00
+; read by: play_sound
+shot_sustain_release:		.byte	$f0
+; read by: play_sound
+shot_frequency_hi:		.byte	$64
+; read by: play_sound
+shot_frequency_lo:		.byte	$27
+; read by: play_sound
+; written by: play_sound
+; modified by: play_sound
+shot_sweep_hi:		.byte	$00
+; read by: play_sound
+; written by: play_sound
+shot_sweep_lo:		.byte	$00
+; read by: play_sound
+explosion_attack_decay:		.byte	$40
+; read by: play_sound
+explosion_sustain_release:		.byte	$88
+unused_9ddb:
+		.byte	$ff, $00, $00, $ff, $ff, $00, $00, $ff, $ff, $00, $00, $ff, $ff, $00, $00, $ff
+		.byte	$ff, $00, $00, $ff, $ff, $00, $00, $ff, $ff, $00, $00, $ff, $ff, $00, $00, $ff
+		.byte	$ff, $00, $00, $ff, $ff
+
+; ---- the crack ----
+; jumped to by: decrunch
+start:
+		lda #$00
+		sta border_color
+		sta background_color
+		jsr kernal_clear_screen
+		ldx #$68
+; jumped to by: start
+l9E0D:
+		lda crack_trainer_msg, x
+		sta screen_ram, x
+		lda #$0f
+		sta color_ram, x
+		dex 
+		bpl l9E0D
+		cli 
+; jumped to by: start
+l9E1C:
+		jsr getin
+		cmp #$4e
+		beq no_trainer
+		cmp #$59
+		bne l9E1C
+		lda #$2c
+		sta lose_life
+; jumped to by: start
+no_trainer:
+		lda #$9e
+		sta enemy_image_3 + $5
+		jmp start_game
+
+unused_9e34:
+		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+
+; read by: start
+crack_trainer_msg:
+		.text	"CRACKED BY MANIK                "
+		.text	"        ", $63, $63, $63, $63, $63, $63, $63, $63, $63, $63, $63, $63, $63, $63, $63, $63, "        "
+		.text	"                UNLIMITED LIVES."
+		.text	"....[Y/N]"
+
+unused_9ea9:
+		.byte	$00, $57
+
+.virtual $9eab
+untouched_9eab:
+		.fill	12629
+; x and y of sprites 0-7
+; written by: update_vic_sprite_positions, init_game
+vic_sprite_coords:
+		.fill	16
+; written by: update_vic_sprite_positions
+vic_sprite_x_high_bits:		.byte	?
+.endv
+
+.virtual $d015
+; written by: reset_screen, update_vic_sprite_positions, demo
+vic_sprite_enable:		.byte	?
+.endv
+
+.virtual $d01e
+; read by: main_loop, flash_sprite, title_screen, demo
+; written by: flash_sprite
+vic_sprite_collision:		.byte	?
+.endv
+
+.virtual $d020
+; written by: start
+border_color:		.byte	?
+; written by: reset_screen, start
+background_color:		.byte	?
+.endv
+
+.virtual $d027
+; read by: flash_sprite, switch_player
+; written by: demo, switch_player
+; modified by: flash_sprite
+vic_sprite_colors:
+		.fill	8
+.endv
+
+.virtual $d400
+; written by: sid_clear_loop, play_sound
+voice1_frequency:		.word	?
+.endv
+
+.virtual $d404
+; written by: play_sound, title_screen
+voice1_control:		.byte	?
+; written by: play_sound
+voice1_attack_decay:		.byte	?
+; written by: play_sound
+voice1_sustain_release:		.byte	?
+; written by: play_sound
+voice2_frequency:		.word	?
+.endv
+
+.virtual $d40b
+; written by: play_sound, title_screen
+voice2_control:		.byte	?
+; written by: play_sound
+voice2_attack_decay:		.byte	?
+; written by: play_sound
+voice2_sustain_release:		.byte	?
+; written by: play_sound
+voice3_frequency:		.word	?
+; written by: play_sound
+voice3_pulse_width:		.word	?
+; written by: play_sound, title_screen
+voice3_control:		.byte	?
+; written by: play_sound
+voice3_attack_decay:		.byte	?
+; written by: play_sound
+voice3_sustain_release:		.byte	?
+.endv
+
+.virtual $d418
+; written by: reset_screen, sound_off, sid_clear_loop, next_turn, title_screen, demo
+sid_vol_filter:		.byte	?
+.endv
+
+.virtual $d800
+; written by: draw_turns, show_top_score_line, show_copyright, make_scores_red, show_game_over, show_top_score_row_14, draw_logo, start
+color_ram:
+		.fill	1000
+.endv
+
+.virtual $dc01
+; keyboard rows, joystick port 1
+; read by: main_loop
+cia1_port_b:		.byte	?
+.endv
+
+.virtual $dc04
+; read by: update_directions, play_sound
+cia1_timer_a:		.word	?
+.endv
+; called by: reset_screen, init_game, start
+kernal_clear_screen = $e544
+; called by: main_loop, demo, show_top_score_row_14
+stop = $ffe1
+; called by: title_screen, demo, show_top_score_row_14, start
+getin = $ffe4
+~~~
+vvv

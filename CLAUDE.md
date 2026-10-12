@@ -19,8 +19,8 @@ Maven project, Java 14 source/target (JDK 23 installed locally works). Depends o
 - Build: `mvn -o compile`
 - Run all tests: `mvn -o test`
 - Run one test class: `mvn -o test -Dtest=DeflowerTest`
-- Run one test method: `mvn -o test -Dtest='DeflowerTest#deflowerZwark'`
-- Run the tool on a flow file: `Deflower.main` takes a classpath-relative path (e.g. `squirm/squirm.flo`). The file must be on the classpath, so it lives under `src/test/resources`. There is no exec plugin configured, so run it from an IDE or with a manually assembled classpath.
+- Run only the short or large snippets: `mvn -o test -Dtest='DeflowerTest#shortSnippets'` (or `#largeSnippets`)
+- Run the tool on a flow file: `Deflower.main` takes a classpath-relative path (e.g. `squirm/squirm.flo`). The file must be on the classpath, so it lives under `src/test/resources`. `Deflower.deflower(Path)` takes a file-system path instead. There is no exec plugin configured, so run it from an IDE or with a manually assembled classpath.
 - No linter or formatter is configured.
 
 All `DeflowerTest` cases pass.
@@ -70,12 +70,18 @@ The pipeline is: **flow file → parse → memory image + annotations → code-f
 - **`Assert`, `Printing`, `ByteBufferAccess`** in `com.laamella` are small helpers (`assertState`, hex formatting, buffer reads).
 
 Test-driven workflow:
-- `DeflowerTest` runs the full pipeline on fixtures in `src/test/resources/<fixture>/` (`<fixture>.flo` plus its binary). The real programs are squirm, zwark and tcmine; the rest are small, purpose-built `.prg` fixtures, one per feature or bug.
-- Each run writes its output to `out/<fixture>.asm` next to the `.flo` file under `target/test-classes`, not in the source tree.
-- Each test compares that output against the versioned `src/test/resources/<fixture>/expected.asm`, using `com.laamella:snippets-test-junit5-core`'s `Snipsertions.snipsert` (manual: https://github.com/laamella-gad/snippets-test-junit5).
-- A changed expectation file in a diff means the generated output changed; review it like any other test failure.
-- To accept a new fixture or a deliberate output change, delete the matching `expected.asm` and rerun the test. It creates the file and fails once, so you can review it before committing.
-- The small fixtures' `expected.asm` can be checked with 64tass: `64tass -q -b -o x.bin expected.asm` must equal the `.prg` minus its 2-byte header.
+- `DeflowerTest` runs snippet files from `src/test/snippets/`, one test case per `.txt` file, with `com.laamella:snippets-test-junit5-core`'s `SnippetTestFactory` (manual: https://github.com/laamella-gad/snippets-test-junit5).
+- A snippet file is an optional description between `>>>` and `<<<`, the input parts separated by `===` lines, a `^^^` line, the three expectations separated by `~~~` lines, and a closing `vvv` line. The expectations are what Deflower printed (stdout and stderr together, paths relative to the `.flo` file), the generated `.asm` (each under a `--- <name>` line when a `.flo` file has several runs; empty when the run had errors), and the exported binaries as hex dumps, each under `--- <name>`.
+- Short snippets (`short/`, purpose-built, one per feature or bug, error cases in `short/invalid/`):
+  - The first input part is 64tass assembly, which mpu6502's `SourceParser` assembles into `test.prg`. Leave it empty when the `.flo` file fails before loading anything.
+  - The second part is the `.flo` file, written as `test.flo`.
+  - More parts are more files, each starting with a `; file: <name>` line. A `.prg` one is assembled, like the first part.
+  - All files go into a temporary directory, and Deflower runs on `test.flo` there.
+  - Round trip: every generated `.asm` must reassemble, with `SourceParser`, to the bytes of the `.prg` with its name. Bytes it leaves out aren't checked. A failure fails the test outright, without writing an expectation.
+- Large snippets (`large/`) are the real programs, whose binaries are too big for a snippet. The only input is a `.flo` path on the test classpath, e.g. `zwark/zwark.flo`, with the `.flo` file and its binary in `src/test/resources/<program>/`. Output goes to `out/` next to the `.flo` file under `target/test-classes`.
+- A changed snippet file in a diff means the generated output changed; review it like any other test failure.
+- To accept a new snippet or a deliberate output change, delete everything from the `^^^` line on and rerun the tests. Running with `-DREGENERATE_EXPECTATIONS` rewrites all of them. Either way, the test writes the actual output into the file and fails once, so you can review it before committing.
+- The `.asm` of a short snippet can also be checked with 64tass: `64tass -q -b -o x.bin test.asm` must equal `test.prg` minus its 2-byte header.
 
 Issues are tracked as `issues/NNNN-slug.md` (frontmatter `title`/`status`/`priority`/`labels`, priority `low`/`medium`/`high`); `issues/README.md` describes the format. To close one, set `status: done`, remove its `priority` and add a "## Closing note".
 

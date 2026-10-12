@@ -1,0 +1,10 @@
+>>> Rejects export of plain address. <<<
+===
+deflower export.prg
+$c020 font export font.bin
+^^^
+Failed to parse test.flo:
+line 2: export needs a type or a range
+~~~
+~~~
+vvv

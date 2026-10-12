@@ -1,6 +1,0 @@
-deflower comments.prg
-; a lone comment
-$c000 byte val
-; entry point
-; second line of same comment
-$c001 code entry_point

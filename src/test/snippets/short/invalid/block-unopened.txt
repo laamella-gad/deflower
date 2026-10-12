@@ -1,0 +1,11 @@
+>>> Rejects close without open block. <<<
+===
+deflower t.prg
+$00 byte freq1
+}
+^^^
+Failed to parse test.flo:
+line 3: '}' without an open block
+~~~
+~~~
+vvv

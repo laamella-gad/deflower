@@ -1,0 +1,23 @@
+>>> Issue 0043: one label defined at two addresses would make the
+assembler reject the output, or resolve references to the wrong
+address, so it is reported and no output is written. <<<
+; Not in the disassembly:
+*=$c000
+		.byte	$01, $02
+===
+deflower test.prg
+$c000 byte twin
+$c001 byte twin
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Marking area of 1 byte at C000 "twin"
+Marking area of 1 byte at C001 "twin"
+Starting flow analysis.
+No entry points defined, nothing to do.
+Duplicate label twin at $c001, already defined at $c000
+Errors detected for test.asm, not writing output.
+~~~
+~~~
+vvv

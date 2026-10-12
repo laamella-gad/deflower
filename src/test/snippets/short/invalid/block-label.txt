@@ -1,0 +1,12 @@
+>>> Rejects label on block opening line. <<<
+===
+deflower t.prg
+$d400 virtual sid {
+}
+^^^
+Failed to parse test.flo:
+line 2: a block's opening line takes only an address and 'virtual'
+line 3: '}' without an open block
+~~~
+~~~
+vvv

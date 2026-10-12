@@ -1,0 +1,10 @@
+>>> Rejects line without address. <<<
+===
+deflower t.prg
+byte label
+^^^
+Failed to parse test.flo:
+line 2:0 extraneous input 'byte' expecting {<EOF>, 'deflower', 'include', '}', COMMENT, INT, HEX}
+~~~
+~~~
+vvv

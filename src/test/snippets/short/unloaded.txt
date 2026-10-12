@@ -1,0 +1,51 @@
+>>> Issue 0065: memory the .prg doesn't load is unknown, not zeros. A
+jsr, a branch or a .flo code entry there gets a label but decodes
+nothing, and an instruction running past the loaded end isn't
+decoded either. <<<
+l0100 = $0100
+; copied here at run time
+relocated = $0200
+*=$c000
+
+entry:
+		jsr l0100
+		beq lC040
+		lda #$01
+lC040 = $c040
+; Not in the disassembly:
+*=$c007
+		.byte	$ad
+===
+deflower test.prg
+$c000 code entry
+; copied here at run time
+$0200 code relocated
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Will disassemble from C000
+Will disassemble from 200
+Starting flow analysis.
+Jumping into memory the image doesn't contain: $0200
+Unnamed target: l0100 from address $c000
+Jumping into memory the image doesn't contain: $0100
+Unnamed target: lC040 from address $c003
+Instruction at $c007 runs past the memory the image contains, not disassembling
+Jumping into memory the image doesn't contain: $c040
+Writing out/test.asm
+~~~
+; called by: entry
+l0100 = $0100
+; copied here at run time
+relocated = $0200
+*=$c000
+
+entry:
+		jsr l0100
+		beq lC040
+		lda #$01
+; jumped to by: entry
+lC040 = $c040
+~~~
+vvv

@@ -14,7 +14,7 @@ import static java.nio.file.Files.readAllBytes;
  */
 class PrgReader {
     void read(Path c64File, Subject subject) {
-        System.out.println("Reading prg " + c64File);
+        System.out.println("Reading prg " + subject.basePath.relativize(c64File));
         try {
             ByteBuffer c64Dump = ByteBuffer.wrap(readAllBytes(c64File));
             int lo = c64Dump.get();
@@ -23,7 +23,7 @@ class PrgReader {
             System.out.println("load address " + loadAddress);
             byte[] b = new byte[c64Dump.remaining()];
             c64Dump.get(b);
-            subject.storeAt(loadAddress, b, c64File);
+            subject.storeAt(loadAddress, b, subject.basePath.relativize(c64File));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

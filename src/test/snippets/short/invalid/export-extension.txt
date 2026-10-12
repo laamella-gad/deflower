@@ -1,0 +1,10 @@
+>>> Rejects export without bin or prg extension. <<<
+===
+deflower export.prg
+$c020-$c030 font export font.asm
+^^^
+Failed to parse test.flo:
+line 2: export font.asm needs a file name ending in .bin or .prg
+~~~
+~~~
+vvv
