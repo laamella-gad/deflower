@@ -14,20 +14,21 @@ Use snippets-test's dynamic tests instead (`SnippetTestFactory` with JUnit 5's `
 - The `.flo` part starts with its own `deflower` line, e.g. `deflower test.prg`. The factory assembles the assembly and writes the result under that name in a temporary directory, writes the `.flo` content next to it, and runs the disassembler on it.
 - Outputs:
   1. what the run printed, stdout and stderr together, so an error run shows its errors here;
-  2. the resulting `.asm` file, or nothing when the run had errors and wrote none.
+  2. the resulting `.asm` file, or nothing when the run had errors and wrote none;
+  3. the binary files the run exported ([0022](0022-export-region-to-binary.md), `export <file>.bin`/`.prg`), one after the other, each under its file name as a hex dump (e.g. the offset, then 16 bytes per line), or nothing when there are none.
 - The test also reassembles the output `.asm` and checks that it gives the same bytes as the input (skipped when the run had errors). Today that check is done by hand (CLAUDE.md, Test-driven workflow).
 - The assembly is readable source instead of a hand-built `.prg`.
 
 **2. Large projects.** For the real programs: squirm, zwark, tcmine.
 - Input: the file name of the project's `.flo` file, e.g. `zwark/zwark.flo`. Its own `deflower` line names the binary (`.vsf` or `.prg`), so nothing is repeated, and a `.flo` with several `deflower` lines still works.
-- The test runs the disassembler and outputs the same two expectations as above. A `.flo` with several runs gives one `.asm` per run; show them one after the other in the second expectation, each under its file name.
+- The test runs the disassembler and outputs the same three expectations as above. A `.flo` with several runs gives one `.asm` per run; show them one after the other in the second expectation, each under its file name. The exported files of all runs go into the third.
 
 ### Assembler: a text parser for mpu6502
 
 The assembling is done by mpu6502 (the user's own library, see [0059](0059-convert-to-nim.md)), not by 64tass, so the tests need no external tool. mpu6502 has an assembler (`com.laamella.mpu6502.assembler.Assembler`), but it is a Java builder API (`org(0x1000)`, `instruction(LDA_IMM, 15)`, `bytes(...)`) with no text parser. Add one to mpu6502 first, as its own piece of work there:
 - It reads a 64tass-like subset: `*=`, every opcode in every addressing mode (illegal opcodes included), labels, `label = value`, and the data directives.
 - For the input side, that subset is whatever the short tests use.
-- For the round trip, it must also read everything deflower writes: `.virtual`/`.endv`, `.byte`, `.word`, `.dword`, `.addr`, `.fill`, `.text` with `.enc "screen"`/`"none"`, `label + $offset` operands, and the `@w` prefix ([0053](0053-force-absolute-operand-on-zero-page-label.md)). When deflower's output gains new syntax, the parser has to follow.
+- For the round trip, it must also read everything deflower writes: `.virtual`/`.endv`, `.byte`, `.word`, `.dword`, `.addr`, `.fill`, `.text` with `.enc "screen"`/`"none"`, `label + $offset` operands, the `@w` prefix ([0053](0053-force-absolute-operand-on-zero-page-label.md)), and `.binary "<file>"` with an optional offset (`, 2` skips a `.prg`'s load address), read from the exported files next to the `.asm` ([0022](0022-export-region-to-binary.md)). When deflower's output gains new syntax, the parser has to follow.
 - Writing it in mpu6502 means it carries over to the planned Nim port of mpu6502.
 
 This issue depends on that parser.
