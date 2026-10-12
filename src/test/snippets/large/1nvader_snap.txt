@@ -286,6 +286,159 @@ Marking area of 2 char at C1B8 "scratch_command"
 Marking area of 9 char at C1BA "highscore_filename"
 Will disassemble from C1C3
 Marking area of 3 byte at C213 "loaded_highscore"
+Marking area of 1 byte at 0 "cpu_port_direction"
+Marking area of 1 byte at 1 "cpu_port"
+Marking area of 41 byte at 2 "null"
+Marking area of 1 word at 2B "basic_start"
+Marking area of 1 word at 2D "basic_variables"
+Marking area of 1 word at 2F "basic_arrays"
+Marking area of 1 word at 31 "basic_arrays_end"
+Marking area of 1 word at 33 "basic_strings"
+Marking area of 2 byte at 35 "null"
+Marking area of 1 word at 37 "basic_memory_end"
+Marking area of 1 word at 39 "basic_line_number"
+Marking area of 56 byte at 3B "null"
+Marking area of 24 byte at 73 "chrget"
+Marking area of 5 byte at 8B "null"
+Marking area of 1 byte at 90 "io_status"
+Marking area of 1 byte at 91 "stop_key"
+Marking area of 14 byte at 92 "null"
+Marking area of 3 byte at A0 "jiffy_clock"
+Marking area of 34 byte at A3 "null"
+Marking area of 1 byte at C5 "last_key"
+Marking area of 1 byte at C6 "keyboard_buffer_length"
+Marking area of 10 byte at C7 "null"
+Marking area of 1 word at D1 "screen_line"
+Marking area of 1 byte at D3 "cursor_column"
+Marking area of 2 byte at D4 "null"
+Marking area of 1 byte at D6 "cursor_row"
+Marking area of 28 byte at D7 "null"
+Marking area of 1 word at F3 "color_line"
+Marking area of 11 byte at F5 "null"
+Marking area of 256 byte at 100 "stack"
+Marking area of 89 byte at 200 "basic_input_buffer"
+Marking area of 30 byte at 259 "null"
+Marking area of 10 byte at 277 "keyboard_buffer"
+Marking area of 5 byte at 281 "null"
+Marking area of 1 byte at 286 "text_color"
+Marking area of 1 byte at 287 "null"
+Marking area of 1 byte at 288 "screen_page"
+Marking area of 119 byte at 289 "null"
+Marking area of 1 addr at 300 "basic_error_vector"
+Marking area of 1 addr at 302 "basic_main_vector"
+Marking area of 16 byte at 304 "null"
+Marking area of 1 addr at 314 "irq_vector"
+Marking area of 1 addr at 316 "brk_vector"
+Marking area of 1 addr at 318 "nmi_vector"
+Marking area of 1 addr at 31A "open_vector"
+Marking area of 1 addr at 31C "close_vector"
+Marking area of 1 addr at 31E "chkin_vector"
+Marking area of 1 addr at 320 "chkout_vector"
+Marking area of 1 addr at 322 "clrchn_vector"
+Marking area of 1 addr at 324 "chrin_vector"
+Marking area of 1 addr at 326 "chrout_vector"
+Marking area of 1 addr at 328 "stop_vector"
+Marking area of 1 addr at 32A "getin_vector"
+Marking area of 1 addr at 32C "clall_vector"
+Marking area of 1 addr at 32E "user_vector"
+Marking area of 1 addr at 330 "load_vector"
+Marking area of 1 addr at 332 "save_vector"
+Marking area of 8 byte at 334 "null"
+Marking area of 192 byte at 33C "tape_buffer"
+Marking area of 4 byte at 3FC "null"
+Marking area of 1000 byte at 400 "screen_ram"
+Marking area of 16 byte at 7E8 "null"
+Marking area of 8 byte at 7F8 "sprite_pointers"
+Marking area of 1 addr at A000 "basic_cold_start_vector"
+Marking area of 1 addr at A002 "basic_warm_start_vector"
+Marking area of 8188 byte at A004 "null"
+Marking area of 16 byte at D000 "vic_sprite_coords"
+Marking area of 1 byte at D010 "vic_sprite_x_high_bits"
+Marking area of 1 byte at D011 "vic_control_1"
+Marking area of 1 byte at D012 "vic_raster"
+Marking area of 1 byte at D013 "vic_light_pen_x"
+Marking area of 1 byte at D014 "vic_light_pen_y"
+Marking area of 1 byte at D015 "vic_sprite_enable"
+Marking area of 1 byte at D016 "vic_control_2"
+Marking area of 1 byte at D017 "vic_sprite_double_height"
+Marking area of 1 byte at D018 "vic_memory_setup"
+Marking area of 1 byte at D019 "vic_irq_status"
+Marking area of 1 byte at D01A "vic_irq_enable"
+Marking area of 1 byte at D01B "vic_sprite_priority"
+Marking area of 1 byte at D01C "vic_sprite_multicolor"
+Marking area of 1 byte at D01D "vic_sprite_double_width"
+Marking area of 1 byte at D01E "vic_sprite_collision"
+Marking area of 1 byte at D01F "vic_background_collision"
+Marking area of 1 byte at D020 "border_color"
+Marking area of 1 byte at D021 "background_color"
+Marking area of 1 byte at D022 "background_color_1"
+Marking area of 1 byte at D023 "background_color_2"
+Marking area of 1 byte at D024 "background_color_3"
+Marking area of 1 byte at D025 "sprite_multicolor_1"
+Marking area of 1 byte at D026 "sprite_multicolor_2"
+Marking area of 8 byte at D027 "vic_sprite_colors"
+Marking area of 977 byte at D02F "null"
+Marking area of 1 word at D400 "voice1_frequency"
+Marking area of 1 word at D402 "voice1_pulse_width"
+Marking area of 1 byte at D404 "voice1_control"
+Marking area of 1 byte at D405 "voice1_attack_decay"
+Marking area of 1 byte at D406 "voice1_sustain_release"
+Marking area of 1 word at D407 "voice2_frequency"
+Marking area of 1 word at D409 "voice2_pulse_width"
+Marking area of 1 byte at D40B "voice2_control"
+Marking area of 1 byte at D40C "voice2_attack_decay"
+Marking area of 1 byte at D40D "voice2_sustain_release"
+Marking area of 1 word at D40E "voice3_frequency"
+Marking area of 1 word at D410 "voice3_pulse_width"
+Marking area of 1 byte at D412 "voice3_control"
+Marking area of 1 byte at D413 "voice3_attack_decay"
+Marking area of 1 byte at D414 "voice3_sustain_release"
+Marking area of 1 word at D415 "filter_cutoff"
+Marking area of 1 byte at D417 "filter_control"
+Marking area of 1 byte at D418 "sid_vol_filter"
+Marking area of 1 byte at D419 "paddle_x"
+Marking area of 1 byte at D41A "paddle_y"
+Marking area of 1 byte at D41B "voice3_oscillator"
+Marking area of 1 byte at D41C "voice3_envelope"
+Marking area of 995 byte at D41D "null"
+Marking area of 1000 byte at D800 "color_ram"
+Marking area of 24 byte at DBE8 "null"
+Marking area of 1 byte at DC00 "cia1_port_a"
+Marking area of 1 byte at DC01 "cia1_port_b"
+Marking area of 1 byte at DC02 "cia1_direction_a"
+Marking area of 1 byte at DC03 "cia1_direction_b"
+Marking area of 1 word at DC04 "cia1_timer_a"
+Marking area of 1 word at DC06 "cia1_timer_b"
+Marking area of 1 byte at DC08 "cia1_tod_tenths"
+Marking area of 1 byte at DC09 "cia1_tod_seconds"
+Marking area of 1 byte at DC0A "cia1_tod_minutes"
+Marking area of 1 byte at DC0B "cia1_tod_hours"
+Marking area of 1 byte at DC0C "cia1_serial"
+Marking area of 1 byte at DC0D "cia1_irq_control"
+Marking area of 1 byte at DC0E "cia1_timer_a_control"
+Marking area of 1 byte at DC0F "cia1_timer_b_control"
+Marking area of 240 byte at DC10 "null"
+Marking area of 1 byte at DD00 "cia2_port_a"
+Marking area of 1 byte at DD01 "cia2_port_b"
+Marking area of 1 byte at DD02 "cia2_direction_a"
+Marking area of 1 byte at DD03 "cia2_direction_b"
+Marking area of 1 word at DD04 "cia2_timer_a"
+Marking area of 1 word at DD06 "cia2_timer_b"
+Marking area of 1 byte at DD08 "cia2_tod_tenths"
+Marking area of 1 byte at DD09 "cia2_tod_seconds"
+Marking area of 1 byte at DD0A "cia2_tod_minutes"
+Marking area of 1 byte at DD0B "cia2_tod_hours"
+Marking area of 1 byte at DD0C "cia2_serial"
+Marking area of 1 byte at DD0D "cia2_irq_control"
+Marking area of 1 byte at DD0E "cia2_timer_a_control"
+Marking area of 1 byte at DD0F "cia2_timer_b_control"
+Marking area of 240 byte at DD10 "null"
+Marking area of 256 byte at DE00 "io_area_1"
+Marking area of 256 byte at DF00 "io_area_2"
+Marking area of 8186 byte at E000 "null"
+Marking area of 1 addr at FFFA "nmi_hardware_vector"
+Marking area of 1 addr at FFFC "reset_hardware_vector"
+Marking area of 1 addr at FFFE "irq_hardware_vector"
 Starting flow analysis.
 Unnamed target: lC1D3 from address $c1cf
 Unnamed target: lC1F7 from address $c1ea
@@ -463,6 +616,19 @@ Unnamed target: l45BE from address $45b9
 Unnamed target: l4131 from address $4137
 Writing out/1nvader_snap.asm
 ~~~
+
+.virtual $0001
+; which ROMs and I/O are banked in
+; read by: build_charset
+; written by: build_charset
+cpu_port:		.byte	?
+.endv
+
+.virtual $0090
+; read by: load_highscore
+; written by: load_highscore
+io_status:		.byte	?
+.endv
 
 .virtual $009d
 ; ---- KERNAL variables ----
@@ -2769,9 +2935,9 @@ build_charset:
 		sei 
 		lda #$18
 		sta vic_memory
-		lda $01
+		lda cpu_port
 		and #$fb
-		sta $01
+		sta cpu_port
 		ldx #$00
 ; jumped to by: build_charset
 l4FE2:
@@ -2797,9 +2963,9 @@ l4FE2:
 
 ; jumped to by: build_charset
 l5018:
-		lda $01
+		lda cpu_port
 		ora #$04
-		sta $01
+		sta cpu_port
 		cli 
 		rts 
 
@@ -3509,11 +3675,11 @@ lC1F7:
 		lda #$6f
 		jsr tksa
 		ldy #$00
-		sty $90
+		sty io_status
 ; jumped to by: load_highscore
 lC205:
 		jsr acptr
-		bit $90
+		bit io_status
 		bvs lC20F
 		iny 
 		bne lC205

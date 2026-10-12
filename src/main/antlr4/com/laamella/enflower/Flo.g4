@@ -18,6 +18,9 @@
  *     stack, KERNAL workspace and vectors, screen), c64_io.flo,
  *     c64_basic.flo and c64_kernal.flo. Included files may include others,
  *     but can't contain 'deflower' lines.
+ *     A VICE snapshot holds the RAM only, not the ROMs or I/O banked over
+ *     it, so without these lines a jump into the KERNAL traces the RAM
+ *     underneath. Include the pieces the program has banked in.
  *     Included lines are weak: any line of the including file that covers
  *     the same memory or names the same address wins, whatever the order,
  *     and an included element it overlaps is dropped. Included areas still

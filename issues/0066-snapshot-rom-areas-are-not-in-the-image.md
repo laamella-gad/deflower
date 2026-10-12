@@ -1,7 +1,6 @@
 ---
 title: A snapshot's ROM areas are decoded from the RAM underneath
-status: open
-priority: medium
+status: done
 labels: bug
 ---
 
@@ -27,3 +26,12 @@ Consequences for the options:
 - Finer control means declaring the banking per routine or address range in the `.flo` file, so code there sees ROM, I/O or RAM. That overlaps with [0069](0069-one-label-per-address-ignores-banking.md), where a label can't follow banking either.
 
 Done when: `bigmac`'s `jmp $ea31` no longer decodes the RAM under the KERNAL, and the chosen way is documented in `Flo.g4`'s format comment if it involves the `.flo` file.
+
+## Closing note
+
+Option 1: the user declares what is banked in. The built-in `c64.flo` ([0078](0078-include-shared-flo-definitions.md)) already declares BASIC, I/O and the KERNAL as virtual areas with their labels, so this needed no code. `bigmac.flo` and `1nvader_snap.flo` now `include c64.flo`, like `zwark`, `squirm` and `tcmine`. `Flo.g4`'s format comment says a snapshot holds only RAM, and that the include keeps the trace out of the ROMs.
+
+- `bigmac`: `jmp $ea31` now prints `jmp kernal_irq`, with `kernal_irq = $ea31`, instead of 16 `ora ($01, x)`, an `isc` and a `brk`. Its SID, `$01` and `$a000` operands got names too.
+- `1nvader_snap` already declared the KERNAL jump table itself (`$ff00 virtual {`), so only `cpu_port` and `io_status` changed.
+
+Seen on the way, and an example of [0069](0069-one-label-per-address-ignores-banking.md): `bigmac`'s IRQ handler banks BASIC and the KERNAL out (`lda cpu_port`, `and #$fd`), and `lC2D8` then reads `lda $a000, y`, which is the RAM under BASIC. That line now prints as `lda basic_cold_start_vector, y`, which is wrong for that code. A label of `bigmac.flo`'s own at `$a000` would fix it there.

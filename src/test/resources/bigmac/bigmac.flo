@@ -5,3 +5,6 @@ $0314 addr irq_vector
 $c543 code irq
 ; where the CPU was when the snapshot was taken
 $c54d code snapshot_pc
+
+; the C64 with BASIC, I/O and KERNAL banked in
+include c64.flo

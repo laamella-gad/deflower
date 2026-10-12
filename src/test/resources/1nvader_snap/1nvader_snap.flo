@@ -331,3 +331,6 @@ $c1b8 char[2] scratch_command
 $c1ba char[9] highscore_filename
 $c1c3 code load_highscore
 $c213 byte[3] loaded_highscore
+
+; the C64 with BASIC, I/O and KERNAL banked in
+include c64.flo
