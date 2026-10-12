@@ -136,6 +136,17 @@ class DeflowerTest {
     }
 
     /**
+     * Issue 0065: memory the .prg doesn't load is unknown, not zeros. A
+     * jsr, a branch or a .flo code entry there gets a label but decodes
+     * nothing, and an instruction running past the loaded end isn't
+     * decoded either.
+     */
+    @Test
+    void traceStopsAtMemoryTheImageDoesNotContain() throws IOException, URISyntaxException {
+        assertDeflowered("unloaded");
+    }
+
+    /**
      * AssemblyFileFormat.print(DataArea, ...) used to only handle BYTE,
      * silently skipping WORD/DWORD/CHAR areas (issue 0002). Covers all three:
      * two WORDs, one DWORD, and three CHARs (printed as one .text

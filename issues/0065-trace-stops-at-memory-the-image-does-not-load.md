@@ -1,7 +1,6 @@
 ---
 title: Flow analysis decodes memory the loaded image doesn't contain
-status: open
-priority: medium
+status: done
 labels: bug
 ---
 
@@ -21,3 +20,14 @@ To decide:
 - **Message.** Print a line like the existing "Jumping into non-code area", e.g. "Jumping into memory the image doesn't contain: $0100".
 
 Done when: the crunched fixtures no longer print `brk` at addresses outside their `.prg`, and a small fixture covers a jump outside the loaded range.
+
+## Decisions
+
+- **How to record what was loaded.** A `loaded` flag on `MemoryLocation`, set by `Subject.storeAt`. A `.vsf` snapshot sets all 64K; its ROM areas stay [0066](0066-snapshot-rom-areas-are-not-in-the-image.md)'s problem.
+- **Behaviour.** A jump, branch or call into memory the image didn't load keeps its label, decodes nothing and prints "Jumping into memory the image doesn't contain: $XXXX". The same for a `.flo` `code` entry there, and for an instruction whose bytes run past the end of the loaded memory.
+
+## Closing note
+
+`MemoryLocation.loaded` is set for the bytes `Subject.storeAt` copies in; a `.vsf` loads all 64K, so snapshots are unchanged. `FlowAnalyser.analyseCodeFlow` stops at a start address that isn't loaded and prints "Jumping into memory the image doesn't contain: $XXXX"; the label the jump, branch or call gave it stays, and prints as a define. `runsIntoExistingArea` also refuses an instruction whose bytes run past the loaded memory (or past `$ffff`).
+
+New fixture `unloaded` covers a `jsr`, a branch and a `.flo` `code` entry outside the `.prg`, and an opcode on the last loaded byte. Its output reassembles to the `.prg` except that last byte, which no area covers. `1nvader`, `2krace`, `3dgolf` and `3dgolfpic` now print `l0100 = $0100` and the like instead of `brk` blocks; no other expectation changed.

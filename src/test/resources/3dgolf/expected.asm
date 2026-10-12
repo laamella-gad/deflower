@@ -1,9 +1,5 @@
-
-*=$0116
-
 ; jumped to by: start
-l0116:
-		brk 
+l0116 = $0116
 *=$0801
 
 ; BASIC stub: SYS 2061

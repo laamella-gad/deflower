@@ -9,14 +9,18 @@ import static com.laamella.Printing.asHexWord;
 class MemoryLocation {
     final int address;
     final int data;
+    // True when the image put this byte here; memory it doesn't load is
+    // unknown, not zero (issue 0065).
+    final boolean loaded;
     Area area = null;
     Label label = null;
     // The comment lines from the .flo file, if any.
     List<String> comment = List.of();
 
-    MemoryLocation(int address, int data) {
+    MemoryLocation(int address, int data, boolean loaded) {
         this.address = address;
         this.data = data;
+        this.loaded = loaded;
     }
 
     /**
@@ -40,7 +44,7 @@ class Subject {
         this.outputPath = basePath.resolve("out");
         this.memory = new MemoryLocation[0x10000];
         for (int i = 0; i < memory.length; i++) {
-            memory[i] = new MemoryLocation(i, 0);
+            memory[i] = new MemoryLocation(i, 0, false);
         }
     }
 
@@ -52,7 +56,7 @@ class Subject {
         assertState(startAddress + bytes.length <= memory.length,
                 "%s: %d bytes loaded at %s run past $ffff", source, bytes.length, asHexWord(startAddress));
         for (int i = 0; i < bytes.length; i++) {
-            memory[startAddress+i] = new MemoryLocation(startAddress + i, bytes[i] & 0xff);
+            memory[startAddress+i] = new MemoryLocation(startAddress + i, bytes[i] & 0xff, true);
         }
     }
 

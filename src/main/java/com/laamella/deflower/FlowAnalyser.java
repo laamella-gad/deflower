@@ -29,6 +29,12 @@ class FlowAnalyser {
             }
             return;
         }
+        if (!memoryLocation.loaded) {
+            // Issue 0065: what is there at run time isn't in the image,
+            // so there is nothing to decode. The target keeps its label.
+            System.out.println("Jumping into memory the image doesn't contain: " + asHexWord(startAddress));
+            return;
+        }
         Instruction instruction = Instruction.INSTRUCTION_BY_NR[memoryLocation.data];
         int address = memoryLocation.address;
         if (instruction == null) {
@@ -103,10 +109,15 @@ class FlowAnalyser {
      * instruction's own length can still run into an address another Area
      * already owns - typically a .flo-declared DataArea (issue 0023). Don't
      * disassemble into it: this is the mirror case of jumping straight into
-     * a non-code area, caught the same way.
+     * a non-code area, caught the same way. Running past the end of the
+     * memory the image loads (issue 0065) is refused too.
      */
     private boolean runsIntoExistingArea(int address, Instruction instruction, Subject subject) {
         for (int offset = 1; offset < instruction.addressingMode.totalBytes; offset++) {
+            if (address + offset > 0xFFFF || !subject.memory[address + offset].loaded) {
+                System.out.println("Instruction at " + asHexWord(address) + " runs past the memory the image contains, not disassembling");
+                return true;
+            }
             Area existing = subject.memory[address + offset].area;
             if (existing != null && !existing.isPlaceholder()) {
                 System.out.println("Instruction at " + asHexWord(address) + " would run into " + existing + ", not disassembling");

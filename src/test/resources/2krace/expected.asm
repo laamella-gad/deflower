@@ -1,14 +1,7 @@
-
-*=$0100
-
 ; called by: $1163
-l0100:
-		brk 
-*=$013a
-
+l0100 = $0100
 ; jumped to by: $1173
-l013A:
-		brk 
+l013A = $013a
 *=$0801
 
 ; BASIC stub: SYS 2061
