@@ -120,7 +120,7 @@ Relation to [0059](0059-convert-to-nim.md): the Nim port plans to convert snippe
 - **Conversion.** Each small fixture's source is its old `expected.asm`, without the cross-reference comments. Where the disassembly leaves bytes out, the source has `.byte` lines under `; Not in the disassembly:`. The `export` fixture's `.binary` lines became `.byte` lines. Every converted `.asm` expectation equals its old `expected.asm`, except `blockoffset`'s (below), and every short snippet passes the round trip.
 - **Deflower.** `Deflower.deflower(Path)` takes a file-system path, and the classpath version calls it. Printed paths are relative to the `.flo` file's directory: `Reading test.prg`, `Writing out/test.asm`, and `include cycle: test.flo -> …`.
 - **What didn't convert.**
-  - `rejectsMissingTrailingNewline` stays a `@Test`, because every snippet part ends in a newline.
+  - `rejectsMissingTrailingNewline` is gone: it guarded [0021](0021-parse-errors-not-collected.md), which `invalid/garbage-tokens` covers too, and a snippet can't hold a file without a trailing newline.
   - `doesNotLogIdenticalReRegistration` and the "no area conflict" check of `narrowplaceholder` are gone: the printed text of `datatypes` and `narrowplaceholder` is now in their expectations.
 - **`blockoffset`.** The round trip found a bug: `byte[48] screen` at `$0400` lies outside the `.prg`, and Deflower printed it as 48 `$00` bytes. The snippet now declares it `virtual`, which is what the test is about anyway, and the bug is [0087](0087-data-on-unloaded-memory-prints-zeroes.md).
 - **JUnit.** `junit-jupiter-engine` went from 5.1.0 to 5.10.1, because the snippet factory uses `DynamicTest.dynamicTest(String, URI, Executable)`, which 5.1 doesn't have.

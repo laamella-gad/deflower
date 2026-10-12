@@ -6,7 +6,6 @@ import com.laamella.snippets_test_junit5.core.BasePath;
 import com.laamella.snippets_test_junit5.core.SnippetFileFormat;
 import com.laamella.snippets_test_junit5.core.SnippetTestFactory;
 import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
 import java.io.ByteArrayOutputStream;
@@ -57,23 +56,6 @@ class DeflowerTest {
     @TestFactory
     Stream<DynamicTest> largeSnippets() throws IOException {
         return new SnippetTestFactory(FORMAT, snippets("large"), filesWithExtension("txt"), DeflowerTest::runLarge).stream();
-    }
-
-    /**
-     * The one case a snippet can't hold: every snippet part ends in a newline.
-     */
-    @Test
-    void rejectsMissingTrailingNewline() throws IOException {
-        Path dir = Files.createTempDirectory("deflower");
-        try {
-            Path flowerFile = dir.resolve("test.flo");
-            Files.writeString(flowerFile, "deflower t.prg\n$0800 byte label1");
-            List<String> outputs = deflower(flowerFile);
-            assertThat(outputs.get(0)).contains("Failed to parse");
-            assertThat(outputs.get(1)).isEmpty();
-        } finally {
-            deleteRecursively(dir);
-        }
     }
 
     private static BasePath snippets(String kind) {
