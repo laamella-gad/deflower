@@ -22,8 +22,11 @@ final class Annotation {
     // True for a line from an included file (issue 0078): weak, so the
     // including file's own lines win over it.
     final boolean included;
+    // The file this line's memory is exported to, like "font.bin" (issue
+    // 0022), or null.
+    final String export;
 
-    Annotation(int address, Integer addressEnd, LineType type, boolean virtual, int amount, String name, List<String> comment, boolean included) {
+    Annotation(int address, Integer addressEnd, LineType type, boolean virtual, int amount, String name, List<String> comment, boolean included, String export) {
         this.address = address;
         this.addressEnd = addressEnd;
         this.type = type;
@@ -32,5 +35,6 @@ final class Annotation {
         this.name = name;
         this.comment = comment;
         this.included = included;
+        this.export = export;
     }
 }

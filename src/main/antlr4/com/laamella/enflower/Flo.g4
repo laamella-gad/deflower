@@ -56,7 +56,15 @@
  *     - label: a name for the address, from [A-Za-z0-9._?]. It can't be
  *       a reserved word: deflower, include, virtual, export, char, byte, word,
  *       long, dword, addr, sbyte, sword, slong, sdword, code.
- *     - export <id> parses, but has no effect yet.
+ *     - export <file>.bin or export <file>.prg: writes the memory the
+ *       line covers to out/<file>.bin, or to out/<file>.prg after a
+ *       2-byte load address (the region's start), and puts
+ *       '.binary "<file>.bin"' (or '.binary "<file>.prg", 2', skipping
+ *       the load address) there in the output instead of the data. Only for a data line (a range or a
+ *       type, not code, not virtual) from the .flo file itself, not an
+ *       included one; each file name once per .flo file. The region is
+ *       fixed data: the code tracing stops at it, even without a type,
+ *       and labels inside it are printed as "label = $addr" after it.
  *     Two lines may only cover the same memory if the earlier one is a
  *     placeholder (or both say exactly the same); otherwise it's an area
  *     conflict, and that run's output isn't written.

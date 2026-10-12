@@ -40,6 +40,8 @@ class Subject {
     final Stack<Integer> potentialCodeLocations = new Stack<>();
     String outputFileName = "deflowered.asm";
     final List<String> errors = new ArrayList<>();
+    // The regions exported to binary files of their own (issue 0022).
+    final List<ExportRegion> exports = new ArrayList<>();
 
     Subject(Path basePath) {
         this.basePath = basePath;
@@ -132,8 +134,15 @@ class Subject {
                     return;
                 }
                 System.out.format("Marking area of %d %s at %X \"%s\"\n", amount, type.dataType.name().toLowerCase(), address, annotation.name);
+                ExportRegion export = null;
+                if (annotation.export != null) {
+                    export = exportRegion(annotation.export, address, address + amount * type.dataType.sizeInBytes);
+                    if (export == null) {
+                        return;
+                    }
+                }
                 for (int i = 0; i < amount; i++) {
-                    DataArea area = new DataArea(address + i * type.dataType.sizeInBytes, type.dataType, annotation.virtual, annotation.name, i, annotation.included);
+                    DataArea area = new DataArea(address + i * type.dataType.sizeInBytes, type.dataType, annotation.virtual, annotation.name, i, annotation.included, export);
                     if (!annotation.included || !overlapsOwnArea(area)) {
                         registerArea(area);
                     }
@@ -141,6 +150,44 @@ class Subject {
             }
             default -> throw new RuntimeException("No data type");
         }
+    }
+
+    /**
+     * Registers the region from `start` to `end` (exclusive) for export to
+     * `fileName` (issue 0022), or reports why it can't be: the file must
+     * hold bytes the image loaded.
+     */
+    private ExportRegion exportRegion(String fileName, int start, int end) {
+        if (end > memory.length) {
+            errors.add(String.format("Exported %s at %s runs past $ffff", fileName, asHexWord(start)));
+            return null;
+        }
+        for (int address = start; address < end; address++) {
+            if (!memory[address].loaded) {
+                errors.add(String.format("Exported %s at %s holds memory the image doesn't load, at %s", fileName, asHexWord(start), asHexWord(address)));
+                return null;
+            }
+        }
+        ExportRegion export = new ExportRegion(fileName, start, end);
+        exports.add(export);
+        return export;
+    }
+
+    /**
+     * The contents of `export`'s file: the bytes as the image loaded them,
+     * after the start address for a .prg file.
+     */
+    byte[] bytesOf(ExportRegion export) {
+        int header = export.headerSize();
+        byte[] bytes = new byte[header + export.end - export.start];
+        if (header == 2) {
+            bytes[0] = (byte) export.start;
+            bytes[1] = (byte) (export.start >> 8);
+        }
+        for (int i = header; i < bytes.length; i++) {
+            bytes[i] = (byte) byteAt(export.start + i - header);
+        }
+        return bytes;
     }
 
     boolean isVirtualAt(int address) {

@@ -16,7 +16,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.laamella.Assert.assertState;
@@ -86,6 +88,10 @@ class FloReader {
         boolean isVirtual = false;
         int amount = 1;
         String name = null;
+        String export = null;
+        // The line each export file name was first given on, across all
+        // runs: they share one output directory.
+        final Map<String, Integer> exportLines;
         final List<String> pendingComments = new ArrayList<>();
         // Mistakes the grammar can't catch, like a misplaced block.
         final List<String> errors = new ArrayList<>();
@@ -100,6 +106,7 @@ class FloReader {
             this.included = included;
             this.path = path;
             this.includeChain = includeChain;
+            this.exportLines = new HashMap<>();
         }
 
         void startNewLine() {
@@ -109,6 +116,7 @@ class FloReader {
             isVirtual = false;
             amount = 1;
             name = null;
+            export = null;
         }
 
         @Override
@@ -226,6 +234,11 @@ class FloReader {
         }
 
         @Override
+        public void enterExport(FloParser.ExportContext ctx) {
+            export = ctx.ID().getText();
+        }
+
+        @Override
         public void exitLine(FloParser.LineContext ctx) {
             assertState(run != null, "Start the file with a 'deflower <file>' line.", ctx.getStart().getLine(), ctx.getText());
             int line = ctx.getStart().getLine();
@@ -246,7 +259,37 @@ class FloReader {
                 openBlock(ctx, line, comment);
                 return;
             }
-            run.annotations.add(new Annotation(address, addressEnd, type, isVirtual, amount, name, comment, included));
+            if (export != null && !checkExport(line)) {
+                return;
+            }
+            run.annotations.add(new Annotation(address, addressEnd, type, isVirtual, amount, name, comment, included, export));
+        }
+
+        /**
+         * Only a data line can be exported (issue 0022), to a file whose
+         * name ends in .bin or .prg and that no other line exports to.
+         */
+        private boolean checkExport(int line) {
+            String problem = null;
+            if (included) {
+                problem = "an included file can't export";
+            } else if (!(export.endsWith(".bin") || export.endsWith(".prg")) || export.length() == ".bin".length()) {
+                problem = "export " + export + " needs a file name ending in .bin or .prg";
+            } else if (type == CODE_LINE) {
+                problem = "code can't be exported";
+            } else if (isVirtual) {
+                problem = "a virtual area can't be exported";
+            } else if (type == UNKNOWN_LINE && addressEnd == null) {
+                problem = "export needs a type or a range";
+            } else if (exportLines.containsKey(export)) {
+                problem = String.format("%s is already exported on line %d", export, exportLines.get(export));
+            }
+            if (problem != null) {
+                errors.add(String.format("line %d: %s", line, problem));
+                return false;
+            }
+            exportLines.put(export, line);
+            return true;
         }
 
         /**
@@ -267,7 +310,7 @@ class FloReader {
             blockVirtual = isVirtual;
             blockLine = line;
             if (!comment.isEmpty()) {
-                run.annotations.add(new Annotation(address, null, UNKNOWN_LINE, false, 1, null, comment, included));
+                run.annotations.add(new Annotation(address, null, UNKNOWN_LINE, false, 1, null, comment, included, null));
             }
         }
 

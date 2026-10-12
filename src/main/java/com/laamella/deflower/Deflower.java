@@ -58,6 +58,11 @@ public class Deflower {
         try (Writer w = new BufferedWriter(new FileWriter(asmFile.toFile()))) {
             resultWriter.write(subject, w);
         }
+        for (ExportRegion export : subject.exports) {
+            Path binFile = subject.outputPath.resolve(export.fileName);
+            System.out.println("Writing " + binFile);
+            Files.write(binFile, subject.bytesOf(export));
+        }
     }
 
     /**

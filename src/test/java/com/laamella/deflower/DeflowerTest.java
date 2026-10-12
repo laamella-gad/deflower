@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 import static com.laamella.snippets_test_junit5.core.Snipsertions.snipsert;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -591,6 +592,62 @@ class DeflowerTest {
     @Test
     void rejectsBlockOffsetPastFFFF() throws IOException, URISyntaxException {
         assertFailsToParse("invalid/block-past-ffff.flo", "line 3: the block's base plus this offset runs past $ffff");
+    }
+
+    /**
+     * Issue 0022: a data line with "export <name>.bin" writes its bytes to
+     * out/<name>.bin, or to out/<name>.prg after its start address, and
+     * the assembly includes that file with .binary instead of printing
+     * the data. Labels inside an exported region
+     * become defines after it, and operands into it still name it.
+     */
+    @Test
+    void exportsRegionToBinaryFile() throws IOException, URISyntaxException {
+        assertDeflowered("export");
+        Path out = outDir("export/export.flo");
+        byte[] prg = Files.readAllBytes(Paths.get(DeflowerTest.class.getResource("/export/export.prg").toURI()));
+        assertThat(Files.readAllBytes(out.resolve("font.bin"))).isEqualTo(Arrays.copyOfRange(prg, 2 + 0x20, 2 + 0x30));
+        assertThat(Files.readAllBytes(out.resolve("table.prg"))).isEqualTo(new byte[]{0x30, (byte) 0xc0, 0x34, 0x12, 0x00, (byte) 0xc0});
+    }
+
+    @Test
+    void rejectsExportOfCode() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/export-code.flo", "line 2: code can't be exported");
+    }
+
+    @Test
+    void rejectsExportWithoutBinOrPrgExtension() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/export-extension.flo", "line 2: export font.asm needs a file name ending in .bin or .prg");
+    }
+
+    @Test
+    void rejectsExportOfPlainAddress() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/export-address.flo", "line 2: export needs a type or a range");
+    }
+
+    @Test
+    void rejectsSameExportFileTwice() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/export-duplicate.flo", "line 4: font.bin is already exported on line 2");
+    }
+
+    /**
+     * Issue 0022: an exported region must hold bytes the image loaded.
+     */
+    @Test
+    void reportsExportOfUnloadedMemory() throws IOException, URISyntaxException {
+        String flowerFile = "exportunloaded/exportunloaded.flo";
+        ByteArrayOutputStream capturedErr = new ByteArrayOutputStream();
+        PrintStream originalErr = System.err;
+        System.setErr(new PrintStream(capturedErr));
+        try {
+            new Deflower().deflower(flowerFile);
+        } finally {
+            System.setErr(originalErr);
+        }
+        assertThat(capturedErr.toString())
+                .contains("Exported table.bin at $c030 holds memory the image doesn't load, at $c036")
+                .contains("Errors detected");
+        assertThat(isEmpty(outDir(flowerFile))).as("output directory for an export of unloaded memory").isTrue();
     }
 
     /**

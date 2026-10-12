@@ -169,6 +169,37 @@ class AssemblyFileFormat {
         return address;
     }
 
+    /**
+     * Prints a region exported to a binary file (issue 0022) as a 64tass
+     * {@code .binary} line, skipping a .prg file's load address, after the
+     * label and comment at its start. The
+     * labels inside it become address defines after it.
+     *
+     * @return the first address after the region
+     */
+    int printExport(ExportRegion export, Subject subject) throws IOException {
+        considerReOrg(export.start);
+        out.finishLine();
+        out.newLine();
+        printCommentLines(export.start, subject);
+        String label = subject.memory[export.start].labelName();
+        if (label != null) {
+            out.print(label + ":");
+            out.newLine();
+        }
+        out.indent();
+        out.print(".binary\t\"" + export.fileName + "\"" + (export.headerSize() != 0 ? ", " + export.headerSize() : ""));
+        lastArea = null;
+        List<Integer> inside = new ArrayList<>();
+        for (int address = export.start + 1; address < export.end; address++) {
+            if (subject.isAnnotated(address)) {
+                inside.add(address);
+            }
+        }
+        printDefines(inside, subject);
+        return export.end;
+    }
+
     private static String reservationDirective(DataType type) {
         return switch (type) {
             case BYTE, UNKNOWN, CHAR -> ".byte";
@@ -439,6 +470,11 @@ class ResultWriter {
                 // The loop's own address++ then lands on the first
                 // address after the stretch.
                 address = assemblyFile.printVirtualStretch(address, subject) - 1;
+                continue;
+            }
+
+            if (currentArea instanceof DataArea && ((DataArea) currentArea).export != null) {
+                address = assemblyFile.printExport(((DataArea) currentArea).export, subject) - 1;
                 continue;
             }
 

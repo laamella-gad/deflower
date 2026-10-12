@@ -16,35 +16,42 @@ class DataArea extends Area {
     final int indexInArray;
     // True for an element an included file declared (issue 0078).
     final boolean included;
+    // The binary file this element is exported to (issue 0022), or null.
+    final ExportRegion export;
 
     DataArea(int address, DataType type, boolean isVirtual, String arrayLabel, int indexInArray) {
-        this(address, type, isVirtual, arrayLabel, indexInArray, false);
+        this(address, type, isVirtual, arrayLabel, indexInArray, false, null);
     }
 
-    DataArea(int address, DataType type, boolean isVirtual, String arrayLabel, int indexInArray, boolean included) {
+    DataArea(int address, DataType type, boolean isVirtual, String arrayLabel, int indexInArray, boolean included, ExportRegion export) {
         super(address, type.sizeInBytes);
         this.type = type;
         this.virtual = isVirtual;
         this.arrayLabel = arrayLabel;
         this.indexInArray = indexInArray;
         this.included = included;
+        this.export = export;
     }
 
     @Override
     public String toString() {
-        return super.toString() + " " + type.name().toLowerCase() + (virtual ? " virtual" : "");
+        return super.toString() + " " + type.name().toLowerCase() + (virtual ? " virtual" : "") + (export != null ? " export " + export.fileName : "");
     }
 
     @Override
     public boolean equals(Object o) {
         if (!super.equals(o)) return false;
         DataArea other = (DataArea) o;
-        return type == other.type && virtual == other.virtual;
+        return type == other.type && virtual == other.virtual && Objects.equals(exportFileName(), other.exportFileName());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), type, virtual);
+        return Objects.hash(super.hashCode(), type, virtual, exportFileName());
+    }
+
+    private String exportFileName() {
+        return export != null ? export.fileName : null;
     }
 
     @Override
@@ -54,7 +61,8 @@ class DataArea extends Area {
 
     @Override
     public boolean isPlaceholder() {
-        return type == DataType.UNKNOWN;
+        // An exported range is fixed data, even without a type.
+        return type == DataType.UNKNOWN && export == null;
     }
 
     /**
