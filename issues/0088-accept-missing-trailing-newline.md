@@ -1,7 +1,6 @@
 ---
 title: Accept a .flo file whose last line has no newline
-status: open
-priority: low
+status: done
 labels: enhancement
 ---
 
@@ -12,3 +11,9 @@ How this came about: [0021](0021-parse-errors-not-collected.md) made parse error
 Want: a last line without a newline parses like any other, e.g. with `prog: (statement NEWLINE)* statement? EOF;` or by putting `NEWLINE?` before `EOF`.
 
 Done when: a file whose last line, an annotation or a comment, has no trailing newline parses and gives the same output as with one. A short snippet can't hold such a file, since every snippet part ends in a newline, so this needs a plain `@Test` or a `FloReader` unit test.
+
+## Closing note
+
+The grammar is unchanged. `FloReader.collect` adds a newline to text that doesn't end in one before parsing, for the `.flo` file itself, included files and the built-in ones. The suggested `statement?` before `EOF` does accept the file, but it changes how ANTLR predicts the line rule: errors such as "extraneous input 'second' expecting NEWLINE" became "no viable alternative at input '$0800bytefirstsecond'", which seven `invalid/` snippets caught.
+
+`DeflowerTest.acceptsLastLineWithoutNewline` runs a file ending in an annotation and one ending in a comment, each without a final newline, and checks both give the same output as with one.

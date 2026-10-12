@@ -6,6 +6,7 @@ import com.laamella.snippets_test_junit5.core.BasePath;
 import com.laamella.snippets_test_junit5.core.SnippetFileFormat;
 import com.laamella.snippets_test_junit5.core.SnippetTestFactory;
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
 import java.io.ByteArrayOutputStream;
@@ -56,6 +57,21 @@ class DeflowerTest {
     @TestFactory
     Stream<DynamicTest> largeSnippets() throws IOException {
         return new SnippetTestFactory(FORMAT, snippets("large"), filesWithExtension("txt"), DeflowerTest::runLarge).stream();
+    }
+
+    /**
+     * A snippet can't hold a file without a trailing newline, since every
+     * part ends in one (issue 0088).
+     */
+    @Test
+    void acceptsLastLineWithoutNewline() throws IOException {
+        String source = "*=$c000\nstart:\n\t\tlda data\n\t\trts\ndata:\n\t\t.byte\t$01\n";
+        for (String lastLine : List.of("$c004 byte data", "; a comment")) {
+            String flo = "deflower test.prg\n$c000 code start\n" + lastLine;
+            assertThat(runShort(List.of(source, flo)))
+                    .as("last line: " + lastLine)
+                    .isEqualTo(runShort(List.of(source, flo + "\n")));
+        }
     }
 
     private static BasePath snippets(String kind) {

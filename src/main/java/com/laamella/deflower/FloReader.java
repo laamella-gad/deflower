@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.laamella.Assert.assertState;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static com.laamella.deflower.LineType.*;
 
 /**
@@ -35,17 +36,20 @@ class FloReader {
 
     List<DeflowerRun> read(Path path, String sourceName) throws IOException {
         AnnotationCollector collector = new AnnotationCollector(null, false, path, new ArrayList<>(List.of(sourceName)));
-        collect(CharStreams.fromPath(path), sourceName, collector);
+        collect(Files.readString(path), sourceName, collector);
         return collector.runs;
     }
 
     /**
-     * Parses `input` and walks it with `collector`, failing on a syntax
+     * Parses `text` and walks it with `collector`, failing on a syntax
      * error or a mistake the collector found.
      */
-    private static void collect(CharStream input, String sourceName, AnnotationCollector collector) {
+    private static void collect(String text, String sourceName, AnnotationCollector collector) {
+        // The grammar ends every line with a newline; the last one may
+        // lack it (issue 0088).
+        String lines = text.isEmpty() || text.endsWith("\n") || text.endsWith("\r") ? text : text + "\n";
         List<String> parseErrors = new ArrayList<>();
-        FloParser parser = createParser(parseErrors, input);
+        FloParser parser = createParser(parseErrors, CharStreams.fromString(lines, sourceName));
         FloParser.ProgContext tree = parser.prog();
         assertState(parseErrors.isEmpty(), "Failed to parse %s:%n%s", sourceName, String.join("\n", parseErrors));
         new ParseTreeWalker().walk(collector, tree);
@@ -161,7 +165,7 @@ class FloReader {
             Path local = path != null ? path.resolveSibling(name) : null;
             try {
                 if (local != null && Files.exists(local)) {
-                    collect(CharStreams.fromPath(local), name, new AnnotationCollector(run, true, local, chain));
+                    collect(Files.readString(local), name, new AnnotationCollector(run, true, local, chain));
                     return;
                 }
                 InputStream builtIn = FloReader.class.getResourceAsStream(BUILT_IN + name);
@@ -170,7 +174,7 @@ class FloReader {
                     return;
                 }
                 try (builtIn) {
-                    collect(CharStreams.fromStream(builtIn), name, new AnnotationCollector(run, true, null, chain));
+                    collect(new String(builtIn.readAllBytes(), UTF_8), name, new AnnotationCollector(run, true, null, chain));
                 }
             } catch (IOException e) {
                 errors.add(String.format("line %d: can't read %s: %s", line, name, e.getMessage()));
