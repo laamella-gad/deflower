@@ -681,6 +681,7 @@ l2437:
 		inx 
 		cpx #$4b
 		bne l2437
+; called by: reset_everything
 l2441 = $2441
 		rts 
 
@@ -3076,7 +3077,7 @@ reset_everything:
 		jsr set_top_bottom_text
 		lda #$c8
 		sta vic_control_2
-		jsr $2441
+		jsr l2441
 		jsr draw_screen_colors
 		jsr initialize_pointers
 		lda #$e0

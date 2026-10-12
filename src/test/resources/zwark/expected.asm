@@ -119,10 +119,11 @@ l0131:
 ; jumped to by: decrunch
 l013E:
 		sta decrunch_count
-		beq $0147
+		beq l0147
 		cmp #$01
 		beq l0191
 		bit kernal_workspace + $e6
+; jumped to by: decrunch
 l0147 = $0147
 		jsr l019F
 		rol decrunch_bits

@@ -132,7 +132,7 @@ lC1BB:
 		adc #$e0
 		sta $c1dd
 		adc #$08
-		sta $c1e4
+		sta dC1E4
 		rts 
 
 ; called by: lC100
@@ -157,6 +157,7 @@ lC1D8:
 lC1DF:
 		ldy $c0c3
 		lda $e800, y
+; written by: lC1BB
 dC1E4 = $c1e4
 		rts 
 
@@ -299,7 +300,7 @@ lC2BB:
 		adc #$a0
 		sta $c2dd
 		adc #$08
-		sta $c2e4
+		sta dC2E4
 		rts 
 
 ; called by: lC200
@@ -324,6 +325,7 @@ lC2D8:
 lC2DF:
 		ldy $c0c8
 		lda $a800, y
+; written by: lC2BB
 dC2E4 = $c2e4
 		rts 
 
@@ -466,7 +468,7 @@ lC3BB:
 		adc #$b0
 		sta $c3dd
 		adc #$08
-		sta $c3e4
+		sta dC3E4
 		rts 
 
 ; called by: lC300
@@ -491,6 +493,7 @@ lC3D8:
 lC3DF:
 		ldy $c0cd
 		lda $b800, y
+; written by: lC3BB
 dC3E4 = $c3e4
 		rts 
 

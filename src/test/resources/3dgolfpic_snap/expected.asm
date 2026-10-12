@@ -44,8 +44,10 @@ escape_code:		.byte	$02
 ; read by: decrunch_loop, decrunch_done
 store_byte:
 		sta packed_data_end
+; read by: decrunch_loop, decrunch_done
+; modified by: store_byte
 output_pointer = $00fa
-		inc store_byte + 1
+		inc output_pointer
 		bne l0102
 		inc store_byte + 2
 
@@ -103,7 +105,7 @@ decrunch_loop:
 l014B:
 		jsr get_gamma
 		tax 
-		lda $01a5, x
+		lda decrunch_table_base, x
 		cpx #$20
 		bcc l015C
 		txa 
@@ -139,7 +141,7 @@ l0169:
 l0177:
 		sta decrunch_pointer + $1
 		jsr get_8_bits
-		adc store_byte + 1
+		adc output_pointer
 		ldx decrunch_pointer
 		sta decrunch_pointer
 		lda store_byte + 2
@@ -160,13 +162,14 @@ decrunch_done:
 		lda #$37
 		sta cpu_port
 		dec c128_clock
-		lda store_byte + 1
+		lda output_pointer
 		sta decrunch_pointer
 		lda store_byte + 2
 		sta decrunch_pointer + $1
 		cli 
 		jmp show_picture
 ; lengths for codes below $20, indexed from 1 through decrunch_table_base
+; read by: decrunch_loop
 decrunch_table_base = $01a5
 
 decrunch_table:
@@ -186,13 +189,15 @@ stack:
 decrunch_get_byte:
 		pha 
 		lda untouched_7f92
+; modified by: decrunch_get_byte
 input_pointer = $0202
+; modified by: decrunch_get_byte
 d0203 = $0203
 		rol 
 		sta bit_buffer
-		inc $0202
+		inc input_pointer
 		bne l020F
-		inc $0203
+		inc d0203
 
 ; jumped to by: decrunch_get_byte
 l020F:
@@ -281,6 +286,7 @@ decrunch:
 		sei 
 		inc c128_clock
 		lda #$38
+; read by: decrunch
 d0812 = $0812
 		sta cpu_port
 		ldx #$34
@@ -304,14 +310,16 @@ l0822:
 ; jumped to by: decrunch
 l082D:
 		dex 
-		lda $0812, x
+		lda d0812, x
+; modified by: decrunch
 d0830 = $0830
 		sta picture_bitmap + $d92, x
+; modified by: decrunch
 d0833 = $0833
 		txa 
 		bne l082D
-		dec $0833
-		dec $0830
+		dec d0833
+		dec d0830
 		dey 
 		bne l082D
 		jmp decrunch_loop

@@ -174,13 +174,13 @@ l08CF:
 		lda fine_scroll
 		clc 
 		adc #$05
-		sta $0a0b
+		sta upper_road_y
 		lda fine_scroll
 		clc 
 		adc #$f6
-		sta $0a32
+		sta lower_road_y
 		lda road_row
-		sta l0B93 + 1
+		sta d0B94
 		lda #$80
 		sta l0B93 + 2
 		lda #$43
@@ -189,7 +189,7 @@ l08CF:
 		sta draw_pointer + $1
 		jsr draw_road_sprite
 		lda road_row
-		sta l0B93 + 1
+		sta d0B94
 		lda #$81
 		sta l0B93 + 2
 		lda #$85
@@ -200,8 +200,8 @@ l08CF:
 		lda road_row
 		clc 
 		adc #$05
-		sta l0926 + 1
-		sta $092c
+		sta left_road_source
+		sta right_road_source
 		lda #$08
 		sta draw_pointer
 		lda #$44
@@ -216,14 +216,16 @@ snapshot_pc:
 		ldy #$00
 
 ; jumped to by: snapshot_pc
-; written by: game_loop
-; modified by: snapshot_pc
 l0926:
 		lda left_road + $fd
 ; operands the game loop changes to step down the road map
+; written by: game_loop
+; modified by: snapshot_pc
 left_road_source = $0927
 		sta (draw_pointer), y
 		lda right_road + $fd
+; written by: game_loop
+; modified by: snapshot_pc
 right_road_source = $092c
 		sta (draw_pointer2), y
 		tya 
@@ -236,14 +238,14 @@ right_road_source = $092c
 
 ; jumped to by: snapshot_pc
 l093B:
-		inc l0926 + 1
-		inc $092c
+		inc left_road_source
+		inc right_road_source
 		dex 
 		bne l0926
 		lda road_row
 		clc 
 		adc #$1e
-		sta l0B93 + 1
+		sta d0B94
 		lda #$80
 		sta l0B93 + 2
 		lda #$c0
@@ -254,7 +256,7 @@ l093B:
 		lda road_row
 		clc 
 		adc #$1e
-		sta l0B93 + 1
+		sta d0B94
 		lda #$81
 		sta l0B93 + 2
 		lda #$02
@@ -349,6 +351,7 @@ irq:
 		sta vic_control1
 		lda #$07
 ; the road sprites' y in each half of the screen, set from fine_scroll
+; written by: game_loop
 upper_road_y = $0a0b
 		sta sprite1_y
 		sta sprite2_y
@@ -369,6 +372,7 @@ upper_road_y = $0a0b
 irq_lower:
 		pha 
 		lda #$f8
+; written by: game_loop
 lower_road_y = $0a32
 		sta sprite1_y
 		sta sprite2_y
@@ -590,9 +594,10 @@ draw_road_sprite:
 
 ; jumped to by: draw_road_sprite
 ; written by: game_loop, snapshot_pc
-; modified by: draw_road_sprite
 l0B93:
 		lda right_road + $fd
+; written by: game_loop, snapshot_pc
+; modified by: draw_road_sprite
 d0B94 = $0b94
 		beq l0B9A
 		lda #$ff
@@ -615,7 +620,7 @@ l0B9A:
 		iny 
 		iny 
 		iny 
-		inc l0B93 + 1
+		inc d0B94
 		dex 
 		bpl l0B93
 		rts 
@@ -939,12 +944,12 @@ music_set_volume:
 
 ; jumped to by: music_init
 l100C:
-		sta $1017
+		sta init_flag
 		rts 
 
 ; jumped to by: music_set_volume
 l1010:
-		sta $10a0
+		sta master_volume
 		rts 
 
 ; jumped to by: music_play
@@ -952,6 +957,7 @@ l1014:
 		ldx #$00
 		ldy #$ff
 ; operands the player changes
+; written by: music_set_volume
 init_flag = $1017
 		bmi l104A
 		txa 
@@ -963,9 +969,9 @@ l101D:
 		dex 
 		bpl l101D
 		sta filter_cutoff
-		sta $1099
+		sta filter_resonance
 		sta l104A + 1
-		stx $1017
+		stx init_flag
 		tax 
 		jsr l103A
 		ldx #$07
@@ -987,15 +993,17 @@ l104A:
 		ldy #$01
 		beq l1093
 		lda #$00
+; written by: l103A, l10AE
+; modified by: l103A
 filter_steps = $104f
 		bne l1075
 		lda filter_left, y
 		beq l1069
 		bpl l1072
 		asl 
-		sta $109e
+		sta filter_type
 		lda filter_right, y
-		sta $1099
+		sta filter_resonance
 		lda filter_left + $1, y
 		bne l1087
 		iny 
@@ -1008,7 +1016,7 @@ l1069:
 
 ; jumped to by: l103A
 l1072:
-		sta $104f
+		sta filter_steps
 
 ; jumped to by: l103A
 l1075:
@@ -1016,7 +1024,7 @@ l1075:
 		clc 
 		adc l1093 + 1
 		sta l1093 + 1
-		dec $104f
+		dec filter_steps
 		bne l1095
 
 ; jumped to by: l103A
@@ -1045,11 +1053,14 @@ l1093:
 l1095:
 		sta filter_cutoff + $1
 		lda #$f1
+; written by: music_set_volume, l103A
 filter_resonance = $1099
 		sta filter_control
 		lda #$10
+; written by: l103A
 filter_type = $109e
 		ora #$0f
+; written by: music_set_volume
 master_volume = $10a0
 		sta volume_filter_mode
 		jsr l10AE
@@ -1128,7 +1139,7 @@ l111B:
 		beq l1128
 		sta l104A + 1
 		lda #$00
-		sta $104f
+		sta filter_steps
 
 ; jumped to by: l10AE
 l1128:

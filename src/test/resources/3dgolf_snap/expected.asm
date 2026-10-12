@@ -288,13 +288,15 @@ stack:
 decrunch_get_byte:
 		pha 
 		lda unused_ed07 + $c
+; modified by: decrunch_get_byte
 d0202 = $0202
+; modified by: decrunch_get_byte
 d0203 = $0203
 		rol 
 		sta vf7
-		inc $0202
+		inc d0202
 		bne l020F
-		inc $0203
+		inc d0203
 
 ; jumped to by: decrunch_get_byte
 l020F:
@@ -744,13 +746,15 @@ l0822:
 l082D:
 		dex 
 		lda old_screen + $2fd, x
+; modified by: decrunch
 d0830 = $0830
 		sta terrain_82bc + $57, x
+; modified by: decrunch
 d0833 = $0833
 		txa 
 		bne l082D
-		dec $0833
-		dec $0830
+		dec d0833
+		dec d0830
 		dey 
 		bne l082D
 		jmp l0116
@@ -767,10 +771,11 @@ old_loader:
 		sta background_color
 		sta vfb
 		lda #$20
-		bne $088b
+		bne l088B
 		jsr l08D0
 		jsr l08D0
 		jsr l08D0
+; jumped to by: old_loader
 l088B = $088b
 		lda #$06
 		sta background_color
@@ -1317,6 +1322,7 @@ l0CFB:
 		sta view_x + $1
 		stx view_x
 		jmp rotate_7
+; written by: set_direction
 rotate_45_next = $0d02
 
 rotate_4:
@@ -1402,7 +1408,7 @@ l0D91:
 		lda #$0c
 		sta l0BF9 + 2
 		lda rotations, x
-		sta $0d02
+		sta rotate_45_next
 		lda rotations + $1, x
 		sta $0d03
 		rts 

@@ -125,6 +125,17 @@ class DeflowerTest {
     }
 
     /**
+     * Issue 0067: an operand pointing at a labelled byte inside an
+     * unlabelled instruction prints that label, whether the analysis or
+     * the .flo file put it there. Without one, it falls back to "label +
+     * offset" from the instruction's own label.
+     */
+    @Test
+    void operandInsideInstructionUsesLabelThere() throws IOException, URISyntaxException {
+        assertDeflowered("operandlabel");
+    }
+
+    /**
      * AssemblyFileFormat.print(DataArea, ...) used to only handle BYTE,
      * silently skipping WORD/DWORD/CHAR areas (issue 0002). Covers all three:
      * two WORDs, one DWORD, and three CHARs (printed as one .text

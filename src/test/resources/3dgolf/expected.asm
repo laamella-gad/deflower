@@ -37,13 +37,15 @@ l0822:
 l082D:
 		dex 
 		lda $707b, x
+; modified by: start
 d0830 = $0830
 		sta $ec13, x
+; modified by: start
 d0833 = $0833
 		txa 
 		bne l082D
-		dec $0833
-		dec $0830
+		dec d0833
+		dec d0830
 		dey 
 		bne l082D
 		jmp l0116

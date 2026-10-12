@@ -29,8 +29,17 @@ public class InstructionArea extends Area {
         return Objects.hash(super.hashCode(), instruction);
     }
 
+    /**
+     * A label on `address` itself, such as one on an operand that
+     * self-modifying code writes to, wins over "label + offset" from the
+     * label on the instruction's first byte (issue 0067).
+     */
     @Override
     public String labelFor(int address, Subject subject) {
+        String directLabel = subject.memory[address].labelName();
+        if (directLabel != null) {
+            return directLabel;
+        }
         int offset = address - this.address;
         String label = subject.memory[this.address].labelName();
         if (label == null) {
@@ -44,6 +53,9 @@ public class InstructionArea extends Area {
 
     @Override
     public int labelAddressFor(int address, Subject subject) {
+        if (subject.memory[address].label != null) {
+            return address;
+        }
         return subject.memory[this.address].label != null ? this.address : -1;
     }
 }
