@@ -1,0 +1,32 @@
+$0000 virtual byte cpu_port_direction
+; which ROMs and I/O are banked in
+$0001 virtual byte cpu_port
+$0002-$002b virtual byte
+$002b virtual word basic_start
+$002d virtual word basic_variables
+$002f virtual word basic_arrays
+$0031 virtual word basic_arrays_end
+$0033 virtual word basic_strings
+$0035-$0037 virtual byte
+$0037 virtual word basic_memory_end
+$0039 virtual word basic_line_number
+$003b-$0073 virtual byte
+; reads the next character of the BASIC program
+$0073 virtual byte[24] chrget
+$008b-$0090 virtual byte
+$0090 virtual byte io_status
+$0091 virtual byte stop_key
+$0092-$00a0 virtual byte
+; counts 1/60 seconds, high byte first
+$00a0 virtual byte[3] jiffy_clock
+$00a3-$00c5 virtual byte
+$00c5 virtual byte last_key
+$00c6 virtual byte keyboard_buffer_length
+$00c7-$00d1 virtual byte
+$00d1 virtual word screen_line
+$00d3 virtual byte cursor_column
+$00d4-$00d6 virtual byte
+$00d6 virtual byte cursor_row
+$00d7-$00f3 virtual byte
+$00f3 virtual word color_line
+$00f5-$0100 virtual byte

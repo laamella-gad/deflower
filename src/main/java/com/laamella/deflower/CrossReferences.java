@@ -92,7 +92,7 @@ class CrossReferences {
      * for an instruction without one. For an indirect mode that is the
      * pointer, not where it points.
      */
-    private static int target(InstructionArea area, Subject subject) {
+    static int target(InstructionArea area, Subject subject) {
         int byte1 = subject.byteAt(area.address + 1);
         return switch (area.instruction.addressingMode) {
             case ZERO_PAGE, ZERO_PAGE_X, ZERO_PAGE_Y, IND_X, IND_Y -> byte1;

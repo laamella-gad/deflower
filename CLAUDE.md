@@ -37,11 +37,12 @@ The pipeline is: **flow file → parse → memory image + annotations → code-f
     - The size is a number or `*`/`+` over numbers (`byte[40*21]`, `byte[$af]`). A size of 0 is an error.
     - The reserved words can't be labels.
     - `export` parses but does nothing yet.
+  - `include <file>` reads another `.flo` file's lines into the run: relative to the including file, else a built-in one from `src/main/resources/deflower/` (`c64.flo`, which includes `c64_zeropage.flo`, `c64_system.flo`, `c64_io.flo`, `c64_basic.flo` and `c64_kernal.flo`). Included lines are weak: the including file's own lines win wherever they overlap, in any order. Included virtual areas and labels on uncovered memory are only printed when an operand or `.addr` value refers to them.
   - A `<address> [virtual] {` line opens a block, closed by `}`: addresses inside are offsets from that address, and `virtual` applies to every line inside. Blocks don't nest; `FloReader` resolves them, so nothing after parsing knows about them.
   - `;`/`#` comments sit on their own line and attach to the next annotation line.
 - **`SubjectConfigurer`** drives the two configuration phases.
-  - **Parse:** `FloReader` turns the `.flo` file into one `DeflowerRun` per `deflower` line, each holding its `Annotation`s (one per line, plain values; `LineType` is the line's kind). It reads nothing else and changes no memory. Syntax errors abort with "Failed to parse".
-  - **Apply:** for each run, `SubjectConfigurer` creates a `Subject`, loads the image (`ViceSnapshotReader` or `PrgReader`, picked by extension), and calls `Subject.annotate` for each annotation. Data lines register one `DataArea` per element; `code` lines push an entry point onto `potentialCodeLocations`.
+  - **Parse:** `FloReader` turns the `.flo` file into one `DeflowerRun` per `deflower` line, each holding its `Annotation`s (one per line, plain values; `LineType` is the line's kind; `included` for a line from an included file). It reads nothing but `.flo` files and changes no memory. Syntax errors abort with "Failed to parse".
+  - **Apply:** for each run, `SubjectConfigurer` creates a `Subject`, loads the image (`ViceSnapshotReader` or `PrgReader`, picked by extension), and calls `Subject.annotate` for each annotation, the run's own ones first and the included ones after, so these only fill in what is still free. Data lines register one `DataArea` per element; `code` lines push an entry point onto `potentialCodeLocations`.
   - To add `.flo` syntax, change the grammar, `FloReader` and `Annotation`/`Subject.annotate`.
 - **`Subject`** holds:
   - the 64K `MemoryLocation[]` (each location has the byte, an `Area` reference, a label and a comment);
@@ -52,7 +53,7 @@ The pipeline is: **flow file → parse → memory image + annotations → code-f
   - It registers an `InstructionArea` for each decoded instruction, follows fall-through and branch/jump/JSR targets (including `JMP (indirect)` through the address it reads), and auto-labels targets (`lXXXX`, `dXXXX`, `aXXXX`).
   - Analysis stops at addresses already covered by a non-placeholder area, and won't decode an instruction whose bytes run into one. It also stops at memory the image didn't load (`MemoryLocation.loaded`): the target keeps its label, printed as a define. That is how it avoids loops and detects jumps into data ("Jumping into non-code area").
 - **`Area`** is the common base for `DataArea` and `InstructionArea`. Each address belongs to at most one area, and `registerArea` writes that link into `Subject.memory`. Address ownership is the main signal the analyser uses, so an overlapping `.flo` declaration changes the output.
-- **`Deflower`** runs the pipeline. It clears and recreates `<basePath>/out` once per `.flo` file, then for each subject analyses and, if there are no errors, opens `out/<binary>.asm` and hands the writer to `ResultWriter`.
+- **`Deflower`** runs the pipeline. It clears and recreates `<basePath>/out` once per `.flo` file, then for each subject analyses, drops the unused included names (`Subject.dropUnusedIncludes`) and, if there are no errors, opens `out/<binary>.asm` and hands the writer to `ResultWriter`.
 - **`ResultWriter`** walks 0x0000–0xFFFF and drives `AssemblyFileFormat`, which owns the layout and the per-type printing (64tass syntax, all lowercase except labels and comments):
   - `*=` origins at gaps;
   - blank-line separators and label placement inside data runs;

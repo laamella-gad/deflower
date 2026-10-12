@@ -1,13 +1,13 @@
 
-.virtual $0000
+.virtual $0001
+; which ROMs and I/O are banked in
+; written by: decrunch
+cpu_port:		.byte	?
 ; Zwark (C) 1982 Robert Wentworth, cracked by Manik, taken while the game runs.
 ; The cracked PRG was crunched: the decruncher still sits in the stack page and its
 ; source and the remains of the packed data at $0900-$12e4. Memory marked untouched
 ; still has VICE's power-on pattern.
 ; ---- zero page ----
-cpu_port_direction:		.byte	?
-; written by: decrunch
-cpu_port:		.byte	?
 ; read by: decrunch
 ; written by: decrunch
 ; modified by: decrunch
@@ -16,19 +16,22 @@ decrunch_count:		.byte	?
 ; written by: decrunch
 ; modified by: decrunch
 decrunch_bits:		.byte	?
-basic_zero_page:
-		.fill	41
+.endv
+
+.virtual $002d
 ; the end of the BASIC program; the protection check expects $0844
 ; read by: check_protection
 basic_end:		.word	?
-basic_zero_page2:
-		.fill	33
+.endv
+
+.virtual $0050
 ; read by: check_protection
 ; written by: check_protection
 ; modified by: check_protection
 clear_pointer:		.word	?
-basic_zero_page3:
-		.fill	5
+.endv
+
+.virtual $0057
 ; read by: copy_sprite
 ; written by: copy_sprite
 sprite_source:		.word	?
@@ -36,21 +39,24 @@ sprite_source:		.word	?
 ; written by: copy_sprite
 ; modified by: copy_sprite
 sprite_destination:		.word	?
-basic_zero_page4:
-		.fill	24
+.endv
+
+.virtual $0073
 ; BASIC's CHRGET, patched by init_game to jump to actual_start_game
 ; read by: check_protection
 ; written by: init_game
 chrget:
 		.fill	3
-basic_kernal_zero_page:
-		.fill	56
+.endv
+
+.virtual $00ae
 ; read by: decrunch, l01B8
 ; written by: decrunch
 ; modified by: decrunch, l01B8
 decrunch_output:		.word	?
-kernal_zero_page:
-		.fill	75
+.endv
+
+.virtual $00fb
 ; written by: l019F
 ; modified by: l019F
 decrunch_byte:		.byte	?
@@ -67,7 +73,7 @@ decrunch_end:		.word	?
 ; ---- decruncher, copied from decruncher_source ----
 decrunch:
 		lda (decrunch_input), y
-		sta vic_screen + $31c, y
+		sta screen_ram + $31c, y
 		iny 
 		bne decrunch
 
@@ -122,7 +128,7 @@ l013E:
 		beq l0147
 		cmp #$01
 		beq l0191
-		bit kernal_workspace + $e6
+		bit $02e6
 ; jumped to by: decrunch
 l0147 = $0147
 		jsr l019F
@@ -220,7 +226,7 @@ l01B5:
 ; called by: decrunch
 l01B8:
 		lda (decrunch_output), y
-		inc vic_screen
+		inc screen_ram
 		cpy decrunch_output
 		bne l01C3
 		dec decrunch_output + $1
@@ -246,21 +252,6 @@ unused_stack:
 stack:
 		.byte	$ce, $91, $8c, $9a, $e7, $99, $1c, $90, $00, $00, $00, $ff, $a7, $79, $a6, $9c
 		.byte	$e3
-
-.virtual $0200
-; ---- KERNAL workspace ----
-; read by: decrunch
-kernal_workspace:
-		.fill	276
-irq_vector:		.addr	?
-brk_vector:		.addr	?
-nmi_vector:		.addr	?
-kernal_vectors:
-		.fill	34
-tape_buffer:
-		.fill	4
-.endv
-
 *=$0340
 
 ; ---- sprite images, copied there by copy_sprite ----
@@ -289,10 +280,11 @@ unused_03ff:		.byte	$00
 .virtual $0400
 ; written by: decrunch, draw_scores, draw_turns, show_top_score_line, show_copyright, update_high_score, hi_score_draw, title_screen, show_game_over, show_top_score_row_14, draw_logo, start
 ; modified by: l01B8
-vic_screen:
+screen_ram:
 		.fill	1000
-unused_07e8:
-		.fill	16
+.endv
+
+.virtual $07f8
 ; read by: explode
 ; written by: init_game
 sprite_pointers:
@@ -527,9 +519,9 @@ l901A:
 
 ; jumped to by: main_loop
 l901D:
-		lda vic_joystick1
+		lda cia1_port_b
 		sta joystick_state
-		lda vic_sprite_coll
+		lda vic_sprite_collision
 		sta sprite_coll_state
 		jsr update_directions
 		jsr move_player
@@ -880,9 +872,9 @@ flash_sprite:
 
 ; jumped to by: explode
 l93C0:
-		lda vic_sprite_coll
+		lda vic_sprite_collision
 		lda #$00
-		sta vic_sprite_coll
+		sta vic_sprite_collision
 		beq l93D7
 
 ; jumped to by: explode
@@ -1514,7 +1506,7 @@ update_directions:
 l9775:
 		dec direction_timers, x
 		bne l9785
-		lda vic_timer_a
+		lda cia1_timer_a
 		sta enemy_directions, x
 		lda #$32
 		sta direction_timers, x
@@ -1546,7 +1538,7 @@ l9795:
 ; jumped to by: draw_scores
 l97A5:
 		ldy score_column
-		sta vic_screen + $28, y
+		sta screen_ram + $28, y
 		ldy score_player
 		lda score_lo, y
 		jsr to_digits
@@ -1564,21 +1556,21 @@ l97A5:
 l97C8:
 		ldy score_column
 		iny 
-		sta vic_screen + $28, y
+		sta screen_ram + $28, y
 		iny 
 		lda digit
-		sta vic_screen + $28, y
+		sta screen_ram + $28, y
 		iny 
 		lda #$30
-		sta vic_screen + $28, y
+		sta screen_ram + $28, y
 		iny 
-		sta vic_screen + $28, y
+		sta screen_ram + $28, y
 		ldx current_player
 		lda lives, x
 		clc 
 		adc #$30
 		ldx #$06
-		sta vic_screen + $96, x
+		sta screen_ram + $96, x
 		lda score_player
 		bne l97FF
 		lda #$01
@@ -1600,9 +1592,9 @@ draw_turns:
 l9805:
 		lda turns_text, x
 		and #$bf
-		sta vic_screen + $96, x
+		sta screen_ram + $96, x
 		lda #$06
-		sta vic_color_ram + $96, x
+		sta color_ram + $96, x
 		inx 
 		cpx #$07
 		bcc l9805
@@ -1611,9 +1603,9 @@ l9805:
 show_top_score_line:
 		lda top_score_line, x
 		and #$bf
-		sta vic_screen, x
+		sta screen_ram, x
 		lda #$08
-		sta vic_color_ram, x
+		sta color_ram, x
 		inx 
 		cpx #$28
 		bcc show_top_score_line
@@ -1621,9 +1613,9 @@ show_top_score_line:
 
 show_copyright:
 		lda robert_copyright, x
-		sta vic_screen + $3c0, x
+		sta screen_ram + $3c0, x
 		lda #$06
-		sta vic_color_ram + $3c0, x
+		sta color_ram + $3c0, x
 		inx 
 		cpx #$21
 		bcc show_copyright
@@ -1631,7 +1623,7 @@ show_copyright:
 		lda #$02
 
 make_scores_red:
-		sta vic_color_ram + $28, x
+		sta color_ram + $28, x
 		inx 
 		cpx #$28
 		bcc make_scores_red
@@ -1702,7 +1694,7 @@ l98F6:
 l98FE:
 		cmp #$05
 		bne l9932
-		lda vic_timer_a
+		lda cia1_timer_a
 		lsr 
 		sta voice3_pulse_width
 		sta voice1_frequency + $1
@@ -1764,7 +1756,7 @@ l995F:
 ; jumped to by: update_high_score
 l996C:
 		ldy #$11
-		sta vic_screen + $28, y
+		sta screen_ram + $28, y
 		lda high_score_lo
 		jsr to_digits
 		tya 
@@ -1778,15 +1770,15 @@ l996C:
 ; jumped to by: update_high_score
 hi_score_draw:
 		ldy #$12
-		sta vic_screen + $28, y
+		sta screen_ram + $28, y
 		iny 
 		txa 
-		sta vic_screen + $28, y
+		sta screen_ram + $28, y
 		iny 
 		lda #$30
-		sta vic_screen + $28, y
+		sta screen_ram + $28, y
 		iny 
-		sta vic_screen + $28, y
+		sta screen_ram + $28, y
 		rts 
 
 ; after move_player: next turn, game over, or the title screen with A = $fe
@@ -1847,7 +1839,7 @@ l99EB:
 
 ; jumped to by: title_screen
 l99EF:
-		sta vic_screen + $1e0, x
+		sta screen_ram + $1e0, x
 		inx 
 		cpx #$28
 		bcc l99EF
@@ -1870,14 +1862,14 @@ l99F7:
 
 ; jumped to by: title_screen
 l9A19:
-		sta vic_screen + $1e0, x
-		sta vic_screen + $230, x
+		sta screen_ram + $1e0, x
+		sta screen_ram + $230, x
 		inx 
 		cpx #$28
 		bcc l9A19
 		ldx #$0f
 		stx sid_vol_filter
-		lda vic_sprite_coll
+		lda vic_sprite_collision
 		lda #$00
 		sta sprite_coll_state
 		sta voice1_control
@@ -1929,7 +1921,7 @@ l9A65:
 		lda enemy_directions
 		eor #$08
 		sta joystick_state
-		lda vic_sprite_coll
+		lda vic_sprite_collision
 		sta sprite_coll_state
 		jsr update_directions
 		jsr move_player
@@ -1971,9 +1963,9 @@ show_game_over:
 l9AE3:
 		lda game_over_text, x
 		lda game_over_text, x
-		sta vic_screen + $1e0, y
+		sta screen_ram + $1e0, y
 		lda #$08
-		sta vic_color_ram + $1e0, y
+		sta color_ram + $1e0, y
 		inx 
 		iny 
 		cpx #$09
@@ -1992,9 +1984,9 @@ show_player:
 show_top_score_row_14:
 		lda top_score_line, x
 		and #$bf
-		sta vic_screen + $230, y
+		sta screen_ram + $230, y
 		lda #$08
-		sta vic_color_ram + $230, y
+		sta color_ram + $230, y
 		iny 
 		inx 
 		cpy #$19
@@ -2115,9 +2107,9 @@ draw_logo:
 ; jumped to by: draw_logo
 l9BCE:
 		lda logo0, x
-		sta vic_screen + $c8, x
+		sta screen_ram + $c8, x
 		lda #$06
-		sta vic_color_ram + $c8, x
+		sta color_ram + $c8, x
 		inx 
 		cpx #$1c
 		bcc l9BCE
@@ -2126,9 +2118,9 @@ l9BCE:
 ; jumped to by: draw_logo
 l9BE0:
 		lda logo1, x
-		sta vic_screen + $f0, x
+		sta screen_ram + $f0, x
 		lda #$06
-		sta vic_color_ram + $f0, x
+		sta color_ram + $f0, x
 		inx 
 		cpx #$1c
 		bcc l9BE0
@@ -2137,9 +2129,9 @@ l9BE0:
 ; jumped to by: draw_logo
 l9BF2:
 		lda logo2, x
-		sta vic_screen + $118, x
+		sta screen_ram + $118, x
 		lda #$06
-		sta vic_color_ram + $118, x
+		sta color_ram + $118, x
 		inx 
 		cpx #$1c
 		bcc l9BF2
@@ -2148,9 +2140,9 @@ l9BF2:
 ; jumped to by: draw_logo
 l9C04:
 		lda logo3, x
-		sta vic_screen + $140, x
+		sta screen_ram + $140, x
 		lda #$06
-		sta vic_color_ram + $140, x
+		sta color_ram + $140, x
 		inx 
 		cpx #$1c
 		bcc l9C04
@@ -2159,9 +2151,9 @@ l9C04:
 ; jumped to by: draw_logo
 l9C16:
 		lda logo4, x
-		sta vic_screen + $168, x
+		sta screen_ram + $168, x
 		lda #$06
-		sta vic_color_ram + $168, x
+		sta color_ram + $168, x
 		inx 
 		cpx #$1c
 		bcc l9C16
@@ -2171,12 +2163,12 @@ l9C16:
 ; jumped to by: draw_logo
 l9C2A:
 		lda f1_1_player_text, x
-		sta vic_screen + $1e0, y
+		sta screen_ram + $1e0, y
 		lda f3_2_player_text, x
-		sta vic_screen + $230, y
+		sta screen_ram + $230, y
 		lda #$04
-		sta vic_color_ram + $1e0, y
-		sta vic_color_ram + $230, y
+		sta color_ram + $1e0, y
+		sta color_ram + $230, y
 		iny 
 		inx 
 		cpx #$14
@@ -2451,9 +2443,9 @@ start:
 ; jumped to by: start
 l9E0D:
 		lda crack_trainer_msg, x
-		sta vic_screen, x
+		sta screen_ram, x
 		lda #$0f
-		sta vic_color_ram, x
+		sta color_ram, x
 		dex 
 		bpl l9E0D
 		cli 
@@ -2490,39 +2482,46 @@ unused_9ea9:
 .virtual $9eab
 untouched_9eab:
 		.fill	12629
-; ---- VIC-II ----
+; x and y of sprites 0-7
 ; written by: update_vic_sprite_positions, init_game
 vic_sprite_coords:
 		.fill	16
 ; written by: update_vic_sprite_positions
 vic_sprite_x_high_bits:		.byte	?
-vic_control:
-		.fill	4
+.endv
+
+.virtual $d015
 ; written by: reset_screen, update_vic_sprite_positions, demo
 vic_sprite_enable:		.byte	?
-vic_registers:
-		.fill	8
+.endv
+
+.virtual $d01e
 ; read by: main_loop, flash_sprite, title_screen, demo
 ; written by: flash_sprite
-vic_sprite_coll:		.byte	?
-vic_background_coll:		.byte	?
+vic_sprite_collision:		.byte	?
+.endv
+
+.virtual $d020
 ; written by: start
 border_color:		.byte	?
 ; written by: reset_screen, start
 background_color:		.byte	?
-vic_colors:
-		.fill	5
+.endv
+
+.virtual $d027
 ; read by: flash_sprite, switch_player
 ; written by: demo, switch_player
 ; modified by: flash_sprite
 vic_sprite_colors:
 		.fill	8
-vic_rest:
-		.fill	977
-; ---- SID ----
+.endv
+
+.virtual $d400
 ; written by: sid_clear_loop, play_sound
 voice1_frequency:		.word	?
-voice1_pulse_width:		.word	?
+.endv
+
+.virtual $d404
 ; written by: play_sound, title_screen
 voice1_control:		.byte	?
 ; written by: play_sound
@@ -2531,7 +2530,9 @@ voice1_attack_decay:		.byte	?
 voice1_sustain_release:		.byte	?
 ; written by: play_sound
 voice2_frequency:		.word	?
-voice2_pulse_width:		.word	?
+.endv
+
+.virtual $d40b
 ; written by: play_sound, title_screen
 voice2_control:		.byte	?
 ; written by: play_sound
@@ -2548,123 +2549,32 @@ voice3_control:		.byte	?
 voice3_attack_decay:		.byte	?
 ; written by: play_sound
 voice3_sustain_release:		.byte	?
-filter_cutoff:		.word	?
-filter_control:		.byte	?
+.endv
+
+.virtual $d418
 ; written by: reset_screen, sound_off, sid_clear_loop, next_turn, title_screen, demo
 sid_vol_filter:		.byte	?
-sid_mirrors:
-		.fill	999
-; written by: draw_turns, show_top_score_line, show_copyright, make_scores_red, show_game_over, show_top_score_row_14, draw_logo, start
-vic_color_ram:
-		.fill	1000
-unused_color_ram:
-		.fill	24
-; ---- CIAs ----
-cia1_port_a:		.byte	?
-; read by: main_loop
-vic_joystick1:		.byte	?
-cia1_directions:
-		.fill	2
-; read by: update_directions, play_sound
-vic_timer_a:		.byte	?
-cia1_rest:
-		.fill	251
-cia2:
-		.fill	256
-io_expansion:
-		.fill	512
-; ---- KERNAL, in ROM; the RAM under it is untouched ----
-untouched_e000:
-		.fill	1348
-; called by: reset_screen, init_game, start
-kernal_clear_screen:
-		.fill	1261
-kernal_irq:
-		.fill	5142
-kernal_nmi:
-		.fill	31
-kernal_brk:
-		.fill	283
-cint:
-		.fill	3
-ioinit:
-		.fill	3
-ramtas:
-		.fill	3
-restor:
-		.fill	3
-vector:
-		.fill	3
-setmsg:
-		.fill	3
-second:
-		.fill	3
-tksa:
-		.fill	3
-memtop:
-		.fill	3
-membot:
-		.fill	3
-scnkey:
-		.fill	3
-settmo:
-		.fill	3
-acptr:
-		.fill	3
-ciout:
-		.fill	3
-untlk:
-		.fill	3
-unlsn:
-		.fill	3
-listen:
-		.fill	3
-talk:
-		.fill	3
-readst:
-		.fill	3
-setlfs:
-		.fill	3
-setnam:
-		.fill	3
-open:
-		.fill	3
-close:
-		.fill	3
-chkin:
-		.fill	3
-chkout:
-		.fill	3
-clrchn:
-		.fill	3
-chrin:
-		.fill	3
-chrout:
-		.fill	3
-load:
-		.fill	3
-save:
-		.fill	3
-settim:
-		.fill	3
-rdtim:
-		.fill	3
-; called by: main_loop, demo, show_top_score_row_14
-stop:
-		.fill	3
-; called by: title_screen, demo, show_top_score_row_14, start
-getin:
-		.fill	3
-clall:
-		.fill	3
-udtim:
-		.fill	3
-screen_size:
-		.fill	3
-plot:
-		.fill	3
-iobase:
-		.fill	3
-untouched_fff6:
-		.fill	10
 .endv
+
+.virtual $d800
+; written by: draw_turns, show_top_score_line, show_copyright, make_scores_red, show_game_over, show_top_score_row_14, draw_logo, start
+color_ram:
+		.fill	1000
+.endv
+
+.virtual $dc01
+; keyboard rows, joystick port 1
+; read by: main_loop
+cia1_port_b:		.byte	?
+.endv
+
+.virtual $dc04
+; read by: update_directions, play_sound
+cia1_timer_a:		.word	?
+.endv
+; called by: reset_screen, init_game, start
+kernal_clear_screen = $e544
+; called by: main_loop, demo, show_top_score_row_14
+stop = $ffe1
+; called by: title_screen, demo, show_top_score_row_14, start
+getin = $ffe4

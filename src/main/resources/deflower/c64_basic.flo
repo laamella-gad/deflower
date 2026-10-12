@@ -1,0 +1,9 @@
+$a000 virtual addr basic_cold_start_vector
+$a002 virtual addr basic_warm_start_vector
+$a004-$c000 virtual byte
+; prints READY. and waits for the next command
+$a474 basic_ready
+; prints the zero-terminated string at A/Y (low/high)
+$ab1e basic_print_string
+; prints the unsigned number in X/A (low/high)
+$bdcd basic_print_number

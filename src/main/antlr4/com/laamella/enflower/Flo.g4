@@ -9,6 +9,22 @@
  *     and its output is out/<file without extension>.asm. Must come
  *     before any annotation line.
  *
+ * include <file>
+ *     Reads the lines of another .flo file into the current run, e.g. a
+ *     machine's I/O registers and ROM routines. The file is looked up
+ *     relative to the including file; when there is none, a file built
+ *     into Deflower is used: c64.flo (all of the C64 pieces below, the
+ *     view with $01 = $37), c64_zeropage.flo, c64_system.flo ($0100-$0800:
+ *     stack, KERNAL workspace and vectors, screen), c64_io.flo,
+ *     c64_basic.flo and c64_kernal.flo. Included files may include others,
+ *     but can't contain 'deflower' lines.
+ *     Included lines are weak: any line of the including file that covers
+ *     the same memory or names the same address wins, whatever the order,
+ *     and an included element it overlaps is dropped. Included areas still
+ *     stop the code tracing. Included virtual areas and included labels
+ *     on memory no area covers are only printed when an instruction's
+ *     operand or an .addr value refers to them.
+ *
  * ; text    or    # text
  *     A comment, on a line of its own (not after an annotation). It is
  *     printed above the next annotation line's address in the output;
@@ -38,7 +54,7 @@
  *       byte[40*21], byte[40*19+5]. A count of 0 (or a range too short
  *       for one element) is an error.
  *     - label: a name for the address, from [A-Za-z0-9._?]. It can't be
- *       a reserved word: deflower, virtual, export, char, byte, word,
+ *       a reserved word: deflower, include, virtual, export, char, byte, word,
  *       long, dword, addr, sbyte, sword, slong, sdword, code.
  *     - export <id> parses, but has no effect yet.
  *     Two lines may only cover the same memory if the earlier one is a
@@ -72,6 +88,7 @@ prog:	(statement NEWLINE)* EOF;
 
 statement: COMMENT # comment
     | 'deflower' ID         # setFileName
+    | 'include' ID          # include
     | (address | memoryRange) setVirtual? datatype? setLabel? export? OPEN_BLOCK? # line
     | CLOSE_BLOCK                   # endBlock
     ;

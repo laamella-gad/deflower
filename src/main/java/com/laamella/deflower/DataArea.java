@@ -14,13 +14,20 @@ class DataArea extends Area {
     // across a partial overwrite (issue 0031's placeholder-carving).
     final String arrayLabel;
     final int indexInArray;
+    // True for an element an included file declared (issue 0078).
+    final boolean included;
 
     DataArea(int address, DataType type, boolean isVirtual, String arrayLabel, int indexInArray) {
+        this(address, type, isVirtual, arrayLabel, indexInArray, false);
+    }
+
+    DataArea(int address, DataType type, boolean isVirtual, String arrayLabel, int indexInArray, boolean included) {
         super(address, type.sizeInBytes);
         this.type = type;
         this.virtual = isVirtual;
         this.arrayLabel = arrayLabel;
         this.indexInArray = indexInArray;
+        this.included = included;
     }
 
     @Override

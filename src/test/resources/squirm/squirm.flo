@@ -8,19 +8,12 @@ deflower squirm.vsf
 ; untouched still has VICE's power-on pattern.
 
 ; ---- zero page ----
-$00 virtual byte cpu_port_direction
-$01 virtual byte cpu_port
-$02-$57 virtual byte basic_zero_page
 ; the joystick direction the player keeps walking in, $ef when standing still
 $57 virtual byte player_direction
 $58 virtual byte joy_dir_for_move
-$59-$a0 virtual byte basic_kernal_zero_page
 $a0 virtual byte[2] jiffy_clock
 ; the game waits by setting this negative and waiting until it counts up past 0
 $a2 virtual byte jiffy_timer
-$a3-$c5 virtual byte kernal_zero_page
-$c5 virtual byte last_key_pressed
-$c6-$fb virtual byte kernal_zero_page2
 ; the screen cell of the player
 $fb virtual byte new_loc_lo
 $fc virtual byte new_loc_hi
@@ -29,15 +22,6 @@ $fd virtual byte tmp_loc_lo
 $fe virtual byte tmp_loc_hi
 $ff virtual byte unused_00ff
 
-; ---- stack and KERNAL workspace ----
-$0100-$0200 virtual byte stack
-$0200-$0314 virtual byte kernal_workspace
-$0314 virtual addr irq_vector
-$0316-$0400 virtual byte kernal_vectors
-
-; ---- screen ----
-$0400 virtual byte[1000] screen_ram
-$07e8-$0800 virtual byte unused_07e8
 ; the level number on the top line
 $0423 level_tens
 $0424 level_ones
@@ -297,64 +281,7 @@ $3ee4 byte[100] voice_2_notes
 $3f48 byte unused_3f48
 $3f49-$a000 virtual byte untouched_3f49
 
-; ---- BASIC ROM; RAMTAS left $55 in the RAM under it ----
-$a000-$c000 virtual byte basic_rom
 $c000-$d000 virtual byte untouched_c000
 
-; ---- VIC-II ----
-$d000 virtual {
-    $00 byte[16] vic_sprite_coords
-    $10 byte vic_sprite_x_high_bits
-    $11-$16 byte vic_control
-    $16 byte vic_control_2
-    $17 byte vic_sprite_double_height
-    $18 byte vic_memory_setup
-    $19-$20 byte vic_registers
-    $20 byte border_color
-    $21 byte background_color
-    $22 byte multicolor_1
-    $23 byte multicolor_2_register
-    $24-$27 byte vic_colors
-    $27 byte[8] vic_sprite_colors
-    $2f-$400 byte vic_rest
-}
-
-; ---- SID ----
-$d400 virtual {
-    $00 word voice1_frequency
-    $02 word voice1_pulse_width
-    $04 byte voice1_control
-    $05 byte voice1_attack_decay
-    $06 byte voice1_sustain_release
-    $07 word voice2_frequency
-    $09 word voice2_pulse_width
-    $0b byte voice2_control
-    $0c byte voice2_attack_decay
-    $0d byte voice2_sustain_release
-    $0e word voice3_frequency
-    $10 word voice3_pulse_width
-    $12 byte voice3_control
-    $13 byte voice3_attack_decay
-    $14 byte voice3_sustain_release
-    $15 word filter_cutoff
-    $17 byte filter_control
-    $18 byte sid_vol_filter
-    $19-$400 byte sid_mirrors
-}
-
-$d800 virtual byte[1000] color_ram
-$dbe8-$dc00 virtual byte unused_color_ram
-
-; ---- CIAs ----
-$dc00 virtual {
-    $00 byte cia1_port_a
-    ; joystick port 1
-    $01 byte cia1_port_b
-    $02-$100 byte cia1_rest
-}
-$dd00-$de00 virtual byte cia2
-$de00-$e000 virtual byte io_expansion
-
-; ---- KERNAL, in ROM ----
-$e000-$10000 virtual byte kernal_rom
-$ea31 kernal_irq
+; the C64 with BASIC, I/O and KERNAL banked in
+include c64.flo

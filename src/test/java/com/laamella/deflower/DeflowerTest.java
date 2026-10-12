@@ -147,6 +147,16 @@ class DeflowerTest {
     }
 
     /**
+     * Issue 0078: a local include, which includes the built-in c64.flo.
+     * The program's own lines win over included ones, and only the
+     * included names the code uses are printed.
+     */
+    @Test
+    void includesSharedDefinitions() throws IOException, URISyntaxException {
+        assertDeflowered("include");
+    }
+
+    /**
      * AssemblyFileFormat.print(DataArea, ...) used to only handle BYTE,
      * silently skipping WORD/DWORD/CHAR areas (issue 0002). Covers all three:
      * two WORDs, one DWORD, and three CHARs (printed as one .text
@@ -581,6 +591,26 @@ class DeflowerTest {
     @Test
     void rejectsBlockOffsetPastFFFF() throws IOException, URISyntaxException {
         assertFailsToParse("invalid/block-past-ffff.flo", "line 3: the block's base plus this offset runs past $ffff");
+    }
+
+    /**
+     * Issue 0078: an include that leads back to a file being read, a file
+     * that can't be found and an included file that starts a run of its
+     * own are reported, and nothing is written.
+     */
+    @Test
+    void rejectsIncludeCycle() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/include-cycle.flo", "line 1: include cycle: invalid/include-cycle.flo -> include_cycle_a.flo -> include_cycle_b.flo -> include_cycle_a.flo");
+    }
+
+    @Test
+    void rejectsMissingInclude() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/include-missing.flo", "line 2: no file no_such_file.flo to include");
+    }
+
+    @Test
+    void rejectsRunInIncludedFile() throws IOException, URISyntaxException {
+        assertFailsToParse("invalid/include-run.flo", "line 1: an included file can't start a run");
     }
 
     /**

@@ -4,6 +4,7 @@ import com.laamella.enflower.FloBaseListener;
 import com.laamella.enflower.FloLexer;
 import com.laamella.enflower.FloParser;
 import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
@@ -11,6 +12,8 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,26 +28,37 @@ import static com.laamella.deflower.LineType.*;
  * file itself, and changes no memory.
  */
 class FloReader {
+    // The directory of the .flo files built into Deflower (issue 0078).
+    private static final String BUILT_IN = "/deflower/";
+
     List<DeflowerRun> read(Path path, String sourceName) throws IOException {
-        List<String> parseErrors = new ArrayList<>();
-        FloParser parser = createParser(parseErrors, path);
-        FloParser.ProgContext tree = parser.prog();
-        assertState(parseErrors.isEmpty(), "Failed to parse %s:%n%s", sourceName, String.join("\n", parseErrors));
-        AnnotationCollector collector = new AnnotationCollector();
-        new ParseTreeWalker().walk(collector, tree);
-        collector.closeRun();
-        assertState(collector.errors.isEmpty(), "Failed to parse %s:%n%s", sourceName, String.join("\n", collector.errors));
+        AnnotationCollector collector = new AnnotationCollector(null, false, path, new ArrayList<>(List.of(sourceName)));
+        collect(CharStreams.fromPath(path), sourceName, collector);
         return collector.runs;
     }
 
-    private static FloParser createParser(List<String> parseErrors, Path path) throws IOException {
+    /**
+     * Parses `input` and walks it with `collector`, failing on a syntax
+     * error or a mistake the collector found.
+     */
+    private static void collect(CharStream input, String sourceName, AnnotationCollector collector) {
+        List<String> parseErrors = new ArrayList<>();
+        FloParser parser = createParser(parseErrors, input);
+        FloParser.ProgContext tree = parser.prog();
+        assertState(parseErrors.isEmpty(), "Failed to parse %s:%n%s", sourceName, String.join("\n", parseErrors));
+        new ParseTreeWalker().walk(collector, tree);
+        collector.closeRun();
+        assertState(collector.errors.isEmpty(), "Failed to parse %s:%n%s", sourceName, String.join("\n", collector.errors));
+    }
+
+    private static FloParser createParser(List<String> parseErrors, CharStream input) {
         BaseErrorListener errorCollector = new BaseErrorListener() {
             @Override
             public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
                 parseErrors.add(String.format("line %d:%d %s", line, charPositionInLine, msg));
             }
         };
-        FloLexer lexer = new FloLexer(CharStreams.fromPath(path));
+        FloLexer lexer = new FloLexer(input);
         lexer.removeErrorListeners();
         lexer.addErrorListener(errorCollector);
         FloParser parser = new FloParser(new CommonTokenStream(lexer));
@@ -59,7 +73,13 @@ class FloReader {
      */
     private static class AnnotationCollector extends FloBaseListener {
         final List<DeflowerRun> runs = new ArrayList<>();
-        DeflowerRun run = null;
+        DeflowerRun run;
+        // True while reading an included file: its lines are weak.
+        final boolean included;
+        // The file being read, or null for a built-in one.
+        final Path path;
+        // The files being read, outermost first, to catch an include cycle.
+        final List<String> includeChain;
         Integer address = null;
         Integer addressEnd = null;
         LineType type = UNKNOWN_LINE;
@@ -75,6 +95,13 @@ class FloReader {
         boolean blockVirtual = false;
         int blockLine = 0;
 
+        AnnotationCollector(DeflowerRun run, boolean included, Path path, List<String> includeChain) {
+            this.run = run;
+            this.included = included;
+            this.path = path;
+            this.includeChain = includeChain;
+        }
+
         void startNewLine() {
             address = null;
             addressEnd = null;
@@ -86,6 +113,10 @@ class FloReader {
 
         @Override
         public void enterSetFileName(FloParser.SetFileNameContext ctx) {
+            if (included) {
+                errors.add(String.format("line %d: an included file can't start a run", ctx.getStart().getLine()));
+                return;
+            }
             closeRun();
             run = new DeflowerRun(ctx.ID().getText());
             pendingComments.clear();
@@ -95,6 +126,47 @@ class FloReader {
         @Override
         public void enterLine(FloParser.LineContext ctx) {
             startNewLine();
+        }
+
+        /**
+         * Reads the included file's lines into the current run, marked as
+         * included (issue 0078). The file is looked up next to the file
+         * being read, then among the built-in ones.
+         */
+        @Override
+        public void enterInclude(FloParser.IncludeContext ctx) {
+            int line = ctx.getStart().getLine();
+            assertState(run != null, "Start the file with a 'deflower <file>' line.", line, ctx.getText());
+            if (blockBase != null) {
+                errors.add(String.format("line %d: can't include inside a block", line));
+                return;
+            }
+            // A comment above an include line is about the include.
+            pendingComments.clear();
+            String name = ctx.ID().getText();
+            if (includeChain.contains(name)) {
+                errors.add(String.format("line %d: include cycle: %s -> %s", line, String.join(" -> ", includeChain), name));
+                return;
+            }
+            List<String> chain = new ArrayList<>(includeChain);
+            chain.add(name);
+            Path local = path != null ? path.resolveSibling(name) : null;
+            try {
+                if (local != null && Files.exists(local)) {
+                    collect(CharStreams.fromPath(local), name, new AnnotationCollector(run, true, local, chain));
+                    return;
+                }
+                InputStream builtIn = FloReader.class.getResourceAsStream(BUILT_IN + name);
+                if (builtIn == null) {
+                    errors.add(String.format("line %d: no file %s to include", line, name));
+                    return;
+                }
+                try (builtIn) {
+                    collect(CharStreams.fromStream(builtIn), name, new AnnotationCollector(run, true, null, chain));
+                }
+            } catch (IOException e) {
+                errors.add(String.format("line %d: can't read %s: %s", line, name, e.getMessage()));
+            }
         }
 
         @Override
@@ -174,7 +246,7 @@ class FloReader {
                 openBlock(ctx, line, comment);
                 return;
             }
-            run.annotations.add(new Annotation(address, addressEnd, type, isVirtual, amount, name, comment));
+            run.annotations.add(new Annotation(address, addressEnd, type, isVirtual, amount, name, comment, included));
         }
 
         /**
@@ -195,7 +267,7 @@ class FloReader {
             blockVirtual = isVirtual;
             blockLine = line;
             if (!comment.isEmpty()) {
-                run.annotations.add(new Annotation(address, null, UNKNOWN_LINE, false, 1, null, comment));
+                run.annotations.add(new Annotation(address, null, UNKNOWN_LINE, false, 1, null, comment, included));
             }
         }
 

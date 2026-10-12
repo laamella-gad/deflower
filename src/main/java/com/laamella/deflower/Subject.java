@@ -16,6 +16,8 @@ class MemoryLocation {
     Label label = null;
     // The comment lines from the .flo file, if any.
     List<String> comment = List.of();
+    // True when the comment came from an included file (issue 0078).
+    boolean commentIncluded = false;
 
     MemoryLocation(int address, int data, boolean loaded) {
         this.address = address;
@@ -84,14 +86,24 @@ class Subject {
      * Applies one {@code .flo} annotation line: its label and comment go
      * onto its address, a code entry becomes a place to start the flow
      * analysis from, and a data line registers one DataArea per element.
+     * <p>
+     * An included line (issue 0078) is weak, and must be applied after
+     * the including file's own lines: its label and comment only go where
+     * there are none yet, and an element that overlaps an area of the
+     * including file is dropped.
      */
     void annotate(Annotation annotation) {
         int address = annotation.address;
-        if (annotation.name != null) {
-            memory[address].label = new Label(annotation.name, false);
+        MemoryLocation location = memory[address];
+        // An included comment describes the included label, so it only goes
+        // where that label does.
+        boolean weakLosesLabel = annotation.included && location.label != null && !location.label.included;
+        if (annotation.name != null && (!annotation.included || location.label == null)) {
+            location.label = new Label(annotation.name, false, annotation.included);
         }
-        if (!annotation.comment.isEmpty()) {
-            memory[address].comment = annotation.comment;
+        if (!annotation.comment.isEmpty() && !weakLosesLabel && (!annotation.included || location.comment.isEmpty())) {
+            location.comment = annotation.comment;
+            location.commentIncluded = annotation.included;
         }
         LineType type = annotation.type;
         if (type == LineType.UNKNOWN_LINE && annotation.addressEnd == null) {
@@ -121,7 +133,10 @@ class Subject {
                 }
                 System.out.format("Marking area of %d %s at %X \"%s\"\n", amount, type.dataType.name().toLowerCase(), address, annotation.name);
                 for (int i = 0; i < amount; i++) {
-                    registerArea(new DataArea(address + i * type.dataType.sizeInBytes, type.dataType, annotation.virtual, annotation.name, i));
+                    DataArea area = new DataArea(address + i * type.dataType.sizeInBytes, type.dataType, annotation.virtual, annotation.name, i, annotation.included);
+                    if (!annotation.included || !overlapsOwnArea(area)) {
+                        registerArea(area);
+                    }
                 }
             }
             default -> throw new RuntimeException("No data type");
@@ -254,6 +269,88 @@ class Subject {
                 errors.add(String.format("Duplicate label %s at %s, already defined at %s", location.label.name, asHexWord(location.address), asHexWord(first)));
             }
         }
+    }
+
+    /**
+     * True when part of `area` is already covered by an area that isn't
+     * from an included file.
+     */
+    private boolean overlapsOwnArea(Area area) {
+        for (int a = area.address; a < area.address + area.size && a < memory.length; a++) {
+            Area existing = memory[a].area;
+            if (existing != null && !(existing instanceof DataArea && ((DataArea) existing).included)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Drops what included files declared but nothing uses (issue 0078),
+     * after the flow analysis: a virtual array without a name or that no
+     * instruction operand or .addr value points into, and a label no
+     * operand or .addr value prints. An included comment goes with its
+     * label. Included areas still stopped the tracing before this.
+     */
+    void dropUnusedIncludes() {
+        Set<Integer> targets = referencedAddresses();
+        Set<Integer> usedArrays = new HashSet<>();
+        for (int target : targets) {
+            DataArea area = includedVirtualArea(target);
+            if (area != null && area.arrayLabel != null) {
+                usedArrays.add(area.arrayStart());
+            }
+        }
+        for (int address = 0; address < memory.length; address++) {
+            DataArea area = includedVirtualArea(address);
+            if (area != null && !usedArrays.contains(area.arrayStart())) {
+                memory[address].area = null;
+            }
+        }
+        Set<Integer> labelAddresses = new HashSet<>();
+        for (int target : targets) {
+            Area area = peek(target);
+            labelAddresses.add(area != null ? area.labelAddressFor(target, this) : target);
+        }
+        for (MemoryLocation location : memory) {
+            Area area = location.area;
+            boolean onIncludedArea = area instanceof DataArea && ((DataArea) area).included && !area.isVirtual();
+            if (location.label != null && location.label.included && !onIncludedArea && !labelAddresses.contains(location.address)) {
+                location.label = null;
+            }
+            if (location.commentIncluded && (location.label == null || !location.label.included) && !onIncludedArea) {
+                location.comment = List.of();
+                location.commentIncluded = false;
+            }
+        }
+    }
+
+    private DataArea includedVirtualArea(int address) {
+        Area area = memory[address].area;
+        return area instanceof DataArea && ((DataArea) area).included && area.isVirtual() ? (DataArea) area : null;
+    }
+
+    /**
+     * Every address an instruction's operand names or a (not virtual)
+     * .addr value holds.
+     */
+    private Set<Integer> referencedAddresses() {
+        Set<Integer> targets = new HashSet<>();
+        for (MemoryLocation location : memory) {
+            Area area = location.area;
+            if (area == null || area.address != location.address) {
+                continue;
+            }
+            if (area instanceof InstructionArea) {
+                int target = CrossReferences.target((InstructionArea) area, this);
+                if (target != -1) {
+                    targets.add(target);
+                }
+            } else if (area instanceof DataArea && ((DataArea) area).type == DataType.ADDR && !area.isVirtual()) {
+                targets.add(wordAt(area.address));
+            }
+        }
+        return targets;
     }
 
     void registerArea(Area area) {

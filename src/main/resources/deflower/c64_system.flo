@@ -1,0 +1,35 @@
+$0100 virtual byte[256] stack
+$0200 virtual byte[89] basic_input_buffer
+$0259-$0277 virtual byte
+$0277 virtual byte[10] keyboard_buffer
+$0281-$0286 virtual byte
+$0286 virtual byte text_color
+$0287-$0288 virtual byte
+; the high byte of the screen address the KERNAL prints to
+$0288 virtual byte screen_page
+$0289-$0300 virtual byte
+$0300 virtual addr basic_error_vector
+$0302 virtual addr basic_main_vector
+$0304-$0314 virtual byte
+$0314 virtual addr irq_vector
+$0316 virtual addr brk_vector
+$0318 virtual addr nmi_vector
+$031a virtual addr open_vector
+$031c virtual addr close_vector
+$031e virtual addr chkin_vector
+$0320 virtual addr chkout_vector
+$0322 virtual addr clrchn_vector
+$0324 virtual addr chrin_vector
+$0326 virtual addr chrout_vector
+$0328 virtual addr stop_vector
+$032a virtual addr getin_vector
+$032c virtual addr clall_vector
+$032e virtual addr user_vector
+$0330 virtual addr load_vector
+$0332 virtual addr save_vector
+$0334-$033c virtual byte
+$033c virtual byte[192] tape_buffer
+$03fc-$0400 virtual byte
+$0400 virtual byte[1000] screen_ram
+$07e8-$07f8 virtual byte
+$07f8 virtual byte[8] sprite_pointers

@@ -5,44 +5,26 @@ deflower zwark.vsf
 ; still has VICE's power-on pattern.
 
 ; ---- zero page ----
-$00 virtual byte cpu_port_direction
-$01 virtual byte cpu_port
 $02 virtual byte decrunch_count
 $03 virtual byte decrunch_bits
-$04-$2d virtual byte basic_zero_page
 ; the end of the BASIC program; the protection check expects $0844
 $2d virtual word basic_end
-$2f-$50 virtual byte basic_zero_page2
 $50 virtual word clear_pointer
-$52-$57 virtual byte basic_zero_page3
 $57 virtual word sprite_source
 $59 virtual word sprite_destination
-$5b-$73 virtual byte basic_zero_page4
 ; BASIC's CHRGET, patched by init_game to jump to actual_start_game
 $73 virtual byte[3] chrget
-$76-$ae virtual byte basic_kernal_zero_page
 $ae virtual word decrunch_output
-$b0-$fb virtual byte kernal_zero_page
 $fb virtual byte decrunch_byte
 $fc virtual word decrunch_input
 $fe virtual word decrunch_end
 
 ; ---- decruncher, copied from decruncher_source ----
+$0100-$01cd
 $0100 code decrunch
 $01cd byte[4] decrunch_table
 $01d1-$01ef byte unused_stack
 $01ef-$0200 byte stack
-
-; ---- KERNAL workspace ----
-$0200-$0314 virtual byte kernal_workspace
-$0314 virtual addr irq_vector
-$0316 virtual addr brk_vector
-$0318 virtual addr nmi_vector
-$031a-$033c virtual byte kernal_vectors
-$033c-$0340 virtual byte tape_buffer
-$ea31 kernal_irq
-$fe66 kernal_brk
-$fe47 kernal_nmi
 
 ; ---- sprite images, copied there by copy_sprite ----
 ; pointer $0d
@@ -54,10 +36,6 @@ $03bf byte unused_03bf
 ; pointer $0f, for sprites 2 and 7
 $03c0 byte[63] enemy_image_2
 $03ff byte unused_03ff
-
-$0400 virtual byte[1000] vic_screen
-$07e8-$07f8 virtual byte unused_07e8
-$07f8 virtual byte[8] sprite_pointers
 
 ; pointers $20-$23, for sprites 3-6; the BASIC stub was here
 $0800 byte[63] enemy_image_3
@@ -231,101 +209,5 @@ $9e40 char[105] crack_trainer_msg
 $9ea9-$9eab byte unused_9ea9
 $9eab-$d000 virtual byte untouched_9eab
 
-; ---- VIC-II ----
-$d000 virtual {
-    $00 byte[16] vic_sprite_coords
-    $10 byte vic_sprite_x_high_bits
-    $11-$15 byte vic_control
-    $15 byte vic_sprite_enable
-    $16-$1e byte vic_registers
-    $1e byte vic_sprite_coll
-    $1f byte vic_background_coll
-    $20 byte border_color
-    $21 byte background_color
-    $22-$27 byte vic_colors
-    $27 byte[8] vic_sprite_colors
-    $2f-$400 byte vic_rest
-}
-
-; ---- SID ----
-$d400 virtual {
-    $00 word voice1_frequency
-    $02 word voice1_pulse_width
-    $04 byte voice1_control
-    $05 byte voice1_attack_decay
-    $06 byte voice1_sustain_release
-    $07 word voice2_frequency
-    $09 word voice2_pulse_width
-    $0b byte voice2_control
-    $0c byte voice2_attack_decay
-    $0d byte voice2_sustain_release
-    $0e word voice3_frequency
-    $10 word voice3_pulse_width
-    $12 byte voice3_control
-    $13 byte voice3_attack_decay
-    $14 byte voice3_sustain_release
-    $15 word filter_cutoff
-    $17 byte filter_control
-    $18 byte sid_vol_filter
-    $19-$400 byte sid_mirrors
-}
-
-$d800 virtual byte[1000] vic_color_ram
-$dbe8-$dc00 virtual byte unused_color_ram
-
-; ---- CIAs ----
-$dc00 virtual {
-    $00 byte cia1_port_a
-    $01 byte vic_joystick1
-    $02-$04 byte cia1_directions
-    $04 byte vic_timer_a
-    $05-$100 byte cia1_rest
-}
-$dd00-$de00 virtual byte cia2
-$de00-$e000 virtual byte io_expansion
-
-; ---- KERNAL, in ROM; the RAM under it is untouched ----
-$e000-$ff81 virtual byte untouched_e000
-$e544 kernal_clear_screen
-$ff00 virtual {
-    $81 byte[3] cint
-    $84 byte[3] ioinit
-    $87 byte[3] ramtas
-    $8a byte[3] restor
-    $8d byte[3] vector
-    $90 byte[3] setmsg
-    $93 byte[3] second
-    $96 byte[3] tksa
-    $99 byte[3] memtop
-    $9c byte[3] membot
-    $9f byte[3] scnkey
-    $a2 byte[3] settmo
-    $a5 byte[3] acptr
-    $a8 byte[3] ciout
-    $ab byte[3] untlk
-    $ae byte[3] unlsn
-    $b1 byte[3] listen
-    $b4 byte[3] talk
-    $b7 byte[3] readst
-    $ba byte[3] setlfs
-    $bd byte[3] setnam
-    $c0 byte[3] open
-    $c3 byte[3] close
-    $c6 byte[3] chkin
-    $c9 byte[3] chkout
-    $cc byte[3] clrchn
-    $cf byte[3] chrin
-    $d2 byte[3] chrout
-    $d5 byte[3] load
-    $d8 byte[3] save
-    $db byte[3] settim
-    $de byte[3] rdtim
-    $e1 byte[3] stop
-    $e4 byte[3] getin
-    $e7 byte[3] clall
-    $ea byte[3] udtim
-    $ed byte[3] screen_size
-    $f0 byte[3] plot
-    $f3 byte[3] iobase
-}
-$fff6-$10000 virtual byte untouched_fff6
+; the C64 with BASIC, I/O and KERNAL banked in
+include c64.flo

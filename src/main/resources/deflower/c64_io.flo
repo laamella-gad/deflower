@@ -1,0 +1,87 @@
+; x and y of sprites 0-7
+$d000 virtual byte[16] vic_sprite_coords
+$d010 virtual byte vic_sprite_x_high_bits
+$d011 virtual byte vic_control_1
+$d012 virtual byte vic_raster
+$d013 virtual byte vic_light_pen_x
+$d014 virtual byte vic_light_pen_y
+$d015 virtual byte vic_sprite_enable
+$d016 virtual byte vic_control_2
+$d017 virtual byte vic_sprite_double_height
+$d018 virtual byte vic_memory_setup
+$d019 virtual byte vic_irq_status
+$d01a virtual byte vic_irq_enable
+$d01b virtual byte vic_sprite_priority
+$d01c virtual byte vic_sprite_multicolor
+$d01d virtual byte vic_sprite_double_width
+$d01e virtual byte vic_sprite_collision
+$d01f virtual byte vic_background_collision
+$d020 virtual byte border_color
+$d021 virtual byte background_color
+$d022 virtual byte background_color_1
+$d023 virtual byte background_color_2
+$d024 virtual byte background_color_3
+$d025 virtual byte sprite_multicolor_1
+$d026 virtual byte sprite_multicolor_2
+$d027 virtual byte[8] vic_sprite_colors
+$d02f-$d400 virtual byte
+$d400 virtual word voice1_frequency
+$d402 virtual word voice1_pulse_width
+$d404 virtual byte voice1_control
+$d405 virtual byte voice1_attack_decay
+$d406 virtual byte voice1_sustain_release
+$d407 virtual word voice2_frequency
+$d409 virtual word voice2_pulse_width
+$d40b virtual byte voice2_control
+$d40c virtual byte voice2_attack_decay
+$d40d virtual byte voice2_sustain_release
+$d40e virtual word voice3_frequency
+$d410 virtual word voice3_pulse_width
+$d412 virtual byte voice3_control
+$d413 virtual byte voice3_attack_decay
+$d414 virtual byte voice3_sustain_release
+$d415 virtual word filter_cutoff
+$d417 virtual byte filter_control
+$d418 virtual byte sid_vol_filter
+$d419 virtual byte paddle_x
+$d41a virtual byte paddle_y
+$d41b virtual byte voice3_oscillator
+$d41c virtual byte voice3_envelope
+$d41d-$d800 virtual byte
+$d800 virtual byte[1000] color_ram
+$dbe8-$dc00 virtual byte
+; keyboard columns, joystick port 2
+$dc00 virtual byte cia1_port_a
+; keyboard rows, joystick port 1
+$dc01 virtual byte cia1_port_b
+$dc02 virtual byte cia1_direction_a
+$dc03 virtual byte cia1_direction_b
+$dc04 virtual word cia1_timer_a
+$dc06 virtual word cia1_timer_b
+$dc08 virtual byte cia1_tod_tenths
+$dc09 virtual byte cia1_tod_seconds
+$dc0a virtual byte cia1_tod_minutes
+$dc0b virtual byte cia1_tod_hours
+$dc0c virtual byte cia1_serial
+$dc0d virtual byte cia1_irq_control
+$dc0e virtual byte cia1_timer_a_control
+$dc0f virtual byte cia1_timer_b_control
+$dc10-$dd00 virtual byte
+; the VIC bank in bits 0-1
+$dd00 virtual byte cia2_port_a
+$dd01 virtual byte cia2_port_b
+$dd02 virtual byte cia2_direction_a
+$dd03 virtual byte cia2_direction_b
+$dd04 virtual word cia2_timer_a
+$dd06 virtual word cia2_timer_b
+$dd08 virtual byte cia2_tod_tenths
+$dd09 virtual byte cia2_tod_seconds
+$dd0a virtual byte cia2_tod_minutes
+$dd0b virtual byte cia2_tod_hours
+$dd0c virtual byte cia2_serial
+$dd0d virtual byte cia2_irq_control
+$dd0e virtual byte cia2_timer_a_control
+$dd0f virtual byte cia2_timer_b_control
+$dd10-$de00 virtual byte
+$de00 virtual byte[256] io_area_1
+$df00 virtual byte[256] io_area_2

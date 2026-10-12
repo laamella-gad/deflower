@@ -58,11 +58,18 @@ class FlowAnalyser {
                 if (instruction.addressingMode == AddressingMode.INDIRECT) {
                     // The operand is where the destination address is stored,
                     // not the destination: mark that location as an addr and follow
-                    // the address stored there.
+                    // the address stored there. A pointer a .flo line already
+                    // declared, like a virtual KERNAL vector, keeps its area, and
+                    // one the image doesn't load holds no address to follow.
                     int addrLocation = getAbsoluteAddressOperand(address, subject);
                     subject.ensureLabelled(addrLocation, "a", address);
-                    subject.registerArea(new DataArea(addrLocation, DataType.ADDR, false, null, 0));
-                    subject.addPotentialCodeLocation(subject.wordAt(addrLocation), true, address);
+                    Area existing = subject.peek(addrLocation);
+                    if (existing == null || existing.isPlaceholder()) {
+                        subject.registerArea(new DataArea(addrLocation, DataType.ADDR, false, null, 0));
+                    }
+                    if (subject.memory[addrLocation].loaded && subject.memory[(addrLocation + 1) & 0xffff].loaded) {
+                        subject.addPotentialCodeLocation(subject.wordAt(addrLocation), true, address);
+                    }
                 } else {
                     subject.addPotentialCodeLocation(getAbsoluteAddressOperand(address, subject), true, address);
                 }
@@ -95,10 +102,13 @@ class FlowAnalyser {
      * "label + offset", and a label of its own would replace that. Memory
      * no area covers (I/O, vectors, outside the image) stays numeric: a
      * label there would only print as an empty origin block (issue 0054).
+     * Neither does memory an included file covers without a name (issue
+     * 0078): that area only stops the tracing, and is dropped before the
+     * output is written.
      */
     private void labelDataReference(int target, int referencingAddress, Subject subject) {
         Area area = subject.peek(target);
-        if (area == null || area.labelFor(target, subject) != null) {
+        if (area == null || isIncluded(area) || area.labelFor(target, subject) != null) {
             return;
         }
         subject.ensureLabelled(target, "d", referencingAddress);
@@ -125,6 +135,10 @@ class FlowAnalyser {
             }
         }
         return false;
+    }
+
+    private static boolean isIncluded(Area area) {
+        return area instanceof DataArea && ((DataArea) area).included;
     }
 
     private Integer getRelativeAddressOperand(int address, Subject subject) {

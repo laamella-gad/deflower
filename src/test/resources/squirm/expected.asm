@@ -1,5 +1,5 @@
 
-.virtual $0000
+.virtual $0057
 ; Squirm, taken while the game runs. The player walks a maze and eats the dots that
 ; some of the snakes leave behind; touching a snake costs a life. After every level
 ; there is a bonus run, in which the player eats the snakes instead.
@@ -8,10 +8,6 @@
 ; program, and the upper half of the character set holds its tables. Memory marked
 ; untouched still has VICE's power-on pattern.
 ; ---- zero page ----
-cpu_port_direction:		.byte	?
-cpu_port:		.byte	?
-basic_zero_page:
-		.fill	85
 ; the joystick direction the player keeps walking in, $ef when standing still
 ; read by: try_move, bonus_walk_on_46, nothing_hit
 ; written by: check_fire, try_move, end_level, life_lost_handler, reset_everything
@@ -19,20 +15,23 @@ player_direction:		.byte	?
 ; read by: check_move_up, try_move
 ; written by: try_move
 joy_dir_for_move:		.byte	?
-basic_kernal_zero_page:
-		.fill	71
+.endv
+
+.virtual $00a0
 jiffy_clock:
 		.fill	2
 ; the game waits by setting this negative and waiting until it counts up past 0
 ; read by: sfx_hi_char_entry, update_hi, game_over, burp_bonus_text, bonus_get_ready, bonus_walk_on_46, end_level, life_lost_handler, play_music_wait_loop, player_not_moving, pause, reset_bonus_notes, quiet
 ; written by: sfx_hi_char_entry, update_hi, game_over, burp_bonus_text, bonus_get_ready, bonus_walk_on_46, end_level, life_lost_handler, play_music_loop, player_not_moving, pause, reset_bonus_notes, quiet
 jiffy_timer:		.byte	?
-kernal_zero_page:
-		.fill	34
+.endv
+
+.virtual $00c5
 ; read by: player_not_moving
-last_key_pressed:		.byte	?
-kernal_zero_page2:
-		.fill	53
+last_key:		.byte	?
+.endv
+
+.virtual $00fb
 ; the screen cell of the player
 ; read by: check_move_possible, check_move_up, check_move_down, check_move_right, check_move_left, try_move, bonus_round_loop, bonus_walk_on_46, life_lost_handler, game_loop, player_not_moving
 ; written by: check_move_possible, check_move_up, check_move_down, end_level, life_lost_handler, reset_everything
@@ -50,16 +49,14 @@ tmp_loc_lo:		.byte	?
 ; written by: try_move, update_hi, old_test_cell, move_snake_0, move_snake_1, draw_snake_1_body, move_snake_2, shift_snake_2, move_snake_3, move_snake_4, move_bonus_guy, update_bonus_guy, life_lost_handler, test_cell
 tmp_loc_hi:		.byte	?
 unused_00ff:		.byte	?
-; ---- stack and KERNAL workspace ----
-stack:
-		.fill	256
-kernal_workspace:
-		.fill	276
+.endv
+
+.virtual $0314
 ; written by: bonus_get_ready, setup_irq
 irq_vector:		.addr	?
-kernal_vectors:
-		.fill	234
-; ---- screen ----
+.endv
+
+.virtual $0400
 ; read by: move_hi_from_scr_to_, update_hi, sort_high_scores, copy_hi_text, colorize_maze, colorize_maze_2, colorize_maze_3, colorize_maze_4, inc_score_digit_x, burp_bonus_text
 ; written by: more_chars, draw_high_score_screen, draw_title_screen, draw_level_1, draw_level_2, draw_level_3, update_hi, sort_high_scores, game_over, inc_score_digit_x, burp_bonus_text, bonus_get_ready, end_level, life_lost_handler
 screen_ram:
@@ -89,8 +86,6 @@ bonus_timer_digit_2:		.byte	?
 ; modified by: countdown_irq
 bonus_timer_digit_3:
 		.fill	8
-unused_07e8:
-		.fill	24
 .endv
 
 *=$0800
@@ -2997,13 +2992,13 @@ l3AB1:
 		sta new_loc_hi
 		sta tmp_loc_hi
 		lda #$00
-		sta multicolor_1
-		sta multicolor_2_register
+		sta background_color_1
+		sta background_color_2
 
 ; jumped to by: life_lost_handler
 l3AD8:
-		inc multicolor_1
-		inc multicolor_2_register
+		inc background_color_1
+		inc background_color_2
 		lda #$ff
 		sta jiffy_timer
 
@@ -3015,8 +3010,8 @@ l3AE2:
 		cmp #$0f
 		bne l3AD8
 		lda #$06
-		sta multicolor_1
-		sta multicolor_2_register
+		sta background_color_1
+		sta background_color_2
 		lda #$81
 		ldx lives
 		lda #$a0
@@ -3069,8 +3064,8 @@ reset_everything:
 		lda #$0f
 		sta sid_vol_filter
 		lda #$06
-		sta multicolor_1
-		sta multicolor_2_register
+		sta background_color_1
+		sta background_color_2
 		lda #$02
 		sta border_color
 		jsr set_top_bottom_red
@@ -3211,7 +3206,7 @@ l3C5B:
 		lda #$00
 		sta voice2_frequency + $1
 		sta voice1_frequency + $1
-		lda last_key_pressed
+		lda last_key
 		cmp #$04
 		bne l3C70
 		jsr pause
@@ -3243,7 +3238,7 @@ l3C80:
 
 ; called by: life_lost_handler
 multicolor_2:
-		lda multicolor_2_register
+		lda background_color_2
 		and #$0f
 		rts 
 
@@ -3448,42 +3443,38 @@ unused_3f48:		.byte	$25
 .virtual $3f49
 untouched_3f49:
 		.fill	24759
-; ---- BASIC ROM; RAMTAS left $55 in the RAM under it ----
-basic_rom:
-		.fill	8192
+.endv
+
+.virtual $c000
 untouched_c000:
 		.fill	4096
-; ---- VIC-II ----
-vic_sprite_coords:
-		.fill	16
-vic_sprite_x_high_bits:		.byte	?
-vic_control:
-		.fill	5
+.endv
+
+.virtual $d016
 ; written by: game_over, reset_everything, check_space
 vic_control_2:		.byte	?
-vic_sprite_double_height:		.byte	?
+.endv
+
+.virtual $d018
 ; written by: entry
 vic_memory_setup:		.byte	?
-vic_registers:
-		.fill	7
+.endv
+
+.virtual $d020
 ; written by: game_over, bonus_round, end_level, reset_everything
 border_color:		.byte	?
 ; written by: reset_everything
 background_color:		.byte	?
 ; written by: life_lost_handler, reset_everything
 ; modified by: life_lost_handler
-multicolor_1:		.byte	?
+background_color_1:		.byte	?
 ; read by: multicolor_2
 ; written by: life_lost_handler, reset_everything
 ; modified by: life_lost_handler
-multicolor_2_register:		.byte	?
-vic_colors:
-		.fill	3
-vic_sprite_colors:
-		.fill	8
-vic_rest:
-		.fill	977
-; ---- SID ----
+background_color_2:		.byte	?
+.endv
+
+.virtual $d400
 ; written by: update_hi, sort_high_scores, copy_hi_text, game_over, no_bonus, bonus_10_points, bonus_100_points, burp_bonus_text, bonus_walk_on_44, bonus_walk_on_43, bonus_walk_on_46, end_bonus_round, end_level, life_lost_handler, restart_to_title, reset_everything, play_music_loop, check_space, check_hit_dot, check_hit_bonus_guy, player_not_moving, quiet
 ; modified by: life_lost_handler
 voice1_frequency:		.word	?
@@ -3506,38 +3497,29 @@ voice2_control:		.byte	?
 voice2_attack_decay:		.byte	?
 ; written by: reset_everything
 voice2_sustain_release:		.byte	?
-voice3_frequency:		.word	?
-voice3_pulse_width:		.word	?
+.endv
+
+.virtual $d412
 ; written by: reset_everything
 voice3_control:		.byte	?
-voice3_attack_decay:		.byte	?
-voice3_sustain_release:		.byte	?
-filter_cutoff:		.word	?
-filter_control:		.byte	?
+.endv
+
+.virtual $d418
 ; written by: sfx_hi_char_entry, game_over, reset_everything, pause
 sid_vol_filter:		.byte	?
-sid_mirrors:
-		.fill	999
+.endv
+
+.virtual $d800
 ; written by: more_colors, draw_screen_colors, color_lines, colorize_maze, colorize_maze_2, colorize_maze_3, colorize_maze_4, end_level
 color_ram:
 		.fill	1000
-unused_color_ram:
-		.fill	24
-; ---- CIAs ----
-cia1_port_a:		.byte	?
-; joystick port 1
+.endv
+
+.virtual $dc01
+; keyboard rows, joystick port 1
 ; read by: try_move, update_hi, game_over, check_space, pause
 cia1_port_b:		.byte	?
-cia1_rest:
-		.fill	254
-cia2:
-		.fill	256
-io_expansion:
-		.fill	512
-; ---- KERNAL, in ROM ----
-kernal_rom:
-		.fill	2609
-; jumped to by: skip_irq, countdown_irq
-kernal_irq:
-		.fill	5583
 .endv
+; the KERNAL interrupt handler: cursor, jiffy clock, keyboard
+; jumped to by: skip_irq, countdown_irq
+kernal_irq = $ea31

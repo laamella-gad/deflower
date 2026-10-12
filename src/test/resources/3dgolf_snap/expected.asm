@@ -10030,25 +10030,25 @@ lA003:
 
 ; read by: l4345, random
 vectors:
-		.addr	add_stroke
+		.addr	add_stroke, update_scores, read_aim_cursor, read_joystick, lB49B, lB496, aim, lB5FC, lB08B, lB6F8
 ; read by: l4348
-aA00E:		.addr	update_scores
+aA00E = $a00e
 ; read by: l32AD
-aA010:		.addr	read_aim_cursor
+aA010 = $a010
 ; read by: l32B0
-aA012:		.addr	read_joystick
+aA012 = $a012
 ; read by: l434B
-aA014:		.addr	lB49B
+aA014 = $a014
 ; read by: l434E
-aA016:		.addr	lB496
+aA016 = $a016
 ; read by: l32B3
-aA018:		.addr	aim
+aA018 = $a018
 ; read by: l32B3
-aA01A:		.addr	lB5FC
+aA01A = $a01a
 ; read by: l32B9
-aA01C:		.addr	lB08B
+aA01C = $a01c
 ; read by: l4351
-aA01E:		.addr	lB6F8
+aA01E = $a01e
 
 ; called by: draw_object
 lA020:

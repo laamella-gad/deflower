@@ -19,8 +19,11 @@ final class Annotation {
     final String name;
     // The standalone comment lines right above this line, if any.
     final List<String> comment;
+    // True for a line from an included file (issue 0078): weak, so the
+    // including file's own lines win over it.
+    final boolean included;
 
-    Annotation(int address, Integer addressEnd, LineType type, boolean virtual, int amount, String name, List<String> comment) {
+    Annotation(int address, Integer addressEnd, LineType type, boolean virtual, int amount, String name, List<String> comment, boolean included) {
         this.address = address;
         this.addressEnd = addressEnd;
         this.type = type;
@@ -28,5 +31,6 @@ final class Annotation {
         this.amount = amount;
         this.name = name;
         this.comment = comment;
+        this.included = included;
     }
 }

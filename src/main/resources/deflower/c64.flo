@@ -1,0 +1,10 @@
+; The C64 as a program sees it with $01 = $37: zero page, system memory and the default
+; screen, BASIC ROM, I/O and KERNAL ROM. A program that banks something out includes
+; only the pieces it sees instead.
+; Built into Deflower; include it with 'include c64.flo'.
+
+include c64_zeropage.flo
+include c64_system.flo
+include c64_basic.flo
+include c64_io.flo
+include c64_kernal.flo

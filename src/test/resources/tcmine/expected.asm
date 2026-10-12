@@ -85,10 +85,11 @@ enemy_steps:
 .virtual $0400
 ; read by: add_score, count_air_bonus
 ; written by: add_score, count_air_bonus
-screen:
+screen_ram:
 		.fill	1000
-unused_07e8:
-		.fill	16
+.endv
+
+.virtual $07f8
 ; read by: animate_player, animate_portal, animate_enemies
 ; written by: init_player, animate_player, animate_portal, init_enemies, animate_enemies
 ; modified by: animate_player, animate_enemies
@@ -269,7 +270,7 @@ install_irq:
 		sta vic_irq_enable
 		lda #$00
 		sta vic_raster
-		sta vic_control
+		sta vic_control_1
 		lda #$e7
 		sta irq_vector
 		lda #$c0
@@ -284,7 +285,7 @@ irq:
 		lda #$00
 		sta vic_raster
 		lda #$1b
-		sta vic_control
+		sta vic_control_1
 		dec frame_counter
 		lda frame_counter
 		and #$07
@@ -1179,14 +1180,14 @@ lC5DD:
 
 ; jumped to by: add_score
 lC5DF:
-		lda screen + $6f, x
+		lda screen_ram + $6f, x
 		clc 
 		adc #$01
-		sta screen + $6f, x
+		sta screen_ram + $6f, x
 		cmp #$3a
 		bcc lC5F4
 		lda #$30
-		sta screen + $6f, x
+		sta screen_ram + $6f, x
 		dex 
 		bne lC5DF
 
@@ -1200,7 +1201,7 @@ lC5F4:
 
 ; jumped to by: animate_portal
 check_collisions:
-		lda vic_sprite_coll
+		lda vic_sprite_collision
 		sta sprite_collisions
 		and #$02
 		beq lC611
@@ -1453,14 +1454,14 @@ lC755:
 
 ; jumped to by: count_air_bonus
 lC75A:
-		lda screen + $6f, x
+		lda screen_ram + $6f, x
 		clc 
 		adc #$01
-		sta screen + $6f, x
+		sta screen_ram + $6f, x
 		cmp #$3a
 		bcc lC76F
 		lda #$30
-		sta screen + $6f, x
+		sta screen_ram + $6f, x
 		dex 
 		bne lC75A
 
@@ -1524,35 +1525,45 @@ sprite4_coords_base = $cffe
 ; written by: irq
 ; modified by: irq
 frame_counter:		.byte	?
+; x and y of sprites 0-7
 ; read by: find_player_cell, animate_player, check_landing, jump_height, check_conveyor
 ; written by: init_player, jump, jump_height, init_enemies
 ; modified by: walk, animate_player, jump_sideways, main_loop, fall, jump_sideways_checked, check_conveyor, check_slope, unused_c451, move_enemies
 vic_sprite_coords:
 		.fill	16
-vic_sprite_x_high_bits:		.byte	?
+.endv
+
+.virtual $d011
 ; written by: install_irq, irq
-vic_control:		.byte	?
+vic_control_1:		.byte	?
 ; read by: main_loop, count_air_bonus
 ; written by: install_irq, irq
 vic_raster:		.byte	?
-vic_light_pen:
-		.fill	2
+.endv
+
+.virtual $d015
 ; written by: init_player
 vic_sprite_enable:		.byte	?
-vic_registers:
-		.fill	3
+.endv
+
+.virtual $d019
 ; written by: install_irq, irq, remove_irq
 vic_irq_status:		.byte	?
 ; written by: install_irq, remove_irq
 vic_irq_enable:		.byte	?
-vic_sprite_priority:		.byte	?
+.endv
+
+.virtual $d01c
 ; written by: init_player
 vic_sprite_multicolor:		.byte	?
-vic_sprite_double_width:		.byte	?
+.endv
+
+.virtual $d01e
 ; read by: check_collisions
-vic_sprite_coll:		.byte	?
-vic_rest:
-		.fill	993
+vic_sprite_collision:		.byte	?
+.endv
+
+.virtual $d400
 ; written by: play_music, count_air_bonus
 voice1_frequency:		.word	?
 ; written by: init_music
@@ -1561,7 +1572,9 @@ voice1_pulse_width:		.word	?
 voice1_control:		.byte	?
 ; written by: play_music, count_air_bonus
 voice1_attack_decay:		.byte	?
-voice1_sustain_release:		.byte	?
+.endv
+
+.virtual $d407
 ; written by: play_music
 voice2_frequency:		.word	?
 ; written by: init_music
@@ -1570,7 +1583,9 @@ voice2_pulse_width:		.word	?
 voice2_control:		.byte	?
 ; written by: play_music
 voice2_attack_decay:		.byte	?
-voice2_sustain_release:		.byte	?
+.endv
+
+.virtual $d40e
 ; written by: play_music
 voice3_frequency:		.word	?
 ; written by: init_music
@@ -1579,30 +1594,27 @@ voice3_pulse_width:		.word	?
 voice3_control:		.byte	?
 ; written by: play_music
 voice3_attack_decay:		.byte	?
-voice3_sustain_release:		.byte	?
-filter_cutoff:		.word	?
-filter_control:		.byte	?
+.endv
+
+.virtual $d418
 ; read by: init_music
 sid_vol_filter:		.byte	?
-sid_mirrors:
-		.fill	999
 .endv
 
 .virtual $dc00
+; keyboard columns, joystick port 2
 ; read by: read_controls
 ; written by: read_controls
 cia1_port_a:		.byte	?
+; keyboard rows, joystick port 1
 ; read by: read_controls
 cia1_port_b:		.byte	?
-cia1_registers:
-		.fill	12
-; written by: install_irq, remove_irq
-cia1_timer_a_control:		.byte	?
-cia1_timer_b_control:		.byte	?
 .endv
 
-.virtual $ea31
-; in the KERNAL ROM
-; jumped to by: animate_enemies
-kernal_irq:		.byte	?
+.virtual $dc0e
+; written by: install_irq, remove_irq
+cia1_timer_a_control:		.byte	?
 .endv
+; the KERNAL interrupt handler: cursor, jiffy clock, keyboard
+; jumped to by: animate_enemies
+kernal_irq = $ea31

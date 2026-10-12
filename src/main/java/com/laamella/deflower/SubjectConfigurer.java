@@ -29,7 +29,10 @@ class SubjectConfigurer {
             subject.outputFileName = outputFileNameFor(run.targetName);
             subjects.add(subject);
             loadMemoryImage(filename, subject);
-            run.annotations.forEach(subject::annotate);
+            // The including file's own lines first: included ones are weak
+            // and only fill in what those leave open (issue 0078).
+            run.annotations.stream().filter(a -> !a.included).forEach(subject::annotate);
+            run.annotations.stream().filter(a -> a.included).forEach(subject::annotate);
         }
         return subjects;
     }
