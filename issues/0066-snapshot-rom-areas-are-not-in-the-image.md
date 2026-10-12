@@ -13,9 +13,17 @@ Also in `1nvader_snap`, where `$01` is `$37` (all ROMs visible): its `jsr $ffba`
 
 Which memory is visible depends on `$01` at the moment the code runs, which a single snapshot doesn't say for every routine (the snapshot's own `$01` is only the value when it was taken).
 
+Worse, the visibility isn't fixed for a program at all. Code can write `$01` at any time, banking the ROMs and I/O in and out, so the same address can be ROM in one routine and RAM in the next, and programs move things around: copy a ROM's contents into the RAM under it, or point the VIC at another bank through `$dd00`. Which memory an instruction sees can only be known by following the `$01` writes, which a static trace can't do in general.
+
 Options to decide between:
 1. **Let the user declare it.** A `virtual` range in the `.flo` file already stops the trace ("Jumping into non-code area") and names the target, e.g. `$e000-$10000 virtual byte kernal` plus `$ea31 kernal_irq`. Then this is only documentation plus a fixture, but every `.flo` for a program that uses the KERNAL repeats it.
 2. **Treat the ROM areas as not loaded by default** (see [0065](0065-trace-stops-at-memory-the-image-does-not-load.md)), with a way to say a program banks them out and uses the RAM.
 3. **Load the ROMs** from the snapshot when VICE saved them (its ROM module), or from ROM files, and pick ROM or RAM by `$01`. Most work, and still only right for the `$01` value it uses.
+
+Consequences for the options:
+- Option 2 can't pick the areas from the snapshot's `$01`: that value is only right for the code that ran when the snapshot was taken. It would have to be fixed areas, which is wrong for every program that banks the ROMs out.
+- Option 3 has the same gap: loading the ROMs doesn't say when they are visible.
+- Option 1 is the only one that doesn't guess: the user knows what each part of the program banks in. A shared `c64.flo` ([0078](0078-include-shared-flo-definitions.md)) makes it cheap.
+- Finer control means declaring the banking per routine or address range in the `.flo` file, so code there sees ROM, I/O or RAM. That overlaps with [0069](0069-one-label-per-address-ignores-banking.md), where a label can't follow banking either.
 
 Done when: `bigmac`'s `jmp $ea31` no longer decodes the RAM under the KERNAL, and the chosen way is documented in `Flo.g4`'s format comment if it involves the `.flo` file.
