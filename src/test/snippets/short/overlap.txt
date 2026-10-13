@@ -13,13 +13,6 @@ deflower test.prg
 $c000 word a_word
 $c001 byte b_byte
 ^^^
-Reading test.prg
-Reading prg test.prg
-load address 49152
-Marking area of 1 word at C000 "a_word"
-Marking area of 1 byte at C001 "b_byte"
-Starting flow analysis.
-No entry points defined, nothing to do.
 Area conflict at $c001: $c001 1 byte overwrites $c000 2 word
 Errors detected for test.asm, not writing output.
 ~~~

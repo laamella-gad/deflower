@@ -14,13 +14,11 @@ import static java.nio.file.Files.readAllBytes;
  */
 class PrgReader {
     void read(Path c64File, Subject subject) {
-        System.out.println("Reading prg " + subject.basePath.relativize(c64File));
         try {
             ByteBuffer c64Dump = ByteBuffer.wrap(readAllBytes(c64File));
             int lo = c64Dump.get();
             int hi = c64Dump.get();
             int loadAddress = ByteManipulation.word(lo, hi);
-            System.out.println("load address " + loadAddress);
             byte[] b = new byte[c64Dump.remaining()];
             c64Dump.get(b);
             subject.storeAt(loadAddress, b, subject.basePath.relativize(c64File));

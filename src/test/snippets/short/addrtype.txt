@@ -17,13 +17,6 @@ $c000 addr[3] vectors
 $c006 code first
 $c007 code second
 ^^^
-Reading test.prg
-Reading prg test.prg
-load address 49152
-Marking area of 3 addr at C000 "vectors"
-Will disassemble from C006
-Will disassemble from C007
-Starting flow analysis.
 Writing out/test.asm
 Writing out/test.map
 Verify out/test.asm: 8 bytes emitted, 0 differ, 0 virtual, 0 gaps

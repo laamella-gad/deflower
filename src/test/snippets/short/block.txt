@@ -42,16 +42,6 @@ $c00c {
     $01 byte[3] notes
 }
 ^^^
-Reading test.prg
-Reading prg test.prg
-load address 49152
-Will disassemble from C000
-Marking area of 1 word at D400 "freq1"
-Marking area of 1 byte at D404 "control1"
-Marking area of 1 byte at D418 "volume"
-Marking area of 1 byte at C00C "waveform"
-Marking area of 3 byte at C00D "notes"
-Starting flow analysis.
 Writing out/test.asm
 Writing out/test.map
 Verify out/test.asm: 16 bytes emitted, 0 differ, 4 virtual, 0 gaps

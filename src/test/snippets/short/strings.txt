@@ -30,16 +30,6 @@ $c00d char[4] counted
 $c011 char[6] mixed
 $c017 char[41] long_nulled
 ^^^
-Reading test.prg
-Reading prg test.prg
-load address 49152
-Will disassemble from C000
-Marking area of 5 char at C004 "plain"
-Marking area of 4 char at C009 "nulled"
-Marking area of 4 char at C00D "counted"
-Marking area of 6 char at C011 "mixed"
-Marking area of 41 char at C017 "long_nulled"
-Starting flow analysis.
 Writing out/test.asm
 Writing out/test.map
 Verify out/test.asm: 64 bytes emitted, 0 differ, 0 virtual, 0 gaps

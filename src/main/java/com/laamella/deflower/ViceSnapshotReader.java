@@ -25,11 +25,9 @@ class ViceSnapshotReader {
     }
 
     void read(Path c64File, Subject subject) {
-        System.out.println("Reading snapshot " + subject.basePath.relativize(c64File));
         try {
             ByteBuffer c64Dump = ByteBuffer.wrap(readAllBytes(c64File));
             ViceVcfFile vcfFile = new ViceVcfFileReader().read(c64Dump, new C64MemModuleHandler());
-            System.out.println(vcfFile);
 
             if (!supportedMachines.contains(vcfFile.header.machineName)) {
                 throw new IllegalArgumentException("Only C64 dumps supported.");

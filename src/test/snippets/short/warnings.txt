@@ -1,0 +1,76 @@
+>>> Issue 0077: the analysis collects suspect spots as warnings and prints
+them after the run, sorted by address: a jsr into the middle of an
+instruction, a jsr that returns into data, a jmp into data, and a jsr into
+memory the image doesn't load. The .flo code line for $c00a comes last, so
+it is traced first. <<<
+
+*=$c000
+
+entry:
+		jsr load + 1
+		jsr print
+		.byte	$01
+		jmp table
+
+; from $c00b, $60 decodes as rts
+load:
+		lda #$60
+		jsr $1000
+		rts 
+
+print:
+		rts 
+
+table:
+		.byte	$02, $03
+===
+deflower test.prg
+$c000 code entry
+$c006 byte message
+$c011 byte[2] table
+$c007 code
+$c00a code load
+^^^
+warning: $c000: jsr $c00b (lC00B) goes into the middle of the instruction at $c00a
+warning: $c003: jsr returns into data at $c006 (message)
+warning: $c007: jmp $c011 (table) goes into data
+warning: $c00c: jsr $1000 (l1000) goes into memory the image doesn't load
+Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 19 bytes emitted, 0 differ, 0 virtual, 0 gaps
+~~~
+; called by: load
+l1000 = $1000
+*=$c000
+
+entry:
+		jsr lC00B
+		jsr lC010
+
+message:
+		.byte	$01
+		jmp table
+
+load:
+		lda #$60
+; called by: entry
+lC00B = $c00b
+		jsr l1000
+		rts 
+
+; called by: entry
+lC010:
+		rts 
+
+; jumped to by: $c007
+table:
+		.byte	$02, $03
+~~~
+--- test.map
+$c000-$c006 code entry
+$c006-$c007 byte message
+$c007-$c00a code
+$c00a-$c010 code load
+$c010-$c011 code lC010
+$c011-$c013 byte[2] table
+vvv

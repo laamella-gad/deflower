@@ -1,0 +1,40 @@
+>>> Issue 0077: a run without suspect spots prints nothing but the files it
+writes and the verify report; no tracing. <<<
+
+*=$c000
+
+entry:
+		jsr $ffd2
+		lda data
+		rts 
+
+data:
+		.byte	$01
+===
+deflower test.prg
+include c64.flo
+$c000 code entry
+$c007 byte data
+^^^
+Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 8 bytes emitted, 0 differ, 22528 virtual, 0 gaps
+~~~
+
+*=$c000
+
+entry:
+		jsr chrout
+		lda data
+		rts 
+
+; read by: entry
+data:
+		.byte	$01
+; called by: entry
+chrout = $ffd2
+~~~
+--- test.map
+$c000-$c007 code entry
+$c007-$c008 byte data
+vvv

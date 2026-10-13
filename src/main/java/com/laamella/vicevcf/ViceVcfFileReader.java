@@ -26,7 +26,6 @@ public class ViceVcfFileReader {
         Version version = new Version(vcfFileContents.get(), vcfFileContents.get());
         int size = readDword(vcfFileContents) - 22;
         byte[] content = getByteArray(vcfFileContents, size);
-        System.out.printf("Found %s %s block of size %d.%n", moduleType, version, size);
 
         for (ModuleHandler moduleHandler : moduleHandlers) {
             Module module = moduleHandler.handle(moduleType, version, content);
@@ -47,7 +46,6 @@ public class ViceVcfFileReader {
         Version version = new Version(vcfFileContents.get(), vcfFileContents.get());
         byte[] machineNameBytes = getByteArray(vcfFileContents, 16);
         String machineName = paddedString(machineNameBytes, 0);
-        System.out.printf("Vice dump found, format %s %s.%n", machineName, version);
 
         // VICE snapshot format 2.0+ has a "VICE Version" block here. Older
         // snapshots (format 1.x, as produced by e.g. VICE 1.x) go straight
@@ -58,7 +56,6 @@ public class ViceVcfFileReader {
         if (Arrays.equals(expectedViceVersionHeader, viceVersionHeader)) {
             int viceVersion = readDword(vcfFileContents);
             int viceSubversionRevisionNumber = readDword(vcfFileContents);
-            System.out.printf("Vice version %s, SVN revision %s.%n", viceVersion, viceSubversionRevisionNumber);
         } else {
             vcfFileContents.position(vcfFileContents.position() - expectedViceVersionHeader.length);
         }

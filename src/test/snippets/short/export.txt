@@ -42,16 +42,6 @@ $c028 glyph_b
 $c030 word[2] table export table.prg
 $c034-$c036 tail
 ^^^
-Reading test.prg
-Reading prg test.prg
-load address 49152
-Will disassemble from C000
-Marking area of 16 unknown at C020 "font"
-Marking area of 2 word at C030 "table"
-Marking area of 2 unknown at C034 "tail"
-Starting flow analysis.
-Unnamed target: lC002 from address $c009
-Unnamed target: aC032 from address $c00e
 Writing out/test.asm
 Writing out/font.bin
 Writing out/table.prg

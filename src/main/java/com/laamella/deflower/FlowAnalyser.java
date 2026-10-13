@@ -2,6 +2,7 @@ package com.laamella.deflower;
 
 import com.laamella.mpu6502.specification.AddressingMode;
 import com.laamella.mpu6502.specification.Instruction;
+import com.laamella.mpu6502.specification.Opcode;
 
 import static com.laamella.Printing.asHexWord;
 import static com.laamella.mpu6502.ByteManipulation.toSignedByte;
@@ -9,36 +10,39 @@ import static com.laamella.mpu6502.ByteManipulation.word;
 
 class FlowAnalyser {
     void analyseCodeFlows(Subject subject) {
-        System.out.println("Starting flow analysis.");
-
-        if (subject.potentialCodeLocations.isEmpty()) {
-            System.out.println("No entry points defined, nothing to do.");
-        }
-
         while (!subject.potentialCodeLocations.empty()) {
-            int startAddress = subject.potentialCodeLocations.pop();
-            analyseCodeFlow(startAddress, subject);
+            analyseCodeFlow(subject.potentialCodeLocations.pop(), subject);
         }
     }
 
-    private void analyseCodeFlow(int startAddress, Subject subject) {
+    private void analyseCodeFlow(CodeEntry entry, Subject subject) {
+        int startAddress = entry.address;
         MemoryLocation memoryLocation = subject.memory[startAddress];
-        if (memoryLocation.area != null && !memoryLocation.area.isPlaceholder()) {
-            if (memoryLocation.area instanceof DataArea) {
-                System.out.println("Jumping into non-code area " + memoryLocation.area.toString());
+        Area area = memoryLocation.area;
+        if (area != null && !area.isPlaceholder()) {
+            // Issue 0077: a virtual area, like a KERNAL routine, is code
+            // that isn't in the image, so calling it is fine.
+            if (area instanceof DataArea && !area.isVirtual()) {
+                warnFlow(entry, subject, "data", "is data");
+            } else if (area instanceof InstructionArea && area.address != startAddress) {
+                String instruction = "the instruction at " + asHexWord(area.address);
+                warnFlow(entry, subject, "the middle of " + instruction, "is inside " + instruction);
             }
             return;
         }
         if (!memoryLocation.loaded) {
             // Issue 0065: what is there at run time isn't in the image,
-            // so there is nothing to decode. The target keeps its label.
-            System.out.println("Jumping into memory the image doesn't contain: " + asHexWord(startAddress));
+            // so there is nothing to decode. The target keeps its label;
+            // one from the .flo file says the user knows what is there.
+            if (memoryLocation.label == null || memoryLocation.label.auto) {
+                warnFlow(entry, subject, "memory the image doesn't load", "is memory the image doesn't load");
+            }
             return;
         }
         Instruction instruction = Instruction.INSTRUCTION_BY_NR[memoryLocation.data];
         int address = memoryLocation.address;
         if (instruction == null) {
-            System.out.println("Jumped into a JAM");
+            subject.warn(address, String.format("jam ($%02x), not decoded", memoryLocation.data));
             return;
         }
         if (runsIntoExistingArea(address, instruction, subject)) {
@@ -98,6 +102,35 @@ class FlowAnalyser {
     }
 
     /**
+     * Warns about flow into memory that isn't code to decode (issue 0077),
+     * at the instruction the flow comes from, or at a .flo code entry.
+     */
+    private void warnFlow(CodeEntry entry, Subject subject, String into, String entryProblem) {
+        String target = asHexWord(entry.address);
+        String label = subject.memory[entry.address].labelName();
+        if (label == null && subject.memory[entry.address].area != null) {
+            label = subject.memory[entry.address].area.labelFor(entry.address, subject);
+        }
+        if (label != null) {
+            target += " (" + label + ")";
+        }
+        if (entry.from == -1) {
+            subject.warn(entry.address, "code entry " + entryProblem);
+            return;
+        }
+        Instruction from = ((InstructionArea) subject.memory[entry.from].area).instruction;
+        String mnemonic = from.opcode.name().toLowerCase();
+        if (entry.fallsThrough && from.opcode == Opcode.JSR) {
+            // Often a routine that reads inline data after its jsr (0068).
+            subject.warn(entry.from, mnemonic + " returns into " + into + " at " + target);
+        } else if (entry.fallsThrough) {
+            subject.warn(entry.from, "falls through into " + into + " at " + target);
+        } else {
+            subject.warn(entry.from, mnemonic + " " + target + " goes into " + into);
+        }
+    }
+
+    /**
      * Labels the data `target` refers to, unless it can already be named:
      * an address inside a labelled array or instruction resolves as
      * "label + offset", and a label of its own would replace that. Memory
@@ -126,12 +159,15 @@ class FlowAnalyser {
     private boolean runsIntoExistingArea(int address, Instruction instruction, Subject subject) {
         for (int offset = 1; offset < instruction.addressingMode.totalBytes; offset++) {
             if (address + offset > 0xFFFF || !subject.memory[address + offset].loaded) {
-                System.out.println("Instruction at " + asHexWord(address) + " runs past the memory the image contains, not disassembling");
+                subject.warn(address, "the instruction runs past the image, not decoded");
                 return true;
             }
             Area existing = subject.memory[address + offset].area;
             if (existing != null && !existing.isPlaceholder()) {
-                System.out.println("Instruction at " + asHexWord(address) + " would run into " + existing + ", not disassembling");
+                String what = existing instanceof InstructionArea
+                        ? "the instruction at " + asHexWord(existing.address)
+                        : "data at " + asHexWord(address + offset);
+                subject.warn(address, "the instruction runs into " + what + ", not decoded");
                 return true;
             }
         }

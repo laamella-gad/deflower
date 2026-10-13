@@ -27,15 +27,6 @@ $c004 sbyte[4] deltas
 $c008 sword[2] speeds
 $c00c sdword offset
 ^^^
-Reading test.prg
-Reading prg test.prg
-load address 49152
-Marking area of 1 sbyte at 2 "velocity"
-Will disassemble from C000
-Marking area of 4 sbyte at C004 "deltas"
-Marking area of 2 sword at C008 "speeds"
-Marking area of 1 sdword at C00C "offset"
-Starting flow analysis.
 Writing out/test.asm
 Writing out/test.map
 Verify out/test.asm: 16 bytes emitted, 0 differ, 1 virtual, 0 gaps

@@ -364,29 +364,12 @@ lC40E:
 		.byte	$8d, $19, $d0, $a9, $f0, $8d, $1a, $d0, $58, $60, $85, $fa, $90, $02, $e6, $fb
 		.byte	$ca, $60, $ff, $00, $ff, $00, $ff, $00, $ff
 ^^^
-Reading a.prg
-Reading prg a.prg
-load address 49152
-Will disassemble from C000
-Reading b.prg
-Reading prg b.prg
-load address 49152
-Will disassemble from C000
-Marking area of 4 byte at C010 "marker_b"
-Starting flow analysis.
-Unnamed target: lC40E from address $c00a
-Unnamed target: lC028 from address $c015
-Unnamed target: lC015 from address $c025
-Unnamed target: lC058 from address $c054
-Unnamed target: lC02A from address $c05a
-Unnamed target: lC069 from address $c065
 Writing out/a.asm
 Writing out/a.map
 Verify out/a.asm: 125 bytes emitted, 0 differ, 0 virtual, 2 gaps
 gap $c074-$c40e
 gap $c417-$c7c0
-Starting flow analysis.
-Unnamed target: lC40E from address $c00a
+warning: $c00e: falls through into data at $c010 (marker_b)
 Writing out/b.asm
 Writing out/b.map
 Verify out/b.asm: 29 bytes emitted, 0 differ, 0 virtual, 2 gaps

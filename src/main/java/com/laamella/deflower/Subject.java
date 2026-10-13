@@ -40,9 +40,11 @@ class Subject {
     final Path outputPath;
     MemoryLocation[] memory;
     final Path basePath;
-    final Stack<Integer> potentialCodeLocations = new Stack<>();
+    final Stack<CodeEntry> potentialCodeLocations = new Stack<>();
     String outputFileName = "deflowered.asm";
     final List<String> errors = new ArrayList<>();
+    // Suspect spots, by address; they don't stop the output (issue 0077).
+    final List<Warning> warnings = new ArrayList<>();
     // The regions exported to binary files of their own (issue 0022).
     final List<ExportRegion> exports = new ArrayList<>();
 
@@ -122,8 +124,7 @@ class Subject {
         }
         switch (type) {
             case CODE_LINE -> {
-                potentialCodeLocations.add(address);
-                System.out.format("Will disassemble from %X\n", address);
+                potentialCodeLocations.add(new CodeEntry(address, -1, false));
             }
             case CHAR_LINE, BYTE_LINE, WORD_LINE, LONG_LINE, DWORD_LINE, ADDR_LINE, SBYTE_LINE, SWORD_LINE, SLONG_LINE, SDWORD_LINE, UNKNOWN_LINE -> {
                 int amount = annotation.addressEnd != null
@@ -136,7 +137,6 @@ class Subject {
                     errors.add(String.format("Zero-size %s at %s", type.dataType.name().toLowerCase(), asHexWord(address)));
                     return;
                 }
-                System.out.format("Marking area of %d %s at %X \"%s\"\n", amount, type.dataType.name().toLowerCase(), address, annotation.name);
                 ExportRegion export = null;
                 if (annotation.export != null) {
                     export = exportRegion(annotation.export, address, address + amount * type.dataType.sizeInBytes);
@@ -167,9 +167,9 @@ class Subject {
                     unloaded.add(asHexWord(unloadedStart) + "-" + asHexWord(address + amount * size));
                 }
                 if (!unloaded.isEmpty() && !annotation.included) {
-                    System.out.format("Warning: %s %s at %s: the image doesn't load %s, printed as virtual%n",
-                            type.dataType.name().toLowerCase(), annotation.name == null ? "area" : annotation.name,
-                            asHexWord(address), String.join(", ", unloaded));
+                    warn(address, String.format("%s%s: the image doesn't load %s, printed as virtual",
+                            type.dataType.name().toLowerCase(), annotation.name == null ? "" : " " + annotation.name,
+                            String.join(", ", unloaded)));
                 }
             }
             default -> throw new RuntimeException("No data type");
@@ -448,15 +448,22 @@ class Subject {
         }
     }
 
+    /**
+     * Code to trace at `address`, reached from the instruction at
+     * `referencingAddress`. Pushed even onto memory an area covers, so the
+     * analyser can warn about a jump into data or into the middle of an
+     * instruction (issue 0077); it only decodes free memory and
+     * placeholders (issue 0055).
+     */
     public void addPotentialCodeLocation(int address, boolean labelIt, int referencingAddress) {
-        MemoryLocation location = memory[address];
         if (labelIt) {
             ensureLabelled(address, "l", true, referencingAddress);
         }
-        // A placeholder may still turn out to be code (issue 0055).
-        if (location.area == null || location.area.isPlaceholder()) {
-            potentialCodeLocations.add(address);
-        }
+        potentialCodeLocations.add(new CodeEntry(address, referencingAddress, !labelIt));
+    }
+
+    void warn(int address, String text) {
+        warnings.add(new Warning(address, text));
     }
 
     /**
@@ -479,7 +486,6 @@ class Subject {
         MemoryLocation location = memory[address];
         if (location.label == null) {
             location.label = new Label(String.format("%s%04X", contentHint, address), local);
-            System.out.println("Unnamed target: " + location.label.name + " from address " + asHexWord(referencedFromAddress));
         }
     }
 }

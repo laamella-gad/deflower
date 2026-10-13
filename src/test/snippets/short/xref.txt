@@ -68,21 +68,6 @@ $c032 code
 $d020 border
 $ffd2 virtual byte[3] chrout
 ^^^
-Reading test.prg
-Reading prg test.prg
-load address 49152
-Marking area of 1 byte at 2 "counter"
-Marking area of 1 word at FB "pointer"
-Will disassemble from C000
-Marking area of 1 byte at C02D "value"
-Marking area of 4 byte at C02E "table"
-Will disassemble from C032
-Marking area of 3 byte at FFD2 "chrout"
-Starting flow analysis.
-Unnamed target: lC009 from address $c027
-Unnamed target: lC01F from address $c020
-Unnamed target: aC02B from address $c022
-Unnamed target: lC02A from address $c022
 Writing out/test.asm
 Writing out/test.map
 Verify out/test.asm: 54 bytes emitted, 0 differ, 6 virtual, 0 gaps

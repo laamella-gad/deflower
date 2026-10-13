@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Comparator;
 import java.util.List;
 
 import static java.nio.file.FileVisitResult.CONTINUE;
@@ -84,6 +85,11 @@ public class Deflower {
                 flowAnalyser.analyseCodeFlows(subject);
                 subject.dropUnusedIncludes();
                 subject.reportDuplicateLabels();
+                subject.warnings.stream()
+                        .sorted(Comparator.comparingInt(warning -> warning.address))
+                        .map(Warning::toString)
+                        .distinct()
+                        .forEach(System.out::println);
                 if (!subject.errors.isEmpty()) {
                     subject.errors.forEach(System.err::println);
                     System.err.println("Errors detected for " + subject.outputFileName + ", not writing output.");

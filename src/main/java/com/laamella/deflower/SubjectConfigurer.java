@@ -23,7 +23,6 @@ class SubjectConfigurer {
         List<Subject> subjects = new ArrayList<>();
         for (DeflowerRun run : floReader.read(path, path.getFileName().toString())) {
             Path filename = basePath.resolve(run.targetName);
-            System.out.println("Reading " + run.targetName);
             Subject subject = new Subject(basePath);
             subject.outputFileName = outputFileNameFor(run.targetName);
             subjects.add(subject);

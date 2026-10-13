@@ -18,15 +18,8 @@ $400 byte[48] screen
 $c000 code entry
 $c007 word[3] table
 ^^^
-Reading test.prg
-Reading prg test.prg
-load address 49152
-Marking area of 48 byte at 400 "screen"
-Warning: byte screen at $0400: the image doesn't load $0400-$0430, printed as virtual
-Will disassemble from C000
-Marking area of 3 word at C007 "table"
-Warning: word table at $c007: the image doesn't load $c009-$c00d, printed as virtual
-Starting flow analysis.
+warning: $0400: byte screen: the image doesn't load $0400-$0430, printed as virtual
+warning: $c007: word table: the image doesn't load $c009-$c00d, printed as virtual
 Writing out/test.asm
 Writing out/test.map
 Verify out/test.asm: 9 bytes emitted, 0 differ, 52 virtual, 0 gaps

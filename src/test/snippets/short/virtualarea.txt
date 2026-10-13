@@ -36,15 +36,6 @@ $d801 virtual byte second_color
 $00fb virtual word ptr
 $c000 code entry
 ^^^
-Reading test.prg
-Reading prg test.prg
-load address 49152
-Marking area of 1 byte at D020 "border_color"
-Marking area of 4 byte at D800 "color_ram"
-Marking area of 1 byte at D801 "second_color"
-Marking area of 1 word at FB "ptr"
-Will disassemble from C000
-Starting flow analysis.
 Writing out/test.asm
 Writing out/test.map
 Verify out/test.asm: 14 bytes emitted, 0 differ, 7 virtual, 0 gaps

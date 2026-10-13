@@ -6,9 +6,6 @@ an ArrayIndexOutOfBoundsException. <<<
 ===
 deflower test.prg
 ^^^
-Reading test.prg
-Reading prg test.prg
-load address 65520
 test.prg: 32 bytes loaded at $fff0 run past $ffff
 ~~~
 ~~~

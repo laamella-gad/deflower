@@ -19,14 +19,6 @@ $c000 word[2] two_words
 $c004 dword dword_val
 $c008 char[3] greeting
 ^^^
-Reading test.prg
-Reading prg test.prg
-load address 49152
-Marking area of 2 word at C000 "two_words"
-Marking area of 1 dword at C004 "dword_val"
-Marking area of 3 char at C008 "greeting"
-Starting flow analysis.
-No entry points defined, nothing to do.
 Writing out/test.asm
 Writing out/test.map
 Verify out/test.asm: 11 bytes emitted, 0 differ, 0 virtual, 0 gaps

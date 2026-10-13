@@ -23,16 +23,6 @@ $c008 byte[2*2] product
 $c00c byte[1+2*2] precedence
 $c011 word[1+1] sum
 ^^^
-Reading test.prg
-Reading prg test.prg
-load address 49152
-Marking area of 4 byte at C000 "plain"
-Marking area of 4 byte at C004 "hex"
-Marking area of 4 byte at C008 "product"
-Marking area of 5 byte at C00C "precedence"
-Marking area of 2 word at C011 "sum"
-Starting flow analysis.
-No entry points defined, nothing to do.
 Writing out/test.asm
 Writing out/test.map
 Verify out/test.asm: 21 bytes emitted, 0 differ, 0 virtual, 0 gaps

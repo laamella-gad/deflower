@@ -26,13 +26,6 @@ $c000-$c00f unknown_block
 $c004 word carved_word
 $c008 code carved_code
 ^^^
-Reading test.prg
-Reading prg test.prg
-load address 49152
-Marking area of 15 unknown at C000 "unknown_block"
-Marking area of 1 word at C004 "carved_word"
-Will disassemble from C008
-Starting flow analysis.
 Writing out/test.asm
 Writing out/test.map
 Verify out/test.asm: 15 bytes emitted, 0 differ, 0 virtual, 1 gap

@@ -23,14 +23,6 @@ $c000 code start
 $c004 long[2] scores
 $c00a slong[2] offsets
 ^^^
-Reading test.prg
-Reading prg test.prg
-load address 49152
-Marking area of 1 long at 4 "timer"
-Will disassemble from C000
-Marking area of 2 long at C004 "scores"
-Marking area of 2 slong at C00A "offsets"
-Starting flow analysis.
 Writing out/test.asm
 Writing out/test.map
 Verify out/test.asm: 16 bytes emitted, 0 differ, 3 virtual, 0 gaps

@@ -16,13 +16,7 @@ deflower test.prg
 $c002 byte guard
 $c000 code entry
 ^^^
-Reading test.prg
-Reading prg test.prg
-load address 49152
-Marking area of 1 byte at C002 "guard"
-Will disassemble from C000
-Starting flow analysis.
-Instruction at $c000 would run into $c002 1 byte, not disassembling
+warning: $c000: the instruction runs into data at $c002, not decoded
 Writing out/test.asm
 Writing out/test.map
 Verify out/test.asm: 1 bytes emitted, 0 differ, 0 virtual, 1 gap

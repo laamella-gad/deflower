@@ -41,18 +41,6 @@ $c01c char[3] digits
 $c01f char[2]
 $c021 char[3] upper_ascii
 ^^^
-Reading test.prg
-Reading prg test.prg
-load address 49152
-Will disassemble from C000
-Marking area of 13 char at C004 "greeting"
-Marking area of 6 char at C011 "odd_codes"
-Marking area of 3 char at C017 "ascii_text"
-Marking area of 2 char at C01A "ok_text"
-Marking area of 3 char at C01C "digits"
-Marking area of 2 char at C01F "null"
-Marking area of 3 char at C021 "upper_ascii"
-Starting flow analysis.
 Writing out/test.asm
 Writing out/test.map
 Verify out/test.asm: 36 bytes emitted, 0 differ, 0 virtual, 0 gaps

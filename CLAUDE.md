@@ -49,10 +49,11 @@ The pipeline is: **flow file → parse → memory image + annotations → code-f
   - the 64K `MemoryLocation[]` (each location has the byte, an `Area` reference, a label and a comment);
   - the `potentialCodeLocations` stack and the output path;
   - the `errors` list. `registerArea` reports one area overwriting a different, non-placeholder one, and `Deflower` skips writing output for a subject with errors.
+  - the `warnings` list (`Subject.warn`, `Warning`): suspect spots that don't stop the output, printed after the analysis as `warning: $addr: text`, sorted by address. They cover a flow into a non-virtual data area, into the middle of an instruction or into memory the image doesn't load (unless a `.flo` label names the target), a `jsr` that returns into data, an instruction that would run into another area or past the image, a jam, and a data line on memory the image doesn't load.
   - It also answers memory questions used by the output: run and array boundaries (`continuesRun`, `endOfRun`, `endOfArray`), annotations (`isAnnotated`), and the ASCII/screen-code guess (`likelyTextEncoding`).
 - **`FlowAnalyser`** pops entry points and follows 6502 control flow using `mpu6502`'s `Instruction` table.
   - It registers an `InstructionArea` for each decoded instruction, follows fall-through and branch/jump/JSR targets (including `JMP (indirect)` through the address it reads), and auto-labels targets (`lXXXX`, `dXXXX`, `aXXXX`).
-  - Analysis stops at addresses already covered by a non-placeholder area, and won't decode an instruction whose bytes run into one. It also stops at memory the image didn't load (`MemoryLocation.loaded`): the target keeps its label, printed as a define. That is how it avoids loops and detects jumps into data ("Jumping into non-code area").
+  - Analysis stops at addresses already covered by a non-placeholder area, and won't decode an instruction whose bytes run into one. It also stops at memory the image didn't load (`MemoryLocation.loaded`): the target keeps its label, printed as a define. That is how it avoids loops and detects jumps into data. Each entry on the stack is a `CodeEntry`, which records the instruction the flow came from, so the warnings can name it. A target is pushed even when an area covers it, and the analyser warns there instead of decoding.
 - **`Area`** is the common base for `DataArea` and `InstructionArea`. Each address belongs to at most one area, and `registerArea` writes that link into `Subject.memory`. Address ownership is the main signal the analyser uses, so an overlapping `.flo` declaration changes the output.
 - **`Deflower`** runs the pipeline. It clears and recreates `<basePath>/out` once per `.flo` file, then for each subject analyses, drops the unused included names (`Subject.dropUnusedIncludes`) and, if there are no errors, opens `out/<binary>.asm` and hands the writer to `ResultWriter`. It also writes `out/<binary>.map` (`MemoryMap`: one line per code run, split at routine labels, per array and per gap, e.g. `$c007-$c009 word table`), and with verify on runs `Verifier`.
 - **`ResultWriter`** walks 0x0000–0xFFFF and drives `AssemblyFileFormat`, which owns the layout and the per-type printing (64tass syntax, all lowercase except labels and comments):
@@ -88,5 +89,5 @@ Issues are tracked as `issues/NNNN-slug.md` (frontmatter `title`/`status`/`prior
 
 ## Notes
 
-- Much of the code is debugging-era, with lots of `System.out` tracing ("Marking area", "Unnamed target", "Jumping into non-code area"). Keep that in mind when reading output; it is not a sign of failure.
+- A run prints only warnings, errors, the files it writes and, with verify on, the verify report. There is no tracing.
 - Numbers in `.flo` files are decimal, or hex with a `$` prefix.

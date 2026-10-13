@@ -24,13 +24,6 @@ $c006 hiscore
 $c00c word vector
 $c00d vector_hi
 ^^^
-Reading test.prg
-Reading prg test.prg
-load address 49152
-Will disassemble from C000
-Marking area of 8 byte at C004 "screen"
-Marking area of 1 word at C00C "vector"
-Starting flow analysis.
 Writing out/test.asm
 Writing out/test.map
 Verify out/test.asm: 14 bytes emitted, 0 differ, 0 virtual, 0 gaps

@@ -9,12 +9,6 @@
 deflower test.prg
 $c030 byte[8] table export table.bin
 ^^^
-Reading test.prg
-Reading prg test.prg
-load address 49152
-Marking area of 8 byte at C030 "table"
-Starting flow analysis.
-No entry points defined, nothing to do.
 Exported table.bin at $c030 holds memory the image doesn't load, at $c036
 Errors detected for test.asm, not writing output.
 ~~~

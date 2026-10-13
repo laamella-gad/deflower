@@ -1,20 +1,8 @@
 >>> Deflower 2krace. <<<
 2krace/2krace.flo
 ^^^
-Reading 2krace.prg
-Reading prg 2krace.prg
-load address 2049
-Marking area of 12 byte at 801 "basic_stub"
-Will disassemble from 80D
-Starting flow analysis.
-Unnamed target: l0810 from address $0817
-Unnamed target: l1140 from address $0819
-Unnamed target: l115A from address $1144
-Unnamed target: l114B from address $114f
-Unnamed target: l0100 from address $1163
-Jumping into memory the image doesn't contain: $0100
-Unnamed target: l013A from address $1173
-Jumping into memory the image doesn't contain: $013a
+warning: $1163: jsr $0100 (l0100) goes into memory the image doesn't load
+warning: $1173: jmp $013a (l013A) goes into memory the image doesn't load
 Writing out/2krace.asm
 Writing out/2krace.map
 Verify out/2krace.asm: 81 bytes emitted, 0 differ, 0 virtual, 2 gaps

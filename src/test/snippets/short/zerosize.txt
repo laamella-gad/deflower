@@ -9,11 +9,6 @@ deflower test.prg
 $c000 byte[0] empty
 $c006-$c007 word too_short
 ^^^
-Reading test.prg
-Reading prg test.prg
-load address 49152
-Starting flow analysis.
-No entry points defined, nothing to do.
 Zero-size byte at $c000
 Zero-size word at $c006
 Errors detected for test.asm, not writing output.

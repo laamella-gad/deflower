@@ -28,13 +28,6 @@ $c000-$c010 my_array
 $c006-$c008 word mid_ptr
 $c010 code entry
 ^^^
-Reading test.prg
-Reading prg test.prg
-load address 49152
-Marking area of 16 unknown at C000 "my_array"
-Marking area of 1 word at C006 "mid_ptr"
-Will disassemble from C010
-Starting flow analysis.
 Writing out/test.asm
 Writing out/test.map
 Verify out/test.asm: 26 bytes emitted, 0 differ, 0 virtual, 0 gaps

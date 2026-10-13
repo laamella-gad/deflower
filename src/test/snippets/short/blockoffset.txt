@@ -16,12 +16,6 @@ deflower test.prg
 $400 virtual byte[48] screen
 $c000 code entry
 ^^^
-Reading test.prg
-Reading prg test.prg
-load address 49152
-Marking area of 48 byte at 400 "screen"
-Will disassemble from C000
-Starting flow analysis.
 Writing out/test.asm
 Writing out/test.map
 Verify out/test.asm: 4 bytes emitted, 0 differ, 48 virtual, 0 gaps

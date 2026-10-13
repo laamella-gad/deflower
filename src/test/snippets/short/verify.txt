@@ -13,11 +13,6 @@ entry:
 deflower test.prg
 $c000 code entry
 ^^^
-Reading test.prg
-Reading prg test.prg
-load address 49152
-Will disassemble from C000
-Starting flow analysis.
 Writing out/test.asm
 Writing out/test.map
 Verify out/test.asm: 3 bytes emitted, 1 differ, 0 virtual, 1 gap
