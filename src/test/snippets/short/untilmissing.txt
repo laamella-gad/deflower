@@ -10,11 +10,11 @@ print:
 ===
 deflower test.prg
 $c000 code entry
-$c005 code print (char[until $ff] text)
-$c006 char[until $ff] tail
+$c005 code print (ascii[until $ff] text)
+$c006 ascii[until $ff] tail
 ^^^
 warning: $c000: no $ff ends text after the jsr before memory the image doesn't load
-No char ending in $ff at $c006 before memory the image doesn't load
+No ascii ending in $ff at $c006 before memory the image doesn't load
 Errors detected for test.asm, not writing output.
 ~~~
 ~~~

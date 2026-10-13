@@ -12,13 +12,17 @@ final class Parameter {
     // data runs up to and including the first element that equals it.
     // Null for a fixed size.
     final Integer terminator;
+    // True for a size like "char[lengthbyte]" (issue 0094): a length
+    // byte, then that many elements.
+    final boolean lengthByte;
     // Null when the parameter has no name.
     final String name;
 
-    Parameter(DataType type, int amount, Integer terminator, String name) {
+    Parameter(DataType type, int amount, Integer terminator, boolean lengthByte, String name) {
         this.type = type;
         this.amount = amount;
         this.terminator = terminator;
+        this.lengthByte = lengthByte;
         this.name = name;
     }
 }

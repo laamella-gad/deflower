@@ -213,7 +213,7 @@ class AssemblyFileFormat {
 
     private static String reservationDirective(DataType type) {
         return switch (type) {
-            case BYTE, UNKNOWN, CHAR -> ".byte";
+            case BYTE, UNKNOWN, SCREENCODE, ASCII -> ".byte";
             case WORD -> ".word";
             case LONG -> ".long";
             case DWORD -> ".dword";
@@ -252,7 +252,7 @@ class AssemblyFileFormat {
             case BYTE, UNKNOWN:
                 tabularPrint(".byte", asHexByte(subject.byteAt(address)));
                 break;
-            case CHAR:
+            case SCREENCODE, ASCII:
                 textPrint(area, subject.byteAt(address), subject);
                 break;
             case WORD:
@@ -293,11 +293,10 @@ class AssemblyFileFormat {
     // "none" is 64tass's own default.
     private String encoding = "none";
 
-    // The declared char array the encoding was last chosen for, as an
-    // address range, so it's chosen once per array, not once per value.
-    private int encodingArrayStart = -1;
-    private int encodingArrayEnd = -1;
-    private String arrayEncoding = "none";
+    // The text array being printed (the elements one .flo line
+    // declared), as an address range.
+    private int textArrayStart = -1;
+    private int textArrayEnd = -1;
 
     // The directive of the .text, .null or .ptext line being printed.
     private String textDirective = ".text";
@@ -306,28 +305,36 @@ class AssemblyFileFormat {
     private boolean ptextOpened = false;
 
     /**
-     * Prints one CHAR value as an item of a 64tass {@code .text} line
+     * Prints one text value as an item of a 64tass {@code .text} line
      * (issue 0039), the string counterpart of tabularPrint: consecutive
      * printable characters share one double-quoted literal, anything else
      * becomes a hex item, e.g. {@code .text "AB", $0D, "C"}. Wraps every
      * TEXT_BYTES_PER_LINE values.
      * <p>
-     * The value is read as ASCII or as Commodore screen codes, whichever
-     * suits its declared array better (issue 0040, {@link #encodingFor}).
-     * A line opening under a different encoding than the one in effect
-     * first switches it with {@code .enc}, so the output reassembles to the
-     * same bytes; an array changing encoding mid-line starts a new line.
+     * A screencode value is read as a Commodore screen code, an ascii one
+     * as Commodore ASCII (issue 0094). A line opening under a different
+     * encoding than the one in effect first switches it with {@code .enc},
+     * so the output reassembles to the same bytes; the next array in
+     * another encoding starts a new line.
      * <p>
-     * A null-terminated string's last line is a {@code .null}, and a
-     * length-prefixed string that fits on one line a {@code .ptext}
-     * (issue 0047, {@link #textDirectiveFor}); the terminator and the
-     * length byte then print as nothing.
+     * An array sized by [until $00] ends in a {@code .null} line, and one
+     * sized by [lengthbyte] is a {@code .ptext} ({@link #textDirectiveFor});
+     * the terminator and the length byte then print as nothing.
      */
     private void textPrint(DataArea area, int value, Subject subject) throws IOException {
-        String valueEncoding = encodingFor(area, subject);
+        boolean newArray = area.address < textArrayStart || area.address >= textArrayEnd;
+        if (newArray) {
+            textArrayStart = area.arrayStart();
+            textArrayEnd = subject.endOfArray(area);
+        }
+        String valueEncoding = area.type == DataType.SCREENCODE ? "screen" : "none";
         boolean continuesPtext = ptextOpened;
         ptextOpened = false;
-        if (out.column() == TEXT_BYTES_PER_LINE || (out.column() != 0 && !valueEncoding.equals(encoding))) {
+        // A .ptext string can't be split, so it makes one long line. A
+        // .null or .ptext line holds one array, which then opens its own.
+        boolean wraps = !textDirective.equals(".ptext");
+        boolean ownLine = newArray && (!textDirective.equals(".text") || area.lengthByte || Integer.valueOf(0).equals(area.terminator));
+        if ((wraps && out.column() == TEXT_BYTES_PER_LINE) || (out.column() != 0 && (ownLine || !valueEncoding.equals(encoding)))) {
             out.newLine();
         }
         if (out.column() == 0 && !continuesPtext) {
@@ -337,15 +344,20 @@ class AssemblyFileFormat {
                 out.newLine();
                 encoding = valueEncoding;
             }
-            textDirective = textDirectiveFor(area.address, subject);
+            textDirective = textDirectiveFor(area, subject);
             out.indent();
             out.print(textDirective + "\t");
             if (textDirective.equals(".ptext")) {
+                if (textArrayEnd == area.address + 1) {
+                    out.print("\"\"");
+                    out.newLine();
+                    return;
+                }
                 ptextOpened = true;
                 return;
             }
         }
-        if (textDirective.equals(".null") && area.address == encodingArrayEnd - 1) {
+        if (textDirective.equals(".null") && area.address == textArrayEnd - 1) {
             return;
         }
         int character = characterFor(valueEncoding, value);
@@ -357,61 +369,27 @@ class AssemblyFileFormat {
     }
 
     /**
-     * The encoding to read the char array `area` belongs to in (the
-     * elements one {@code .flo} line declared), chosen once per array by
-     * {@link Subject#likelyTextEncoding}. A tie keeps the encoding already
-     * in effect, so it doesn't cause a needless {@code .enc} switch.
+     * The directive for a line of the current text array opening at
+     * `area` (issue 0094): {@code .ptext} at the start of an array sized
+     * by [lengthbyte], however long; {@code .null} for the line that ends
+     * an array sized by [until $00], when the rest of the array fits on
+     * the line; else {@code .text}. A comment inside the rest of the array
+     * would break the line, so it rules both out.
      */
-    private String encodingFor(DataArea area, Subject subject) {
-        if (area.address < encodingArrayStart || area.address >= encodingArrayEnd) {
-            encodingArrayStart = area.arrayStart();
-            encodingArrayEnd = subject.endOfArray(area);
-            arrayEncoding = subject.likelyTextEncoding(encodingArrayStart, encodingArrayEnd, encoding);
-        }
-        return arrayEncoding;
-    }
-
-    /**
-     * The directive for a line of the current char array opening at
-     * `address`: {@code .ptext} at the start of an array whose first byte
-     * is the length of the rest, when the rest fits on the line;
-     * {@code .null} for the line that ends an array whose only $00 is its
-     * last byte, when the rest of the array fits on the line; else
-     * {@code .text}. A comment inside the rest of the array would break
-     * the line, so it rules both out.
-     */
-    private String textDirectiveFor(int address, Subject subject) {
-        int start = encodingArrayStart;
-        int end = encodingArrayEnd;
-        for (int inside = address + 1; inside < end; inside++) {
+    private String textDirectiveFor(DataArea area, Subject subject) {
+        int address = area.address;
+        for (int inside = address + 1; inside < textArrayEnd; inside++) {
             if (!subject.memory[inside].comment.isEmpty() && subject.memory[inside].label == null) {
                 return ".text";
             }
         }
-        if (isNullTerminated(start, end, subject)) {
-            return end - 1 - address <= TEXT_BYTES_PER_LINE ? ".null" : ".text";
+        if (area.lengthByte) {
+            return address == textArrayStart ? ".ptext" : ".text";
         }
-        int length = end - start - 1;
-        if (address == start && length >= 1 && length <= TEXT_BYTES_PER_LINE && subject.byteAt(start) == length) {
-            return ".ptext";
+        if (Integer.valueOf(0).equals(area.terminator) && textArrayEnd - textArrayStart >= 2) {
+            return textArrayEnd - 1 - address <= TEXT_BYTES_PER_LINE ? ".null" : ".text";
         }
         return ".text";
-    }
-
-    /**
-     * True when the char array from `start` to `end` (exclusive) holds
-     * at least one character before a $00 at its end, and no other $00.
-     */
-    private static boolean isNullTerminated(int start, int end, Subject subject) {
-        if (end - start < 2 || subject.byteAt(end - 1) != 0) {
-            return false;
-        }
-        for (int address = start; address < end - 1; address++) {
-            if (subject.byteAt(address) == 0) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**

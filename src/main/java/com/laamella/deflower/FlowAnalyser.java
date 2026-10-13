@@ -150,8 +150,15 @@ class FlowAnalyser {
                     return -1;
                 }
             }
+            if (parameter.lengthByte) {
+                if (address >= subject.memory.length || !subject.memory[address].loaded) {
+                    subject.warn(jsrAddress, "the data after the jsr runs past the image");
+                    return -1;
+                }
+                amount = 1 + subject.byteAt(address);
+            }
             for (int i = 0; i < amount; i++) {
-                areas.add(new DataArea(address, parameter.type, false, null, i));
+                areas.add(new DataArea(address, parameter.type, false, null, i, false, null, parameter.terminator, parameter.lengthByte));
                 address += parameter.type.sizeInBytes;
             }
             if (parameter.name != null) {

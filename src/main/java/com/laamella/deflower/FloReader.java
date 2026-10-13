@@ -94,6 +94,7 @@ class FloReader {
         String name = null;
         String export = null;
         Integer terminator = null;
+        boolean lengthByte = false;
         // The line each export file name was first given on, across all
         // runs: they share one output directory.
         final Map<String, Integer> exportLines;
@@ -123,6 +124,7 @@ class FloReader {
             name = null;
             export = null;
             terminator = null;
+            lengthByte = false;
         }
 
         @Override
@@ -201,6 +203,7 @@ class FloReader {
             if (ctx.untilSize() != null) {
                 terminator = parseNumber(ctx.untilSize().number().getText()).orElseThrow();
             }
+            lengthByte = ctx.lengthByte() != null;
         }
 
         @Override
@@ -256,13 +259,16 @@ class FloReader {
             if (terminator != null && !checkTerminator(line, type, terminator)) {
                 return;
             }
+            if (lengthByte && !checkLengthByte(line, type)) {
+                return;
+            }
             List<Parameter> parameters = ctx.parameters() != null ? parameters(ctx.parameters(), line) : null;
             boolean noReturn = ctx.noReturn() != null;
             if ((parameters != null || noReturn) && type != CODE_LINE) {
                 errors.add(String.format("line %d: only a code line takes parameters or noreturn", line));
                 return;
             }
-            run.annotations.add(new Annotation(address, addressEnd, type, isVirtual, amount, name, comment, included, export, terminator, parameters, noReturn));
+            run.annotations.add(new Annotation(address, addressEnd, type, isVirtual, amount, name, comment, included, export, terminator, lengthByte, parameters, noReturn));
         }
 
         /**
@@ -285,12 +291,16 @@ class FloReader {
                 if (parameterTerminator != null && !checkTerminator(line, parameterType, parameterTerminator)) {
                     return null;
                 }
+                boolean parameterLengthByte = datatype.lengthByte() != null;
+                if (parameterLengthByte && !checkLengthByte(line, parameterType)) {
+                    return null;
+                }
                 if (parameterAmount <= 0) {
                     errors.add(String.format("line %d: zero-size parameter", line));
                     return null;
                 }
                 String parameterName = parameter.ID() != null ? parameter.ID().getText() : null;
-                parameters.add(new Parameter(parameterType.dataType, parameterAmount, parameterTerminator, parameterName));
+                parameters.add(new Parameter(parameterType.dataType, parameterAmount, parameterTerminator, parameterLengthByte, parameterName));
             }
             return parameters;
         }
@@ -300,7 +310,18 @@ class FloReader {
          */
         private boolean checkTerminator(int line, LineType lineType, int value) {
             if (lineType.dataType != null && value >= 1L << (8 * lineType.dataType.sizeInBytes)) {
-                errors.add(String.format("line %d: until $%x doesn't fit in a %s", line, value, lineType.dataType.name().toLowerCase()));
+                errors.add(String.format("line %d: until $%x doesn't fit in one %s", line, value, lineType.dataType.name().toLowerCase()));
+                return false;
+            }
+            return true;
+        }
+
+        /**
+         * A length byte counts elements of one byte (issue 0094).
+         */
+        private boolean checkLengthByte(int line, LineType lineType) {
+            if (lineType.dataType != null && lineType.dataType.sizeInBytes != 1) {
+                errors.add(String.format("line %d: lengthbyte needs a one-byte type, not %s", line, lineType.dataType.name().toLowerCase()));
                 return false;
             }
             return true;
@@ -377,8 +398,10 @@ class FloReader {
     }
 
     private static LineType lineTypeOf(FloParser.DatatypeContext ctx) {
-        if (ctx.CHAR() != null) {
-            return CHAR_LINE;
+        if (ctx.SCREENCODE() != null) {
+            return SCREENCODE_LINE;
+        } else if (ctx.ASCII() != null) {
+            return ASCII_LINE;
         } else if (ctx.BYTE() != null) {
             return BYTE_LINE;
         } else if (ctx.WORD() != null) {

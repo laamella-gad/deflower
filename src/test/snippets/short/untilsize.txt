@@ -6,8 +6,8 @@ and including the first element that holds the value. <<<
 		.word $1234, $ffff
 ===
 deflower test.prg
-$c000 char[until $00] bye
-$c004 char[until $ff] go
+$c000 ascii[until $00] bye
+$c004 ascii[until $ff] go
 $c007 word[until $ffff] numbers
 ^^^
 Writing out/test.asm
@@ -26,7 +26,7 @@ numbers:
 		.word	$1234, $ffff
 ~~~
 --- test.map
-$c000-$c004 char[4] bye
-$c004-$c007 char[3] go
+$c000-$c004 ascii[4] bye
+$c004-$c007 ascii[3] go
 $c007-$c00b word[2] numbers
 vvv

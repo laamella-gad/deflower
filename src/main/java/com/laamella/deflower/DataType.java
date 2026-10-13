@@ -1,7 +1,12 @@
 package com.laamella.deflower;
 
 public enum DataType {
-    CHAR(1), BYTE(1), WORD(2), LONG(3), DWORD(4), ADDR(2),
+    /**
+     * Text (issue 0094) in Commodore screen codes (64tass's "screen") and
+     * in Commodore ASCII (64tass's "none").
+     */
+    SCREENCODE(1), ASCII(1),
+    BYTE(1), WORD(2), LONG(3), DWORD(4), ADDR(2),
     /**
      * Signed (two's-complement) numbers (issue 0037), printed as 64tass's
      * {@code .char}, {@code .sint}, {@code .lint} (issue 0064) and

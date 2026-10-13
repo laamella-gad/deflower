@@ -303,7 +303,7 @@ $50f2 byte[2] unused_50f2
 $50f4 byte star_index
 ; sprite y per invader_row, indexed by the BCD value, so $0a-$0f and $1a-$1f are unused
 $50f5 byte[35] row_y
-$5118 char[256] scroll_text
+$5118 ascii[256] scroll_text
 ; the title screen: the end of scroll_text, the logo and the copyright line
 $5218 byte[40*6] title_chars
 $5308 byte[40*6] ground_chars
@@ -321,14 +321,14 @@ $c0ad byte[2] unused_c0ad
 $c0af code apply_trainer
 ; invader_row + 1, but never past $21
 $c0eb code trainer_next_row
-$c0f8 char[40] title_line
-$c120 char[40] question_line
+$c0f8 screencode[40] title_line
+$c120 screencode[40] question_line
 ; saves high_score to disk if it changed since load_highscore read it
 $c148 code save_highscore
 $c1b7 byte saved_volume
 ; SETNAM is given "S:HIGHSCORE" to scratch the old file, then "HIGHSCORE" to save it
-$c1b8 char[2] scratch_command
-$c1ba char[9] highscore_filename
+$c1b8 ascii[2] scratch_command
+$c1ba ascii[9] highscore_filename
 $c1c3 code load_highscore
 $c213 byte[3] loaded_highscore
 

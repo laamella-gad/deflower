@@ -53,7 +53,7 @@ $12e4-$9000 virtual byte untouched_12e4
 
 ; ---- the game ----
 $9000 code start_game
-$9003 char[3] signature
+$9003 ascii[3] signature
 $9006 byte[3] unused_9006
 $9009 code actual_start_game
 $9010 code main_loop
@@ -109,9 +109,9 @@ $9803 code draw_turns
 $9819 code show_top_score_line
 $982d code show_copyright
 $9841 code make_scores_red
-$984a char[34] robert_copyright
-$986c char[40] top_score_line
-$9894 char[8] turns_text
+$984a screencode[34] robert_copyright
+$986c ascii[40] top_score_line
+$9894 ascii[8] turns_text
 ; A: 1 starts the shot sound, 2 sweeps it, $ff stops it, 5 starts the explosion, $fe stops it
 $989c code play_sound
 $993c code update_high_score
@@ -121,14 +121,14 @@ $999a code next_turn
 $99bd code title_screen
 ; plays the game by itself, steering with an enemy's random direction
 $9a4b code demo
-$9ab7 char[20] f1_1_player_text
-$9acb char[20] f3_2_player_text
+$9ab7 screencode[20] f1_1_player_text
+$9acb screencode[20] f3_2_player_text
 $9adf code show_game_over
 ; shows whose turn it is, and waits for a key or a while
 $9af7 code show_player
 $9b02 code show_top_score_row_14
 $9b41 byte show_player_countdown
-$9b42 char[11] game_over_text
+$9b42 screencode[11] game_over_text
 ; in a two player game, saves the sprites of one player and restores the other's
 $9b4d code switch_player
 $9bcc code draw_logo
@@ -205,7 +205,7 @@ $9ddb-$9e00 byte unused_9ddb
 $9e00 code start
 $9e2c code no_trainer
 $9e34-$9e40 byte unused_9e34
-$9e40 char[105] crack_trainer_msg
+$9e40 screencode[105] crack_trainer_msg
 $9ea9-$9eab byte unused_9ea9
 $9eab-$d000 virtual byte untouched_9eab
 

@@ -38,8 +38,8 @@ $8407 virtual byte[$5a] jump_table
 ; each level byte holds two tiles, each nibble indexing tile_chars_left/right
 $c000 code draw_level
 $c074 byte[2] unused_c074
-$c076 char[10] tile_chars_left
-$c080 char[10] tile_chars_right
+$c076 ascii[10] tile_chars_left
+$c080 ascii[10] tile_chars_right
 ; an older copy of draw_level's start that was patched over; nothing calls it
 $c08a code unused_c08a
 $c0b0 code unused_c0b0

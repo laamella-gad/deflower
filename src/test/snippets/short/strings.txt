@@ -1,8 +1,8 @@
->>> Issue 0039: consecutive CHAR values print as `.text` lines, printable
+>>> Issue 0039: consecutive text values print as `.text` lines, printable
 characters sharing a double-quoted literal and anything else
 (control codes, double quotes) as hex items, wrapping every 32
-values. Issue 0047: a null-terminated string ends with a `.null`
-line, and a length-prefixed one prints as `.ptext`. <<<
+values. Issue 0047: a string sized by [until $00] ends with a `.null`
+line, and one sized by [lengthbyte] prints as `.ptext`. <<<
 
 *=$c000
 
@@ -24,11 +24,11 @@ long_nulled:
 ===
 deflower test.prg
 $c000 code entry
-$c004 char[5] plain
-$c009 char[4] nulled
-$c00d char[4] counted
-$c011 char[6] mixed
-$c017 char[41] long_nulled
+$c004 ascii[5] plain
+$c009 ascii[until $00] nulled
+$c00d ascii[lengthbyte] counted
+$c011 ascii[6] mixed
+$c017 ascii[until $00] long_nulled
 ^^^
 Writing out/test.asm
 Writing out/test.map
@@ -56,9 +56,9 @@ long_nulled:
 ~~~
 --- test.map
 $c000-$c004 code entry
-$c004-$c009 char[5] plain
-$c009-$c00d char[4] nulled
-$c00d-$c011 char[4] counted
-$c011-$c017 char[6] mixed
-$c017-$c040 char[41] long_nulled
+$c004-$c009 ascii[5] plain
+$c009-$c00d ascii[4] nulled
+$c00d-$c011 ascii[4] counted
+$c011-$c017 ascii[6] mixed
+$c017-$c040 ascii[41] long_nulled
 vvv

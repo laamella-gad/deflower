@@ -3407,7 +3407,7 @@ $0800-$0801 byte basic_start
 $0801-$0803 addr basic_next_line
 $0803-$0805 word basic_line_number
 $0805-$0806 byte basic_sys_token
-$0806-$080b char[5] basic_sys_address
+$0806-$080b ascii[5] basic_sys_address
 $080b-$080c byte basic_line_end
 $080c-$080e word basic_program_end
 $080e-$0fa0 byte[1938] unused_080e
@@ -3481,11 +3481,11 @@ $2691-$2692 byte bonus_points_char
 $2692-$2693 byte note_idx
 $2693-$2694 byte unused_2693
 $2694-$26ac byte[24] unused_2694
-$26ac-$26bf char[19] press_fire_to_start_
+$26ac-$26bf screencode[19] press_fire_to_start_
 $26bf-$26c0 byte unused_26bf
-$26c0-$26ca char[10] get_ready_text
-$26ca-$26d4 char[10] level_text
-$26d4-$26dd char[9] bonus_run_text
+$26c0-$26ca screencode[10] get_ready_text
+$26ca-$26d4 screencode[10] level_text
+$26d4-$26dd screencode[9] bonus_run_text
 $26dd-$2800 byte[291] unused_26dd
 $2800-$2a00 byte[512] charset
 $2a00-$2a08 byte[8] arrow_char_1

@@ -18,12 +18,16 @@ class DataArea extends Area {
     final boolean included;
     // The binary file this element is exported to (issue 0022), or null.
     final ExportRegion export;
+    // The value an [until n] size ended the array at (issue 0068), or null.
+    final Integer terminator;
+    // True for an array sized by [lengthbyte] (issue 0094).
+    final boolean lengthByte;
 
     DataArea(int address, DataType type, boolean isVirtual, String arrayLabel, int indexInArray) {
-        this(address, type, isVirtual, arrayLabel, indexInArray, false, null);
+        this(address, type, isVirtual, arrayLabel, indexInArray, false, null, null, false);
     }
 
-    DataArea(int address, DataType type, boolean isVirtual, String arrayLabel, int indexInArray, boolean included, ExportRegion export) {
+    DataArea(int address, DataType type, boolean isVirtual, String arrayLabel, int indexInArray, boolean included, ExportRegion export, Integer terminator, boolean lengthByte) {
         super(address, type.sizeInBytes);
         this.type = type;
         this.virtual = isVirtual;
@@ -31,6 +35,8 @@ class DataArea extends Area {
         this.indexInArray = indexInArray;
         this.included = included;
         this.export = export;
+        this.terminator = terminator;
+        this.lengthByte = lengthByte;
     }
 
     @Override

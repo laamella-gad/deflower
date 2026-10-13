@@ -141,7 +141,7 @@ class Subject {
                             annotation.parameters != null ? annotation.parameters : List.of(), annotation.noReturn));
                 }
             }
-            case CHAR_LINE, BYTE_LINE, WORD_LINE, LONG_LINE, DWORD_LINE, ADDR_LINE, SBYTE_LINE, SWORD_LINE, SLONG_LINE, SDWORD_LINE, UNKNOWN_LINE -> {
+            case SCREENCODE_LINE, ASCII_LINE, BYTE_LINE, WORD_LINE, LONG_LINE, DWORD_LINE, ADDR_LINE, SBYTE_LINE, SWORD_LINE, SLONG_LINE, SDWORD_LINE, UNKNOWN_LINE -> {
                 int amount = annotation.addressEnd != null
                         ? (annotation.addressEnd - address) / type.dataType.sizeInBytes
                         : annotation.amount;
@@ -152,6 +152,14 @@ class Subject {
                                 type.dataType.name().toLowerCase(), annotation.terminator, asHexWord(address)));
                         return;
                     }
+                }
+                if (annotation.addressEnd == null && annotation.lengthByte) {
+                    if (!isLoaded(address, 1)) {
+                        errors.add(String.format("No length byte for %s at %s: memory the image doesn't load",
+                                type.dataType.name().toLowerCase(), asHexWord(address)));
+                        return;
+                    }
+                    amount = 1 + byteAt(address);
                 }
                 if (amount <= 0) {
                     // Issue 0044: an empty array, or a range too short to
@@ -181,7 +189,7 @@ class Subject {
                         unloaded.add(asHexWord(unloadedStart) + "-" + asHexWord(elementAddress));
                         unloadedStart = -1;
                     }
-                    DataArea area = new DataArea(elementAddress, type.dataType, annotation.virtual || !loaded, annotation.name, i, annotation.included, export);
+                    DataArea area = new DataArea(elementAddress, type.dataType, annotation.virtual || !loaded, annotation.name, i, annotation.included, export, annotation.terminator, annotation.lengthByte);
                     if (!annotation.included || !overlapsOwnArea(area)) {
                         registerArea(area);
                     }
@@ -350,31 +358,6 @@ class Subject {
             end += element.size;
         }
         return end;
-    }
-
-    /**
-     * The 64tass encoding the text at `start` (inclusive) to `end`
-     * (exclusive) is most likely written in. Counts the bytes that are
-     * uppercase letters in each: $41-$5A under "none" (ASCII), $01-$1A
-     * under "screen" (Commodore screen codes). More wins; a tie (e.g.
-     * digits, reverse video) returns `onTie`. Only uppercase counts,
-     * because ASCII uppercase is also screen-code lowercase, and a stray
-     * $00 terminator or length byte would otherwise tip plain ASCII text
-     * over to "screen".
-     */
-    String likelyTextEncoding(int start, int end, String onTie) {
-        int none = 0;
-        int screen = 0;
-        for (int address = start; address < end; address++) {
-            int value = byteAt(address);
-            if (value >= 0x41 && value <= 0x5A) {
-                none++;
-            }
-            if (value >= 0x01 && value <= 0x1A) {
-                screen++;
-            }
-        }
-        return screen > none ? "screen" : none > screen ? "none" : onTie;
     }
 
     /**

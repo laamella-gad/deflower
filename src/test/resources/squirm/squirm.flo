@@ -36,7 +36,7 @@ $0800 byte basic_start
 $0801 addr basic_next_line
 $0803 word basic_line_number
 $0805 byte basic_sys_token
-$0806 char[5] basic_sys_address
+$0806 ascii[5] basic_sys_address
 $080b byte basic_line_end
 $080c word basic_program_end
 ; the remains of an assembler's BASIC program
@@ -138,11 +138,11 @@ $2693 byte unused_2693
 $2694-$26ac byte unused_2694
 
 ; ---- texts ----
-$26ac char[19] press_fire_to_start_
+$26ac screencode[19] press_fire_to_start_
 $26bf byte unused_26bf
-$26c0 char[10] get_ready_text
-$26ca char[10] level_text
-$26d4 char[9] bonus_run_text
+$26c0 screencode[10] get_ready_text
+$26ca screencode[10] level_text
+$26d4 screencode[9] bonus_run_text
 $26dd-$2800 byte unused_26dd
 
 ; ---- character set ----

@@ -43,11 +43,16 @@
  *       zero page, screen). Output as a .virtual reservation, not as data.
  *       A data element on memory the image doesn't load is made virtual
  *       anyway, with a warning, so it isn't printed as zero bytes.
- *     - type: char (text), byte, word, long (24 bits), dword, addr (a
- *       16-bit address, printed as .addr with the label of the address it
- *       holds), sbyte, sword, slong, sdword (signed numbers, printed as
- *       .char, .sint, .lint and .dint, e.g. .char -3), or code (an entry
- *       point to trace from; any [size] is ignored). A range without a type is a
+ *     - type: screencode or ascii (text), byte, word, long (24
+ *       bits), dword, addr (a 16-bit address, printed as .addr with the
+ *       label of the address it holds), sbyte, sword, slong, sdword
+ *       (signed numbers, printed as .char, .sint, .lint and .dint, e.g.
+ *       .char -3), or code (an entry point to trace from; any [size] is
+ *       ignored). Text prints as .text: screencode in Commodore screen
+ *       codes (64tass's "screen" encoding), ascii in Commodore ASCII
+ *       (64tass's "none"); as .null when sized by [until $00] and as
+ *       .ptext, on one line, when sized by [lengthbyte]. A range without
+ *       a type is a
  *       placeholder: printed as bytes, but a later, more specific line
  *       may narrow part of it without a conflict. A single address
  *       without a type only names (or comments) that address and covers
@@ -58,17 +63,19 @@
  *       and + over numbers (* binds tighter, no parentheses): byte[$af],
  *       byte[40*21], byte[40*19+5]. A count of 0 (or a range too short
  *       for one element) is an error. Or [until n]: the elements up to and
- *       including the first one that holds n, e.g. char[until $00] for a
+ *       including the first one that holds n, e.g. ascii[until $00] for a
  *       null-terminated string. No such element before memory the image
- *       doesn't load is an error.
+ *       doesn't load is an error. Or [lengthbyte], only for one-byte
+ *       types: a byte holding the number of elements after it, then those
+ *       elements, e.g. ascii[lengthbyte] for a .ptext string.
  *     - label: a name for the address, from [A-Za-z0-9._?]. It can't be
- *       a reserved word: deflower, include, virtual, export, char, byte, word,
- *       long, dword, addr, sbyte, sword, slong, sdword, code, until,
- *       noreturn.
+ *       a reserved word: deflower, include, virtual, export,
+ *       screencode, ascii, byte, word, long, dword, addr, sbyte, sword,
+ *       slong, sdword, code, until, lengthbyte, noreturn.
  *     - (parameters), only on a code line: the data that follows every
  *       jsr to this address in memory, which the routine reads and steps
  *       over, as a comma-separated list of <type>[<size>] [<name>], e.g.
- *       $2c75 code print_inline (char[until $ff] text). At each call site
+ *       $2c75 code print_inline (ascii[until $ff] text). At each call site
  *       the data is registered, the names are printed after the jsr, and
  *       the tracing carries on after the data. A data line at a call site
  *       wins over the list for that call; the tracing then carries on
@@ -107,8 +114,7 @@
  * Example:
  *     deflower game.prg
  *     $d020 virtual byte border_color
- *     ; title text, in screen codes
- *     $c100 char[20] title_text
+ *     $c100 screencode[20] title_text
  *     $c000 code start
  */
 grammar Flo;
@@ -130,9 +136,11 @@ parameters: '(' parameter (',' parameter)* ')';
 parameter: datatype ID?;
 noReturn: 'noreturn';
 
-datatype: (CHAR|BYTE|WORD|LONG|DWORD|ADDR|SBYTE|SWORD|SLONG|SDWORD|CODE) ( '[' (arraySize | untilSize)? ']')?;
+datatype: (SCREENCODE|ASCII|BYTE|WORD|LONG|DWORD|ADDR|SBYTE|SWORD|SLONG|SDWORD|CODE) ( '[' (arraySize | untilSize | lengthByte)? ']')?;
 // The elements up to and including the first one that equals the number.
 untilSize: 'until' number;
+// A length byte, then that many elements.
+lengthByte: 'lengthbyte';
 // The element count of an array: a number, or * and + over numbers, with
 // * binding tighter.
 arraySize: arraySize '*' arraySize  # arraySizeMul
@@ -141,7 +149,8 @@ arraySize: arraySize '*' arraySize  # arraySizeMul
     ;
 number: INT|HEX;
 
-CHAR: 'char';
+SCREENCODE: 'screencode';
+ASCII: 'ascii';
 BYTE: 'byte';
 WORD: 'word';
 LONG: 'long';

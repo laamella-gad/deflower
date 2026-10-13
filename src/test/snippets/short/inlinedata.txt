@@ -29,10 +29,10 @@ dispatch:
 ===
 deflower test.prg
 $c000 code entry
-$c01f code print (char[until $ff] text)
+$c01f code print (ascii[until $ff] text)
 $c020 code locate (byte column, byte row)
 $c021 code dispatch (addr[2] handlers) noreturn
-$c012 char[4] own_text
+$c012 ascii[4] own_text
 $c01d code one
 $c01e code two
 ^^^
@@ -77,14 +77,14 @@ dispatch:
 ~~~
 --- test.map
 $c000-$c003 code entry
-$c003-$c006 char[3]
+$c003-$c006 ascii[3]
 $c006-$c009 code
-$c009-$c00a char
+$c009-$c00a ascii
 $c00a-$c00d code
 $c00d-$c00e byte
 $c00e-$c00f byte
 $c00f-$c012 code
-$c012-$c016 char[4] own_text
+$c012-$c016 ascii[4] own_text
 $c016-$c019 code
 $c019-$c01d addr[2]
 $c01d-$c01e code one

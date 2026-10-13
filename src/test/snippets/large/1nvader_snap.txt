@@ -3451,7 +3451,7 @@ $50ec-$50f2 byte[6] star_positions
 $50f2-$50f4 byte[2] unused_50f2
 $50f4-$50f5 byte star_index
 $50f5-$5118 byte[35] row_y
-$5118-$5218 char[256] scroll_text
+$5118-$5218 ascii[256] scroll_text
 $5218-$5308 byte[240] title_chars
 $5308-$53f8 byte[240] ground_chars
 $53f8-$55f8 byte[512] custom_chars
@@ -3463,12 +3463,12 @@ $c0ac-$c0ad byte trainer_flag
 $c0ad-$c0af byte[2] unused_c0ad
 $c0af-$c0eb code apply_trainer
 $c0eb-$c0f8 code trainer_next_row
-$c0f8-$c120 char[40] title_line
-$c120-$c148 char[40] question_line
+$c0f8-$c120 screencode[40] title_line
+$c120-$c148 screencode[40] question_line
 $c148-$c1b7 code save_highscore
 $c1b7-$c1b8 byte saved_volume
-$c1b8-$c1ba char[2] scratch_command
-$c1ba-$c1c3 char[9] highscore_filename
+$c1b8-$c1ba ascii[2] scratch_command
+$c1ba-$c1c3 ascii[9] highscore_filename
 $c1c3-$c213 code load_highscore
 $c213-$c216 byte[3] loaded_highscore
 $c216-$d000 gap

@@ -1,0 +1,11 @@
+>>> Issue 0094: a length byte counts one-byte elements only. <<<
+
+===
+deflower test.prg
+$c000 word[lengthbyte] table
+^^^
+Failed to parse test.flo:
+line 2: lengthbyte needs a one-byte type, not word
+~~~
+~~~
+vvv

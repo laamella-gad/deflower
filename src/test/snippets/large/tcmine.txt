@@ -1581,8 +1581,8 @@ $3250-$3258 virtual byte[8] conveyor_char_2
 $8407-$8461 virtual byte[90] jump_table
 $c000-$c074 code draw_level
 $c074-$c076 byte[2] unused_c074
-$c076-$c080 char[10] tile_chars_left
-$c080-$c08a char[10] tile_chars_right
+$c076-$c080 ascii[10] tile_chars_left
+$c080-$c08a ascii[10] tile_chars_right
 $c08a-$c0b0 code unused_c08a
 $c0b0-$c0c5 code unused_c0b0
 $c0c5-$c0e7 code install_irq

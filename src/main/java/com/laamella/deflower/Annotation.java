@@ -28,17 +28,20 @@ final class Annotation {
     // For a size like "char[until $ff]" (issue 0068): the value of the
     // last element. Null for a fixed size.
     final Integer terminator;
+    // For a size like "char[lengthbyte]" (issue 0094): a length byte,
+    // then that many elements.
+    final boolean lengthByte;
     // A code line's parameter list (issue 0068), or null when it has none.
     final List<Parameter> parameters;
     // True for a code line marked "noreturn" (issue 0068).
     final boolean noReturn;
 
     Annotation(int address, Integer addressEnd, LineType type, boolean virtual, int amount, String name, List<String> comment, boolean included, String export) {
-        this(address, addressEnd, type, virtual, amount, name, comment, included, export, null, null, false);
+        this(address, addressEnd, type, virtual, amount, name, comment, included, export, null, false, null, false);
     }
 
     Annotation(int address, Integer addressEnd, LineType type, boolean virtual, int amount, String name, List<String> comment, boolean included, String export,
-               Integer terminator, List<Parameter> parameters, boolean noReturn) {
+               Integer terminator, boolean lengthByte, List<Parameter> parameters, boolean noReturn) {
         this.address = address;
         this.addressEnd = addressEnd;
         this.type = type;
@@ -49,6 +52,7 @@ final class Annotation {
         this.included = included;
         this.export = export;
         this.terminator = terminator;
+        this.lengthByte = lengthByte;
         this.parameters = parameters;
         this.noReturn = noReturn;
     }

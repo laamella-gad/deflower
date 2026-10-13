@@ -9858,10 +9858,10 @@ text_player:
 
 text_1:
 		.text	"1", $ff
-		jsr print_inline
+		jsr print_inline	; text
 
 newline:
-		.byte	$0d, $ff
+		.text	$0d, $ff
 		lda text_x
 		clc 
 		adc #$04
@@ -9878,10 +9878,10 @@ text_player2:
 
 text_2:
 		.text	"2", $ff
-		jsr print_inline
+		jsr print_inline	; text
 
 newline2:
-		.byte	$0d, $ff
+		.text	$0d, $ff
 		lda text_x
 		clc 
 		adc #$04
@@ -9898,10 +9898,10 @@ text_hole:
 
 text_club:
 		.text	"CLUB", $ff
-		jsr print_inline
+		jsr print_inline	; text
 
 newline3:
-		.byte	$0d, $ff
+		.text	$0d, $ff
 		lda text_x
 		clc 
 		adc #$04
@@ -9910,10 +9910,10 @@ newline3:
 
 text_yds:
 		.text	"YDS", $ff
-		jsr print_inline
+		jsr print_inline	; text
 
 newline4:
-		.byte	$0d, $ff
+		.text	$0d, $ff
 		lda text_x
 		clc 
 		adc #$04
@@ -12504,18 +12504,18 @@ lB2AE:
 
 text_f1_1_player:
 		.text	"F1) 1 PLAYER", $ff
-		jsr print_inline
+		jsr print_inline	; text
 
 newline5:
-		.byte	$0d, $ff
+		.text	$0d, $ff
 		jsr print_inline	; text
 
 text_f3_2_player:
 		.text	"    F3) 2 PLAYER", $ff
-		jsr print_inline
+		jsr print_inline	; text
 
 newline6:
-		.byte	$0d, $ff
+		.text	$0d, $ff
 		jsr print_inline	; text
 
 text_f5_practice:
@@ -12535,10 +12535,10 @@ lB305:
 		cmp #$87
 		bne lB305
 		stx game_mode
-		jsr print_inline
+		jsr print_inline	; text
 
 newline7:
-		.byte	$0d, $ff
+		.text	$0d, $ff
 		jsr print_inline	; text
 
 text_hole_1_18:
@@ -15053,7 +15053,7 @@ $0316-$0318 virtual addr brk_vector
 $0318-$031a addr nmi_vector
 $031a-$033c virtual byte[34] kernal_vectors
 $033c-$0341 byte[5] tape_header
-$0341-$0351 char[16] tape_name
+$0341-$0351 ascii[16] tape_name
 $0351-$0400 virtual byte[175] tape_buffer_rest
 $0400-$0402 virtual word hole_x
 $0402-$0404 virtual word hole_y
@@ -15360,11 +15360,11 @@ $2d68-$2d7e code raise_meter
 $2d7e-$2d91 code lower_meter
 $2d91-$2d92 byte unused_2d91
 $2d92-$2da9 code swing
-$2da9-$2db4 char[11] text_swing_club
+$2da9-$2db4 ascii[11] text_swing_club
 $2db4-$2e55 code l2DB4
-$2e55-$2e56 char
+$2e55-$2e56 ascii
 $2e56-$2eca code
-$2eca-$2ed2 char[8] text_down
+$2eca-$2ed2 ascii[8] text_down
 $2ed2-$2edf code l2ED2
 $2edf-$2eed code silence_voices
 $2eed-$2ef7 code get_key
@@ -15387,14 +15387,14 @@ $305e-$3096 code mirror_sprite
 $3096-$30ae code reverse_bits
 $30ae-$30af byte sprite_mode
 $30af-$30dd code check_landing
-$30dd-$30ea char[13] text_in_the_water
+$30dd-$30ea ascii[13] text_in_the_water
 $30ea-$3113 code l30EA
 $3113-$313e code check_out_of_bounds
-$313e-$314c char[14] text_out_of_bounds
+$313e-$314c ascii[14] text_out_of_bounds
 $314c-$3167 code
-$3167-$3173 char[12] text_select_club
+$3167-$3173 ascii[12] text_select_club
 $3173-$31a9 code
-$31a9-$31aa char
+$31a9-$31aa ascii
 $31aa-$31ee code
 $31ee-$31f8 code wait_16_frames
 $31f8-$31fc byte[4] unused_31f8
@@ -15474,7 +15474,7 @@ $378c-$37ff code l378C
 $37ff-$382b code select_club
 $382b-$3879 code l382B
 $3879-$389a code print_club_name
-$389a-$38b6 char[28] club_names
+$389a-$38b6 ascii[28] club_names
 $38b6-$3956 code face_hole
 $3956-$3965 code l3956
 $3965-$3982 code l3965
@@ -15639,34 +15639,34 @@ $a00c-$a020 addr[10] vectors
 $a020-$a026 code lA020
 $a026-$a029 code lA026
 $a029-$a02b addr aA029
-$a02b-$a09d char[114] digit_text
+$a02b-$a09d ascii[114] digit_text
 $a09d-$a0ff code main
 $a0ff-$a14c code new_game
 $a14c-$a178 code hole_loop
 $a178-$a18f code print_score_labels
-$a18f-$a196 char[7] text_player
+$a18f-$a196 ascii[7] text_player
 $a196-$a1a0 code
-$a1a0-$a1a2 char[2] text_1
+$a1a0-$a1a2 ascii[2] text_1
 $a1a2-$a1a5 code
-$a1a5-$a1a7 byte[2] newline
+$a1a5-$a1a7 ascii[2] newline
 $a1a7-$a1b1 code
-$a1b1-$a1b8 char[7] text_player2
+$a1b1-$a1b8 ascii[7] text_player2
 $a1b8-$a1c2 code
-$a1c2-$a1c4 char[2] text_2
+$a1c2-$a1c4 ascii[2] text_2
 $a1c4-$a1c7 code
-$a1c7-$a1c9 byte[2] newline2
+$a1c7-$a1c9 ascii[2] newline2
 $a1c9-$a1d3 code
-$a1d3-$a1dc char[9] text_hole
+$a1d3-$a1dc ascii[9] text_hole
 $a1dc-$a1e6 code
-$a1e6-$a1eb char[5] text_club
+$a1e6-$a1eb ascii[5] text_club
 $a1eb-$a1ee code
-$a1ee-$a1f0 byte[2] newline3
+$a1ee-$a1f0 ascii[2] newline3
 $a1f0-$a1fa code
-$a1fa-$a1fe char[4] text_yds
+$a1fa-$a1fe ascii[4] text_yds
 $a1fe-$a201 code
-$a201-$a203 byte[2] newline4
+$a201-$a203 ascii[2] newline4
 $a203-$a20d code
-$a20d-$a211 char[4] text_par
+$a20d-$a211 ascii[4] text_par
 $a211-$a212 code
 $a212-$a2e9 code shot_loop
 $a2e9-$a42c code clear_screen
@@ -15677,7 +15677,7 @@ $a55b-$a56b byte[16] menu_sprite_registers
 $a56b-$a5af code irq
 $a5af-$a5e9 code install_interrupts
 $a5e9-$a630 code nmi
-$a630-$a63e char[14] text_quit_y_n
+$a630-$a63e ascii[14] text_quit_y_n
 $a63e-$a687 code lA63E
 $a687-$a688 byte nmi_active
 $a688-$a6aa code enable_raster_irq
@@ -15722,11 +15722,11 @@ $af2e-$af2f byte leader
 $af2f-$af65 code select_player
 $af65-$afb6 code save_player
 $afb6-$afdb code print_par_result
-$afdb-$afe4 char[9] text_over_par
+$afdb-$afe4 ascii[9] text_over_par
 $afe4-$afec code
-$afec-$aff6 char[10] text_under_par
+$afec-$aff6 ascii[10] text_under_par
 $aff6-$affe code
-$affe-$b008 char[10] text_level_par
+$affe-$b008 ascii[10] text_level_par
 $b008-$b00d code
 $b00d-$b061 code change_wind
 $b061-$b075 code random_wind
@@ -15740,7 +15740,7 @@ $b0f8-$b0f9 byte drift_direction
 $b0f9-$b0fa byte tilt_strength
 $b0fa-$b0fb byte tilt_direction
 $b0fb-$b0fc byte wind_or_tilt
-$b0fc-$b104 char[8] text_wind_tilt
+$b0fc-$b104 ascii[8] text_wind_tilt
 $b104-$b116 byte[18] green_tilt
 $b116-$b135 code random
 $b135-$b200 code draw_wind
@@ -15750,19 +15750,19 @@ $b202-$b222 byte[32] arrow_lines
 $b222-$b23a sbyte[24] arrow_points
 $b23a-$b24d code lB23A
 $b24d-$b2c6 code title_screen
-$b2c6-$b2d3 char[13] text_f1_1_player
+$b2c6-$b2d3 ascii[13] text_f1_1_player
 $b2d3-$b2d6 code
-$b2d6-$b2d8 byte[2] newline5
+$b2d6-$b2d8 ascii[2] newline5
 $b2d8-$b2db code
-$b2db-$b2ec char[17] text_f3_2_player
+$b2db-$b2ec ascii[17] text_f3_2_player
 $b2ec-$b2ef code
-$b2ef-$b2f1 byte[2] newline6
+$b2ef-$b2f1 ascii[2] newline6
 $b2f1-$b2f4 code
-$b2f4-$b305 char[17] text_f5_practice
+$b2f4-$b305 ascii[17] text_f5_practice
 $b305-$b320 code lB305
-$b320-$b322 byte[2] newline7
+$b320-$b322 ascii[2] newline7
 $b322-$b325 code
-$b325-$b336 char[17] text_hole_1_18
+$b325-$b336 ascii[17] text_hole_1_18
 $b336-$b353 code lB336
 $b353-$b396 code read_hole_number
 $b396-$b41d code lB396
@@ -15772,7 +15772,7 @@ $b467-$b46f byte[8] aim_limits
 $b46f-$b4a0 code beep
 $b4a0-$b4b1 code delay
 $b4b1-$b4c8 code aim
-$b4c8-$b4cc char[4] text_aim
+$b4c8-$b4cc ascii[4] text_aim
 $b4cc-$b5b0 code
 $b5b0-$b5bc code lB5B0
 $b5bc-$b5c3 code bank_out_io
@@ -15800,7 +15800,7 @@ $b8a8-$b90d code lB8A8
 $b90d-$b916 code play_tune
 $b916-$b97f code music_start
 $b97f-$b9c4 code music_step
-$b9c4-$b9ca char[6] text_error
+$b9c4-$b9ca ascii[6] text_error
 $b9ca-$bbb8 code
 $bbb8-$bbbd byte[5] voice_offsets
 $bbbd-$bc01 code lBBBD
@@ -15810,7 +15810,7 @@ $bc51-$bd19 code select_tune
 $bd19-$bf16 byte[509] music_data
 $bf16-$c00e word[124] note_frequencies
 $c00e-$c00f byte vc00e
-$c00f-$c013 char[4] unused_golf
+$c00f-$c013 ascii[4] unused_golf
 $c013-$c014 byte vc013
 $c014-$c015 byte vc014
 $c015-$c017 word vc015
@@ -15818,10 +15818,10 @@ $c017-$c018 byte vc017
 $c018-$c01a word vc018
 $c01a-$c0f3 code lC01A
 $c0f3-$c114 code lC0F3
-$c114-$c126 char[18] text_error_in_setlfs
+$c114-$c126 ascii[18] text_error_in_setlfs
 $c126-$c13b code lC126
 $c13b-$c161 code lC13B
-$c161-$c176 char[21] text_save_routine_error
+$c161-$c176 ascii[21] text_save_routine_error
 $c176-$c17d code lC176
 $c17d-$cb00 byte[2435] unused_nops
 $cb00-$cee8 byte[1000] cell_depths

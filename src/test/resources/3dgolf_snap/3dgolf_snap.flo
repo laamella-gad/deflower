@@ -18,26 +18,26 @@ $313e text_out_of_bounds
 $3167 text_select_club
 $a18f text_player
 $a1a0 text_1
-$a1a5 byte[2] newline
+$a1a5 newline
 $a1b1 text_player2
 $a1c2 text_2
-$a1c7 byte[2] newline2
+$a1c7 newline2
 $a1d3 text_hole
 $a1e6 text_club
-$a1ee byte[2] newline3
+$a1ee newline3
 $a1fa text_yds
-$a201 byte[2] newline4
+$a201 newline4
 $a20d text_par
 $a630 text_quit_y_n
 $afdb text_over_par
 $afec text_under_par
 $affe text_level_par
 $b2c6 text_f1_1_player
-$b2d6 byte[2] newline5
+$b2d6 newline5
 $b2db text_f3_2_player
-$b2ef byte[2] newline6
+$b2ef newline6
 $b2f4 text_f5_practice
-$b320 byte[2] newline7
+$b320 newline7
 $b325 text_hole_1_18
 $b4c8 text_aim
 $b9c4 text_error
@@ -52,7 +52,7 @@ $08dc code
 $08ea byte loader_part2
 $08eb-$0900 byte unused_08eb
 $033c byte[5] tape_header
-$0341 char[16] tape_name
+$0341 ascii[16] tape_name
 $2c8b code print_hex
 $2c99 code store_hex
 $2cca-$2cd0 byte unused_2cca
@@ -291,7 +291,7 @@ $378b byte v378b
 ; unreferenced
 $3844 code
 ; two letters per club: 1W 3W 1I 3I ... 9I PW SW PT
-$389a char[28] club_names
+$389a ascii[28] club_names
 $3982 byte v3982
 $3983 byte[8] octant_directions
 $3a93 byte digit_text_index
@@ -332,7 +332,7 @@ $4342 byte v4342
 $4343 byte v4343
 $4344 byte v4344
 ; printed piece by piece through print_char, from digit_text_index on
-$a02b char[114] digit_text
+$a02b ascii[114] digit_text
 $a42c byte menu_sprite_flag
 ; sprite registers saved while a menu sprite is shown, and the values it sets
 $a533 byte[40] saved_sprite_registers
@@ -359,7 +359,7 @@ $b0f9 byte tilt_strength
 $b0fa byte tilt_direction
 ; 1 to print "WIND", 5 to print "TILT"
 $b0fb byte wind_or_tilt
-$b0fc char[8] text_wind_tilt
+$b0fc ascii[8] text_wind_tilt
 ; the green's tilt per hole, indexed from 1: strength in the high nibble, direction in the low
 $b104 byte[18] green_tilt
 $b200 byte arrow_x
@@ -575,7 +575,7 @@ $bd19-$bf16 byte music_data
 ; SID frequencies: 16 words per octave, 12 of them used
 $bf16 word[16*7+12] note_frequencies
 $c00e byte vc00e
-$c00f char[4] unused_golf
+$c00f ascii[4] unused_golf
 $c013 byte vc013
 $c014 byte vc014
 $c015 word vc015
@@ -847,7 +847,7 @@ $9ff1-$a000 byte leftover_9ff1
 $0900 to_log
 $0ffb print_char
 ; prints the $ff-terminated text after the jsr
-$2c75 code print_inline (char[until $ff] text)
+$2c75 code print_inline (ascii[until $ff] text)
 ; never returns: ends in a jmp to start
 $b5e8 code noreturn
 $2c93 print_nibble

@@ -1540,6 +1540,7 @@ robert_copyright:
 		.enc	"screen"
 		.text	"ZWARK  (C) 1982  ROBERT WENTWORT"
 		.text	"H "
+
 ; read by: show_top_score_line, show_top_score_row_14
 top_score_line:
 		.enc	"none"
@@ -2482,7 +2483,7 @@ $0900-$1217 byte[2327] packed_data
 $1217-$12e4 byte[205] decruncher_source
 $12e4-$9000 virtual byte[32028] untouched_12e4
 $9000-$9003 code start_game
-$9003-$9006 char[3] signature
+$9003-$9006 ascii[3] signature
 $9006-$9009 byte[3] unused_9006
 $9009-$9010 code actual_start_game
 $9010-$9049 code main_loop
@@ -2523,22 +2524,22 @@ $9803-$9819 code draw_turns
 $9819-$982d code show_top_score_line
 $982d-$9841 code show_copyright
 $9841-$984a code make_scores_red
-$984a-$986c char[34] robert_copyright
-$986c-$9894 char[40] top_score_line
-$9894-$989c char[8] turns_text
+$984a-$986c screencode[34] robert_copyright
+$986c-$9894 ascii[40] top_score_line
+$9894-$989c ascii[8] turns_text
 $989c-$993c code play_sound
 $993c-$9985 code update_high_score
 $9985-$999a code hi_score_draw
 $999a-$99bd code next_turn
 $99bd-$9a4b code title_screen
 $9a4b-$9ab7 code demo
-$9ab7-$9acb char[20] f1_1_player_text
-$9acb-$9adf char[20] f3_2_player_text
+$9ab7-$9acb screencode[20] f1_1_player_text
+$9acb-$9adf screencode[20] f3_2_player_text
 $9adf-$9af7 code show_game_over
 $9af7-$9b02 code show_player
 $9b02-$9b41 code show_top_score_row_14
 $9b41-$9b42 byte show_player_countdown
-$9b42-$9b4d char[11] game_over_text
+$9b42-$9b4d screencode[11] game_over_text
 $9b4d-$9bcc code switch_player
 $9bcc-$9c45 code draw_logo
 $9c45-$9c61 byte[28] logo0
@@ -2601,7 +2602,7 @@ $9ddb-$9e00 byte[37] unused_9ddb
 $9e00-$9e2c code start
 $9e2c-$9e34 code no_trainer
 $9e34-$9e40 byte[12] unused_9e34
-$9e40-$9ea9 char[105] crack_trainer_msg
+$9e40-$9ea9 screencode[105] crack_trainer_msg
 $9ea9-$9eab byte[2] unused_9ea9
 $9eab-$d000 virtual byte[12629] untouched_9eab
 $d000-$d010 virtual byte[16] vic_sprite_coords

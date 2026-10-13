@@ -1,10 +1,10 @@
 >>> Issue 0068: the value an "until" size ends at must fit in one element. <<<
 ===
 deflower test.prg
-$c000 char[until $100] text
+$c000 ascii[until $100] text
 ^^^
 Failed to parse test.flo:
-line 2: until $100 doesn't fit in a char
+line 2: until $100 doesn't fit in one ascii
 ~~~
 ~~~
 vvv

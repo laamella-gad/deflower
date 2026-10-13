@@ -17,7 +17,7 @@ greeting:
 deflower test.prg
 $c000 word[2] two_words
 $c004 dword dword_val
-$c008 char[3] greeting
+$c008 ascii[3] greeting
 ^^^
 Writing out/test.asm
 Writing out/test.map
@@ -38,5 +38,5 @@ greeting:
 --- test.map
 $c000-$c004 word[2] two_words
 $c004-$c008 dword dword_val
-$c008-$c00b char[3] greeting
+$c008-$c00b ascii[3] greeting
 vvv
