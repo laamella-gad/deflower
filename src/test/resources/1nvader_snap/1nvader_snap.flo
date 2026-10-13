@@ -1,5 +1,12 @@
 deflower 1nvader_snap.vsf
 
+; ---- the decruncher's variables ----
+$9f virtual byte decrunch_value_high
+$a7 virtual byte decrunch_length
+$ae virtual word decrunch_copy_source
+$fd virtual byte decrunch_bit_buffer
+$fe virtual word decrunch_output
+
 ; ---- KERNAL variables ----
 $9d virtual byte kernal_msgflag
 $ba virtual byte kernal_device
@@ -9,6 +16,40 @@ $0286 virtual byte kernal_text_color
 $0291 virtual byte kernal_case_lock
 $0314 virtual word irq_vector
 $0328 virtual word stop_vector
+
+; ---- start-up: what is left of the crunched program ----
+; the decruncher, copied from decruncher_source
+$0100-$01aa
+; reads X bits into A, high bits in decrunch_value_high
+$0100 code read_bits
+; the same, adding to what A and decrunch_value_high hold
+$0108 read_more_bits
+; build_decrunch_tables jumps here; when done, it jumps to crack_intro
+$013c decrunch
+; the operand of read_more_bits's lda: where the next packed byte is read, counting down
+$0120 decrunch_input
+$01aa byte[6] decrunch_table
+; built by build_decrunch_tables: per code, its extra bits and base value
+$0334 virtual byte[52] decrunch_bit_counts
+$0368 virtual byte[52] decrunch_base_low
+$039c virtual byte[52] decrunch_base_high
+; the zero byte BASIC wants in front of a program
+$0800 byte basic_start
+; BASIC stub: SYS 2061
+$0801-$080d byte basic_stub
+; copies decrunch_zero_page and decruncher_source to $fd-$01b4
+$080d code decrunch_start
+; the remains of the packed data, behind what the decruncher overwrote
+$081f-$15b3 byte packed_data
+$15b3 code build_decrunch_tables
+$15e6 byte[3] decrunch_zero_page
+$15e9-$169d byte decruncher_source
+; still VICE's power-on pattern
+$169d-$2000 virtual byte untouched_169d
+$2800-$3200 virtual byte untouched_2800
+$3300-$4000 virtual byte untouched_3300
+$56f8-$a000 virtual byte unused_56f8
+$c216-$d000 virtual byte untouched_c216
 
 ; ---- built at run time by build_charset and build_sprites ----
 $2000-$2800 virtual byte charset

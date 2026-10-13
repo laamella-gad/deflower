@@ -3,29 +3,13 @@
 ^^^
 Writing out/2krace_snap.asm
 Writing out/2krace_snap.map
-Verify out/2krace_snap.asm: 3939 bytes emitted, 0 differ, 2867 virtual, 19 gaps
-gap $0000-$0002
-gap $0003-$0004
-gap $000a-$00d0
-gap $00d2-$00fb
-gap $00ff-$0801
-gap $0da0-$1000
-gap $1592-$4040
-gap $4240-$4400
-gap $47e8-$47f8
-gap $4a80-$7800
-gap $78b0-$7fff
-gap $8200-$d000
-gap $d02f-$d400
-gap $d419-$d800
-gap $dbe8-$dc00
-gap $dc02-$dc0d
-gap $dc0e-$dd00
-gap $dd01-$dd0d
-gap $dd0e-$fffe
+Verify out/2krace_snap.asm: 3972 bytes emitted, 0 differ, 61564 virtual, 0 gaps
 ~~~
 
-.virtual $0002
+.virtual $0001
+; which ROMs and I/O are banked in
+; written by: start
+cpu_port:		.byte	?
 ; ---- zero page ----
 ; the road map row at the top of the screen; counts down as the road scrolls
 ; read by: game_loop, snapshot_pc
@@ -67,6 +51,8 @@ difficulty:		.byte	?
 ; read by: l10AE
 ; written by: l10AE
 music_pointer:		.word	?
+; the KERNAL's screen_line high byte; music_pointer took its low byte
+		.byte	?
 .endv
 
 .virtual $00fb
@@ -80,9 +66,12 @@ draw_pointer:		.word	?
 draw_pointer2:		.word	?
 .endv
 
-*=$0801
+*=$0800
 
 ; ---- start-up ----
+; the zero byte BASIC wants in front of a program
+basic_start:
+		.byte	$00
 ; BASIC stub: SYS 2061
 basic_stub:
 		.byte	$0b, $08, $14, $00, $9e, $32, $30, $36, $31, $00, $00, $00
@@ -95,7 +84,7 @@ decruncher_leftover:
 start:
 		sei 
 		lda #$35
-		sta $01
+		sta cpu_port
 		lda #$7f
 		sta cia1_interrupt_control
 		sta cia2_interrupt_control
@@ -912,6 +901,14 @@ unused_0d83:
 ; read by: position_car
 car_x:
 		.byte	$56, $57, $5d, $66, $71, $80, $90, $a1, $b2, $c3, $d4, $e2, $ed, $f6, $fc, $fe
+
+.virtual $0da0
+; ---- memory the game doesn't use ----
+; cleared, by the decruncher or at power-on
+unused_0da0:
+		.fill	608
+.endv
+
 *=$1000
 
 ; ---- music player ----
@@ -1471,7 +1468,9 @@ pattern10:
 		.byte	$01, $7d, $7d, $7d, $7c, $7d, $7d, $7d, $7d, $7d, $7c, $7d, $7d, $77, $77, $77
 		.byte	$72, $77, $77, $7b, $7b, $7b, $76, $7b, $7b, $00
 
-.virtual $4040
+.virtual $1592
+unused_1592:
+		.fill	10926
 ; ---- video bank 1 ($4000-$7fff) ----
 ; four sprites the game draws the road walls into
 ; written by: clear_screen
@@ -1499,13 +1498,14 @@ car_sprites:
 		.byte	$e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0
 		.byte	$00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $7f, $e0, $00, $00, $00, $00
 
-.virtual $4400
+.virtual $4240
+unused_4240:
+		.fill	448
 ; written by: clear_screen, title
 screen:
 		.fill	1000
-.endv
-
-.virtual $47f8
+unused_47e8:
+		.fill	16
 ; written by: irq, irq_lower, init_video, check_stage, add_score, update_high_score
 sprite_pointers:
 		.fill	8
@@ -1555,6 +1555,12 @@ digit_sprites:
 		.byte	$3e, $00, $7f, $fe, $00, $3f, $fe, $00, $0f, $fe, $00, $00, $3e, $00, $00, $3e
 		.byte	$00, $00, $7c, $00, $1f, $fc, $00, $1f, $f8, $00, $1f, $e0, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+
+.virtual $4a80
+unused_4a80:
+		.fill	11648
+.endv
+
 *=$7800
 
 charset:
@@ -1570,7 +1576,9 @@ charset:
 		.byte	$fe, $9e, $9e, $fe, $fe, $fe, $fe, $00, $7f, $78, $79, $7f, $3f, $3f, $0f, $00
 		.byte	$e7, $07, $e7, $e7, $e3, $c3, $00, $00, $9e, $fe, $fe, $e0, $f0, $f8, $f8, $00
 
-.virtual $7fff
+.virtual $78b0
+unused_78b0:
+		.fill	1871
 ; the VIC shows the bank's last byte in the open border
 ; written by: init_video
 idle_byte:		.byte	?
@@ -1584,9 +1592,9 @@ left_road:
 ; written by: game_loop, init_road
 right_road:
 		.fill	256
-.endv
-
-.virtual $d000
+; still VICE's power-on pattern
+untouched_8200:
+		.fill	19968
 ; ---- VIC-II ----
 ; written by: position_car, clear_screen
 sprite0_x:		.byte	?
@@ -1731,6 +1739,22 @@ cia2_port_a:		.byte	?
 cia2_interrupt_control:		.byte	?
 .endv
 
+.virtual $e000
+untouched_e000:
+		.fill	7472
+.endv
+
+*=$fd30
+
+; the KERNAL's default vectors, which RESTOR copies from the ROM and so also writes to the RAM under it
+ram_vectors_copy:
+		.word	$ea31, $fe66, $fe47, $f34a, $f291, $f20e, $f250, $f333, $f157, $f1ca, $f6ed, $f13e, $f32f, $fe66, $f4a5, $f5ed
+
+.virtual $fd50
+untouched_fd50:
+		.fill	686
+.endv
+
 *=$fffe
 
 ; the hardware IRQ vector ($01 = $35: KERNAL banked out, so it's RAM)
@@ -1739,21 +1763,19 @@ irq_vector:
 		.addr	irq
 ~~~
 --- 2krace_snap.map
-$0000-$0002 gap
+$0001-$0002 virtual byte cpu_port
 $0002-$0003 virtual byte road_row
-$0003-$0004 gap
 $0004-$0005 virtual byte fine_scroll
 $0005-$0006 virtual byte speed
 $0006-$0007 virtual byte max_speed
 $0007-$0008 virtual byte car_state
 $0008-$0009 virtual byte car_step
 $0009-$000a virtual byte difficulty
-$000a-$00d0 gap
 $00d0-$00d2 virtual word music_pointer
-$00d2-$00fb gap
+$00d2-$00d3 virtual byte
 $00fb-$00fd virtual word draw_pointer
 $00fd-$00ff virtual word draw_pointer2
-$00ff-$0801 gap
+$0800-$0801 byte basic_start
 $0801-$080d byte[12] basic_stub
 $080d-$0820 byte[19] decruncher_leftover
 $0820-$0850 code start
@@ -1798,7 +1820,7 @@ $0d4d-$0d7f code random
 $0d7f-$0d83 dword random_seed
 $0d83-$0d90 byte[13] unused_0d83
 $0d90-$0da0 byte[16] car_x
-$0da0-$1000 gap
+$0da0-$1000 virtual byte[608] unused_0da0
 $1000-$1003 code music_init
 $1003-$1006 code music_play
 $1006-$103a code music_set_volume
@@ -1861,21 +1883,21 @@ $151e-$154a byte[44] pattern7
 $154a-$155f byte[21] pattern8
 $155f-$1578 byte[25] pattern9
 $1578-$1592 byte[26] pattern10
-$1592-$4040 gap
+$1592-$4040 virtual byte[10926] unused_1592
 $4040-$4140 virtual byte[256] road_sprites
 $4140-$4240 byte[256] car_sprites
-$4240-$4400 gap
+$4240-$4400 virtual byte[448] unused_4240
 $4400-$47e8 virtual byte[1000] screen
-$47e8-$47f8 gap
+$47e8-$47f8 virtual byte[16] unused_47e8
 $47f8-$4800 virtual byte[8] sprite_pointers
 $4800-$4a80 byte[640] digit_sprites
-$4a80-$7800 gap
+$4a80-$7800 virtual byte[11648] unused_4a80
 $7800-$78b0 byte[176] charset
-$78b0-$7fff gap
+$78b0-$7fff virtual byte[1871] unused_78b0
 $7fff-$8000 virtual byte idle_byte
 $8000-$8100 virtual byte[256] left_road
 $8100-$8200 virtual byte[256] right_road
-$8200-$d000 gap
+$8200-$d000 virtual byte[19968] untouched_8200
 $d000-$d001 virtual byte sprite0_x
 $d001-$d002 virtual byte sprite0_y
 $d002-$d003 virtual byte sprite1_x
@@ -1923,7 +1945,6 @@ $d02b-$d02c virtual byte sprite4_color
 $d02c-$d02d virtual byte sprite5_color
 $d02d-$d02e virtual byte sprite6_color
 $d02e-$d02f virtual byte sprite7_color
-$d02f-$d400 gap
 $d400-$d402 virtual word voice1_frequency
 $d402-$d404 virtual word voice1_pulse_width
 $d404-$d405 virtual byte voice1_control
@@ -1942,17 +1963,14 @@ $d414-$d415 virtual byte voice3_sustain_release
 $d415-$d417 virtual word filter_cutoff
 $d417-$d418 virtual byte filter_control
 $d418-$d419 virtual byte volume_filter_mode
-$d419-$d800 gap
 $d800-$dbe8 virtual byte[1000] color_ram
-$dbe8-$dc00 gap
 $dc00-$dc01 virtual byte cia1_port_a
 $dc01-$dc02 virtual byte cia1_port_b
-$dc02-$dc0d gap
 $dc0d-$dc0e virtual byte cia1_interrupt_control
-$dc0e-$dd00 gap
 $dd00-$dd01 virtual byte cia2_port_a
-$dd01-$dd0d gap
 $dd0d-$dd0e virtual byte cia2_interrupt_control
-$dd0e-$fffe gap
+$e000-$fd30 virtual byte[7472] untouched_e000
+$fd30-$fd50 word[16] ram_vectors_copy
+$fd50-$fffe virtual byte[686] untouched_fd50
 $fffe-$10000 addr irq_vector
 vvv

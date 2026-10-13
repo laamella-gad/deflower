@@ -550,8 +550,10 @@ $a97c code
 ; $08c0 was changed: the jsr runs the old screen as code, so the jmp after it
 ; never runs
 $abe8 code tamper_crash
+$07c6 code noreturn
 $abeb byte[3] never_reached_abeb
 $abee code tamper_crash2
+$07c3 code noreturn
 $abf1 byte[3] never_reached_abf1
 ; start-up sets this to $20
 $abf4 byte vabf4
@@ -574,13 +576,24 @@ $bbb8 byte[5] voice_offsets
 $bd19-$bf16 byte music_data
 ; SID frequencies: 16 words per octave, 12 of them used
 $bf16 word[16*7+12] note_frequencies
-$c00e byte vc00e
-$c00f ascii[4] unused_golf
-$c013 byte vc013
-$c014 byte vc014
-$c015 word vc015
-$c017 byte vc017
-$c018 word vc018
+; the brk for the X key: save_game turns it into a nop for C and D, and back for N and M
+$a64e
+; ---- a leftover tool that saves the game's memory to tape or disk ----
+; 1 for tape, 8 for disk
+$c00e byte save_device
+; "GOLF" and a digit, which save_range counts up from save_digit
+$c00f ascii[5] save_name
+$c013 save_name_digit
+$c014 byte save_name_length
+$c015 addr save_start
+$c017 byte save_digit
+$c018 addr save_end
+; asks C, N, D or M: tape or disk, and whether to keep the brk at $a64e
+$c01a code save_game
+; sets the device and file name
+$c0f3 code set_save_file
+; saves save_start up to save_end as the next file
+$c13b code save_range
 ; unreferenced: flashes the border forever
 $c177 code
 $c17d-$cb00 byte unused_nops

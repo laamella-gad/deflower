@@ -3,18 +3,14 @@
 ^^^
 Writing out/1nvader_snap.asm
 Writing out/1nvader_snap.map
-Verify out/1nvader_snap.asm: 6414 bytes emitted, 0 differ, 24832 virtual, 5 gaps
-gap $0800-$2000
-gap $2800-$3200
-gap $3300-$4000
-gap $56f8-$a000
-gap $c216-$d000
+Verify out/1nvader_snap.asm: 10331 bytes emitted, 0 differ, 55205 virtual, 0 gaps
 ~~~
 
 .virtual $0001
 ; which ROMs and I/O are banked in
 ; read by: build_charset
 ; written by: build_charset
+; modified by: read_more_bits, decrunch, decrunch_start
 cpu_port:		.byte	?
 .endv
 
@@ -30,6 +26,27 @@ io_status:		.byte	?
 kernal_msgflag:		.byte	?
 .endv
 
+.virtual $009f
+; ---- the decruncher's variables ----
+; read by: decrunch, build_decrunch_tables
+; written by: read_bits
+; modified by: read_more_bits, decrunch, build_decrunch_tables
+decrunch_value_high:		.byte	?
+.endv
+
+.virtual $00a7
+; read by: decrunch
+; written by: decrunch
+decrunch_length:		.byte	?
+.endv
+
+.virtual $00ae
+; read by: read_more_bits
+; written by: decrunch
+; modified by: read_more_bits
+decrunch_copy_source:		.word	?
+.endv
+
 .virtual $00ba
 ; read by: save_highscore, load_highscore
 ; written by: load_highscore
@@ -40,6 +57,157 @@ kernal_device:		.byte	?
 ; written by: save_highscore
 kernal_save_start:		.word	?
 .endv
+
+.virtual $00fd
+; written by: read_more_bits
+; modified by: read_more_bits
+decrunch_bit_buffer:		.byte	?
+; read by: read_more_bits, decrunch
+; written by: decrunch
+; modified by: read_more_bits, decrunch
+decrunch_output:		.word	?
+.endv
+
+*=$0100
+
+; reads X bits into A, high bits in decrunch_value_high
+; called by: decrunch, build_decrunch_tables
+read_bits:
+		lda #$00
+		sta decrunch_value_high
+		cpx #$01
+		bcc l012E
+; the same, adding to what A and decrunch_value_high hold
+; called by: decrunch
+read_more_bits:
+		lsr decrunch_bit_buffer
+		bne l0128
+		pha 
+; jumped to by: decrunch
+l010D:
+		dec cpu_port
+		sta border_color
+		inc cpu_port
+		lda decrunch_input
+		bne l011C
+		dec d0121
+; jumped to by: read_more_bits
+l011C:
+		dec decrunch_input
+		lda packed_data
+; the operand of read_more_bits's lda: where the next packed byte is read, counting down
+; read by: read_more_bits
+; modified by: read_more_bits
+decrunch_input = $0120
+; modified by: read_more_bits
+d0121 = $0121
+		bcc l0137
+		ror 
+		sta decrunch_bit_buffer
+		pla 
+; jumped to by: read_more_bits
+l0128:
+		rol 
+		rol decrunch_value_high
+		dex 
+		bne read_more_bits
+; jumped to by: read_bits
+l012E:
+		rts 
+
+; jumped to by: decrunch
+l012F:
+		dex 
+		dec decrunch_output + $1
+		dec decrunch_copy_source + $1
+; jumped to by: read_more_bits
+l0134:
+		dey 
+		lda (decrunch_copy_source), y
+; jumped to by: read_more_bits
+l0137:
+		sta (decrunch_output), y
+; jumped to by: decrunch
+l0139:
+		tya 
+		bne l0134
+; build_decrunch_tables jumps here; when done, it jumps to crack_intro
+; jumped to by: build_decrunch_tables
+decrunch:
+		txa 
+		bne l012F
+		dey 
+; jumped to by: decrunch
+l0140:
+		inx 
+		jsr read_more_bits
+		lsr 
+		iny 
+		bcc l0140
+		beq l0175
+		cpy #$11
+		bcs l01A4
+		ldx save_vector + $1, y
+		jsr read_bits
+		adc decrunch_bit_counts + $33, y
+		sta decrunch_length
+		lda decrunch_value_high
+		adc decrunch_base_low + $33, y
+		pha 
+		bne l0167
+		ldy decrunch_length
+		cpy #$04
+		bcc l0169
+; jumped to by: decrunch
+l0167:
+		ldy #$03
+; jumped to by: decrunch
+l0169:
+		ldx d01A9, y
+		jsr read_bits
+		adc decrunch_table + $2, y
+		tay 
+		lda decrunch_length
+; jumped to by: decrunch
+l0175:
+		sbc decrunch_output
+		bcc l017B
+		dec decrunch_output + $1
+; jumped to by: decrunch
+l017B:
+		eor #$ff
+		sta decrunch_output
+		cpy #$01
+		bcc l010D
+		ldx decrunch_bit_counts, y
+		jsr read_bits
+		adc decrunch_base_low, y
+		bcc l0191
+		inc decrunch_value_high
+		clc 
+; jumped to by: decrunch
+l0191:
+		adc decrunch_output
+		sta decrunch_copy_source
+		lda decrunch_value_high
+		adc decrunch_base_high, y
+		adc decrunch_output + $1
+		sta decrunch_copy_source + $1
+		pla 
+		tax 
+		ldy decrunch_length
+		bcc l0139
+; jumped to by: decrunch
+l01A4:
+		dec cpu_port
+		cli 
+		jmp crack_intro
+; read by: decrunch
+d01A9 = $01a9
+
+; read by: decrunch
+decrunch_table:
+		.byte	$02, $04, $04, $30, $20, $10
 
 .virtual $0286
 ; written by: start
@@ -62,6 +230,24 @@ irq_vector:		.word	?
 stop_vector:		.word	?
 .endv
 
+.virtual $0332
+; read by: decrunch, build_decrunch_tables
+save_vector:		.addr	?
+; built by build_decrunch_tables: per code, its extra bits and base value
+; read by: decrunch, build_decrunch_tables
+; written by: build_decrunch_tables
+decrunch_bit_counts:
+		.fill	52
+; read by: decrunch, build_decrunch_tables
+; written by: build_decrunch_tables
+decrunch_base_low:
+		.fill	52
+; read by: decrunch
+; written by: build_decrunch_tables
+decrunch_base_high:
+		.fill	52
+.endv
+
 .virtual $0400
 ; ---- screen ----
 ; read by: twinkle_stars
@@ -76,17 +262,317 @@ sprite_pointers:
 		.fill	8
 .endv
 
-.virtual $2000
+*=$0800
+
+; the zero byte BASIC wants in front of a program
+basic_start:
+		.byte	$00
+; BASIC stub: SYS 2061
+basic_stub:
+		.byte	$0b, $08, $14, $00, $9e, $32, $30, $36, $31, $00, $00, $00
+
+; copies decrunch_zero_page and decruncher_source to $fd-$01b4
+decrunch_start:
+		ldy #$00
+		sei 
+		inc cpu_port
+		tsx 
+; jumped to by: decrunch_start
+l0813:
+		lda d15E5, x
+		sta @w $00fc, x
+		dex 
+		bne l0813
+		jmp build_decrunch_tables
+
+; the remains of the packed data, behind what the decruncher overwrote
+; read by: read_more_bits
+packed_data:
+		.byte	$80, $00, $0a, $93, $d2, $d5, $ff, $90, $20, $9c, $00, $db, $f8, $ff, $1b, $86
+		.byte	$02, $33, $aa, $a2, $f6, $24, $84, $fe, $82, $90, $d9, $5a, $58, $da, $9d, $5c
+		.byte	$db, $d5, $d0, $ec, $d1, $d4, $4f, $4b, $c0, $c1, $78, $f2, $c8, $54, $f8, $ae
+		.byte	$c9, $b5, $f9, $2e, $fa, $b4, $a5, $86, $f1, $fc, $dc, $3a, $4a, $65, $d5, $41
+		.byte	$ee, $f4, $f0, $86, $7c, $02, $a0, $a1, $a6, $92, $8c, $b9, $68, $0b, $9f, $1a
+		.byte	$10, $65, $e0, $6c, $f0, $07, $9b, $17, $8a, $d5, $d0, $db, $cf, $85, $b1, $68
+		.byte	$6e, $e7, $c2, $87, $58, $11, $dd, $d8, $dd, $4b, $82, $9e, $75, $79, $ee, $cc
+		.byte	$ad, $69, $b7, $7b, $19, $79, $68, $b7, $39, $ae, $4b, $a7, $a0, $55, $51, $32
+		.byte	$a3, $e8, $32, $28, $f4, $ee, $b3, $f2, $a6, $86, $b3, $93, $66, $10, $86, $6c
+		.byte	$f8, $4c, $14, $41, $b7, $67, $01, $cd, $b3, $08, $39, $f0, $25, $77, $f7, $99
+		.byte	$58, $06, $bb, $af, $28, $bc, $4c, $79, $bb, $43, $f6, $18, $52, $98, $98, $f5
+		.byte	$44, $a9, $20, $98, $04, $9d, $91, $ad, $b1, $50, $07, $fa, $cb, $53, $13, $86
+		.byte	$26, $06, $68, $57, $b8, $bd, $08, $53, $c9, $5d, $9f, $4c, $a0, $96, $e4, $14
+		.byte	$5d, $09, $eb, $46, $c8, $34, $08, $4f, $10, $f3, $a9, $05, $8c, $a0, $a9, $08
+		.byte	$c7, $6a, $c2, $a9, $03, $a2, $d7, $9d, $7e, $da, $ad, $9e, $e1, $92, $65, $9e
+		.byte	$c3, $ce, $00, $a4, $06, $49, $08, $01, $91, $0b, $24, $02, $22, $44, $0c, $90
+		.byte	$03, $89, $0f, $12, $44, $c0, $ba, $d0, $05, $cc, $4c, $ba, $41, $f7, $a9, $04
+		.byte	$9d, $e6, $c8, $c0, $06, $77, $02, $35, $ca, $d3, $a0, $d0, $c2, $b7, $32, $01
+		.byte	$fe, $f3, $94, $30, $7f, $f0, $96, $02, $e8, $12, $c3, $bd, $1a, $0d, $d2, $f8
+		.byte	$df, $4b, $c1, $1b, $d0, $1b, $54, $68, $e7, $ed, $e1, $0b, $b9, $a3, $00, $b8
+		.byte	$69, $96, $47, $8e, $1e, $c8, $f3, $0e, $9a, $d7, $57, $94, $34, $c0, $ae, $ac
+		.byte	$6e, $a3, $68, $c4, $cf, $95, $f5, $f2, $da, $9b, $33, $6c, $60, $f8, $e5, $c5
+		.byte	$4c, $c6, $6c, $c7, $6c, $d4, $6c, $67, $d8, $d6, $f3, $f8, $ed, $fd, $af, $05
+		.byte	$b9, $2b, $00, $c6, $43, $b4, $08, $0f, $07, $cd, $78, $0a, $a4, $8b, $5e, $24
+		.byte	$ff, $33, $4a, $75, $e9, $0f, $dc, $72, $00, $58, $72, $ce, $cc, $ad, $69, $b0
+		.byte	$d1, $19, $a9, $1d, $8d, $cf, $b6, $cb, $7a, $ad, $b5, $36, $e7, $30, $f0, $52
+		.byte	$e9, $10, $7c, $53, $69, $02, $31, $4c, $d4, $ce, $ca, $1a, $10, $03, $ee, $90
+		.byte	$b8, $c4, $f3, $e9, $c9, $07, $d2, $15, $34, $1a, $0a, $fd, $ee, $97, $b8, $f1
+		.byte	$5b, $cb, $25, $d0, $75, $82, $79, $8f, $df, $cb, $1c, $4c, $81, $42, $72, $47
+		.byte	$a5, $58, $39, $9e, $25, $ca, $41, $67, $35, $88, $ce, $26, $31, $74, $ca, $8e
+		.byte	$88, $91, $20, $ac, $8b, $c2, $17, $8b, $3b, $57, $da, $06, $0d, $ad, $b3, $43
+		.byte	$fa, $a1, $be, $ee, $d1, $ea, $d3, $ee, $ad, $63, $72, $0d, $bf, $79, $f9, $1d
+		.byte	$b3, $17, $d0, $1b, $0f, $2e, $18, $f7, $ce, $86, $dd, $34, $da, $ae, $e7, $36
+		.byte	$bd, $96, $02, $3c, $e0, $ae, $97, $e2, $44, $4c, $b4, $4a, $97, $82, $ee, $e5
+		.byte	$2f, $b3, $72, $8d, $b4, $04, $97, $1f, $41, $cb, $d5, $2d, $f6, $6d, $42, $37
+		.byte	$0c, $9d, $a3, $10, $2a, $3d, $f9, $e8, $48, $f6, $dc, $9f, $06, $ed, $4c, $e5
+		.byte	$4b, $bc, $12, $d5, $c9, $fb, $2f, $f9, $29, $1e, $af, $8d, $b0, $ae, $26, $bc
+		.byte	$25, $ce, $4c, $a4, $cd, $32, $90, $be, $d2, $da, $43, $ef, $6a, $14, $85, $5e
+		.byte	$0a, $a1, $15, $2d, $97, $16, $0c, $d9, $43, $f3, $20, $02, $44, $f2, $01, $75
+		.byte	$b1, $03, $2e, $53, $d9, $b6, $1e, $ce, $e9, $a9, $65, $ba, $db, $c4, $15, $21
+		.byte	$dc, $29, $10, $5f, $13, $06, $3c, $a2, $65, $3d, $ed, $6c, $0c, $72, $de, $73
+		.byte	$d9, $eb, $d5, $d7, $8a, $4f, $ae, $a8, $d3, $19, $2d, $6e, $51, $44, $74, $71
+		.byte	$98, $d1, $46, $3e, $a5, $4b, $7e, $d6, $da, $2a, $30, $cb, $1e, $0f, $96, $03
+		.byte	$87, $e6, $3a, $d9, $48, $3e, $3b, $83, $e5, $ae, $08, $ec, $bb, $83, $13, $34
+		.byte	$ee, $1c, $ea, $3f, $0a, $f4, $d3, $b8, $00, $f9, $41, $6b, $12, $b8, $4c, $b9
+		.byte	$44, $f6, $c1, $d0, $07, $f5, $fe, $f0, $10, $4c, $16, $f1, $c5, $77, $06, $26
+		.byte	$19, $dc, $79, $dc, $d0, $3f, $35, $e9, $e7, $52, $00, $04, $b3, $6b, $32, $b8
+		.byte	$4c, $21, $45, $f7, $bd, $5f, $e1, $fc, $e0, $e7, $05, $1b, $60, $01, $d1, $e4
+		.byte	$36, $4c, $88, $45, $07, $fc, $a2, $2f, $54, $36, $f2, $85, $95, $21, $c5, $71
+		.byte	$36, $a9, $0b, $c6, $8e, $9d, $99, $0b, $c7, $28, $5f, $01, $8f, $67, $f1, $45
+		.byte	$ac, $94, $a2, $c4, $e4, $27, $07, $a9, $cb, $46, $8a, $ce, $63, $79, $d4, $01
+		.byte	$5e, $eb, $03, $88, $12, $68, $c9, $11, $8b, $88, $38, $c3, $ea, $cc, $2c, $ac
+		.byte	$ea, $d4, $6d, $36, $6d, $2d, $28, $0b, $d5, $dd, $3b, $69, $37, $4e, $d6, $e4
+		.byte	$4b, $fb, $32, $8c, $ae, $99, $e9, $b8, $5e, $b9, $a0, $c6, $92, $d0, $eb, $4f
+		.byte	$ce, $ee, $37, $e6, $ac, $81, $1a, $ee, $a3, $8d, $63, $c9, $66, $2d, $cc, $02
+		.byte	$e3, $95, $2d, $ce, $b8, $8b, $b7, $e5, $a5, $e6, $ba, $1c, $af, $8a, $5d, $e9
+		.byte	$42, $97, $70, $1e, $cd, $6b, $56, $b0, $c4, $17, $94, $76, $31, $d8, $e5, $d0
+		.byte	$0e, $9e, $28, $24, $33, $b8, $4c, $da, $46, $91, $df, $d9, $59, $cd, $2b, $eb
+		.byte	$cd, $37, $14, $2d, $a3, $54, $16, $ad, $f3, $6a, $cd, $97, $48, $ce, $2e, $fb
+		.byte	$91, $07, $fa, $b6, $0c, $d0, $19, $8f, $c2, $e9, $04, $8d, $78, $d5, $ad, $c9
+		.byte	$32, $d0, $0a, $cf, $bc, $dd, $cf, $07, $ca, $e9, $fc, $07, $60, $af, $8d, $de
+		.byte	$16, $d9, $09, $2a, $dd, $4c, $a1, $9e, $46, $60, $ed, $d8, $ee, $38, $a7, $77
+		.byte	$1c, $34, $85, $ae, $e3, $41, $61, $11, $18, $d4, $ee, $3c, $16, $ce, $8e, $4c
+		.byte	$fa, $46, $fd, $f7, $18, $24, $4a, $6c, $f0, $52, $4c, $59, $d0, $49, $8e, $95
+		.byte	$89, $9c, $df, $05, $82, $2c, $29, $55, $c5, $25, $19, $75, $e1, $25, $f8, $18
+		.byte	$6a, $46, $3d, $7f, $d8, $20, $63, $4d, $8f, $2e, $f5, $f5, $98, $1d, $22, $b0
+		.byte	$1e, $ef, $3d, $47, $ba, $ae, $d2, $c3, $25, $4f, $38, $1f, $53, $31, $43, $2d
+		.byte	$da, $22, $9e, $0f, $28, $3d, $d0, $b1, $11, $e4, $a4, $a0, $82, $7d, $47, $a3
+		.byte	$6c, $c8, $d8, $38, $a8, $c3, $5f, $90, $95, $1f, $a4, $a8, $fd, $c3, $85, $fa
+		.byte	$72, $4c, $b6, $47, $9c, $6b, $1f, $c0, $b1, $7e, $c3, $41, $24, $34, $56, $d4
+		.byte	$1b, $32, $f0, $b1, $2a, $ca, $41, $d0, $23, $47, $e5, $b8, $25, $d9, $30, $ee
+		.byte	$47, $7b, $9d, $f3, $68, $8e, $5e, $0b, $43, $08, $c9, $4d, $c7, $bd, $47, $c4
+		.byte	$ae, $95, $0b, $ca, $e9, $d2, $a0, $6d, $a5, $c3, $86, $34, $c3, $b3, $8b, $17
+		.byte	$ba, $54, $ce, $57, $a1, $cb, $6a, $4e, $a1, $cc, $5d, $2a, $cd, $26, $30, $74
+		.byte	$ce, $c3, $e9, $50, $53, $b4, $b0, $d6, $34, $8b, $9a, $58, $58, $44, $46, $42
+		.byte	$2e, $69, $70, $ce, $c1, $5b, $75, $c5, $7b, $63, $7b, $ed, $ef, $d3, $5a, $27
+		.byte	$66, $5f, $d9, $4e, $4d, $68, $17, $b7, $08, $21, $cc, $ce, $08, $01, $4d, $9b
+		.byte	$4c, $8c, $48, $9e, $1c, $3c, $dd, $af, $42, $da, $d4, $9d, $42, $db, $b3, $de
+		.byte	$e2, $8d, $dc, $e6, $a5, $74, $ce, $d2, $ae, $16, $0b, $89, $4a, $72, $24, $ee
+		.byte	$59, $ac, $50, $16, $06, $8d, $08, $22, $23, $1f, $9c, $c9, $d6, $77, $94, $ce
+		.byte	$d0, $50, $27, $d5, $4a, $4c, $d8, $48, $97, $40, $ad, $c4, $18, $d3, $d8, $ca
+		.byte	$d9, $4f, $d9, $d8, $dc, $0f, $49, $96, $77, $97, $97, $59, $47, $44, $22, $8b
+		.byte	$11, $e9, $df, $ad, $d8, $50, $5c, $b9, $06, $b9, $57, $2e, $07, $97, $06, $cb
+		.byte	$84, $3f, $ad, $d0, $03, $4c, $58, $4a, $be, $46, $5c, $af, $ed, $07, $43, $a7
+		.byte	$ff, $c6, $98, $8c, $b0, $06, $8e, $c5, $b2, $05, $c1, $62, $32, $c0, $21, $c6
+		.byte	$d6, $58, $03, $2c, $46, $58, $02, $75, $31, $96, $01, $0b, $11, $96, $26, $11
+		.byte	$d4, $d6, $58, $25, $2c, $46, $58, $24, $47, $d5, $59, $60, $23, $b1, $14, $b8
+		.byte	$22, $47, $d6, $54, $b8, $21, $04, $36, $d0, $b9, $c6, $04, $bb, $05, $a2, $ec
+		.byte	$c5, $25, $d8, $c6, $97, $c7, $62, $5d, $1b, $4b, $ab, $6d, $26, $b7, $12, $d5
+		.byte	$94, $aa, $f5, $b6, $1c, $d0, $08, $fc, $cd, $27, $90, $12, $5b, $d4, $aa, $a9
+		.byte	$5a, $d5, $5a, $aa, $5a, $d6, $5b, $25, $eb, $dc, $ec, $cb, $16, $08, $a9, $eb
+		.byte	$2c, $15, $16, $23, $2c, $14, $23, $aa, $ac, $b0, $13, $58, $96, $87, $12, $04
+		.byte	$ad, $87, $ab, $da, $1e, $11, $04, $0e, $d7, $e2, $4d, $27, $ae, $ac, $e7, $b4
+		.byte	$b9, $f5, $b5, $16, $e3, $df, $b6, $ba, $29, $29, $fe, $83, $53, $de, $15, $66
+		.byte	$e5, $76, $01, $2e, $b1, $85, $28, $92, $c2, $d7, $03, $6b, $c1, $b6, $ba, $29
+		.byte	$29, $fd, $83, $53, $c0, $19, $3a, $aa, $ec, $02, $5d, $63, $6b, $29, $25, $d1
+		.byte	$a5, $0d, $c7, $68, $88, $62, $98, $29, $fb, $35, $cf, $31, $15, $d5, $10, $04
+		.byte	$e3, $5d, $ce, $8d, $8e, $08, $0d, $8a, $c8, $25, $2a, $a5, $cd, $be, $0d, $c7
+		.byte	$cc, $6d, $8c, $53, $03, $28, $a2, $cb, $28, $75, $cb, $1c, $08, $6c, $50, $f7
+		.byte	$6c, $dd, $71, $1b, $a8, $37, $df, $42, $15, $e9, $d7, $2d, $2b, $2d, $dc, $2d
+		.byte	$76, $09, $bb, $db, $4a, $0f, $35, $53, $03, $28, $a2, $da, $25, $b5, $c4, $9d
+		.byte	$66, $09, $c4, $10, $ea, $44, $cc, $ef, $8d, $eb, $15, $d0, $60, $ee, $cc, $b0
+		.byte	$d0, $8e, $e7, $b2, $cf, $c1, $62, $32, $d5, $c2, $ac, $3a, $cb, $d4, $05, $88
+		.byte	$cb, $d3, $08, $ad, $eb, $2c, $d2, $16, $29, $11, $0f, $88, $d8, $07, $ad, $b8
+		.byte	$8f, $50, $80, $4a, $18, $69, $30, $8d, $9f, $d7, $da, $20, $1d, $a2, $0f, $9d
+		.byte	$c0, $f9, $df, $e0, $19, $d0, $f8, $60, $df, $2d, $b8, $fd, $b1, $40, $29, $5d
+		.byte	$42, $01, $ca, $e4, $12, $5a, $46, $d2, $e9, $da, $30, $4b, $ee, $e3, $aa, $cf
+		.byte	$ad, $8d, $ae, $40, $ea, $1c, $ad, $3b, $c9, $6e, $cf, $d1, $b5, $af, $46, $ce
+		.byte	$e4, $7c, $af, $bf, $be, $59, $d8, $8b, $d4, $aa, $ba, $4a, $e2, $0b, $c1, $87
+		.byte	$41, $ee, $d4, $2a, $8e, $4f, $90, $4d, $e1, $21, $96, $56, $a8, $38, $41, $50
+		.byte	$65, $45, $a8, $0e, $47, $10, $a9, $19, $52, $bf, $30, $07, $b0, $76, $2a, $bb
+		.byte	$2d, $58, $29, $c2, $2e, $ed, $63, $28, $0b, $2f, $b5, $84, $53, $97, $27, $36
+		.byte	$9f, $91, $eb, $88, $20, $31, $b1, $4c, $db, $6c, $ae, $c6, $c9, $aa, $d8, $e8
+		.byte	$87, $4b, $40, $a0, $06, $ef, $20, $95, $43, $c0, $00, $f8, $37, $88, $b1, $b3
+		.byte	$4c, $60, $7e, $e4, $45, $97, $28, $67, $b9, $c3, $1d, $ef, $dd, $47, $f7, $1b
+		.byte	$49, $ab, $3a, $17, $de, $14, $ad, $bd, $c9, $0c, $3b, $90, $03, $e2, $f0, $4c
+		.byte	$eb, $8e, $c1, $58, $49, $7d, $8d, $c0, $eb, $b0, $bd, $29, $75, $88, $8e, $ad
+		.byte	$e1, $a3, $66, $d2, $50, $20, $f7, $64, $48, $d0, $00, $60, $b3, $ed, $28, $3c
+		.byte	$50, $4f, $78, $13, $c4, $a0, $e0, $c8, $9c, $f0, $04, $13, $18, $4d, $40, $c9
+		.byte	$68, $c9, $22, $90, $4a, $ed, $b9, $38, $e0, $05, $26, $08, $9b, $c4, $30, $f1
+		.byte	$58, $3c, $80, $4f, $a8, $13, $82, $d0, $70, $f8, $06, $4c, $20, $da, $a2, $30
+		.byte	$57, $49, $97, $e8, $8e, $70, $07, $2f, $60, $a9, $8c, $8d, $d4, $fd, $19, $62
+		.byte	$10, $0e, $01, $61, $51, $05, $41, $cc, $02, $2a, $38, $66, $03, $0a, $8e, $19
+		.byte	$81, $d2, $8e, $19, $05, $82, $a2, $04, $83, $98, $06, $54, $70, $cc, $07, $15
+		.byte	$1c, $33, $08, $05, $47, $0c, $09, $c1, $51, $03, $41, $cc, $10, $2a, $38, $66
+		.byte	$11, $0a, $8e, $19, $12, $82, $a3, $86, $60, $13, $a8, $a0, $02, $e6, $14, $15
+		.byte	$1c, $33, $15, $05, $47, $0c, $16, $c1, $51, $c3, $30, $17, $72, $00, $71, $01
+		.byte	$1c, $18, $c3, $75, $93, $8c, $19, $0e, $44, $b2, $80, $8a, $0d, $72, $25, $54
+		.byte	$44, $4c, $dd, $4e, $1c, $9e, $ac, $ce, $8d, $42, $59, $56, $05, $c6, $b6, $06
+		.byte	$35, $a8, $00, $1a, $d8, $01, $d6, $04, $c3, $59, $0c, $0d, $6c, $0d, $6b, $50
+		.byte	$07, $35, $08, $b1, $ad, $84, $f4, $ba, $aa, $13, $5a, $bb, $5a, $14, $5a, $59
+		.byte	$8f, $34, $f8, $bd, $b4, $0e, $b6, $ad, $a9, $1e, $0f, $b5, $ae, $b5, $c3, $e8
+		.byte	$8a, $d8, $24, $50, $04, $9a, $18, $0b, $96, $92, $12, $d4, $7e, $53, $bb, $9b
+		.byte	$40, $0c, $73, $08, $23, $9b, $de, $4e, $07, $eb, $59, $4f, $b4, $53, $37, $0d
+		.byte	$03, $99, $09, $1c, $c8, $cb, $32, $05, $3e, $20, $5f, $bb, $4f, $19, $95, $ba
+		.byte	$2b, $9a, $c7, $bb, $dc, $0f, $d2, $bc, $b9, $01, $a5, $bd, $73, $10, $4a, $be
+		.byte	$95, $58, $8f, $bf, $50, $20, $e7, $2c, $4f, $60, $78, $a9, $fc, $8d, $18, $d0
+		.byte	$5c, $4f, $29, $fb, $62, $79, $86, $07, $78, $20, $b4, $53, $b4, $21, $b5, $f7
+		.byte	$54, $4b, $22, $4b, $d3, $4b, $23, $4b, $d4, $4b, $24, $4b, $d5, $4b, $25, $4b
+		.byte	$d6, $4b, $26, $bd, $69, $d7, $41, $27, $e8, $f0, $77, $03, $4c, $e2, $4f, $a5
+		.byte	$fe, $09, $04, $85, $01, $58, $5f, $60, $a2, $ca, $f8, $55, $ab, $00, $aa, $38
+		.byte	$5a, $40, $5a, $78, $5a, $80, $5b, $bd, $b8, $56, $57, $9d, $c0, $32, $e8, $e0
+		.byte	$40, $d0, $e3, $ff, $60, $ee, $e3, $ad, $4d, $c9, $06, $be, $00, $8d, $53, $ae
+		.byte	$8d, $f4, $bc, $a5, $73, $8a, $29, $01, $dc, $00, $d4, $1e, $d5, $48, $6b, $02
+		.byte	$c6, $90, $6c, $6a, $23, $4d, $28, $04, $4c, $95, $4f, $53, $2a, $15, $26, $4a
+		.byte	$43, $9d, $50, $b9, $5c, $c9, $20, $db, $d0, $a9, $95, $2a, $99, $30, $05, $fb
+		.byte	$9d, $ec, $5b, $af, $9c, $50, $60, $98, $bd, $05, $0a, $f0, $2f, $90, $02, $49
+		.byte	$17, $1d, $a8, $60, $e0, $3c, $00, $2d, $20, $40, $60, $80, $a0, $c0, $e0, $7f
+		.byte	$00, $3a, $42, $4a, $52, $5a, $62, $6a, $ff, $72, $7a, $82, $fa, $8a, $21, $92
+		.byte	$9a, $a2, $aa, $b2, $ba, $c2, $ca, $ff, $d2, $fd, $96, $da, $e2, $ea, $87, $01
+		.byte	$f0, $01, $39, $58, $53, $2e, $54, $21, $4f, $d1, $4c, $41, $59, $ef, $9d, $46
+		.byte	$8d, $a8, $95, $48, $e8, $4f, $5c, $e8, $73, $66, $48, $b5, $47, $45, $5b, $d5
+		.byte	$43, $dc, $9f, $45, $44, $44, $94, $27, $43, $54, $49, $73, $1f, $36, $4d, $c4
+		.byte	$5b, $cb, $de, $50, $4f, $49, $e6, $b8, $57, $65, $8b, $c9, $52, $c1, $91, $2e
+		.byte	$4b, $34, $55, $4b, $a9, $31, $4e, $43, $56, $41, $fd, $64, $4c, $cb, $9a, $17
+		.byte	$44, $4f, $57, $4e, $79, $17, $46, $be, $52, $7a, $45, $6b, $6f, $0f, $e1, $59
+		.byte	$5d, $54, $e9, $c4, $27, $85, $5e, $a0, $27, $45, $45, $ed, $54, $48, $03, $58
+		.byte	$20, $27, $42, $f7, $59, $4c, $7e, $52, $44, $e2, $56, $4c, $45, $58, $50, $fd
+		.byte	$2c, $48, $49, $65, $55, $91, $af, $59, $41, $6a, $44, $9a, $54, $42, $4f, $4e
+		.byte	$45, $2f, $fd, $31, $80, $9d, $c6, $d1, $94, $fe, $63, $7b, $63, $e1, $45, $e2
+		.byte	$7f, $db, $44, $01, $fe, $da, $ed, $6b, $d3, $ac, $7c, $7e, $66, $ff, $ba, $03
+		.byte	$c0, $46, $92, $7e, $45, $7c, $fb, $4b, $6c, $fe, $4b, $48, $62, $2c, $e1, $34
+		.byte	$04, $80, $01, $32, $30, $31, $39, $5e, $44, $41, $6b, $52, $45, $0b, $4e, $9a
+		.byte	$46, $4f, $55, $4c, $44, $53, $fc, $8c, $00, $53, $c0, $71, $c0, $65, $89, $30
+		.byte	$4a, $c0, $c9, $01, $1f, $60, $cb, $05, $13, $89, $94, $5d, $92, $a4, $93, $11
+		.byte	$24, $0a, $7a, $ed, $83, $24, $15, $2a, $5e, $c5, $5d, $5f, $36, $9a, $4c, $15
+		.byte	$8b, $01, $30, $a4, $01, $84, $5c, $54, $c0, $20, $5b, $dc, $6e, $01, $f0, $5f
+		.byte	$40, $0c, $05, $00, $5e, $50, $b8, $22, $06, $80, $82, $07, $62, $ab, $a3, $66
+		.byte	$13, $d1, $1f, $ba, $d9, $80, $80, $4f, $0c, $46, $f8, $eb, $45, $18, $18, $e0
+		.byte	$2d, $c7, $5c, $16, $23, $9a, $cd, $5c, $04, $69, $aa, $ff, $87, $04, $ba, $b6
+		.byte	$8e, $5c, $19, $88, $d0, $22, $18, $03, $07, $04, $02, $c3, $0e, $02, $54, $b7
+		.byte	$22, $87, $f3, $6d, $43, $38, $5a, $f5, $c1, $18, $9d, $d3, $03, $74, $59, $56
+		.byte	$d2, $6b, $33, $dc, $30, $40, $64, $76, $38, $1e, $0c, $35, $10, $d4, $22, $4c
+		.byte	$b7, $34, $10, $aa, $0b, $83, $00, $55, $03, $d9, $04, $05, $06, $07, $fa, $b2
+		.byte	$34, $2c, $8b, $76, $bb, $04, $d9, $0c, $14, $24, $e0, $79, $8a, $58, $8e, $98
+		.byte	$75, $34, $70, $48, $c6, $16, $a9, $c3, $0d, $7c, $26, $2e, $4c, $c9, $b2, $40
+		.byte	$8e, $66, $d2, $5c, $35, $96, $23, $3a, $50, $01, $08, $30, $8c, $d7, $69, $a6
+		.byte	$00, $40, $7c, $23, $e1, $2c, $36, $9d, $28, $64, $54, $4c, $7c, $da, $20, $dd
+		.byte	$34, $c0, $4d, $38, $d3, $6a, $40, $3c, $7a, $78, $d8, $58, $d6, $e4, $3c, $40
+		.byte	$38, $70, $04, $78, $b6, $e4, $00, $10, $9d, $31, $99, $d4, $d6, $48, $50, $60
+		.byte	$40, $fd, $54, $31, $2c, $f0, $18, $c4, $84, $d6, $06, $44, $3c, $04, $38, $fc
+		.byte	$5d, $08, $10, $9b, $20, $7c, $eb, $02, $06, $0a, $77, $18, $2a, $e3, $80, $40
+		.byte	$a0, $30, $28, $04, $26, $7f, $05, $b0, $18, $3c, $6e, $ab, $8f, $ff, $11, $44
+		.byte	$f9, $b1, $42, $99, $40, $17, $aa, $55, $fb, $ec, $7e, $ae, $f9, $80, $2d, $9e
+		.byte	$c0, $06, $db, $60, $f4, $0f, $13, $c7, $03, $99, $c0, $01, $be, $80, $2b, $0e
+		.byte	$00, $20, $91, $1c, $00, $03, $74, $e0, $a8, $30, $07, $ff, $f0, $76, $1e, $00
+		.byte	$e3, $10, $06, $86, $04, $28, $08, $31, $61, $40, $42, $0f, $18, $06, $2d, $60
+		.byte	$8b, $81, $17, $01, $24, $80, $2f, $42, $15, $3b, $00, $ff, $20, $30, $e0, $00
+		.byte	$00, $58, $1b, $fc, $ae, $28, $5c, $4a, $a5, $14, $03, $a9, $80, $7e, $91, $02
+		.byte	$0a, $5d, $20, $2a, $8d, $21, $d0, $aa, $5f, $aa, $46, $d9, $c6, $da, $9b, $db
+		.byte	$4f, $f1, $76, $f8, $c0, $ad, $da, $bd, $20, $c1, $af, $04, $ad, $f6, $fc, $00
+		.byte	$95, $9d, $c8, $d8, $e8, $2f, $e0, $28, $d0, $e7, $fa, $4e, $ae, $9b, $41, $ef
+		.byte	$d6, $df, $af, $c0, $4c, $ba, $46, $3e, $00, $4b, $d5, $a0, $80, $aa, $e8, $f4
+		.byte	$fd, $88, $d0, $f9, $be, $0b, $e7, $da, $c8, $c9, $ff, $7e, $ea, $a0, $7f, $bf
+		.byte	$cc, $09, $d0, $cd, $e0, $8c, $e1, $45, $38, $1a, $20, $36, $22, $37, $17, $a9
+		.byte	$db, $f7, $8d, $e8, $c0, $4a, $57, $41, $0e, $00, $69, $ad, $01, $dc, $78, $90
+		.byte	$0a, $bb, $d8, $ee, $4f, $c0, $38, $5f, $19, $d0, $2b, $03, $18, $a9, $0e, $2e
+		.byte	$fd, $8d, $ef, $04, $b7, $ba, $01, $39, $6e, $ac, $c0, $90, $27, $a9, $ea, $fe
+		.byte	$fe, $96, $ff, $46, $36, $22, $97, $23, $5a, $57, $00, $29, $d6, $24, $eb, $eb
+		.byte	$52, $01, $eb, $25, $4a, $c0, $75, $02, $4a, $95, $26, $47, $60, $5c, $20, $a9
+		.byte	$4b, $5c, $48, $d2, $4c, $a5, $2e, $8d, $4d, $fb, $40, $60, $ad, $e6, $c9, $21
+		.byte	$f0, $02, $69, $df, $8d, $b5, $e7, $50, $60, $ee, $0e, $16, $01, $04, $05, $12
+		.byte	$bf, $2b, $31, $4b, $00, $20, $12, $02, $20, $95, $06, $85, $19, $04, $eb, $2f
+		.byte	$18, $a5, $f5, $50, $13, $53, $0c, $09, $05, $5f, $2a, $03, $01, $0e, $27, $14
+		.byte	$be, $0b, $09, $56, $0c, $14, $19, $0f, $15, $3f, $af, $01, $40, $28, $19, $ab
+		.byte	$2f, $0e, $29, $e1, $20, $56, $6c, $85, $dd, $f7, $67, $d0, $06, $d9, $cf, $f5
+		.byte	$4c, $b4, $bd, $b4, $16, $ad, $75, $8a, $92, $f6, $d7, $b1, $30, $97, $a8, $6d
+		.byte	$30, $3d, $b8, $bd, $b5, $82, $c0, $b6, $0f, $20, $c3, $77, $8a, $98, $c8, $8a
+		.byte	$05, $15, $86, $01, $84, $c2, $cb, $a9, $fa, $a2, $ac, $c8, $20, $d8, $ff, $f7
+		.byte	$ad, $b7, $c1, $8d, $18, $d4, $4c, $d5, $ff, $41, $00, $ea, $3a, $49, $a5, $47
+		.byte	$48, $53, $43, $4f, $52, $45, $fe, $6b, $85, $9d, $a9, $01, $bd, $0f, $a6, $6d
+		.byte	$e0, $72, $10, $02, $dd, $08, $86, $6e, $b8, $a7, $09, $5d, $ba, $35, $c1, $35
+		.byte	$bd, $75, $a2, $75, $a0, $50, $4b, $00, $f5, $20, $d5, $ff, $b0, $0b, $a2, $02
+		.byte	$bd, $ff, $a9, $50, $9d, $13, $c2, $ca, $10, $f7, $ff, $a5, $ba, $ca, $b4, $a9
+		.byte	$95, $6f, $9a, $96, $9a, $a0, $00, $84, $e5, $7a, $a5, $fa, $24, $90, $70, $03
+		.byte	$c8, $d0, $f6, $20, $ff, $ab, $ff, $60, $e0, $00, $25, $22, $20, $59, $88, $8b
+		.byte	$02, $22, $00, $00, $23, $f5, $47, $aa, $88, $b3, $30, $11, $30, $5e, $f7, $0a
+		.byte	$10, $b1, $22, $20
+
+; jumped to by: decrunch_start
+build_decrunch_tables:
+		inx 
+		tya 
+		and #$0f
+		beq l15CD
+		txa 
+		lsr 
+		ldx save_vector + $1, y
+; jumped to by: build_decrunch_tables
+l15BE:
+		rol 
+		rol decrunch_value_high
+		dex 
+		bpl l15BE
+		adc decrunch_bit_counts + $33, y
+		tax 
+		lda decrunch_value_high
+		adc decrunch_base_low + $33, y
+; jumped to by: build_decrunch_tables
+l15CD:
+		sta decrunch_base_high, y
+		txa 
+		sta decrunch_base_low, y
+		ldx #$04
+		jsr read_bits
+		sta decrunch_bit_counts, y
+		iny 
+		cpy #$34
+		bne build_decrunch_tables
+		ldy #$00
+		jmp decrunch
+; read by: decrunch_start
+d15E5 = $15e5
+
+decrunch_zero_page:
+		.byte	$48, $17, $c2
+decruncher_source:
+		.byte	$a9, $00, $85, $9f, $e0, $01, $90, $26, $46, $fd, $d0, $1c, $48, $c6, $01, $8d
+		.byte	$20, $d0, $e6, $01, $ad, $20, $01, $d0, $03, $ce, $21, $01, $ce, $20, $01, $ad
+		.byte	$b3, $15, $90, $13, $6a, $85, $fd, $68, $2a, $26, $9f, $ca, $d0, $da, $60, $ca
+		.byte	$c6, $ff, $c6, $af, $88, $b1, $ae, $91, $fe, $98, $d0, $f8, $8a, $d0, $f0, $88
+		.byte	$e8, $20, $08, $01, $4a, $c8, $90, $f8, $f0, $2b, $c0, $11, $b0, $56, $be, $33
+		.byte	$03, $20, $00, $01, $79, $67, $03, $85, $a7, $a5, $9f, $79, $9b, $03, $48, $d0
+		.byte	$06, $a4, $a7, $c0, $04, $90, $02, $a0, $03, $be, $a9, $01, $20, $00, $01, $79
+		.byte	$ac, $01, $a8, $a5, $a7, $e5, $fe, $90, $02, $c6, $ff, $49, $ff, $85, $fe, $c0
+		.byte	$01, $90, $8a, $be, $34, $03, $20, $00, $01, $79, $68, $03, $90, $03, $e6, $9f
+		.byte	$18, $65, $fe, $85, $ae, $a5, $9f, $79, $9c, $03, $65, $ff, $85, $af, $68, $aa
+		.byte	$a4, $a7, $90, $95, $c6, $01, $58, $4c, $00, $c0, $02, $04, $04, $30, $20, $10
+		.byte	$00, $00, $ff, $ff
+
+.virtual $169d
+; still VICE's power-on pattern
+untouched_169d:
+		.fill	2403
 ; ---- built at run time by build_charset and build_sprites ----
 ; written by: build_charset
 charset:
 		.fill	2048
-.endv
-
-.virtual $3200
+untouched_2800:
+		.fill	2560
 ; written by: build_sprites
 sprites:
 		.fill	256
+untouched_3300:
+		.fill	3328
 .endv
 
 *=$4000
@@ -2788,10 +3274,17 @@ sprite_shapes:
 		.byte	$24, $80, $00, $42, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $ff
+
+.virtual $56f8
+unused_56f8:
+		.fill	18696
+.endv
+
 *=$c000
 
 ; ---- crack intro and high-score code ----
 ; the cracker's intro: asks whether to enable the trainer
+; jumped to by: decrunch
 crack_intro:
 		cli 
 		lda #$fc
@@ -3087,7 +3580,9 @@ lC20F:
 loaded_highscore:
 		.byte	$00, $00, $00
 
-.virtual $d000
+.virtual $c216
+untouched_c216:
+		.fill	3562
 ; ---- VIC-II ----
 ; read by: build_charset
 ; written by: title_screen, position_invader
@@ -3141,7 +3636,7 @@ sprite_expand_x:		.byte	?
 ; read by: wait_frame
 sprite_sprite_collision:		.byte	?
 sprite_background_collision:		.byte	?
-; written by: start, crack_intro
+; written by: read_more_bits, start, crack_intro
 border_color:		.byte	?
 ; written by: start, crack_intro
 background_color:		.byte	?
@@ -3319,19 +3814,39 @@ iobase:
 $0001-$0002 virtual byte cpu_port
 $0090-$0091 virtual byte io_status
 $009d-$009e virtual byte kernal_msgflag
+$009f-$00a0 virtual byte decrunch_value_high
+$00a7-$00a8 virtual byte decrunch_length
+$00ae-$00b0 virtual word decrunch_copy_source
 $00ba-$00bb virtual byte kernal_device
 $00c1-$00c3 virtual word kernal_save_start
+$00fd-$00fe virtual byte decrunch_bit_buffer
+$00fe-$0100 virtual word decrunch_output
+$0100-$0108 code read_bits
+$0108-$013c code read_more_bits
+$013c-$01aa code decrunch
+$01aa-$01b0 byte[6] decrunch_table
 $0286-$0287 virtual byte kernal_text_color
 $0291-$0292 virtual byte kernal_case_lock
 $0314-$0316 virtual word irq_vector
 $0328-$032a virtual word stop_vector
+$0332-$0334 virtual addr save_vector
+$0334-$0368 virtual byte[52] decrunch_bit_counts
+$0368-$039c virtual byte[52] decrunch_base_low
+$039c-$03d0 virtual byte[52] decrunch_base_high
 $0400-$07e8 virtual byte[1000] screen
 $07f8-$0800 virtual byte[8] sprite_pointers
-$0800-$2000 gap
+$0800-$0801 byte basic_start
+$0801-$080d byte[12] basic_stub
+$080d-$081f code decrunch_start
+$081f-$15b3 byte[3476] packed_data
+$15b3-$15e6 code build_decrunch_tables
+$15e6-$15e9 byte[3] decrunch_zero_page
+$15e9-$169d byte[180] decruncher_source
+$169d-$2000 virtual byte[2403] untouched_169d
 $2000-$2800 virtual byte[2048] charset
-$2800-$3200 gap
+$2800-$3200 virtual byte[2560] untouched_2800
 $3200-$3300 virtual byte[256] sprites
-$3300-$4000 gap
+$3300-$4000 virtual byte[3328] untouched_3300
 $4000-$404b code start
 $404b-$40a8 code title_screen
 $40a8-$4102 code title_loop
@@ -3456,7 +3971,7 @@ $5218-$5308 byte[240] title_chars
 $5308-$53f8 byte[240] ground_chars
 $53f8-$55f8 byte[512] custom_chars
 $55f8-$56f8 byte[256] sprite_shapes
-$56f8-$a000 gap
+$56f8-$a000 virtual byte[18696] unused_56f8
 $c000-$c04e code crack_intro
 $c04e-$c0ac code ask_trainer
 $c0ac-$c0ad byte trainer_flag
@@ -3471,7 +3986,7 @@ $c1b8-$c1ba ascii[2] scratch_command
 $c1ba-$c1c3 ascii[9] highscore_filename
 $c1c3-$c213 code load_highscore
 $c213-$c216 byte[3] loaded_highscore
-$c216-$d000 gap
+$c216-$d000 virtual byte[3562] untouched_c216
 $d000-$d001 virtual byte sprite0_x
 $d001-$d002 virtual byte sprite0_y
 $d002-$d003 virtual byte sprite1_x

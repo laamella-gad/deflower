@@ -117,8 +117,9 @@ class Subject {
         MemoryLocation location = memory[address];
         // An included comment describes the included label, so it only goes
         // where that label does.
-        boolean weakLosesLabel = annotation.included && location.label != null && !location.label.included;
-        if (annotation.name != null && (!annotation.included || location.label == null)) {
+        boolean weakLosesLabel = annotation.included && (location.label != null && !location.label.included
+                || insideOwnArea(address));
+        if (annotation.name != null && (!annotation.included || location.label == null && !weakLosesLabel)) {
             location.label = new Label(annotation.name, false, annotation.included);
         }
         if (!annotation.comment.isEmpty() && !weakLosesLabel && (!annotation.included || location.comment.isEmpty())) {
@@ -399,6 +400,16 @@ class Subject {
                 errors.add(String.format("Duplicate label %s at %s, already defined at %s", location.label.name, asHexWord(location.address), asHexWord(first)));
             }
         }
+    }
+
+    /**
+     * True when an area of the including file covers `address` but starts
+     * before it, like the high byte of a word: an included name there
+     * would replace the word's own name in the operands.
+     */
+    private boolean insideOwnArea(int address) {
+        Area area = memory[address].area;
+        return area != null && area.address != address && !(area instanceof DataArea && ((DataArea) area).included);
     }
 
     /**

@@ -4,8 +4,6 @@
 warning: $0881: bne $088b (l088B) goes into the middle of the instruction at $0889
 warning: $08d3: jsr $033c (tape_header) goes into data
 warning: $a587: jmp $ea31 (kernal_irq) goes into data
-warning: $abe8: jsr returns into data at $abeb (never_reached_abeb)
-warning: $abee: jsr returns into data at $abf1 (never_reached_abf1)
 Writing out/3dgolf_snap.asm
 Writing out/3dgolf_snap.map
 Verify out/3dgolf_snap.asm: 45859 bytes emitted, 0 differ, 19677 virtual, 0 gaps
@@ -14,11 +12,11 @@ Verify out/3dgolf_snap.asm: 45859 bytes emitted, 0 differ, 19677 virtual, 0 gaps
 .virtual $0000
 ; ---- zero page ----
 cpu_port_direction:		.byte	?
-; read by: start2, $a003, irq, nmi, bank_out_io, bank_in_io, $c041, $c06a, lC0F3
-; written by: $0195, decrunch, start2, $a007, irq, nmi, bank_out_io, bank_in_io, $c045, $c06e, lC0F3
+; read by: start2, $a003, irq, nmi, bank_out_io, bank_in_io, save_game, set_save_file
+; written by: $0195, decrunch, start2, $a007, irq, nmi, bank_out_io, bank_in_io, save_game, set_save_file
 cpu_port:		.byte	?
 ; read by: l2C60, print_inline, store_hex, nmi
-; written by: print_inline, nmi, lC13B
+; written by: print_inline, nmi, save_range
 ; modified by: l2C60, print_inline, store_hex
 text_pointer:		.word	?
 ; read by: l0DC7, scroll_text, draw_shape, color_text, nmi, lA8CB, draw_wind, lB396, $b60a, $b612, $b616, lB78E
@@ -150,17 +148,17 @@ vf8:		.byte	?
 vf9:		.byte	?
 ; read by: $017c, $019a
 vfa:		.byte	?
-; read by: $0182, $019e, old_loader, $c059
-; written by: old_loader, $c049
+; read by: $0182, $019e, old_loader, save_game
+; written by: old_loader, save_game
 ; modified by: $0100
 vfb:		.byte	?
-; read by: old_loader, $c064
-; written by: old_loader, $c04d
-; modified by: old_loader, $c060
+; read by: old_loader, save_game
+; written by: old_loader, save_game
+; modified by: old_loader, save_game
 vfc:		.byte	?
-; read by: old_loader, load_animation, draw_animation_frame, l33C0, $c05b
-; written by: old_loader, load_animation, draw_animation_frame, $c051, $c055
-; modified by: old_loader, $c062
+; read by: old_loader, load_animation, draw_animation_frame, l33C0, save_game
+; written by: old_loader, load_animation, draw_animation_frame, save_game
+; modified by: old_loader, save_game
 pointer_fd:		.word	?
 unused_ff:		.byte	?
 .endv
@@ -1618,7 +1616,7 @@ unused_z80_junk:
 		.byte	$d1, $e1, $21, $bb, $02, $e5, $d5, $c5, $c9, $b7, $cd, $f7, $10, $23, $22, $ce
 		.byte	$41, $7e, $f6, $28, $77, $cd, $86, $32, $22, $df, $41, $0e, $00, $c5, $cd
 
-; called by: $c01f
+; called by: save_game
 ; jumped to by: bank_in_io
 l0FF3:
 		jsr scnkey
@@ -5026,7 +5024,7 @@ l2C72:
 		jmp l2C60
 
 ; prints the $ff-terminated text after the jsr
-; called by: swing, check_landing, check_out_of_bounds, print_score_labels, nmi, print_par_result, title_screen, aim, music_step, lC0F3, lC13B
+; called by: swing, check_landing, check_out_of_bounds, print_score_labels, nmi, print_par_result, title_screen, aim, music_step, set_save_file, save_range
 print_inline:
 		pla 
 		sta text_pointer
@@ -5044,7 +5042,7 @@ l2C81:
 		pha 
 		rts 
 
-; called by: bank_in_io, lC0F3, lC13B
+; called by: bank_in_io, set_save_file, save_range
 print_hex:
 		pha 
 		jsr l2CB4
@@ -5103,7 +5101,7 @@ l2CC7:
 unused_2cca:
 		.byte	$00, $00, $00, $00, $00, $00
 
-; jumped to by: $01a3, old_loader, $c0f0
+; jumped to by: $01a3, old_loader, save_game
 start:
 		jmp l2CDC
 
@@ -10489,6 +10487,7 @@ lA63E:
 lA64A:
 		cmp #$17
 		bne lA64F
+; the brk for the X key: save_game turns it into a nop for C and D, and back for N and M
 		brk 
 
 ; jumped to by: nmi
@@ -12988,7 +12987,7 @@ lB5D8:
 ; called by: $a009
 lB5E8:
 		jsr install_interrupts
-		jmp lC01A
+		jmp save_game
 
 ; called by: nmi
 lB5EE:
@@ -13979,38 +13978,42 @@ note_frequencies:
 		.word	$430f, $470c, $4b45, $4fbf, $547d, $5983, $5ed6, $6479, $6a73, $70c7, $777c, $7e97, $0000, $0000, $0000, $0000
 		.word	$861e, $8e18, $968b, $9f7e, $a8fa, $b306, $bdac, $c8f3, $d4e6, $e18f, $eef8, $fd2e
 
-; read by: lC0F3
-; written by: $c03b
-vc00e:
+; ---- a leftover tool that saves the game's memory to tape or disk ----
+; 1 for tape, 8 for disk
+; read by: set_save_file
+; written by: save_game
+save_device:
 		.byte	$08
 
-unused_golf:
-		.text	"GOLF"
+; "GOLF" and a digit, which save_range counts up from save_digit
+save_name:
+		.text	"GOLF4"
+; written by: save_range
+save_name_digit = $c013
 
-; written by: lC13B
-vc013:
+; read by: set_save_file
+save_name_length:
+		.byte	$05
+
+; read by: save_range
+; written by: save_game
+save_start:
+		.addr	data_pointers
+
+; read by: save_range
+; written by: set_save_file
+; modified by: save_range
+save_digit:
 		.byte	$34
-; read by: lC0F3
-vc014:		.byte	$05
 
-; read by: lC13B
-; written by: $c072, $c077, $c089, $c08e, $c0a0, $c0a5, $c0bc, $c0c1, $c0d6, $c0db
-vc015:
-		.word	$7f40
+; read by: save_range
+; written by: save_game
+save_end:
+		.addr	unused_nops
 
-; read by: lC13B
-; written by: lC0F3
-; modified by: lC13B
-vc017:
-		.byte	$34
-
-; read by: lC13B
-; written by: $c07c, $c081, $c093, $c098, $c0aa, $c0af, $c0c6, $c0cb, $c0e0, $c0e5
-vc018:
-		.word	$c17d
-
-; jumped to by: lB5E8, $c034
-lC01A:
+; asks C, N, D or M: tape or disk, and whether to keep the brk at $a64e
+; jumped to by: lB5E8
+save_game:
 		lda #$ea
 		sta $a64e
 		jsr l0FF3
@@ -14023,15 +14026,15 @@ lC01A:
 		cmp #$44
 		beq lC03B
 		cmp #$4d
-		bne lC01A
-; jumped to by: $c02a
+		bne save_game
+; jumped to by: save_game
 lC036:
 		lda #$00
 		sta $a64e
-; jumped to by: $c026, $c030
+; jumped to by: save_game
 lC03B:
-		stx vc00e
-		jsr lC0F3
+		stx save_device
+		jsr set_save_file
 		lda cpu_port
 		and #$fd
 		sta cpu_port
@@ -14044,7 +14047,7 @@ lC03B:
 		lda #$60
 		sta pointer_fd + $1
 		ldy #$00
-; jumped to by: $c05e, $c068
+; jumped to by: save_game
 lC059:
 		lda (vfb), y
 		sta (pointer_fd), y
@@ -14058,74 +14061,75 @@ lC059:
 		lda cpu_port
 		ora #$02
 		sta cpu_port
+		lda #<bitmap
+		sta save_start
+		lda #>bitmap
+		sta save_start + $1
 		lda #$00
-		sta vc015
-		lda #$60
-		sta vc015 + $1
-		lda #$00
-		sta vc018
+		sta save_end
 		lda #$70
-		sta vc018 + $1
-		jsr lC13B
-		lda #$00
-		sta vc015
-		lda #$09
-		sta vc015 + $1
-		lda #$00
-		sta vc018
-		lda #$44
-		sta vc018 + $1
-		jsr lC13B
-		lda #$00
-		sta vc015
-		lda #$48
-		sta vc015 + $1
-		lda #$00
-		sta vc018
-		lda #$60
-		sta vc018 + $1
-		jsr lC13B
+		sta save_end + $1
+		jsr save_range
+		lda #<to_log
+		sta save_start
+		lda #>to_log
+		sta save_start + $1
+		lda #<bitmap_colors
+		sta save_end
+		lda #>bitmap_colors
+		sta save_end + $1
+		jsr save_range
+		lda #<sprites
+		sta save_start
+		lda #>sprites
+		sta save_start + $1
+		lda #<bitmap
+		sta save_end
+		lda #>bitmap
+		sta save_end + $1
+		jsr save_range
 		lda $a64e
 		beq lC0D4
-		lda #$40
-		sta vc015
-		lda #$7f
-		sta vc015 + $1
-		lda #$1a
-		sta vc018
-		lda #$c0
-		sta vc018 + $1
-		jsr lC13B
+		lda #<data_pointers
+		sta save_start
+		lda #>data_pointers
+		sta save_start + $1
+		lda #<save_game
+		sta save_end
+		lda #>save_game
+		sta save_end + $1
+		jsr save_range
 		jmp lC0EB
 
-; jumped to by: $c0b8
+; jumped to by: save_game
 lC0D4:
-		lda #$40
-		sta vc015
-		lda #$7f
-		sta vc015 + $1
-		lda #$7d
-		sta vc018
-		lda #$c1
-		sta vc018 + $1
-		jsr lC13B
-; jumped to by: $c0d1
+		lda #<data_pointers
+		sta save_start
+		lda #>data_pointers
+		sta save_start + $1
+		lda #<unused_nops
+		sta save_end
+		lda #>unused_nops
+		sta save_end + $1
+		jsr save_range
+; jumped to by: save_game
 lC0EB:
 		lda #$00
 		sta $a64e
 		jmp start
 
-; called by: $c03e
-lC0F3:
+; sets the device and file name
+; called by: save_game
+set_save_file:
 		lda cpu_port
 		and #$fe
 		sta cpu_port
 		lda #$30
-		sta vc017
+		sta save_digit
 		jsr clall
-		ldx vc00e
+		ldx save_device
 		ldy #$01
-		lda vc00e
+		lda save_device
 		jsr setlfs
 		bcs lC129
 		jsr print_hex
@@ -14134,37 +14138,38 @@ lC0F3:
 text_error_in_setlfs:
 		.text	" ERROR IN SETLFS", $0d, $ff
 
-; jumped to by: lC0F3
+; jumped to by: set_save_file
 lC126:
 		jmp lC126
 
-; jumped to by: lC0F3
+; jumped to by: set_save_file
 lC129:
-		lda vc014
+		lda save_name_length
 		ldx #$0f
 		ldy #$c0
 		jsr setnam
 		bcs lC13A
 		bcc lC13A
-; jumped to by: lC0F3
+; jumped to by: set_save_file
 lC137:
 		jmp lC137
 
-; jumped to by: lC0F3
+; jumped to by: set_save_file
 lC13A:
 		rts 
 
-; called by: $c084, $c09b, $c0b2, $c0ce, $c0e8
-lC13B:
-		inc vc017
-		lda vc017
-		sta vc013
-		lda vc015
+; saves save_start up to save_end as the next file
+; called by: save_game
+save_range:
+		inc save_digit
+		lda save_digit
+		sta save_name_digit
+		lda save_start
 		sta text_pointer
-		lda vc015 + $1
+		lda save_start + $1
 		sta text_pointer + $1
-		ldx vc018
-		ldy vc018 + $1
+		ldx save_end
+		ldy save_end + $1
 		lda #$02
 		jsr save
 		bcc lC176
@@ -14174,12 +14179,12 @@ lC13B:
 text_save_routine_error:
 		.text	" SAVE ROUTINE ERROR", $0d, $ff
 
-; jumped to by: lC13B
+; jumped to by: save_range
 lC176:
 		rts 
 
 ; unreferenced: flashes the border forever
-; jumped to by: lC13B
+; jumped to by: save_range
 lC177:
 		inc border_color
 		jmp lC177
@@ -14499,7 +14504,7 @@ sprite_expand_x:		.byte	?
 sprite_sprite_collision:		.byte	?
 sprite_background_collision:		.byte	?
 ; written by: main
-; modified by: lC13B
+; modified by: save_range
 border_color:		.byte	?
 ; written by: old_loader, clear_screen, $a52d
 background_color:		.byte	?
@@ -14937,10 +14942,10 @@ talk:
 		.fill	3
 readst:
 		.fill	3
-; called by: lC0F3
+; called by: set_save_file
 setlfs:
 		.fill	3
-; called by: $08de, lC0F3
+; called by: $08de, set_save_file
 setnam:
 		.fill	3
 open:
@@ -14960,7 +14965,7 @@ chrout:
 ; called by: $08e3
 load:
 		.fill	3
-; called by: lC13B
+; called by: save_range
 save:
 		.fill	3
 settim:
@@ -14972,7 +14977,7 @@ stop:
 ; called by: l0FF3, read_hex_digit, read_hole_number, music_step
 getin:
 		.fill	3
-; called by: lC0F3
+; called by: set_save_file
 clall:
 		.fill	3
 udtim:
@@ -15811,18 +15816,17 @@ $bc51-$bd18 code select_tune
 $bd18-$bd19 code dBD18
 $bd19-$bf16 byte[509] music_data
 $bf16-$c00e word[124] note_frequencies
-$c00e-$c00f byte vc00e
-$c00f-$c013 ascii[4] unused_golf
-$c013-$c014 byte vc013
-$c014-$c015 byte vc014
-$c015-$c017 word vc015
-$c017-$c018 byte vc017
-$c018-$c01a word vc018
-$c01a-$c0f3 code lC01A
-$c0f3-$c114 code lC0F3
+$c00e-$c00f byte save_device
+$c00f-$c014 ascii[5] save_name
+$c014-$c015 byte save_name_length
+$c015-$c017 addr save_start
+$c017-$c018 byte save_digit
+$c018-$c01a addr save_end
+$c01a-$c0f3 code save_game
+$c0f3-$c114 code set_save_file
 $c114-$c126 ascii[18] text_error_in_setlfs
 $c126-$c13b code lC126
-$c13b-$c161 code lC13B
+$c13b-$c161 code save_range
 $c161-$c176 ascii[21] text_save_routine_error
 $c176-$c17d code lC176
 $c17d-$cb00 byte[2435] unused_nops

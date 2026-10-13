@@ -1,0 +1,42 @@
+>>> An included label on the second byte of the program's own word is
+dropped with the included area: the operand stays pointer + $1. <<<
+
+.virtual $00d0
+pointer:		.word	?
+.endv
+
+*=$c000
+
+start:
+		lda #$00
+		sta pointer
+		sta pointer + $1
+		rts
+===
+deflower test.prg
+$c000 code start
+$d0 virtual word pointer
+include c64_zeropage.flo
+^^^
+Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 7 bytes emitted, 0 differ, 255 virtual, 0 gaps
+~~~
+
+.virtual $00d0
+; written by: start
+pointer:		.word	?
+.endv
+
+*=$c000
+
+start:
+		lda #$00
+		sta pointer
+		sta pointer + $1
+		rts 
+~~~
+--- test.map
+$00d0-$00d2 virtual word pointer
+$c000-$c007 code start
+vvv

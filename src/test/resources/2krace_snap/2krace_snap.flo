@@ -15,10 +15,14 @@ $08 virtual byte car_step
 ; the current stage's index into the wall tables
 $09 virtual byte difficulty
 $d0 virtual word music_pointer
+; the KERNAL's screen_line high byte; music_pointer took its low byte
+$d2 virtual byte
 $fb virtual word draw_pointer
 $fd virtual word draw_pointer2
 
 ; ---- start-up ----
+; the zero byte BASIC wants in front of a program
+$0800 byte basic_start
 ; BASIC stub: SYS 2061
 $0801-$080d byte basic_stub
 ; the decruncher's start, still in memory but no longer used
@@ -260,3 +264,23 @@ $dd00 virtual {
 
 ; the hardware IRQ vector ($01 = $35: KERNAL banked out, so it's RAM)
 $fffe addr irq_vector
+
+; ---- memory the game doesn't use ----
+; cleared, by the decruncher or at power-on
+$0da0-$1000 virtual byte unused_0da0
+$1592-$4040 virtual byte unused_1592
+$4240-$4400 virtual byte unused_4240
+$47e8-$47f8 virtual byte unused_47e8
+$4a80-$7800 virtual byte unused_4a80
+$78b0-$7fff virtual byte unused_78b0
+; still VICE's power-on pattern
+$8200-$d000 virtual byte untouched_8200
+$e000-$fd30 virtual byte untouched_e000
+; the KERNAL's default vectors, which RESTOR copies from the ROM and so also writes to the RAM under it
+$fd30-$fd50 word ram_vectors_copy
+$fd50-$fffe virtual byte untouched_fd50
+
+; the system areas; BASIC and KERNAL are banked out
+include c64_zeropage.flo
+include c64_system.flo
+include c64_io.flo
