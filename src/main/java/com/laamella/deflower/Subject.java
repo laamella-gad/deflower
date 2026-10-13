@@ -145,7 +145,7 @@ class Subject {
                             annotation.parameters != null ? annotation.parameters : List.of(), annotation.noReturn));
                 }
             }
-            case SCREENCODE_LINE, ASCII_LINE, BYTE_LINE, WORD_LINE, LONG_LINE, DWORD_LINE, ADDR_LINE, SBYTE_LINE, SWORD_LINE, SLONG_LINE, SDWORD_LINE, UNKNOWN_LINE -> {
+            case SCREENCODE_LINE, ASCII_LINE, BYTE_LINE, WORD_LINE, LONG_LINE, DWORD_LINE, ADDR_LINE, RTA_LINE, SBYTE_LINE, SWORD_LINE, SLONG_LINE, SDWORD_LINE, UNKNOWN_LINE -> {
                 int amount = annotation.addressEnd != null
                         ? (annotation.addressEnd - address) / type.dataType.sizeInBytes
                         : annotation.amount;
@@ -196,6 +196,7 @@ class Subject {
                     DataArea area = new DataArea(elementAddress, type.dataType, annotation.virtual || !loaded, annotation.name, i, annotation.included, export, annotation.terminator, annotation.lengthByte);
                     if (!annotation.included || !overlapsOwnArea(area)) {
                         registerArea(area);
+                        addReturnAddress(area);
                     }
                 }
                 if (unloadedStart != -1) {
@@ -209,6 +210,23 @@ class Subject {
             }
             default -> throw new RuntimeException("No data type");
         }
+    }
+
+    /**
+     * Traces where an rta element (issue 0038) returns to, as the start of
+     * a routine: an rts dispatch table's entries are its handlers.
+     */
+    void addReturnAddress(DataArea area) {
+        if (area.type == DataType.RTA && !area.isVirtual()) {
+            addCallTarget(returnAddressAt(area.address), area.address);
+        }
+    }
+
+    /**
+     * The address an rts returns to through the rta value at `address`.
+     */
+    int returnAddressAt(int address) {
+        return (wordAt(address) + 1) & 0xffff;
     }
 
     /**
@@ -445,7 +463,7 @@ class Subject {
 
     /**
      * Every address an instruction's operand names, a (not virtual)
-     * .addr value holds, and the address an address setup builds when its
+     * .addr value holds, an .rta value returns to, and the address an address setup builds when its
      * label would be on that address itself.
      */
     private Set<Integer> referencedAddresses() {
@@ -462,6 +480,8 @@ class Subject {
                 }
             } else if (area instanceof DataArea && ((DataArea) area).type == DataType.ADDR && !area.isVirtual()) {
                 targets.add(wordAt(area.address));
+            } else if (area instanceof DataArea && ((DataArea) area).type == DataType.RTA && !area.isVirtual()) {
+                targets.add(returnAddressAt(area.address));
             }
         }
         for (int built : lowByteSetups.values()) {

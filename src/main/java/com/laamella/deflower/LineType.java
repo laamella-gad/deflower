@@ -3,7 +3,7 @@ package com.laamella.deflower;
 import static com.laamella.deflower.DataType.*;
 
 enum LineType {
-    SCREENCODE_LINE(SCREENCODE), ASCII_LINE(ASCII), BYTE_LINE(BYTE), CODE_LINE(null), WORD_LINE(WORD), LONG_LINE(LONG), DWORD_LINE(DWORD), ADDR_LINE(ADDR),
+    SCREENCODE_LINE(SCREENCODE), ASCII_LINE(ASCII), BYTE_LINE(BYTE), CODE_LINE(null), WORD_LINE(WORD), LONG_LINE(LONG), DWORD_LINE(DWORD), ADDR_LINE(ADDR), RTA_LINE(RTA),
     SBYTE_LINE(SBYTE), SWORD_LINE(SWORD), SLONG_LINE(SLONG), SDWORD_LINE(SDWORD),
     /**
      * The default when a line has no explicit type keyword (issue

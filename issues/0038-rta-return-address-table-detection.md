@@ -1,7 +1,6 @@
 ---
 title: Detect and support 64tass's `.rta` return-address-table idiom
-status: open
-priority: low
+status: done
 labels: enhancement
 ---
 
@@ -37,3 +36,11 @@ Proposed structure, once something needs it:
 - The tracing itself stays one phase: `FlowAnalyser`'s worklist loop, with its per-opcode cases, doesn't split into phases.
 
 Not worth doing before then: today it is four fixed steps, and only one of them is an extra analysis.
+
+## Closing note
+
+Done as decided: `rta` is a two-byte type, e.g. `$c00b rta[3] handlers`. It prints as `.rta` with the label of the value plus one (`Subject.returnAddressAt`), and each loaded, non-virtual element pushes that address as a code entry, labelled as a routine (`Subject.addReturnAddress`). `InlineData` does the same for an `rta` parameter after a jsr, though no snippet covers that. An entry that returns into data warns at the element: `rta $c019 (lC019) goes into data`. An `.rta` value also keeps an included label it returns to.
+
+The table is declared, not detected, so its entries are pushed before the tracing and the phase structure above isn't needed yet.
+
+mpu6502's `SourceParser` learned `.rta` (stored minus one, wrapping like 64tass) for verify and the round trip; it is installed in `~/.m2` but not committed there. `short/rta.txt` models an rts dispatch (`lda handlers + 1, x`, `pha`, `lda handlers, x`, `pha`, `rts`) with two handlers and an entry into data; 64tass reassembles it to the source bytes. None of the real programs has such a table: 3dgolf's only `pha`/`pha`/`rts` is `print_inline` returning past its text.

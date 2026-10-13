@@ -218,6 +218,7 @@ class AssemblyFileFormat {
             case LONG -> ".long";
             case DWORD -> ".dword";
             case ADDR -> ".addr";
+            case RTA -> ".rta";
             case SBYTE -> ".char";
             case SWORD -> ".sint";
             case SLONG -> ".lint";
@@ -269,6 +270,10 @@ class AssemblyFileFormat {
                 // (issue 0036) - more precise than .WORD for a value that's
                 // always an address, not an arbitrary 16-bit number.
                 tabularPrint(".addr", nameForAddress(subject.wordAt(address), "$%04x", subject));
+                break;
+            case RTA:
+                // 64tass stores the label minus one (issue 0038).
+                tabularPrint(".rta", nameForAddress(subject.returnAddressAt(address), "$%04x", subject));
                 break;
             case SBYTE:
                 tabularPrint(".char", Integer.toString((byte) subject.byteAt(address)));

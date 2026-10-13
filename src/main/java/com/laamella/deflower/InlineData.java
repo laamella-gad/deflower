@@ -76,6 +76,7 @@ final class InlineData {
             }
         }
         areas.forEach(subject::registerArea);
+        areas.forEach(subject::addReturnAddress);
         if (!names.isEmpty()) {
             subject.callComments.put(jsrAddress, String.join(", ", names));
         }

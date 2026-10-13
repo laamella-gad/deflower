@@ -412,6 +412,8 @@ class FloReader {
             return DWORD_LINE;
         } else if (ctx.ADDR() != null) {
             return ADDR_LINE;
+        } else if (ctx.RTA() != null) {
+            return RTA_LINE;
         } else if (ctx.SBYTE() != null) {
             return SBYTE_LINE;
         } else if (ctx.SWORD() != null) {

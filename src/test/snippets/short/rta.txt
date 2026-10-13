@@ -1,0 +1,67 @@
+>>> Issue 0038: an rta table holds addresses minus one, as an rts
+dispatch pushes them. It prints as `.rta` with the label of the address
+plus one, and that address is traced as code, labelled as a routine when
+it has no label. An entry that returns into data is a warning. <<<
+
+*=$c000
+
+entry:
+		ldx #$02
+		lda handlers + 1, x
+		pha
+		lda handlers, x
+		pha
+		rts
+handlers:
+		.rta	first, second, $c019
+first:
+		inc $d020
+		rts
+second:
+		inc $d021
+		rts
+		.byte	1, 2, 3, 4
+===
+deflower test.prg
+$c000 code entry
+$c00b rta[3] handlers
+$c019-$c01d byte
+^^^
+warning: $c00f: rta $c019 (lC019) goes into data
+Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 29 bytes emitted, 0 differ, 0 virtual, 0 gaps
+~~~
+
+*=$c000
+
+entry:
+		ldx #$02
+		lda handlers + $1, x
+		pha 
+		lda handlers, x
+		pha 
+		rts 
+
+; read by: entry
+handlers:
+		.rta	lC011, lC015, lC019
+
+lC011:
+		inc $d020
+		rts 
+
+lC015:
+		inc $d021
+		rts 
+
+lC019:
+		.byte	$01, $02, $03, $04
+~~~
+--- test.map
+$c000-$c00b code entry
+$c00b-$c011 rta[3] handlers
+$c011-$c015 code lC011
+$c015-$c019 code lC015
+$c019-$c01d byte[4] lC019
+vvv

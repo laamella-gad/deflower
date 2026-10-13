@@ -8,6 +8,12 @@ public enum DataType {
     SCREENCODE(1), ASCII(1),
     BYTE(1), WORD(2), LONG(3), DWORD(4), ADDR(2),
     /**
+     * A return address (issue 0038): an address minus one, as an rts
+     * dispatch table holds it, printed as 64tass's {@code .rta}. The
+     * address it returns to is traced as code.
+     */
+    RTA(2),
+    /**
      * Signed (two's-complement) numbers (issue 0037), printed as 64tass's
      * {@code .char}, {@code .sint}, {@code .lint} (issue 0064) and
      * {@code .dint}.

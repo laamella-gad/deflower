@@ -45,7 +45,10 @@
  *       anyway, with a warning, so it isn't printed as zero bytes.
  *     - type: screencode or ascii (text), byte, word, long (24
  *       bits), dword, addr (a 16-bit address, printed as .addr with the
- *       label of the address it holds), sbyte, sword, slong, sdword
+ *       label of the address it holds), rta (a 16-bit address minus one,
+ *       as an rts dispatch table holds it: printed as .rta with the label
+ *       of the address plus one, which is traced as code), sbyte, sword,
+ *       slong, sdword
  *       (signed numbers, printed as .char, .sint, .lint and .dint, e.g.
  *       .char -3), or code (an entry point to trace from; any [size] is
  *       ignored). Text prints as .text: screencode in Commodore screen
@@ -74,7 +77,7 @@
  *       elements, e.g. ascii[lengthbyte] for a .ptext string.
  *     - label: a name for the address, from [A-Za-z0-9._?]. It can't be
  *       a reserved word: deflower, include, virtual, export,
- *       screencode, ascii, byte, word, long, dword, addr, sbyte, sword,
+ *       screencode, ascii, byte, word, long, dword, addr, rta, sbyte, sword,
  *       slong, sdword, code, until, lengthbyte, noreturn.
  *     - (parameters), only on a code line: the data that follows every
  *       jsr to this address in memory, which the routine reads and steps
@@ -140,7 +143,7 @@ parameters: '(' parameter (',' parameter)* ')';
 parameter: datatype ID?;
 noReturn: 'noreturn';
 
-datatype: (SCREENCODE|ASCII|BYTE|WORD|LONG|DWORD|ADDR|SBYTE|SWORD|SLONG|SDWORD|CODE) ( '[' (arraySize | untilSize | lengthByte)? ']')?;
+datatype: (SCREENCODE|ASCII|BYTE|WORD|LONG|DWORD|ADDR|RTA|SBYTE|SWORD|SLONG|SDWORD|CODE) ( '[' (arraySize | untilSize | lengthByte)? ']')?;
 // The elements up to and including the first one that equals the number.
 untilSize: 'until' number;
 // A length byte, then that many elements.
@@ -160,6 +163,7 @@ WORD: 'word';
 LONG: 'long';
 DWORD: 'dword';
 ADDR: 'addr';
+RTA: 'rta';
 SBYTE: 'sbyte';
 SWORD: 'sword';
 SLONG: 'slong';

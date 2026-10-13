@@ -130,6 +130,10 @@ class FlowAnalyser {
             subject.warn(entry.address, "code entry " + entryProblem);
             return;
         }
+        if (subject.memory[entry.from].area instanceof DataArea) {
+            subject.warn(entry.from, "rta " + target + " goes into " + into);
+            return;
+        }
         Instruction from = ((InstructionArea) subject.memory[entry.from].area).instruction;
         String mnemonic = from.opcode.name().toLowerCase();
         if (entry.fallsThrough && from.opcode == Opcode.JSR) {
