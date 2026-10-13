@@ -43,4 +43,4 @@ Done as decided: `rta` is a two-byte type, e.g. `$c00b rta[3] handlers`. It prin
 
 The table is declared, not detected, so its entries are pushed before the tracing and the phase structure above isn't needed yet.
 
-mpu6502's `SourceParser` learned `.rta` (stored minus one, wrapping like 64tass) for verify and the round trip; it is installed in `~/.m2` but not committed there. `short/rta.txt` models an rts dispatch (`lda handlers + 1, x`, `pha`, `lda handlers, x`, `pha`, `rts`) with two handlers and an entry into data; 64tass reassembles it to the source bytes. None of the real programs has such a table: 3dgolf's only `pha`/`pha`/`rts` is `print_inline` returning past its text.
+mpu6502's `SourceParser` learned `.rta` (stored minus one, wrapping like 64tass) for verify and the round trip (mpu6502 commit 46caac7). `short/rta.txt` models an rts dispatch (`lda handlers + 1, x`, `pha`, `lda handlers, x`, `pha`, `rts`) with two handlers and an entry into data; 64tass reassembles it to the source bytes. None of the real programs has such a table: 3dgolf's only `pha`/`pha`/`rts` is `print_inline` returning past its text.
