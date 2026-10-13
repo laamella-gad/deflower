@@ -56,6 +56,10 @@ class Subject {
     // The jsr each call with inline data returns from, by the address it
     // returns to, after the data (issue 0068).
     final Map<Integer, Integer> callsByReturnAddress = new HashMap<>();
+    // The address an address setup (issue 0074) builds, by the address of
+    // the immediate load of its low byte, and of its high byte.
+    final Map<Integer, Integer> lowByteSetups = new HashMap<>();
+    final Map<Integer, Integer> highByteSetups = new HashMap<>();
 
     Subject(Path basePath) {
         this.basePath = basePath;
@@ -440,8 +444,9 @@ class Subject {
     }
 
     /**
-     * Every address an instruction's operand names or a (not virtual)
-     * .addr value holds.
+     * Every address an instruction's operand names, a (not virtual)
+     * .addr value holds, and the address an address setup builds when its
+     * label would be on that address itself.
      */
     private Set<Integer> referencedAddresses() {
         Set<Integer> targets = new HashSet<>();
@@ -457,6 +462,13 @@ class Subject {
                 }
             } else if (area instanceof DataArea && ((DataArea) area).type == DataType.ADDR && !area.isVirtual()) {
                 targets.add(wordAt(area.address));
+            }
+        }
+        for (int built : lowByteSetups.values()) {
+            // Only a label on the address itself prints (issue 0034).
+            Area area = peek(built);
+            if (area == null || area.labelAddressFor(built, this) == built) {
+                targets.add(built);
             }
         }
         return targets;
@@ -501,6 +513,25 @@ class Subject {
         if (location.label.local) {
             location.label = new Label(location.label.name, false);
         }
+    }
+
+    /**
+     * Labels the data `target` refers to, unless it can already be named:
+     * an address inside a labelled array or instruction resolves as
+     * "label + offset", and a label of its own would replace that. Memory
+     * no area covers (I/O, vectors, outside the image) stays numeric: a
+     * label there would only print as an empty origin block (issue 0054).
+     * Neither does memory an included file covers without a name (issue
+     * 0078): that area only stops the tracing, and is dropped before the
+     * output is written.
+     */
+    void labelDataReference(int target, int referencingAddress) {
+        Area area = peek(target);
+        boolean included = area instanceof DataArea && ((DataArea) area).included;
+        if (area == null || included || area.labelFor(target, this) != null) {
+            return;
+        }
+        ensureLabelled(target, "d", referencingAddress);
     }
 
     public void ensureLabelled(int address, String contentHint, int referencedFromAddress) {

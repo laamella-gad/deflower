@@ -51,7 +51,11 @@
  *       ignored). Text prints as .text: screencode in Commodore screen
  *       codes (64tass's "screen" encoding), ascii in Commodore ASCII
  *       (64tass's "none"); as .null when sized by [until $00] and as
- *       .ptext, on one line, when sized by [lengthbyte]. A range without
+ *       .ptext, on one line, when sized by [lengthbyte]. Code that stores
+ *       both halves of a constant address into an addr (four
+ *       instructions in a row: an immediate load and a store per half)
+ *       labels that address and prints the loads as #<label and #>label.
+ *       A range without
  *       a type is a
  *       placeholder: printed as bytes, but a later, more specific line
  *       may narrow part of it without a conflict. A single address

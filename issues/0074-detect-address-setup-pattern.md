@@ -1,7 +1,6 @@
 ---
 title: Detect the lda/sta/lda/sta address setup pattern and annotate the address as data
-status: open
-priority: medium
+status: done
 labels: enhancement
 ---
 
@@ -54,3 +53,12 @@ Done when:
 - a small fixture with the pattern shows the built address labelled and marked as data;
 - the existing fixtures' changed `expected.asm` files are reviewed with snipsert, with each new label checked against the program;
 - immediates that aren't such a pair are unaffected.
+
+## Closing note
+
+Decided and done (`AddressSetupFinder`, after the tracing):
+- **Match.** Four instructions in a row, in either order, each half an immediate `lda`/`ldx`/`ldy` and the matching `sta`/`stx`/`sty` (zero page or absolute) to `target` and `target + 1`. A label on the second, third or fourth instruction ends the match, and an instruction belongs to one match at most.
+- **Target.** Only an `addr` element starting at `target` counts. Matching any two adjacent bytes found colors stored to the border and background registers, two screen characters, and BCD scores. Allowing `word` too still matched numbers: 1nvader's BCD `hit_points` and 3dgolf's `ball_x`/`ball_y`/`hole_x`/`view_y` coordinates, one of which put a `d0130` label inside the decruncher. So a pointer has to be declared as an `addr` to be recognized; tcmine's `level_pointer`, zwark's `clear_pointer` and 3dgolf's `pointer_06` and `step_pointer` became `addr`. 3dgolf's `pointer_08` stays a `word`: `fill_colors` also uses it as a counter from `$d000` and `$fff6` up to 0.
+- **Annotation.** A label only, by the same rule as an absolute operand (`Subject.labelDataReference`): `dXXXX`, unless a label already resolves there, and none on memory no area covers or an included area covers. No area is registered, so the tracing isn't affected and a `code` line always wins.
+
+`short/addresssetup.txt` shows `lda`/`ldx`/`ldy` setups in both orders into `addr` targets, and the cases that don't match, a `word` target among them. The real programs' new matches are irq and nmi vectors (2krace, squirm, tcmine, 3dgolf) and pointers: tcmine's `level_pointer` to `screen_ram`, zwark's `clear_pointer` to `enemy_image_3`, and 3dgolf's `pointer_06` to `bitmap`, `color_ram` and others. The one new label, 3dgolf's `dBD18`, is a music data pointer set to an `rts` byte, which the music code probably also reads as an end marker.

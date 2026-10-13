@@ -1,7 +1,6 @@
 ---
 title: Support tass64's `<`/`>` hi/lo byte extraction operators in output
-status: open
-priority: low
+status: done
 labels: enhancement
 ---
 
@@ -45,3 +44,7 @@ Rejected: too complex for little gain. Even limited to the exact four-instructio
 ## Reopened
 
 Reopened with the pattern detection split off into [0074](0074-detect-address-setup-pattern.md), which removes most of the complexity that got this rejected. Once 0074 finds the pairs and gives the built address a label, printing `#<label`/`#>label` for the paired immediates is a change to the output only.
+
+## Closing note (reopened)
+
+Done with [0074](0074-detect-address-setup-pattern.md): the immediates of an address setup into an `addr` print as `#<label` and `#>label` (`AssemblyFileFormat.nameForImmediate`). Only for a label on the address itself: for an address inside an array, 64tass reads `#<label + $22` as the low byte of the sum, but mpu6502's `SourceParser` as the low byte of `label` plus `$22`, and it has no parentheses. Those immediates stay numeric. A built address only keeps an included label or virtual area from being dropped when it prints that way.

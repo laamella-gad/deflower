@@ -184,7 +184,7 @@ $2007 byte v2007
 $20de byte v20de
 ; 8 steps of +-64 per direction, read through step_pointer
 $20df sbyte[8*8] direction_steps
-$211f word step_pointer
+$211f addr step_pointer
 $252e byte[8] empty_cell
 $2536 byte cell_x
 $2537 byte cell_y
@@ -376,7 +376,7 @@ $00 virtual byte cpu_port_direction
 $01 virtual byte cpu_port
 $02 virtual word text_pointer
 $04 virtual word pointer_04
-$06 virtual word pointer_06
+$06 virtual addr pointer_06
 $08 virtual word pointer_08
 $0a virtual word bitmap_pointer
 $0c virtual byte v0c

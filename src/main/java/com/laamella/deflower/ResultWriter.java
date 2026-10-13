@@ -463,7 +463,7 @@ class AssemblyFileFormat {
             case ABSOLUTE -> format("%s", nameForAbsoluteAddress(word, subject));
             case ABSOLUTE_X -> format("%s, x", nameForAbsoluteAddress(word, subject));
             case ABSOLUTE_Y -> format("%s, y", nameForAbsoluteAddress(word, subject));
-            case IMMEDIATE -> format("#$%02x", byte1);
+            case IMMEDIATE -> format("#%s", nameForImmediate(area.address, byte1, subject));
             case ZERO_PAGE -> format("%s", nameForAddress(byte1, "$%02x", subject));
             case ZERO_PAGE_X -> format("%s, x", nameForAddress(byte1, "$%02x", subject));
             case ZERO_PAGE_Y -> format("%s, y", nameForAddress(byte1, "$%02x", subject));
@@ -482,6 +482,35 @@ class AssemblyFileFormat {
         }
 
         lastArea = area;
+    }
+
+    /**
+     * An immediate operand. The low or high byte of an address an address
+     * setup builds (issue 0074) is named `<label` or `>label` (issue
+     * 0034), but only for a label on that address itself: 64tass reads
+     * `<label + 1` as the low byte of the sum, mpu6502 as the low byte of
+     * the label plus one.
+     */
+    private String nameForImmediate(int address, int value, Subject subject) {
+        Integer low = subject.lowByteSetups.get(address);
+        Integer high = subject.highByteSetups.get(address);
+        Integer built = low != null ? low : high;
+        if (built != null) {
+            String label = exactLabel(built, subject);
+            if (label != null) {
+                return (low != null ? "<" : ">") + label;
+            }
+        }
+        return format("$%02x", value);
+    }
+
+    /**
+     * The label on `address` itself, or null, also for "label + offset".
+     */
+    private String exactLabel(int address, Subject subject) {
+        Area area = subject.memory[address].area;
+        String label = area == null ? subject.memory[address].labelName() : area.labelFor(address, subject);
+        return label == null || label.contains(" ") ? null : label;
     }
 
     /**

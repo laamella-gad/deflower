@@ -22,6 +22,7 @@ import static java.nio.file.Files.walkFileTree;
 public class Deflower {
     private final SubjectConfigurer subjectConfigurer = new SubjectConfigurer();
     private final FlowAnalyser flowAnalyser = new FlowAnalyser();
+    private final AddressSetupFinder addressSetupFinder = new AddressSetupFinder();
     private final ResultWriter resultWriter = new ResultWriter();
     private final Verifier verifier = new Verifier();
     // Reassemble each written .asm and check it against its image (issue 0075).
@@ -83,6 +84,7 @@ public class Deflower {
             prepareOutputDirectory(subjects.get(0).basePath);
             for (Subject subject : subjects) {
                 flowAnalyser.analyseCodeFlows(subject);
+                addressSetupFinder.find(subject);
                 subject.dropUnusedIncludes();
                 subject.reportDuplicateLabels();
                 subject.warnings.stream()

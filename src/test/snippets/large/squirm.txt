@@ -2459,9 +2459,9 @@ l37DC:
 		cpx #$ff
 		bne l37DC
 		sei 
-		lda #$27
+		lda #<countdown_irq
 		sta irq_vector
-		lda #$3d
+		lda #>countdown_irq
 		sta irq_vector + $1
 		cli 
 ; jumped to by: bonus_walk_on_46
@@ -3185,9 +3185,9 @@ skip_irq:
 ; called by: end_bonus_round, entry
 setup_irq:
 		sei 
-		lda #$b3
+		lda #<irq
 		sta irq_vector
-		lda #$3c
+		lda #>irq
 		sta irq_vector + $1
 		cli 
 		rts 

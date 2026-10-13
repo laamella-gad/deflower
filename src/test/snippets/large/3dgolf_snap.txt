@@ -28,7 +28,7 @@ pointer_04:		.word	?
 ; read by: to_log, from_log, clear_bitmap, plot_pixel, l1501, horizontal_line, vertical_line, draw_line, l18EF, clear_screen, nmi, fill_colors, title_screen, lB396, next_music_byte, lB8A8, music_step, $bbe8, $bbed
 ; written by: to_log, from_log, clear_bitmap, plot_pixel, l1501, horizontal_line, vertical_line, draw_line, l18EF, read_hex_word, clear_screen, nmi, fill_colors, title_screen, lB396, lB8A8, music_step, $bbd5, $bbda
 ; modified by: to_log, from_log, clear_bitmap, l18EF, clear_screen, fill_colors, title_screen, next_music_byte, music_step
-pointer_06:		.word	?
+pointer_06:		.addr	?
 ; read by: set_cell_color, l18EF, draw_view, collect_objects, draw_terrain, draw_hole_shape, draw_polygon, l286B, project_vertex, collect_features, lA927, lB396
 ; written by: clear_bitmap, l18EF, draw_view, collect_objects, find_cell, draw_terrain, draw_hole_shape, collect_features, clear_screen, fill_colors, lA927, title_screen, lB396
 ; modified by: clear_bitmap, collect_objects, clear_screen, fill_colors, title_screen
@@ -1644,9 +1644,9 @@ screen_on:
 
 ; called by: l0E4F
 clear_bitmap:
-		lda #$00
+		lda #<bitmap
 		sta pointer_06
-		lda #$60
+		lda #>bitmap
 		sta pointer_06 + $1
 		lda #$c0
 		sta pointer_08
@@ -3593,9 +3593,9 @@ l200F:
 		sta point_y + $1
 		jsr find_cell
 		jsr collect_objects
-		lda #$df
+		lda #<direction_steps
 		sta step_pointer
-		lda #$20
+		lda #>direction_steps
 		sta step_pointer + $1
 		ldy #$09
 		lda direction
@@ -3714,7 +3714,7 @@ direction_steps:
 ; read by: draw_view
 ; written by: draw_view
 step_pointer:
-		.word	$20df
+		.addr	direction_steps
 
 ; called by: draw_view
 collect_objects:
@@ -10036,9 +10036,9 @@ lA2E6:
 
 ; called by: new_game, shot_loop
 clear_screen:
-		lda #$00
+		lda #<bitmap
 		sta pointer_06
-		lda #$60
+		lda #>bitmap
 		sta pointer_06 + $1
 		lda #$40
 		sta pointer_08
@@ -10058,9 +10058,9 @@ lA304:
 		bne lA2FB
 		inc pointer_08 + $1
 		bne lA2FB
-		lda #$00
+		lda #<bitmap_colors
 		sta pointer_06
-		lda #$44
+		lda #>bitmap_colors
 		sta pointer_06 + $1
 		lda #$08
 		sta pointer_08
@@ -10080,9 +10080,9 @@ lA327:
 		bne lA31E
 		inc pointer_08 + $1
 		bne lA31E
-		lda #$00
+		lda #<color_ram
 		sta pointer_06
-		lda #$d8
+		lda #>color_ram
 		sta pointer_06 + $1
 		lda #$08
 		sta pointer_08
@@ -10102,9 +10102,9 @@ lA34A:
 		bne lA341
 		inc pointer_08 + $1
 		bne lA341
-		lda #$00
+		lda #<cell_depths
 		sta pointer_06
-		lda #$cb
+		lda #>cell_depths
 		sta pointer_06 + $1
 		lda #$08
 		sta pointer_08
@@ -10415,13 +10415,13 @@ lA5B1:
 		lda irq_vector + $1
 		sta $a589
 		sei 
-		lda #$6b
+		lda #<irq
 		sta irq_vector
-		lda #$a5
+		lda #>irq
 		sta irq_vector + $1
-		lda #$e9
+		lda #<nmi
 		sta nmi_vector
-		lda #$a5
+		lda #>nmi
 		sta nmi_vector + $1
 		lda #$00
 		sta nmi_active
@@ -13351,9 +13351,9 @@ lB8A8:
 		lda pointer_06 + $1
 		sta v043a
 		jsr music_push
-		lda #$18
+		lda #<dBD18
 		sta pointer_06
-		lda #$bd
+		lda #>dBD18
 		sta pointer_06 + $1
 		lda v040f
 		sta v0439
@@ -13928,6 +13928,7 @@ lBCDC:
 		sta v0419
 		lda #$bf
 		sta v041a
+dBD18:
 		rts 
 
 ; ---- music ----
@@ -14995,7 +14996,7 @@ $0000-$0001 virtual byte cpu_port_direction
 $0001-$0002 virtual byte cpu_port
 $0002-$0004 virtual word text_pointer
 $0004-$0006 virtual word pointer_04
-$0006-$0008 virtual word pointer_06
+$0006-$0008 virtual addr pointer_06
 $0008-$000a virtual word pointer_08
 $000a-$000c virtual word bitmap_pointer
 $000c-$000d virtual byte v0c
@@ -15289,7 +15290,7 @@ $2007-$2008 byte v2007
 $2008-$20de code draw_view
 $20de-$20df byte v20de
 $20df-$211f sbyte[64] direction_steps
-$211f-$2121 word step_pointer
+$211f-$2121 addr step_pointer
 $2121-$2193 code collect_objects
 $2193-$21db code sort_objects
 $21db-$22db byte[256] object_types
@@ -15806,7 +15807,8 @@ $bbb8-$bbbd byte[5] voice_offsets
 $bbbd-$bc01 code lBBBD
 $bc01-$bc0c code silence_sid
 $bc0c-$bc51 code init_sid
-$bc51-$bd19 code select_tune
+$bc51-$bd18 code select_tune
+$bd18-$bd19 code dBD18
 $bd19-$bf16 byte[509] music_data
 $bf16-$c00e word[124] note_frequencies
 $c00e-$c00f byte vc00e

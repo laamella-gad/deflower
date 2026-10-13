@@ -48,7 +48,7 @@ air_pointer:		.word	?
 ; read by: draw_level, unused_c08a, unused_c0b0, find_player_cell, is_wall, check_floor, unused_c25e, check_landing, jump_height, check_conveyor, check_slope, check_pickup, collect_item, init_enemies
 ; written by: draw_level, unused_c08a, unused_c0b0, find_player_cell, init_draw_pointers, init_enemies, add_to_level_pointer
 ; modified by: draw_level, unused_c0b0, find_player_cell, add_to_level_pointer
-level_pointer:		.word	?
+level_pointer:		.addr	?
 ; the screen address while drawing; $fc is also the player's row
 ; read by: draw_level, find_player_cell
 ; written by: draw_level, find_player_cell, init_draw_pointers
@@ -270,9 +270,9 @@ install_irq:
 		lda #$00
 		sta vic_raster
 		sta vic_control_1
-		lda #$e7
+		lda #<irq
 		sta irq_vector
-		lda #$c0
+		lda #>irq
 		sta irq_vector + $1
 		cli 
 		rts 
@@ -409,9 +409,9 @@ unused_c1ce:
 ; points level_pointer at the screen cell of the player
 ; called by: check_walls, check_landing, jump_height, check_slope
 find_player_cell:
-		lda #$00
+		lda #<screen_ram
 		sta level_pointer
-		lda #$04
+		lda #>screen_ram
 		sta level_pointer + $1
 		lda vic_sprite_coords
 		sec 
@@ -1429,9 +1429,9 @@ bonus_sound_frequency:
 
 remove_irq:
 		sei 
-		lda #$31
+		lda #<kernal_irq
 		sta irq_vector
-		lda #$ea
+		lda #>kernal_irq
 		sta irq_vector + $1
 		lda #$01
 		sta cia1_timer_a_control
@@ -1564,7 +1564,7 @@ $00dc-$00dd virtual byte voice2_duration
 $00dd-$00de virtual byte voice1_duration
 $00de-$00e0 virtual word voice2_music
 $00e4-$00e6 virtual word air_pointer
-$00fa-$00fc virtual word level_pointer
+$00fa-$00fc virtual addr level_pointer
 $00fc-$00fe virtual word screen_pointer
 $00fe-$00ff virtual byte draw_column
 $00ff-$0100 virtual byte draw_row

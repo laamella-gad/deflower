@@ -9,7 +9,7 @@ $02 virtual byte decrunch_count
 $03 virtual byte decrunch_bits
 ; the end of the BASIC program; the protection check expects $0844
 $2d virtual word basic_end
-$50 virtual word clear_pointer
+$50 virtual addr clear_pointer
 $57 virtual word sprite_source
 $59 virtual word sprite_destination
 ; BASIC's CHRGET, patched by init_game to jump to actual_start_game

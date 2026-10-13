@@ -1,0 +1,145 @@
+>>> Issue 0074: four instructions in a row that store the two halves of
+a constant address to an addr, each half an immediate load and a
+store of the same register, label the address they build.
+Issue 0034: the immediates then print as `#<label` and `#>label`, but
+only for a label on the address itself, not "label + offset". Halves
+stored to bytes that aren't adjacent, a load and store of different
+registers, a label between the halves and a target that isn't an addr,
+even a word, don't match. <<<
+
+*=$c000
+
+		.byte	1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+entry:
+		lda #<$c000
+		sta $fb
+		lda #>$c000
+		sta $fc
+		nop
+		ldx #>$c004
+		stx $0340
+		ldx #<$c004
+		stx $033f
+		nop
+		ldy #<$c008
+		sty $fb
+		ldy #>$c008
+		sty $fc
+		nop
+		lda #<$c00a
+		sta $fb
+		lda #>$c00a
+		sta $fc
+		nop
+		lda #$00
+		sta $fb
+		lda #$c0
+		sta $fd
+		nop
+		lda #$00
+		stx $fb
+		lda #$c0
+		sta $fc
+		nop
+		lda #$00
+		sta $fd
+		lda #$c0
+		sta $fe
+		nop
+		lda #$00
+		sta $fb
+		bne skip
+skip:
+		lda #$c0
+		sta $fc
+		rts
+===
+deflower test.prg
+$c000-$c004 byte
+$c004-$c008 byte
+$c008-$c00c byte table
+$c00c code entry
+$fb virtual addr pointer
+$fd virtual word number
+$033f virtual addr pointer3
+^^^
+Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 88 bytes emitted, 0 differ, 6 virtual, 0 gaps
+~~~
+
+.virtual $00fb
+; written by: entry
+pointer:		.addr	?
+; written by: entry
+number:		.word	?
+.endv
+
+.virtual $033f
+; written by: entry
+pointer3:		.addr	?
+.endv
+
+*=$c000
+
+dC000:
+		.byte	$01, $02, $03, $04
+dC004:
+		.byte	$05, $06, $07, $08
+table:
+		.byte	$09, $0a, $0b, $0c
+
+entry:
+		lda #<dC000
+		sta pointer
+		lda #>dC000
+		sta pointer + $1
+		nop 
+		ldx #>dC004
+		stx pointer3 + $1
+		ldx #<dC004
+		stx pointer3
+		nop 
+		ldy #<table
+		sty pointer
+		ldy #>table
+		sty pointer + $1
+		nop 
+		lda #$0a
+		sta pointer
+		lda #$c0
+		sta pointer + $1
+		nop 
+		lda #$00
+		sta pointer
+		lda #$c0
+		sta number
+		nop 
+		lda #$00
+		stx pointer
+		lda #$c0
+		sta pointer + $1
+		nop 
+		lda #$00
+		sta number
+		lda #$c0
+		sta number + $1
+		nop 
+		lda #$00
+		sta pointer
+		bne lC053
+; jumped to by: entry
+lC053:
+		lda #$c0
+		sta pointer + $1
+		rts 
+~~~
+--- test.map
+$00fb-$00fd virtual addr pointer
+$00fd-$00ff virtual word number
+$033f-$0341 virtual addr pointer3
+$c000-$c004 byte[4] dC000
+$c004-$c008 byte[4] dC004
+$c008-$c00c byte[4] table
+$c00c-$c058 code entry
+vvv

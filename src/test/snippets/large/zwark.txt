@@ -39,7 +39,7 @@ basic_end:		.word	?
 ; read by: check_protection
 ; written by: check_protection
 ; modified by: check_protection
-clear_pointer:		.word	?
+clear_pointer:		.addr	?
 .endv
 
 .virtual $0057
@@ -2088,9 +2088,9 @@ check_protection:
 		beq nothing_just_rts
 ; jumped to by: check_protection
 l9CF4:
-		lda #$00
+		lda #<enemy_image_3
 		sta clear_pointer
-		lda #$08
+		lda #>enemy_image_3
 		sta clear_pointer + $1
 		lda #$00
 		ldy #$00
@@ -2447,7 +2447,7 @@ $0001-$0002 virtual byte cpu_port
 $0002-$0003 virtual byte decrunch_count
 $0003-$0004 virtual byte decrunch_bits
 $002d-$002f virtual word basic_end
-$0050-$0052 virtual word clear_pointer
+$0050-$0052 virtual addr clear_pointer
 $0057-$0059 virtual word sprite_source
 $0059-$005b virtual word sprite_destination
 $0073-$0076 virtual byte[3] chrget

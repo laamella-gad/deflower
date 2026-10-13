@@ -106,9 +106,9 @@ start:
 		lsr vic_irq_status
 		lda #$f9
 		sta raster
-		lda #$db
+		lda #<irq_bottom
 		sta irq_vector
-		lda #$09
+		lda #>irq_bottom
 		sta irq_vector + $1
 		lda #$1b
 		sta vic_control1
@@ -348,9 +348,9 @@ irq_bottom:
 		lsr vic_irq_status
 		lda #$02
 		sta raster
-		lda #$fd
+		lda #<irq
 		sta irq_vector
-		lda #$09
+		lda #>irq
 		sta irq_vector + $1
 		pla 
 		rti 
@@ -374,9 +374,9 @@ upper_road_y = $0a0b
 		sta sprite_pointers + $2
 		lda #$c0
 		sta raster
-		lda #$30
+		lda #<irq_lower
 		sta irq_vector
-		lda #$0a
+		lda #>irq_lower
 		sta irq_vector + $1
 		lsr vic_irq_status
 		pla 
@@ -395,9 +395,9 @@ lower_road_y = $0a32
 		sta sprite_pointers + $2
 		lda #$f9
 		sta raster
-		lda #$db
+		lda #<irq_bottom
 		sta irq_vector
-		lda #$09
+		lda #>irq_bottom
 		sta irq_vector + $1
 		lsr vic_irq_status
 		pla 

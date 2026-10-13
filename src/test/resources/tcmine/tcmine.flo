@@ -7,7 +7,7 @@ deflower tcmine.prg
 
 ; ---- zero page ----
 ; the level data while drawing, the screen cell of the player otherwise
-$fa virtual word level_pointer
+$fa virtual addr level_pointer
 ; the screen address while drawing; $fc is also the player's row
 $fc virtual word screen_pointer
 $fe virtual byte draw_column
