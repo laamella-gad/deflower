@@ -23,3 +23,17 @@ Done when: a `.flo` line can mark a table as `rta`, it prints as `.rta` with cor
 
 - **Keyword `rta`**, a type like `word`: `$c100 rta[4] handlers`, printed as `.rta label` with the label of value + 1.
 - **The entries are traced as code.** Each entry + 1 is where an `RTS` lands, so it is pushed as a code entry point, like a `code` line. A table then disassembles its handlers without separate `code` lines.
+
+## Analysis phases
+
+If tables are ever detected from the code instead of only declared (the `pha`/`pha`/`rts` dispatch, reading its table at `table,x`), the detector finds new code entries, and those have to be traced too. That doesn't fit the current pipeline: `Deflower.deflower` runs the tracing once, then `AddressSetupFinder` ([0074](0074-detect-address-setup-pattern.md)), `Subject.dropUnusedIncludes` and `Subject.reportDuplicateLabels`, each exactly once.
+
+A declared `rta` table doesn't need this: its entries are pushed before the tracing starts, like `code` lines.
+
+Proposed structure, once something needs it:
+- A `Phase` interface, `void run(Subject)`, with the analysis holding a list of phases instead of `Deflower` calling each step.
+- Two kinds of phases. Ones that may find code (this detector) repeat with the tracing until no new entry turns up. Ones that only label or clean up (address setups, dropping unused includes, duplicate labels) run once afterwards, in order. The order matters: address setups must run before the unused includes are dropped, or the labels they keep are gone.
+- `dropUnusedIncludes` and `reportDuplicateLabels` move out of `Subject` into phases.
+- The tracing itself stays one phase: `FlowAnalyser`'s worklist loop, with its per-opcode cases, doesn't split into phases.
+
+Not worth doing before then: today it is four fixed steps, and only one of them is an extra analysis.
