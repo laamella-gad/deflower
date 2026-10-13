@@ -1,10 +1,180 @@
+; bigmac.vsf: VICE snapshot of a C64SC
+; $01 = $35: BASIC out, KERNAL out, I/O in
+; CPU: PC $c54d A $02 X $ec Y $00 SP $eb P $25
+; IRQ $0314 -> $c543 (RAM)
+; VIC bank 0 ($0000-$3fff), multicolor text, screen $0400, charset $2000
+; sprites on, pointers at $07f8: 0 $2d40
+; interrupt sources: CIA1 timer A (IRQ), IRQs masked by the I flag
 deflower bigmac.vsf
+
+; ---- system ----
 ; the IRQ vector
 $0314 addr irq_vector
-; the IRQ handler the vector points to
+
+; ---- game state ----
+$0800-$080c byte[12] flags
+; one entry per screen column
+$080c byte[40] column_active
+$0834 byte[40] column_flag_index
+$085c byte[40] column_timer
+$0884 byte[40] column_delay
+$08ac byte[40] column_pointer_lo
+$08d4 byte[40] column_pointer_hi
+$08fc byte[40] column_direction
+$0924 byte[40] column_position
+$094c byte[40] column_limit
+$0974-$097e virtual byte untouched_0974
+; one entry per sprite, cleared by $3c5d
+$097e byte[10] sprite_a
+$0988 byte[10] sprite_b
+$0992 byte[10] sprite_c
+$099c byte[10] sprite_d
+$09a6 byte[10] sprite_e
+$09b0 byte[10] sprite_f
+$09ba byte[10] sprite_g
+$09c4 byte[10] sprite_h
+$09ce byte[10] sprite_i
+$09d8 byte[10] sprite_j
+$09e2 byte[10] sprite_k
+$09ec byte[10] sprite_l
+$09f6-$0a00 virtual byte untouched_09f6
+
+; ---- game code ----
+; patches the game by the option bits at $0200
+$0a00 code apply_options
+$0b15 byte
+; leftover of a copy of the KERNAL's reset code, partly overwritten
+$0c25-$0eb0 byte kernal_copy
+$0ec0-$0f00 screencode texts
+$0f00-$0f5e virtual byte untouched_0f00
+$0f5e-$0f9d byte
+$0f9d-$0fff virtual byte untouched_0f9d
+$0fff-$1026 byte
+$1026 screencode[18] player_text
+$1038 byte[40] row_template
+$1060 byte[1000] colors_1
+$1448 byte[1000] screen_1
+$1830 byte[1000] colors_2
+$1c18 byte[1000] screen_2
+
+; ---- graphics ----
+$2000 byte[8*130] charset
+; dead code between flow ends, left from patching
+$251f code
+$28f9 code
+$2acb-$2b00 byte
+$2b00 byte[64*54] sprites
+$3880 code
+$39b0 code
+$3a85 code
+$3b2c code
+$3e5a code
+$42e6 byte
+$434d code
+$4372 code
+$4488 code
+$45b5 code
+$4944 code
+; where the IRQ interrupted the main code (the KERNAL's $ff48 pushed A, X and Y, the handler did a pha)
+$4aaf code after_read_input
+; the return address under it on the stack
+$4b0f code after_67a0
+$4c87 code
+$4c92 code
+$4c99 code
+$4c9a byte
+$4c9b code sid_init
+$4d3d code
+
+; ---- levels ----
+$4d85-$4e1f byte
+; set up into $fd/$fe by $2465
+$4e1f-$66a0 byte level_data
+$6721 code
+$6750 code read_input
+$67bf code
+$6810-$6860 screencode messages
+$6860-$686d ascii highscore_filename
+$686d-$6875 byte
+$6875-$68a6 screencode highscore_texts
+$68a6-$6b4e virtual byte unused_68a6
+$6b4e-$6d65 byte
+$6d65-$6da8 virtual byte untouched_6d65
+$6da8-$6fbe byte
+$6fbe-$7000 virtual byte unused_6fbe
+
+; ---- music ----
+; a copy of the music player, and the loader at $7800
+$7000-$9000 byte
+; copied to $e000 by copy_music_data
+$9000-$9252 byte music_data_1
+$9252-$9800 virtual byte unused_9252
+$9800-$9a52 byte music_data_2
+$9a52-$b000 virtual byte unused_9a52
+$b000-$b217 byte
+; written by the player
+$b217-$b800 virtual byte music_buffer_1
+$b800-$ba17 byte
+$ba17-$c000 virtual byte music_buffer_2
+$c000-$c100 byte frequencies
+$c1ba byte
+$c2ba byte
+$c3ba byte
+; the music player's API; only $c4d0 and $c4fb are called from the game
+$c400 code copy_music_data
+$c48d code music_bank_out
+$c494 code music_bank_in
+$c49b code music_stop
+$c4a8 code music_play_1
+$c4bc code music_play_2
+$c4d0 code music_play_3
+$c4e4 code music_play_1_2
+$c4fb code music_play_1_3
+$c512 code music_play_2_3
+$c529 code music_play_all
 $c543 code irq
 ; where the CPU was when the snapshot was taken
 $c54d code snapshot_pc
+$c56c code silence_voice_1
+$c577 code silence_voice_2
+$c582 code silence_voice_3
+$c58d code music_silence_1
+$c593 code music_silence_2
+$c599 code music_silence_3
+$c59f code music_silence_1_2
+$c5a8 code music_silence_1_3
+$c5b1 code music_silence_2_3
+$c5ba code music_silence_all
+$c5c6 code
+$c5d0 code
+$c5d7 code
+$c5fc-$c600 byte
+$c658 code
+$c662 code
+$c669 code
+$c673 code
+$c67f-$c690 byte
+$c6d6 code
+$c6e0 code
+$c6eb code
+$c746 code
+$c750 code
+$c75f code
+; leftover of the loader
+$c770-$c7eb byte
+$c7eb code
+; more of the loader, then a copy of the KERNAL's $fd00 page, repeated
+$c7f2-$d000 byte
+$e000-$e252 byte music_patterns_1
+$e252-$e800 virtual byte unused_e252
+; the IRQ handler jumps to the KERNAL's $ea31 in the ROM over this
+$e800-$ea52 byte music_patterns_2
+$ea52-$f000 virtual byte unused_ea52
+$f000-$fd30 virtual byte untouched_f000
+$fd30-$fd50 byte
+$fd50-$fffa virtual byte untouched_fd50
+$fffa word[3] vectors
 
-; the C64 with BASIC, I/O and KERNAL banked in
-include c64.flo
+include c64_zeropage.flo
+include c64_system.flo
+include c64_io.flo
