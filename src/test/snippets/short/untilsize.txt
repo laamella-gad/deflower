@@ -1,0 +1,32 @@
+>>> Issue 0068: "until" as the size of a data line: the area runs up to
+and including the first element that holds the value. <<<
+*=$c000
+		.text "BYE", $00
+		.text "GO", $ff
+		.word $1234, $ffff
+===
+deflower test.prg
+$c000 char[until $00] bye
+$c004 char[until $ff] go
+$c007 word[until $ffff] numbers
+^^^
+Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 11 bytes emitted, 0 differ, 0 virtual, 0 gaps
+~~~
+
+*=$c000
+
+bye:
+		.null	"BYE"
+go:
+		.text	"GO", $ff
+
+numbers:
+		.word	$1234, $ffff
+~~~
+--- test.map
+$c000-$c004 char[4] bye
+$c004-$c007 char[3] go
+$c007-$c00b word[2] numbers
+vvv

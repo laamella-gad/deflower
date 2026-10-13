@@ -497,6 +497,11 @@ class AssemblyFileFormat {
         out.print(instruction.opcode.name().toLowerCase());
         out.print(" ");
         out.print(operand);
+        String callComment = subject.callComments.get(area.address);
+        if (callComment != null) {
+            // The names of the inline data after this jsr (issue 0068).
+            out.print("\t; " + callComment);
+        }
 
         lastArea = area;
     }

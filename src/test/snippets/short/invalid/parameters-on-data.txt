@@ -1,0 +1,10 @@
+>>> Issue 0068: only a code line takes a parameter list or noreturn. <<<
+===
+deflower test.prg
+$c000 byte table (byte value)
+^^^
+Failed to parse test.flo:
+line 2: only a code line takes parameters or noreturn
+~~~
+~~~
+vvv

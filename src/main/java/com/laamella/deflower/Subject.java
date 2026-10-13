@@ -47,6 +47,15 @@ class Subject {
     final List<Warning> warnings = new ArrayList<>();
     // The regions exported to binary files of their own (issue 0022).
     final List<ExportRegion> exports = new ArrayList<>();
+    // What the .flo code lines say about calls to their address, by that
+    // address (issue 0068).
+    final Map<Integer, Routine> routines = new HashMap<>();
+    // The parameter names to print after each jsr whose inline data a
+    // parameter list declared, by the jsr's address (issue 0068).
+    final Map<Integer, String> callComments = new HashMap<>();
+    // The jsr each call with inline data returns from, by the address it
+    // returns to, after the data (issue 0068).
+    final Map<Integer, Integer> callsByReturnAddress = new HashMap<>();
 
     Subject(Path basePath) {
         this.basePath = basePath;
@@ -125,11 +134,25 @@ class Subject {
         switch (type) {
             case CODE_LINE -> {
                 potentialCodeLocations.add(new CodeEntry(address, -1, false));
+                if (annotation.parameters != null || annotation.noReturn) {
+                    // The included lines come last, so they don't replace
+                    // what the including file says.
+                    routines.putIfAbsent(address, new Routine(
+                            annotation.parameters != null ? annotation.parameters : List.of(), annotation.noReturn));
+                }
             }
             case CHAR_LINE, BYTE_LINE, WORD_LINE, LONG_LINE, DWORD_LINE, ADDR_LINE, SBYTE_LINE, SWORD_LINE, SLONG_LINE, SDWORD_LINE, UNKNOWN_LINE -> {
                 int amount = annotation.addressEnd != null
                         ? (annotation.addressEnd - address) / type.dataType.sizeInBytes
                         : annotation.amount;
+                if (annotation.addressEnd == null && annotation.terminator != null) {
+                    amount = countUntil(address, type.dataType.sizeInBytes, annotation.terminator);
+                    if (amount == -1) {
+                        errors.add(String.format("No %s ending in $%02x at %s before memory the image doesn't load",
+                                type.dataType.name().toLowerCase(), annotation.terminator, asHexWord(address)));
+                        return;
+                    }
+                }
                 if (amount <= 0) {
                     // Issue 0044: an empty array, or a range too short to
                     // hold one element (e.g. $c006-$c007 word: the end is
@@ -174,6 +197,25 @@ class Subject {
             }
             default -> throw new RuntimeException("No data type");
         }
+    }
+
+    /**
+     * The number of `elementSize`-byte elements from `address` on, up to
+     * and including the first one that holds `terminator` (issue 0068), or
+     * -1 when memory the image doesn't load comes first.
+     */
+    int countUntil(int address, int elementSize, int terminator) {
+        for (int count = 1; isLoaded(address, elementSize); count++) {
+            long value = 0;
+            for (int i = elementSize - 1; i >= 0; i--) {
+                value = value * 256 + byteAt(address + i);
+            }
+            if (value == terminator) {
+                return count;
+            }
+            address += elementSize;
+        }
+        return -1;
     }
 
     /**

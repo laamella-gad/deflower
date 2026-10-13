@@ -93,6 +93,7 @@ class FloReader {
         int amount = 1;
         String name = null;
         String export = null;
+        Integer terminator = null;
         // The line each export file name was first given on, across all
         // runs: they share one output directory.
         final Map<String, Integer> exportLines;
@@ -121,6 +122,7 @@ class FloReader {
             amount = 1;
             name = null;
             export = null;
+            terminator = null;
         }
 
         @Override
@@ -188,31 +190,16 @@ class FloReader {
 
         @Override
         public void enterDatatype(FloParser.DatatypeContext ctx) {
-            if (ctx.CHAR() != null) {
-                type = CHAR_LINE;
-            } else if (ctx.BYTE() != null) {
-                type = BYTE_LINE;
-            } else if (ctx.WORD() != null) {
-                type = WORD_LINE;
-            } else if (ctx.LONG() != null) {
-                type = LONG_LINE;
-            } else if (ctx.DWORD() != null) {
-                type = DWORD_LINE;
-            } else if (ctx.ADDR() != null) {
-                type = ADDR_LINE;
-            } else if (ctx.SBYTE() != null) {
-                type = SBYTE_LINE;
-            } else if (ctx.SWORD() != null) {
-                type = SWORD_LINE;
-            } else if (ctx.SLONG() != null) {
-                type = SLONG_LINE;
-            } else if (ctx.SDWORD() != null) {
-                type = SDWORD_LINE;
-            } else if (ctx.CODE() != null) {
-                type = CODE_LINE;
+            // A parameter's type (issue 0068) is read in exitLine.
+            if (!(ctx.getParent() instanceof FloParser.LineContext)) {
+                return;
             }
+            type = lineTypeOf(ctx);
             if (ctx.arraySize() != null) {
                 amount = evaluate(ctx.arraySize());
+            }
+            if (ctx.untilSize() != null) {
+                terminator = parseNumber(ctx.untilSize().number().getText()).orElseThrow();
             }
         }
 
@@ -266,7 +253,57 @@ class FloReader {
             if (export != null && !checkExport(line)) {
                 return;
             }
-            run.annotations.add(new Annotation(address, addressEnd, type, isVirtual, amount, name, comment, included, export));
+            if (terminator != null && !checkTerminator(line, type, terminator)) {
+                return;
+            }
+            List<Parameter> parameters = ctx.parameters() != null ? parameters(ctx.parameters(), line) : null;
+            boolean noReturn = ctx.noReturn() != null;
+            if ((parameters != null || noReturn) && type != CODE_LINE) {
+                errors.add(String.format("line %d: only a code line takes parameters or noreturn", line));
+                return;
+            }
+            run.annotations.add(new Annotation(address, addressEnd, type, isVirtual, amount, name, comment, included, export, terminator, parameters, noReturn));
+        }
+
+        /**
+         * A routine's parameter list (issue 0068): the data after each jsr
+         * to it, in order. Null after a mistake, which is reported.
+         */
+        private List<Parameter> parameters(FloParser.ParametersContext ctx, int line) {
+            List<Parameter> parameters = new ArrayList<>();
+            for (FloParser.ParameterContext parameter : ctx.parameter()) {
+                FloParser.DatatypeContext datatype = parameter.datatype();
+                LineType parameterType = lineTypeOf(datatype);
+                if (parameterType == CODE_LINE) {
+                    errors.add(String.format("line %d: a parameter can't be code", line));
+                    return null;
+                }
+                int parameterAmount = datatype.arraySize() != null ? evaluate(datatype.arraySize()) : 1;
+                Integer parameterTerminator = datatype.untilSize() != null
+                        ? parseNumber(datatype.untilSize().number().getText()).orElseThrow()
+                        : null;
+                if (parameterTerminator != null && !checkTerminator(line, parameterType, parameterTerminator)) {
+                    return null;
+                }
+                if (parameterAmount <= 0) {
+                    errors.add(String.format("line %d: zero-size parameter", line));
+                    return null;
+                }
+                String parameterName = parameter.ID() != null ? parameter.ID().getText() : null;
+                parameters.add(new Parameter(parameterType.dataType, parameterAmount, parameterTerminator, parameterName));
+            }
+            return parameters;
+        }
+
+        /**
+         * The value an "until" size ends at must fit in one element.
+         */
+        private boolean checkTerminator(int line, LineType lineType, int value) {
+            if (lineType.dataType != null && value >= 1L << (8 * lineType.dataType.sizeInBytes)) {
+                errors.add(String.format("line %d: until $%x doesn't fit in a %s", line, value, lineType.dataType.name().toLowerCase()));
+                return false;
+            }
+            return true;
         }
 
         /**
@@ -306,7 +343,8 @@ class FloReader {
                 errors.add(String.format("line %d: blocks can't be nested (the open one starts at line %d)", line, blockLine));
                 return;
             }
-            if (addressEnd != null || ctx.datatype() != null || name != null || ctx.export() != null) {
+            if (addressEnd != null || ctx.datatype() != null || name != null || ctx.export() != null
+                    || ctx.parameters() != null || ctx.noReturn() != null) {
                 errors.add(String.format("line %d: a block's opening line takes only an address and 'virtual'", line));
                 return;
             }
@@ -336,6 +374,31 @@ class FloReader {
             }
             blockBase = null;
         }
+    }
+
+    private static LineType lineTypeOf(FloParser.DatatypeContext ctx) {
+        if (ctx.CHAR() != null) {
+            return CHAR_LINE;
+        } else if (ctx.BYTE() != null) {
+            return BYTE_LINE;
+        } else if (ctx.WORD() != null) {
+            return WORD_LINE;
+        } else if (ctx.LONG() != null) {
+            return LONG_LINE;
+        } else if (ctx.DWORD() != null) {
+            return DWORD_LINE;
+        } else if (ctx.ADDR() != null) {
+            return ADDR_LINE;
+        } else if (ctx.SBYTE() != null) {
+            return SBYTE_LINE;
+        } else if (ctx.SWORD() != null) {
+            return SWORD_LINE;
+        } else if (ctx.SLONG() != null) {
+            return SLONG_LINE;
+        } else if (ctx.SDWORD() != null) {
+            return SDWORD_LINE;
+        }
+        return CODE_LINE;
     }
 
     private static int evaluate(FloParser.ArraySizeContext size) {

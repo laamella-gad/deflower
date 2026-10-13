@@ -3,44 +3,9 @@
 ^^^
 warning: $0881: bne $088b (l088B) goes into the middle of the instruction at $0889
 warning: $08d3: jsr $033c (tape_header) goes into data
-warning: $2da6: jsr returns into data at $2da9 (text_swing_club)
-warning: $2e52: jsr returns into data at $2e55
-warning: $2ec7: jsr returns into data at $2eca (text_down)
-warning: $30da: jsr returns into data at $30dd (text_in_the_water)
-warning: $313b: jsr returns into data at $313e (text_out_of_bounds)
-warning: $3164: jsr returns into data at $3167 (text_select_club)
-warning: $31a6: jsr returns into data at $31a9
-warning: $a009: jsr returns into data at $a00c (vectors)
-warning: $a18c: jsr returns into data at $a18f (text_player)
-warning: $a19d: jsr returns into data at $a1a0 (text_1)
-warning: $a1a2: jsr returns into data at $a1a5 (newline)
-warning: $a1ae: jsr returns into data at $a1b1 (text_player2)
-warning: $a1bf: jsr returns into data at $a1c2 (text_2)
-warning: $a1c4: jsr returns into data at $a1c7 (newline2)
-warning: $a1d0: jsr returns into data at $a1d3 (text_hole)
-warning: $a1e3: jsr returns into data at $a1e6 (text_club)
-warning: $a1eb: jsr returns into data at $a1ee (newline3)
-warning: $a1f7: jsr returns into data at $a1fa (text_yds)
-warning: $a1fe: jsr returns into data at $a201 (newline4)
-warning: $a20a: jsr returns into data at $a20d (text_par)
 warning: $a587: jmp $ea31 (kernal_irq) goes into data
-warning: $a62d: jsr returns into data at $a630 (text_quit_y_n)
 warning: $abe8: jsr returns into data at $abeb (never_reached_abeb)
 warning: $abee: jsr returns into data at $abf1 (never_reached_abf1)
-warning: $afd8: jsr returns into data at $afdb (text_over_par)
-warning: $afe9: jsr returns into data at $afec (text_under_par)
-warning: $affb: jsr returns into data at $affe (text_level_par)
-warning: $b2c3: jsr returns into data at $b2c6 (text_f1_1_player)
-warning: $b2d3: jsr returns into data at $b2d6 (newline5)
-warning: $b2d8: jsr returns into data at $b2db (text_f3_2_player)
-warning: $b2ec: jsr returns into data at $b2ef (newline6)
-warning: $b2f1: jsr returns into data at $b2f4 (text_f5_practice)
-warning: $b31d: jsr returns into data at $b320 (newline7)
-warning: $b322: jsr returns into data at $b325 (text_hole_1_18)
-warning: $b4c5: jsr returns into data at $b4c8 (text_aim)
-warning: $b9c1: jsr returns into data at $b9c4 (text_error)
-warning: $c111: jsr returns into data at $c114 (text_error_in_setlfs)
-warning: $c15e: jsr returns into data at $c161 (text_save_routine_error)
 Writing out/3dgolf_snap.asm
 Writing out/3dgolf_snap.map
 Verify out/3dgolf_snap.asm: 45859 bytes emitted, 0 differ, 19677 virtual, 0 gaps
@@ -50,18 +15,18 @@ Verify out/3dgolf_snap.asm: 45859 bytes emitted, 0 differ, 19677 virtual, 0 gaps
 ; ---- zero page ----
 cpu_port_direction:		.byte	?
 ; read by: start2, $a003, irq, nmi, bank_out_io, bank_in_io, $c041, $c06a, lC0F3
-; written by: d0103, decrunch, start2, $a007, irq, $a679, bank_out_io, bank_in_io, $c045, $c06e, lC0F3
+; written by: $0195, decrunch, start2, $a007, irq, nmi, bank_out_io, bank_in_io, $c045, $c06e, lC0F3
 cpu_port:		.byte	?
 ; read by: l2C60, print_inline, store_hex, nmi
-; written by: print_inline, $a66f, $a672, lC13B
+; written by: print_inline, nmi, lC13B
 ; modified by: l2C60, print_inline, store_hex
 text_pointer:		.word	?
 ; read by: l0DC7, scroll_text, draw_shape, color_text, nmi, lA8CB, draw_wind, lB396, $b60a, $b612, $b616, lB78E
-; written by: l0DC7, scroll_text, draw_shape, draw_objects, color_text, $a669, $a66c, lA8CB, draw_wind, lB396, $b600, $b604, $b614, $b61a
+; written by: l0DC7, scroll_text, draw_shape, draw_objects, color_text, nmi, lA8CB, draw_wind, lB396, $b600, $b604, $b614, $b61a
 ; modified by: l0DC7, color_text
 pointer_04:		.word	?
-; read by: to_log, from_log, clear_bitmap, plot_pixel, l1501, horizontal_line, vertical_line, draw_line, l18EF, clear_screen, nmi, fill_colors, title_screen, lB396, next_music_byte, lB8A8, $b9fa, $b9ff, $ba19, $ba1e, $bbe8, $bbed
-; written by: to_log, from_log, clear_bitmap, plot_pixel, l1501, horizontal_line, vertical_line, draw_line, l18EF, read_hex_word, clear_screen, $a663, $a666, fill_colors, title_screen, lB396, lB8A8, $ba29, $ba2e, $ba43, $ba48, $bbd5, $bbda
+; read by: to_log, from_log, clear_bitmap, plot_pixel, l1501, horizontal_line, vertical_line, draw_line, l18EF, clear_screen, nmi, fill_colors, title_screen, lB396, next_music_byte, lB8A8, music_step, $bbe8, $bbed
+; written by: to_log, from_log, clear_bitmap, plot_pixel, l1501, horizontal_line, vertical_line, draw_line, l18EF, read_hex_word, clear_screen, nmi, fill_colors, title_screen, lB396, lB8A8, music_step, $bbd5, $bbda
 ; modified by: to_log, from_log, clear_bitmap, l18EF, clear_screen, fill_colors, title_screen, next_music_byte, music_step
 pointer_06:		.word	?
 ; read by: set_cell_color, l18EF, draw_view, collect_objects, draw_terrain, draw_hole_shape, draw_polygon, l286B, project_vertex, collect_features, lA927, lB396
@@ -69,7 +34,7 @@ pointer_06:		.word	?
 ; modified by: clear_bitmap, collect_objects, clear_screen, fill_colors, title_screen
 pointer_08:		.word	?
 ; read by: l0DC7, scroll_text, l0EC7, d129A, test_pixel, plot_pixel, l1501, horizontal_line, vertical_line, draw_line, l18EF, replot_seeds, color_text, nmi, $b84e, $b850
-; written by: l0DC7, scroll_text, pixel_address, test_pixel, plot_pixel, l1501, horizontal_line, vertical_line, draw_line, l18EF, color_text, $a657, $a65a
+; written by: l0DC7, scroll_text, pixel_address, test_pixel, plot_pixel, l1501, horizontal_line, vertical_line, draw_line, l18EF, color_text, nmi
 bitmap_pointer:		.word	?
 ; read by: l18EF
 ; written by: l18EF
@@ -77,8 +42,8 @@ v0c:		.byte	?
 ; read by: flood_fill, l18EF
 ; written by: flood_fill, l18EF
 v0d:		.byte	?
-; read by: log_multiply, log_divide_into, project, rotate_45, draw_line, l18EF, scale_step, sort_objects, compute_shot, l34C1, l35A1, l3E04, l4210, lAE18, $b548, $b54a
-; written by: log_multiply, log_divide_into, project, rotate_45, draw_line, flood_fill, l18EF, scale_step, sort_objects, compute_shot, l34C1, l35A1, l3E04, l4210, lAE18, $b52b, $b52d
+; read by: log_multiply, log_divide_into, project, rotate_45, draw_line, l18EF, scale_step, sort_objects, compute_shot, l34C1, l35A1, l3E04, l4210, lAE18, aim
+; written by: log_multiply, log_divide_into, project, rotate_45, draw_line, flood_fill, l18EF, scale_step, sort_objects, compute_shot, l34C1, l35A1, l3E04, l4210, lAE18, aim
 ; modified by: sort_objects
 log_value:		.word	?
 ; read by: to_view, rotate_0, rotate_1, rotate_2, rotate_3, rotate_45, add_fill_seed, draw_line, flood_fill, l18EF, draw_view, find_cell, project_vertex, l3711
@@ -105,18 +70,18 @@ plot_y:		.byte	?
 unused_19:
 		.fill	2
 ; read by: to_view, draw_view, check_out_of_bounds, l3711, $37a6, $37aa, $37e0, $37e6, face_hole, setup_hole, l3AC7, l3EF4, shot_loop, lA99D, save_player
-; written by: $30fd, $3103, $37b9, $37bf, $37f5, $37f9, setup_hole, setup_practice_hole, l3AC7, l3EF4, new_game, shot_loop, lA99D, select_player
+; written by: check_landing, $37b9, $37bf, $37f5, $37f9, setup_hole, setup_practice_hole, l3AC7, l3EF4, new_game, shot_loop, lA99D, select_player
 ; modified by: setup_hole, l3EF4
 ball_x:		.word	?
 ; read by: to_view, draw_view, check_out_of_bounds, l3711, $37ae, $37b2, $37d4, $37da, face_hole, setup_hole, l3AC7, l3EF4, shot_loop, lA99D, save_player
-; written by: $3109, $310f, $37c5, $37cb, $37ed, $37f1, setup_hole, setup_practice_hole, l3AC7, l3EF4, new_game, shot_loop, lA99D, select_player
+; written by: check_landing, $37c5, $37cb, $37ed, $37f1, setup_hole, setup_practice_hole, l3AC7, l3EF4, new_game, shot_loop, lA99D, select_player
 ; modified by: setup_hole, l3EF4
 ball_y:		.word	?
-; read by: l0DC7, message_line, color_text, print_score_labels, $a196, $a1a7, $a1b8, $a1c9, $a1dc, $a1f0, $a203, nmi, print_par_result, draw_wind, aim
-; written by: l0DC7, l0E4F, scroll_text, message_line, print_club_name, setup_hole, color_text, main, print_score_labels, $a19b, $a1ac, $a1bd, $a1ce, $a1e1, $a1f5, $a208, $a65d, add_stroke, update_scores, print_par_result, draw_wind, title_screen, $b338, aim, lB5EE
+; read by: l0DC7, message_line, color_text, print_score_labels, nmi, print_par_result, draw_wind, aim
+; written by: l0DC7, l0E4F, scroll_text, message_line, print_club_name, setup_hole, color_text, main, print_score_labels, nmi, add_stroke, update_scores, print_par_result, draw_wind, title_screen, aim, lB5EE
 text_x:		.byte	?
 ; read by: l0DC7, l0E4F, color_text, nmi, draw_wind
-; written by: l0E4F, scroll_text, message_line, print_club_name, setup_hole, color_text, main, print_score_labels, $a660, add_stroke, update_scores, print_par_result, draw_wind, title_screen, $b33c, aim, lB5EE
+; written by: l0E4F, scroll_text, message_line, print_club_name, setup_hole, color_text, main, print_score_labels, nmi, add_stroke, update_scores, print_par_result, draw_wind, title_screen, aim, lB5EE
 text_y:		.byte	?
 ; read by: to_view
 ; written by: to_view
@@ -146,8 +111,8 @@ object_depth:		.byte	?
 clip_top:		.byte	?
 unused_2a:
 		.fill	3
-; read by: d0103
-; written by: d0103
+; read by: $015c, $017e, $0184, $0189
+; written by: $0125, $013a, $0145, $0177, $0180, $0186, $019c, $01a0
 decrunch_pointer:		.word	?
 unused_2f:
 		.fill	50
@@ -161,8 +126,8 @@ v63:		.byte	?
 ; read by: set_cell_color
 ; written by: l18EF
 pointer_64:		.word	?
-; read by: $2ea8, $2fb9, $2fc8, $3796, l3EF4, shot_loop, save_player, compute_drift
-; written by: $2eba, setup_hole, l3EF4, select_player
+; read by: swing, $2fb9, $2fc8, $3796, l3EF4, shot_loop, save_player, compute_drift
+; written by: swing, setup_hole, l3EF4, select_player
 hole_distance:		.byte	?
 ; read by: vertical_line, draw_line, l18EF, line_start_on_screen, pen_on_screen
 ; written by: draw_terrain, reset_clip, main
@@ -170,7 +135,7 @@ clip_bottom:		.byte	?
 unused_68:
 		.fill	93
 ; the KERNAL's last key pressed
-; read by: snapshot_pc, $a641
+; read by: snapshot_pc, nmi
 kernal_lstx:		.byte	?
 ; written by: decrunch
 unused_c6:
@@ -178,14 +143,14 @@ unused_c6:
 ; written by: decrunch_get_byte
 ; modified by: l0211, l0226
 vf7:		.byte	?
-; read by: d0103
-; written by: d0103
+; read by: $0104, $011e
+; written by: $010b
 vf8:		.byte	?
-; called by: d0103
+; called by: $0113, $015f, $018c
 vf9:		.byte	?
-; read by: d0103
+; read by: $017c, $019a
 vfa:		.byte	?
-; read by: d0103, old_loader, $c059
+; read by: $0182, $019e, old_loader, $c059
 ; written by: old_loader, $c049
 ; modified by: $0100
 vfb:		.byte	?
@@ -203,23 +168,21 @@ unused_ff:		.byte	?
 *=$0100
 		inc vfb
 		dex 
-; read by: add_fill_seed
-d0103:
 		rts 
 
-; jumped to by: d0103
+; jumped to by: $0134
 l0104:
 		ldy vf8
 		ldx #$02
 		jsr l022F
 		sta vf8
 		tya 
-; jumped to by: d0103
+; jumped to by: $0120
 l010E:
 		ldx #$06
 		jsr l022F
 		jsr @w vf9
-; jumped to by: d0103, decrunch
+; jumped to by: $0167, decrunch
 l0116:
 		ldy #$00
 		tya 
@@ -247,7 +210,7 @@ l0116:
 		sta decrunch_pointer
 		jsr l0211
 		tay 
-; jumped to by: d0103
+; jumped to by: $013e
 l014B:
 		jsr l0211
 		tax 
@@ -257,20 +220,20 @@ l014B:
 		txa 
 		ldx #$03
 		jsr l0226
-; jumped to by: d0103
+; jumped to by: $0154
 l015C:
 		ldx decrunch_pointer
 		inx 
-; jumped to by: d0103
+; jumped to by: $0162, $0165
 l015F:
 		jsr @w vf9
 		bne l015F
 		dey 
 		bne l015F
-; jumped to by: d0103
+; jumped to by: $0191
 l0167:
 		beq l0116
-; jumped to by: d0103
+; jumped to by: $0128
 l0169:
 		jsr l0211
 		cmp #$ff
@@ -278,7 +241,7 @@ l0169:
 		sbc #$00
 		ldx #$00
 		jsr l022F
-; jumped to by: d0103
+; jumped to by: $012e
 l0177:
 		sta decrunch_pointer + $1
 		jsr l0223
@@ -289,14 +252,14 @@ l0177:
 		sbc decrunch_pointer + $1
 		sta decrunch_pointer + $1
 		inx 
-; jumped to by: d0103
+; jumped to by: $018f
 l0189:
 		lda (decrunch_pointer), y
 		iny 
 		jsr @w vf9
 		bne l0189
 		beq l0167
-; jumped to by: d0103
+; jumped to by: $016e
 l0193:
 		lda #$37
 		sta cpu_port
@@ -338,7 +301,7 @@ l020F:
 		pla 
 		rts 
 
-; called by: d0103
+; called by: $0122, $0137, $0147, $014b, $0169
 l0211:
 		inx 
 		txa 
@@ -354,13 +317,13 @@ l021A:
 		cpx #$08
 		bne l0213
 		beq l022E
-; called by: d0103
+; called by: $0179
 l0223:
 		ldx #$07
-; called by: d0103
+; called by: $012a, $0130
 l0225:
 		inx 
-; called by: d0103
+; called by: $0142, $0159
 ; jumped to by: l022F
 l0226:
 		asl vf7
@@ -372,7 +335,7 @@ l022D:
 ; jumped to by: l0211
 l022E:
 		dex 
-; called by: d0103
+; called by: $0108, $0110, $011b, $0174
 l022F:
 		bne l0226
 		clc 
@@ -427,38 +390,38 @@ hole_x:		.word	?
 ; read by: $37c2, $37c8, face_hole, l3EF4, draw_flag, $b70a, $b70f
 ; written by: setup_hole, setup_practice_hole
 hole_y:		.word	?
-; read by: $2eac, check_landing, check_out_of_bounds, $3187, check_terrain, l3C3F, l3CB7, $3cfe, l3D9F, ball_flight, l3EF4, $b515, $b6f8
+; read by: swing, check_landing, check_out_of_bounds, check_terrain, l3C3F, l3CB7, $3cfe, l3D9F, ball_flight, l3EF4, aim, $b6f8
 ; written by: setup_hole, shot_loop
 green_view:		.byte	?
 ; per player: where the ball was before the shot, put back after water
-; read by: $30fa, $3100
+; read by: check_landing
 ; written by: l3EF4
 safe_ball_x:
 		.fill	4
-; read by: $3106, $310c
+; read by: check_landing
 ; written by: l3EF4
 safe_ball_y:
 		.fill	4
-; read by: $b9cd, $ba26, $ba7a, $bbc6, $bbf2
-; written by: $ba0a, $ba6e, $baad, $bbc9, $bbf5
+; read by: music_step, $bbc6, $bbf2
+; written by: music_step, $bbc9, $bbf5
 v040d:		.byte	?
-; read by: $b9d3, $ba2b, $ba80
-; written by: $ba10, $ba74, $bab3
+; read by: music_step
+; written by: music_step
 v040e:		.byte	?
-; read by: next_music_byte, lB8A8, $b9dc, $ba89, $bac5
-; written by: lB8A8, $b9fc, $ba5f, $babc
-; modified by: $bacd
+; read by: next_music_byte, lB8A8, music_step
+; written by: lB8A8, music_step
+; modified by: music_step
 v040f:		.byte	?
-; read by: next_music_byte, lB8A8, $b9e2, $ba8f
-; written by: lB8A8, $ba01, $ba65, $bac2
-; modified by: $baca
+; read by: next_music_byte, lB8A8, music_step
+; written by: lB8A8, music_step
+; modified by: music_step
 v0410:		.byte	?
-; read by: $b9eb, $ba33, $ba98
-; written by: $ba16, $ba50, $bad2
-; modified by: $ba38
+; read by: music_step
+; written by: music_step
+; modified by: music_step
 v0411:		.byte	?
-; read by: $b9f1, $ba9e, $bbd2
-; written by: $ba56, $bbea
+; read by: music_step, $bbd2
+; written by: music_step, $bbea
 v0412:		.byte	?
 ; read by: $bbd7
 ; written by: $bbef
@@ -498,38 +461,38 @@ unused_0426:		.byte	?
 v0427:		.byte	?
 ; written by: music_start, select_tune
 v0428:		.byte	?
-; read by: lB8A8, $ba07, $baaa, $bab9
+; read by: lB8A8, music_step
 ; written by: lB8A8
 v0429:		.byte	?
-; read by: $ba0d, $bab0, $babf
+; read by: music_step
 ; written by: lB8A8
 v042a:		.byte	?
-; read by: music_step, $bafa, $bb4f
+; read by: music_step
 ; written by: music_step
 music_note:		.byte	?
-; read by: $bb11, $bb6e
+; read by: music_step
 ; written by: music_step
 music_duration:		.byte	?
-; read by: $bb14, $bb8b
+; read by: music_step
 ; written by: init_sid
 music_tempo:		.byte	?
-; read by: music_push, music_pop, $bb34, $bb43, $bb63, $bb71, $bb7a, $bbbd, $bbdf
-; written by: $bb31
-; modified by: $bb77
+; read by: music_push, music_pop, music_step, $bbbd, $bbdf
+; written by: music_step
+; modified by: music_step
 music_voice:		.byte	?
-; read by: $bb54
-; written by: $bb3f
+; read by: music_step
+; written by: music_step
 v042f:		.byte	?
-; read by: $bb46, $bb66
+; read by: music_step
 v0430:		.byte	?
 ; written by: init_sid
 v0431:		.byte	?
-; written by: $bae2, $baf4, init_sid
+; written by: music_step, init_sid
 v0432:		.byte	?
 ; written by: init_sid
 v0433:		.byte	?
-; written by: $bb74
-; modified by: $bb37
+; written by: music_step
+; modified by: music_step
 v0434:		.byte	?
 ; written by: music_start
 v0435:		.byte	?
@@ -537,14 +500,14 @@ v0435:		.byte	?
 v0436:		.byte	?
 ; written by: music_start
 v0437:		.byte	?
-; read by: $bbb3
+; read by: music_step
 ; written by: music_start
 music_saved_stack:		.byte	?
-; read by: lAE92, music_push, lB8A8, $ba40, $ba4d, $ba5c, $ba6b
-; written by: lAE92, music_pop, lB8A8, $b9d0, $b9df, $b9ee, $ba1b, $ba7d, $ba8c, $ba9b
+; read by: lAE92, music_push, lB8A8, music_step
+; written by: lAE92, music_pop, lB8A8, music_step
 v0439:		.byte	?
-; read by: select_player, music_push, lB8A8, $ba45, $ba53, $ba62, $ba71
-; written by: save_player, music_pop, lB8A8, $b9d6, $b9e5, $b9f4, $ba20, $ba83, $ba92, $baa1
+; read by: select_player, music_push, lB8A8, music_step
+; written by: save_player, music_pop, lB8A8, music_step
 v043a:		.byte	?
 ; read by: select_player
 ; written by: save_player
@@ -591,9 +554,9 @@ unused_044c:		.byte	?
 ; read by: shot_loop
 v044d:		.byte	?
 ; read by: $2fb3, shot_loop, fill_colors, lAC2B, lAE92, read_joystick
-; written by: main, $b31a, $b34b
+; written by: main, title_screen
 game_mode:		.byte	?
-; read by: draw_golfer, $2fbe, $30f3, $378c, l3EF4, $a488, $a50b, add_stroke, update_scores, select_player, save_player, print_par_result, read_joystick
+; read by: draw_golfer, $2fbe, check_landing, $378c, l3EF4, $a488, $a50b, add_stroke, update_scores, select_player, save_player, print_par_result, read_joystick
 ; written by: hole_loop, lAC2B, select_player
 ; modified by: lAC2B
 current_player:		.byte	?
@@ -637,34 +600,34 @@ wind_direction:		.byte	?
 ; read by: change_wind, compute_drift
 ; written by: change_wind, random_wind
 wind_strength:		.byte	?
-; read by: $2dd3, $2e30, $2e68, $2e7d
-; written by: $2dc2, $2e0e, $2e46, $2e6f
+; read by: swing
+; written by: swing
 frame_timer_reload:		.byte	?
-; read by: $2dcb, $2e21, $2e75
-; written by: $2dc5, $2dd6, $2e11, $2e43, $2e6b, $2e80
+; read by: swing
+; written by: swing
 ; modified by: snapshot_pc
 frame_timer:		.byte	?
 ; read by: l34C1
-; written by: $2dbd
-; modified by: $2dc8
+; written by: swing
+; modified by: swing
 v045e:		.byte	?
-; read by: $2e5b, $2e83
-; written by: $2df0, $2e89
-; modified by: $2df8
+; read by: swing
+; written by: swing
+; modified by: swing
 v045f:		.byte	?
-; written by: $2df5
-; modified by: $2dfd
+; written by: swing
+; modified by: swing
 v0460:		.byte	?
 ; read by: l34C1
-; written by: $2e5f
+; written by: swing
 v0461:		.byte	?
 unused_0462:		.byte	?
-; read by: $2e37, l34C1
-; written by: $2e09
-; modified by: $2e1e
+; read by: swing, l34C1
+; written by: swing
+; modified by: swing
 v0463:		.byte	?
-; read by: swing, $31d0, draw_animation_frame, l33C0
-; written by: draw_golfer, $31d6, draw_animation_frame
+; read by: swing, check_out_of_bounds, draw_animation_frame, l33C0
+; written by: draw_golfer, check_out_of_bounds, draw_animation_frame
 golfer_x:		.byte	?
 unused_0465:		.byte	?
 ; read by: l33C0
@@ -672,7 +635,7 @@ unused_0465:		.byte	?
 golfer_y:		.byte	?
 unused_0467:
 		.fill	3
-; read by: set_golfer_colors, raise_meter, lower_meter, $2dd9, $2de7, $2e29
+; read by: set_golfer_colors, raise_meter, lower_meter, swing
 ; written by: set_golfer_colors, raise_meter, lower_meter
 power_level:		.byte	?
 unused_046b:		.byte	?
@@ -691,21 +654,21 @@ v046f:		.byte	?
 ; read by: l3D9F, ball_flight, draw_flag
 ; written by: shot_loop, draw_flag
 green_flag_x:		.byte	?
-; read by: l3D9F, ball_flight, draw_flag, $b532
+; read by: l3D9F, ball_flight, draw_flag, aim
 ; written by: shot_loop, draw_flag
 green_flag_y:		.byte	?
-; read by: $b4e4
+; read by: aim
 ; written by: lB458
 aim_x:		.byte	?
-; read by: $b4de
+; read by: aim
 aim_y:		.byte	?
-; read by: $b56b
+; read by: aim
 aim_max:		.byte	?
-; read by: $b58f
+; read by: aim
 aim_min:		.byte	?
-; read by: l36E6, $b50c, $b51a, $b568, $b58c
-; written by: l3EF4, $b4f7, $b512, $b558
-; modified by: $b573, $b597
+; read by: l36E6, aim
+; written by: l3EF4, aim
+; modified by: aim
 aim_offset:		.byte	?
 ; read by: clear_screen
 ; written by: l31FC, l3202
@@ -862,7 +825,7 @@ unused_08eb:
 
 ; ---- routine names ----
 ; converts the 16-bit A:X to a log: A the fraction (in 32nds of an octave), X the exponent
-; called by: project, rotate_45, scale_step, compute_shot, l34C1, l35A1, l3E04, l4210, lAE18, $b528, $b538, $b542
+; called by: project, rotate_45, scale_step, compute_shot, l34C1, l35A1, l3E04, l4210, lAE18, aim
 to_log:
 		stx pointer_06
 		ldx #$00
@@ -893,7 +856,7 @@ l091B:
 
 ; ---- 3D engine ----
 ; back from a log in A:X to a 16-bit value
-; called by: project, rotate_45, scale_step, l34C1, l3E04, l4210, lAE18, $b54c
+; called by: project, rotate_45, scale_step, l34C1, l3E04, l4210, lAE18, aim
 ; jumped to by: l35A1
 from_log:
 		cmp #$80
@@ -937,11 +900,11 @@ l0945:
 		bne l0945
 		beq l0941
 ; log_value -= A:X, i.e. divides
-; called by: project, compute_shot, l34C1, l3E04, l4210, lAE18, $b53b
+; called by: project, compute_shot, l34C1, l3E04, l4210, lAE18, aim
 log_divide:
 		jsr log_negate
 ; log_value += A:X, i.e. multiplies
-; called by: project, scale_step, compute_shot, l34C1, l35A1, l3E04, l4210, $b545
+; called by: project, scale_step, compute_shot, l34C1, l35A1, l3E04, l4210, aim
 log_multiply:
 		clc 
 		adc log_value
@@ -1793,7 +1756,7 @@ seed_count:		.byte	$02
 ; called by: plot_pixel, l1501, horizontal_line, vertical_line, draw_line
 add_fill_seed:
 		tsx 
-		lda d0103, x
+		lda $0103, x
 		tay 
 		ldx plot_y
 		lda seed_count
@@ -5063,7 +5026,7 @@ l2C72:
 		jmp l2C60
 
 ; prints the $ff-terminated text after the jsr
-; called by: swing, $2e52, $2ec7, check_landing, check_out_of_bounds, $3164, $31a6, print_score_labels, $a19d, $a1a2, $a1ae, $a1bf, $a1c4, $a1d0, $a1e3, $a1eb, $a1f7, $a1fe, $a20a, nmi, print_par_result, $afe9, $affb, title_screen, $b2d3, $b2d8, $b2ec, $b2f1, $b31d, $b322, aim, music_step, lC0F3, lC13B
+; called by: swing, check_landing, check_out_of_bounds, print_score_labels, nmi, print_par_result, title_screen, aim, music_step, lC0F3, lC13B
 print_inline:
 		pla 
 		sta text_pointer
@@ -5140,7 +5103,7 @@ l2CC7:
 unused_2cca:
 		.byte	$00, $00, $00, $00, $00, $00
 
-; jumped to by: d0103, old_loader, $c0f0
+; jumped to by: $01a3, old_loader, $c0f0
 start:
 		jmp l2CDC
 
@@ -5250,7 +5213,7 @@ shift_right_signed:
 		ror 
 		rts 
 
-; called by: $2e26, $2e7a, $32c2
+; called by: swing, $32c2
 raise_meter:
 		ldy power_level
 		cpy #$10
@@ -5265,7 +5228,7 @@ l2D76:
 		ldx #$59
 		jmp draw_animation_frame
 
-; called by: $2dd0
+; called by: swing
 lower_meter:
 		ldy power_level
 		cpy #$02
@@ -5282,7 +5245,7 @@ l2D89:
 unused_2d91:
 		.byte	$60
 
-; jumped to by: $31eb
+; jumped to by: check_out_of_bounds
 swing:
 		jsr get_key
 		ldx golfer_x
@@ -5291,12 +5254,12 @@ swing:
 		jsr l32B3
 		jsr compute_shot
 		jsr message_line
-		jsr print_inline
+		jsr print_inline	; text
 
 text_swing_club:
 		.text	"SWING CLUB", $ff
 
-; jumped to by: $2db9
+; jumped to by: swing
 l2DB4:
 		jsr get_key
 		cmp #$2a
@@ -5306,7 +5269,7 @@ l2DB4:
 		lda #$04
 		sta frame_timer_reload
 		sta frame_timer
-; jumped to by: $2de5, $2dec
+; jumped to by: swing
 l2DC8:
 		inc v045e
 		lda frame_timer
@@ -5317,7 +5280,7 @@ l2DC8:
 		lda power_level
 		cmp #$01
 		beq l2DEE
-; jumped to by: $2dce
+; jumped to by: swing
 l2DE0:
 		jsr get_key
 		cmp #$2a
@@ -5325,18 +5288,18 @@ l2DE0:
 		lda power_level
 		cmp #$0a
 		bcs l2DC8
-; jumped to by: $2dde
+; jumped to by: swing
 l2DEE:
 		lda #$00
 		sta v045f
 		lda #$00
 		sta v0460
-; jumped to by: $2e05
+; jumped to by: swing
 l2DF8:
 		inc v045f
 		bne l2E00
 		inc v0460
-; jumped to by: $2dfb
+; jumped to by: swing
 l2E00:
 		jsr get_key
 		cmp #$29
@@ -5347,13 +5310,13 @@ l2E00:
 		sta frame_timer_reload
 		sta frame_timer
 		jsr swing_sound
-; jumped to by: $2e49
+; jumped to by: swing
 l2E17:
 		jsr get_key
 		cmp #$29
 		bne l2E21
 		inc v0463
-; jumped to by: $2e1c
+; jumped to by: swing
 l2E21:
 		lda frame_timer
 		bne l2E49
@@ -5371,20 +5334,20 @@ l2E21:
 		adc #$01
 		clc 
 		adc #$05
-; jumped to by: $2e35
+; jumped to by: swing
 l2E43:
 		sta frame_timer
 		sta frame_timer_reload
-; jumped to by: $2e24
+; jumped to by: swing
 l2E49:
 		jmp l2E17
 
-; jumped to by: $2e2e
+; jumped to by: swing
 l2E4C:
 		jsr click_sound
 		jsr message_line
-		jsr print_inline
-		.byte	$ff
+		jsr print_inline	; text
+		.text	$ff
 		lda #$ff
 		sta v3294
 		lda v045f
@@ -5396,7 +5359,7 @@ l2E4C:
 		sta frame_timer
 		asl 
 		sta frame_timer_reload
-; jumped to by: $2e78, $2e8c
+; jumped to by: swing
 l2E72:
 		jsr get_key
 		lda frame_timer
@@ -5410,7 +5373,7 @@ l2E72:
 		sta v045f
 		bcs l2E72
 		jsr l2F5A
-; jumped to by: $2e97
+; jumped to by: swing
 l2E91:
 		jsr get_key
 		lda v3294
@@ -5426,24 +5389,24 @@ l2E91:
 		lda green_view
 		bne l2EB3
 		beq l2ED2
-; jumped to by: $2eaf
+; jumped to by: swing
 l2EB3:
 		jsr l32AD
 		beq l2ED2
 		lda #$00
 		sta hole_distance
-; jumped to by: $2eaa
+; jumped to by: swing
 l2EBC:
 		jsr l434E
 		lda #$3f
 		sta sprite_enable
 		jsr message_line
-		jsr print_inline
+		jsr print_inline	; text
 
 text_down:
 		.text	"DOWN !!", $ff
 
-; jumped to by: $2eb1, $2eb6, $2ed7
+; jumped to by: swing
 l2ED2:
 		jsr get_key
 		cmp #$3c
@@ -5451,7 +5414,7 @@ l2ED2:
 		jsr l434B
 		jmp silence_voices
 
-; jumped to by: $2edc
+; jumped to by: swing
 silence_voices:
 		lda #$00
 		sta voice1_control
@@ -5460,7 +5423,7 @@ silence_voices:
 		jmp l2FB1
 
 ; waits a frame and returns the key or joystick direction
-; called by: swing, $2db4, $2de0, $2e00, $2e17, $2e72, $2e91, $2ed2, wait_16_frames, play_animation, select_club
+; called by: swing, wait_16_frames, play_animation, select_club
 get_key:
 		txa 
 		pha 
@@ -5490,7 +5453,7 @@ l2F09:
 golfer_colors:
 		.byte	$09, $01, $02, $02, $00, $00, $01, $01, $00, $01, $01, $01, $09, $09, $01, $01
 
-; called by: $2e14, play_animation
+; called by: swing, play_animation
 swing_sound:
 		lda #$00
 		sta voice1_control
@@ -5516,7 +5479,7 @@ swing_sound:
 		sta voice1_control
 		rts 
 
-; called by: $2e8e
+; called by: swing
 l2F5A:
 		lda #$80
 		sta voice1_control
@@ -5531,7 +5494,7 @@ l2F60:
 		sta filter_cutoff + $1
 		rts 
 
-; called by: $2e4c, play_animation, l3EF4
+; called by: swing, play_animation, l3EF4
 click_sound:
 		ldx #$81
 		stx voice2_control
@@ -5544,7 +5507,7 @@ click_sound:
 swing_cutoff:
 		.byte	$42
 
-; called by: $3154
+; called by: check_out_of_bounds
 l2F78:
 		rts 
 
@@ -5643,7 +5606,7 @@ l3011:
 		sta sprites_x_msb
 		rts 
 
-; called by: $31e8
+; called by: check_out_of_bounds
 l301D:
 		lda sprites + $3f
 		beq l3025
@@ -5665,7 +5628,7 @@ l3027:
 		bne l3027
 		rts 
 
-; called by: set_golfer_colors, $2fd9, l301D, check_landing, $31cd
+; called by: set_golfer_colors, $2fd9, l301D, check_landing, check_out_of_bounds
 mirror_golfer:
 		ldx #$2f
 ; jumped to by: mirror_golfer
@@ -5776,12 +5739,12 @@ l30CD:
 		jsr check_terrain
 		bne check_out_of_bounds
 		jsr message_line
-		jsr print_inline
+		jsr print_inline	; text
 
 text_in_the_water:
 		.text	"IN THE WATER", $ff
 
-; jumped to by: $314c
+; jumped to by: check_out_of_bounds
 l30EA:
 		jsr l434B
 		jsr l434E
@@ -5823,7 +5786,7 @@ l3128:
 ; jumped to by: check_out_of_bounds
 l3138:
 		jsr message_line
-		jsr print_inline
+		jsr print_inline	; text
 
 text_out_of_bounds:
 		.text	"OUT OF BOUNDS", $ff
@@ -5839,7 +5802,7 @@ l314F:
 		lda #$01
 		sta v32bc
 		jsr message_line
-		jsr print_inline
+		jsr print_inline	; text
 
 text_select_club:
 		.text	"SELECT CLUB", $ff
@@ -5849,12 +5812,12 @@ text_select_club:
 		bne l3181
 		jsr l32B9
 		ldx #$0c
-; jumped to by: $317a
+; jumped to by: check_out_of_bounds
 l3181:
 		cmp #$06
 		bne l3187
 		ldx #$0b
-; jumped to by: $3183
+; jumped to by: check_out_of_bounds
 l3187:
 		lda green_view
 		beq l3197
@@ -5863,15 +5826,15 @@ l3187:
 		jsr select_club
 		jmp l31EB
 
-; jumped to by: $318a
+; jumped to by: check_out_of_bounds
 l3197:
 		stx club
 		jsr l3202
 		jsr select_club
 		jsr wait_16_frames
 		jsr message_line
-		jsr print_inline
-		.byte	$ff
+		jsr print_inline	; text
+		.text	$ff
 		lda #$04
 		sta anim_frame_count
 		lda #$0a
@@ -5891,7 +5854,7 @@ l3197:
 		clc 
 		adc #$2d
 		sta golfer_x
-; jumped to by: $31cb
+; jumped to by: check_out_of_bounds
 l31D9:
 		lda #$02
 		sta anim_frame_count
@@ -5900,11 +5863,11 @@ l31D9:
 		ldy #$12
 		jsr play_animation
 		jsr l301D
-; jumped to by: $3194
+; jumped to by: check_out_of_bounds
 l31EB:
 		jmp swing
 
-; called by: $2ff0, $31a0
+; called by: $2ff0, check_out_of_bounds
 wait_16_frames:
 		ldx #$10
 ; jumped to by: wait_16_frames
@@ -5925,7 +5888,7 @@ l31FC:
 		sta v0477
 		rts 
 
-; called by: $319a
+; called by: check_out_of_bounds
 l3202:
 		lda #$ff
 		sta v0477
@@ -6014,16 +5977,16 @@ table_327e:
 buffer_328e:
 		.byte	$01, $aa, $aa, $aa, $aa
 
-; called by: $2e62
+; called by: swing
 l3293:
 		rts 
 
-; read by: $2e94, snapshot_pc
-; written by: $2e58, check_landing, l3EF4
+; read by: swing, snapshot_pc
+; written by: swing, check_landing, l3EF4
 v3294:
 		.byte	$00
 
-; called by: swing, $2e4f, $2ec4, check_landing, check_out_of_bounds, $3161, $31a3
+; called by: swing, check_landing, check_out_of_bounds
 message_line:
 		lda #$00
 		sta @w text_x
@@ -6036,7 +5999,7 @@ message_line:
 		lda #$0d
 		jmp color_text
 
-; called by: $2eb3
+; called by: swing
 l32AD:
 		jmp (aA010)
 
@@ -6052,11 +6015,11 @@ l32B3:
 l32B6:
 		jmp (aA01A)
 
-; called by: $317c
+; called by: check_out_of_bounds
 l32B9:
 		jmp (aA01C)
 
-; written by: $3151, $315e
+; written by: check_out_of_bounds
 v32bc:
 		.byte	$01
 
@@ -6085,7 +6048,7 @@ l32D3:
 		rts 
 
 ; read by: wait_frames
-; written by: $2e9b, $2fde, $2ff5, $3009, l3027, $31b1, $31bb, $31e0
+; written by: swing, $2fde, $2ff5, $3009, l3027, check_out_of_bounds
 frame_delay:
 		.byte	$7e
 
@@ -6294,7 +6257,7 @@ l3414:
 unused_3417:
 		.byte	$06, $25, $41, $42, $43, $80, $44, $45
 
-; called by: $2ea5, $2fe8, $2fff, $300e, l3027, $31b6, $31c5, $31e5
+; called by: swing, $2fe8, $2fff, $300e, l3027, check_out_of_bounds
 play_animation:
 		tya 
 		pha 
@@ -6348,7 +6311,7 @@ l3469:
 		bne play_animation
 		rts 
 
-; written by: $2ea0, $2fe3, $2ffa, $3004, l3027, $31ac, $31c0, $31db
+; written by: swing, $2fe3, $2ffa, $3004, l3027, check_out_of_bounds
 ; modified by: play_animation
 anim_frame_count:
 		.byte	$44
@@ -6387,7 +6350,7 @@ compute_shot:
 		sta v377d
 		jmp l36E6
 
-; called by: $2e65
+; called by: swing
 l34C1:
 		lda v377c
 		sta log_value
@@ -6519,10 +6482,10 @@ shot_speed:		.byte	$00
 ; written by: l34C1, l3711, l3EF4
 shot_sideways:		.byte	$00
 ; read by: compute_shot, l34C1, select_club, l382B, print_club_name, $3d69, l3EF4, l4210
-; written by: $318e, $3197
+; written by: check_out_of_bounds
 ; modified by: l382B
 club:		.byte	$00
-; read by: $3173, check_terrain, compute_shot
+; read by: check_out_of_bounds, check_terrain, compute_shot
 ; written by: l3253
 terrain_type:		.byte	$0a
 ; read by: l34C1
@@ -6932,7 +6895,7 @@ l379D:
 		sta @w ball_x + $1
 		jmp l3AB8
 
-; called by: $3191, $319d
+; called by: check_out_of_bounds
 select_club:
 		jsr print_club_name
 		lda club
@@ -8589,7 +8552,7 @@ v4343:		.byte	$55
 ; modified by: l423D
 v4344:		.byte	$41
 
-; called by: $30f0, ball_flight
+; called by: check_landing, ball_flight
 l4345:
 		jmp (vectors)
 
@@ -8597,12 +8560,12 @@ l4345:
 l4348:
 		jmp (aA00E)
 
-; called by: $2ed9, $30ea
+; called by: swing, check_landing
 ; jumped to by: select_club
 l434B:
 		jmp (aA014)
 
-; called by: $2ebc, $30ed, l382B
+; called by: swing, check_landing, l382B
 l434E:
 		jmp (aA016)
 
@@ -8642,14 +8605,14 @@ unused_47e8:
 
 .virtual $47f8
 ; read by: $a42f, $a4b2
-; written by: check_terrain, l33C0, ball_flight, l3EF4, clear_screen, $a438, $a4bb, draw_flag, $b4d6, $b562, $b76a
+; written by: check_terrain, l33C0, ball_flight, l3EF4, clear_screen, $a438, $a4bb, draw_flag, aim, $b76a
 sprite_pointers:
 		.fill	8
 .endv
 
 *=$4800
 
-; read by: draw_golfer, set_golfer_colors, l2F9B, $2fd4, l301D, mirror_golfer, check_landing, $31c8, draw_animation_frame, l33C0
+; read by: draw_golfer, set_golfer_colors, l2F9B, $2fd4, l301D, mirror_golfer, check_landing, check_out_of_bounds, draw_animation_frame, l33C0
 ; written by: draw_golfer, set_golfer_colors, mirror_golfer
 sprites:
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
@@ -9773,7 +9736,7 @@ digit_text:
 		.text	"33122854133064145955154204161803"
 		.text	"175465183784      "
 
-; jumped to by: $a000, $a647
+; jumped to by: $a000, nmi
 main:
 		jsr install_interrupts
 		lda #$ff
@@ -9883,7 +9846,7 @@ print_score_labels:
 		clc 
 		adc #$04
 		sta text_x
-		jsr print_inline
+		jsr print_inline	; text
 
 text_player:
 		.text	"PLAYER", $ff
@@ -9891,7 +9854,7 @@ text_player:
 		clc 
 		adc #$04
 		sta text_x
-		jsr print_inline
+		jsr print_inline	; text
 
 text_1:
 		.text	"1", $ff
@@ -9903,7 +9866,7 @@ newline:
 		clc 
 		adc #$04
 		sta text_x
-		jsr print_inline
+		jsr print_inline	; text
 
 text_player2:
 		.text	"PLAYER", $ff
@@ -9911,7 +9874,7 @@ text_player2:
 		clc 
 		adc #$04
 		sta text_x
-		jsr print_inline
+		jsr print_inline	; text
 
 text_2:
 		.text	"2", $ff
@@ -9923,7 +9886,7 @@ newline2:
 		clc 
 		adc #$04
 		sta text_x
-		jsr print_inline
+		jsr print_inline	; text
 
 text_hole:
 		.text	"HOLE    ", $ff
@@ -9931,7 +9894,7 @@ text_hole:
 		clc 
 		adc #$04
 		sta text_x
-		jsr print_inline
+		jsr print_inline	; text
 
 text_club:
 		.text	"CLUB", $ff
@@ -9943,7 +9906,7 @@ newline3:
 		clc 
 		adc #$04
 		sta text_x
-		jsr print_inline
+		jsr print_inline	; text
 
 text_yds:
 		.text	"YDS", $ff
@@ -9955,7 +9918,7 @@ newline4:
 		clc 
 		adc #$04
 		sta text_x
-		jsr print_inline
+		jsr print_inline	; text
 
 text_par:
 		.text	"PAR", $ff
@@ -10509,12 +10472,12 @@ lA5FA:
 		lda bitmap_pointer
 		pha 
 		jsr lB5EE
-		jsr print_inline
+		jsr print_inline	; text
 
 text_quit_y_n:
 		.text	"QUIT (Y/N) ? ", $ff
 
-; jumped to by: $a651
+; jumped to by: nmi
 lA63E:
 		jsr scnkey
 		lda kernal_lstx
@@ -10522,13 +10485,13 @@ lA63E:
 		bne lA64A
 		jmp main
 
-; jumped to by: $a645
+; jumped to by: nmi
 lA64A:
 		cmp #$17
 		bne lA64F
 		brk 
 
-; jumped to by: $a64c
+; jumped to by: nmi
 lA64F:
 		cmp #$27
 		bne lA63E
@@ -10571,7 +10534,7 @@ lA680:
 
 ; $ff while nmi runs, so a nested NMI returns at once
 ; read by: nmi
-; written by: install_interrupts, nmi, $a67d
+; written by: install_interrupts, nmi
 nmi_active:
 		.byte	$00
 
@@ -11044,7 +11007,7 @@ lA95A:
 		rts 
 
 ; called by: new_game, hole_loop
-; jumped to by: $b348, $b350
+; jumped to by: title_screen
 lA95B:
 		jmp (a2CE5)
 
@@ -11052,7 +11015,7 @@ lA95B:
 lA95E:
 		jmp (a2CE7)
 
-; called by: add_stroke, update_scores, print_par_result, $b340, aim
+; called by: add_stroke, update_scores, print_par_result, title_screen, aim
 ; jumped to by: lB5EE
 lA961:
 		jmp (a2CE9)
@@ -11061,7 +11024,7 @@ lA961:
 lA964:
 		jmp (a2CEB)
 
-; called by: $b4fa
+; called by: aim
 lA967:
 		jmp (a2CED)
 
@@ -12102,7 +12065,7 @@ print_par_result:
 		sbc par
 		bcc lAFE9
 		beq lAFFB
-		jsr print_inline
+		jsr print_inline	; text
 
 text_over_par:
 		.text	"OVER PAR", $ff
@@ -12111,7 +12074,7 @@ text_over_par:
 
 ; jumped to by: print_par_result
 lAFE9:
-		jsr print_inline
+		jsr print_inline	; text
 
 text_under_par:
 		.text	"UNDER PAR", $ff
@@ -12120,7 +12083,7 @@ text_under_par:
 
 ; jumped to by: print_par_result
 lAFFB:
-		jsr print_inline
+		jsr print_inline	; text
 
 text_level_par:
 		.text	"LEVEL PAR", $ff
@@ -12537,7 +12500,7 @@ lB2AE:
 		sta text_x
 		lda #$1f
 		sta text_y
-		jsr print_inline
+		jsr print_inline	; text
 
 text_f1_1_player:
 		.text	"F1) 1 PLAYER", $ff
@@ -12545,7 +12508,7 @@ text_f1_1_player:
 
 newline5:
 		.byte	$0d, $ff
-		jsr print_inline
+		jsr print_inline	; text
 
 text_f3_2_player:
 		.text	"    F3) 2 PLAYER", $ff
@@ -12553,12 +12516,12 @@ text_f3_2_player:
 
 newline6:
 		.byte	$0d, $ff
-		jsr print_inline
+		jsr print_inline	; text
 
 text_f5_practice:
 		.text	"    F5) PRACTICE", $ff
 
-; jumped to by: $b318
+; jumped to by: title_screen
 lB305:
 		lda #$00
 		jsr play_tune
@@ -12576,12 +12539,12 @@ lB305:
 
 newline7:
 		.byte	$0d, $ff
-		jsr print_inline
+		jsr print_inline	; text
 
 text_hole_1_18:
 		.text	"    HOLE (1-18) ", $ff
 
-; jumped to by: $b346
+; jumped to by: title_screen
 lB336:
 		lda #$80
 		sta text_x
@@ -12593,13 +12556,13 @@ lB336:
 		beq lB336
 		jmp lA95B
 
-; jumped to by: $b30e, $b313
+; jumped to by: title_screen
 lB34B:
 		stx game_mode
 		lda #$01
 		jmp lA95B
 
-; called by: $b343
+; called by: title_screen
 read_hole_number:
 		lda #$00
 ; jumped to by: read_hole_number
@@ -12806,7 +12769,7 @@ lB471:
 		sta voice1_control
 		jmp silence_sid
 
-; jumped to by: $b565
+; jumped to by: aim
 lB496:
 		ldy #$1e
 		jmp beep
@@ -12846,7 +12809,7 @@ aim:
 		sta text_x
 		lda #$0d
 		jsr lA961
-		jsr print_inline
+		jsr print_inline	; text
 
 text_aim:
 		.text	"AIM", $ff
@@ -12866,11 +12829,11 @@ text_aim:
 		lda sprites_x_msb
 		ora #$80
 		sta sprites_x_msb
-; jumped to by: $b4eb
+; jumped to by: aim
 lB4F5:
 		lda #$50
 		sta aim_offset
-; jumped to by: $b50a, $b570, $b57e, $b589, $b594, $b5ad
+; jumped to by: aim
 lB4FA:
 		jsr lA967
 		cmp #$29
@@ -12879,7 +12842,7 @@ lB4FA:
 		bne lB508
 		jmp lB58C
 
-; jumped to by: $b503
+; jumped to by: aim
 lB508:
 		cmp #$3c
 		bne lB4FA
@@ -12895,7 +12858,7 @@ lB508:
 		clc 
 		eor #$ff
 		adc #$01
-; jumped to by: $b51e
+; jumped to by: aim
 lB525:
 		tax 
 		lda #$00
@@ -12922,10 +12885,10 @@ lB525:
 		clc 
 		eor #$ff
 		adc #$01
-; jumped to by: $b551
+; jumped to by: aim
 lB558:
 		sta aim_offset
-; jumped to by: $b518
+; jumped to by: aim
 lB55B:
 		lda #$fe
 		sta sprite7_y
@@ -12933,14 +12896,14 @@ lB55B:
 		sta sprite_pointers + $7
 		jmp lB496
 
-; jumped to by: $b4ff
+; jumped to by: aim
 lB568:
 		lda aim_offset
 		cmp aim_max
 		bcc lB573
 		jmp lB4FA
 
-; jumped to by: $b56e
+; jumped to by: aim
 lB573:
 		inc aim_offset
 		inc sprite7_x
@@ -12948,21 +12911,21 @@ lB573:
 		beq lB581
 		jmp lB4FA
 
-; jumped to by: $b57c
+; jumped to by: aim
 lB581:
 		lda sprites_x_msb
 		ora #$80
 		sta sprites_x_msb
 		jmp lB4FA
 
-; jumped to by: $b505
+; jumped to by: aim
 lB58C:
 		lda aim_offset
 		cmp aim_min
 		bcs lB597
 		jmp lB4FA
 
-; jumped to by: $b592
+; jumped to by: aim
 lB597:
 		dec aim_offset
 		lda sprite7_x
@@ -12970,7 +12933,7 @@ lB597:
 		lda sprites_x_msb
 		and #$7f
 		sta sprites_x_msb
-; jumped to by: $b59d
+; jumped to by: aim
 lB5A7:
 		dec sprite7_x
 		dec sprite7_x
@@ -13021,12 +12984,13 @@ lB5D8:
 		bne lB5D8
 		jmp l0FF3
 
+; never returns: ends in a jmp to start
 ; called by: $a009
 lB5E8:
 		jsr install_interrupts
 		jmp lC01A
 
-; called by: nmi, $a653
+; called by: nmi
 lB5EE:
 		lda #$00
 		sta text_x
@@ -13325,7 +13289,7 @@ vb853:
 ; written by: $b81a
 vb854:		.byte	$76
 
-; called by: lB8A8, $b9d9, $b9e8, $b9f7, $ba23, $ba86, $ba95, $baa4
+; called by: lB8A8, music_step
 music_push:
 		ldx music_voice
 		lda v0479, x
@@ -13341,7 +13305,7 @@ music_push:
 		sta v0479, x
 		rts 
 
-; called by: lB8A8, $ba3d, $ba4a, $ba59, $ba68
+; called by: lB8A8, music_step
 music_pop:
 		ldx music_voice
 		lda v0479, x
@@ -13357,7 +13321,7 @@ music_pop:
 		sta v0479, x
 		rts 
 
-; called by: lB8A8, music_step, $ba13
+; called by: lB8A8, music_step
 next_music_byte:
 		inc pointer_06
 		bne lB895
@@ -13378,7 +13342,7 @@ lB8A1:
 lB8A7:
 		rts 
 
-; called by: $ba04, $baa7, $bab6
+; called by: music_step
 lB8A8:
 		jsr next_music_byte
 		sta v0429
@@ -13423,8 +13387,8 @@ lB8D7:
 		rts 
 
 ; plays tune A until it ends or F1/F3/F5 is pressed
-; called by: $b307
-; jumped to by: $afe6, $aff8, $b00a
+; called by: title_screen
+; jumped to by: print_par_result
 play_tune:
 		jsr music_start
 		pha 
@@ -13476,13 +13440,12 @@ music_start:
 		sta v047c
 		jmp lBB2F
 
-; called by: $ba30
-; jumped to by: $ba77, $bae5, $baf7, $bbdc
+; jumped to by: $bbdc
 music_step:
 		jsr next_music_byte
 		sta music_note
 		bne lB988
-; jumped to by: $b9ca
+; jumped to by: music_step
 lB987:
 		rts 
 
@@ -13531,7 +13494,7 @@ lB9BE:
 
 ; jumped to by: music_step
 lB9C1:
-		jsr print_inline
+		jsr print_inline	; text
 
 text_error:
 		.text	"ERROR", $ff
@@ -13565,14 +13528,14 @@ lB9CD:
 		sta v040e
 		jsr next_music_byte
 		sta v0411
-; jumped to by: $bad5
+; jumped to by: music_step
 lBA19:
 		lda pointer_06
 		sta v0439
 		lda pointer_06 + $1
 		sta v043a
 		jsr music_push
-; jumped to by: $ba36, $ba3b
+; jumped to by: music_step
 lBA26:
 		lda v040d
 		sta pointer_06
@@ -13635,7 +13598,7 @@ lBA7A:
 		lda v040f
 		bne lBACD
 		dec v0410
-; jumped to by: $bac8
+; jumped to by: music_step
 lBACD:
 		dec v040f
 		lda #$01
@@ -13673,16 +13636,16 @@ lBAE8:
 		sta voice2_control
 		pha 
 		ldx music_duration
-; jumped to by: $bb26
+; jumped to by: music_step
 lBB14:
 		ldy music_tempo
-; jumped to by: $bb23
+; jumped to by: music_step
 lBB17:
 		pha 
 		txa 
 		pha 
 		ldx #$00
-; jumped to by: $bb1d
+; jumped to by: music_step
 lBB1C:
 		dex 
 		bne lBB1C
@@ -13698,11 +13661,11 @@ lBB1C:
 		sta voice2_control
 		rts 
 
-; jumped to by: music_start, $bb9f
+; jumped to by: music_start, music_step
 lBB2F:
 		lda #$01
 		sta music_voice
-; jumped to by: $bb7f
+; jumped to by: music_step
 lBB34:
 		ldx music_voice
 		dec v0434, x
@@ -13732,7 +13695,7 @@ lBB4F:
 		lda music_duration
 		ldx music_voice
 		sta v0434, x
-; jumped to by: $bb3a
+; jumped to by: music_step
 lBB77:
 		inc music_voice
 		lda music_voice
@@ -13741,19 +13704,19 @@ lBB77:
 		jsr scnkey
 		jsr getin
 		bne lBBA2
-; jumped to by: $bbac
+; jumped to by: music_step
 lBB89:
 		ldx #$01
-; jumped to by: $bb9d
+; jumped to by: music_step
 lBB8B:
 		ldy music_tempo
-; jumped to by: $bb9a
+; jumped to by: music_step
 lBB8E:
 		pha 
 		txa 
 		pha 
 		ldx #$00
-; jumped to by: $bb94
+; jumped to by: music_step
 lBB93:
 		dex 
 		bne lBB93
@@ -13766,7 +13729,7 @@ lBB93:
 		bne lBB8B
 		jmp lBB2F
 
-; jumped to by: $bb87
+; jumped to by: music_step
 lBBA2:
 		cmp #$85
 		beq lBBAE
@@ -13774,7 +13737,7 @@ lBBA2:
 		beq lBBAE
 		cmp #$87
 		bne lBB89
-; jumped to by: $bba4, $bba8
+; jumped to by: music_step
 lBBAE:
 		pha 
 		jsr silence_sid
@@ -13783,11 +13746,11 @@ lBBAE:
 		txs 
 		rts 
 
-; read by: $bb3c, $bbc0, $bbe2
+; read by: music_step, $bbc0, $bbe2
 voice_offsets:
 		.byte	$00, $00, $07, $0e, $15
 
-; jumped to by: $bb4c
+; jumped to by: music_step
 lBBBD:
 		ldx music_voice
 		lda voice_offsets + $1, x
@@ -13827,7 +13790,7 @@ lBBF2:
 		bcc lBBF2
 		jmp lBB4F
 
-; called by: lB5B0, play_tune, $bbaf, init_sid
+; called by: lB5B0, play_tune, music_step, init_sid
 ; jumped to by: beep
 silence_sid:
 		ldx #$19
@@ -14004,7 +13967,7 @@ music_data:
 		.byte	$02, $34, $02, $40, $04, $20, $04, $20, $04, $20, $04, $25, $04
 
 ; SID frequencies: 16 words per octave, 12 of them used
-; read by: $baff, $bb05, $bb57, $bb5d
+; read by: music_step
 note_frequencies:
 		.word	$010c, $011c, $012d, $013e, $0151, $0166, $017b, $0191, $01a9, $01c3, $01dd, $01fa, $0000, $0000, $0000, $0000
 		.word	$0218, $0238, $025a, $027d, $02a3, $02cc, $02f6, $0323, $0353, $0386, $03bb, $03f4, $0000, $0000, $0000, $0000
@@ -14026,7 +13989,7 @@ unused_golf:
 ; written by: lC13B
 vc013:
 		.byte	$34
-; read by: $c129
+; read by: lC0F3
 vc014:		.byte	$05
 
 ; read by: lC13B
@@ -14165,12 +14128,12 @@ lC0F3:
 		jsr setlfs
 		bcs lC129
 		jsr print_hex
-		jsr print_inline
+		jsr print_inline	; text
 
 text_error_in_setlfs:
 		.text	" ERROR IN SETLFS", $0d, $ff
 
-; jumped to by: $c126
+; jumped to by: lC0F3
 lC126:
 		jmp lC126
 
@@ -14182,11 +14145,11 @@ lC129:
 		jsr setnam
 		bcs lC13A
 		bcc lC13A
-; jumped to by: $c137
+; jumped to by: lC0F3
 lC137:
 		jmp lC137
 
-; jumped to by: $c133, $c135
+; jumped to by: lC0F3
 lC13A:
 		rts 
 
@@ -14205,7 +14168,7 @@ lC13B:
 		jsr save
 		bcc lC176
 		jsr print_hex
-		jsr print_inline
+		jsr print_inline	; text
 
 text_save_routine_error:
 		.text	" SAVE ROUTINE ERROR", $0d, $ff
@@ -14215,7 +14178,7 @@ lC176:
 		rts 
 
 ; unreferenced: flashes the border forever
-; jumped to by: $c17a
+; jumped to by: lC13B
 lC177:
 		inc border_color
 		jmp lC177
@@ -14490,14 +14453,14 @@ sprite5_y:		.byte	?
 sprite6_x:		.byte	?
 ; written by: $3013, check_terrain, position_ball_sprite, draw_flag
 sprite6_y:		.byte	?
-; read by: $b59a
-; written by: position_ball_sprite, $b4e8, $b74b
-; modified by: $b576, $b579, $b5a7, $b5aa
+; read by: aim
+; written by: position_ball_sprite, aim, $b74b
+; modified by: aim
 sprite7_x:		.byte	?
-; written by: $3016, check_landing, position_ball_sprite, $b4e1, $b55d, $b765
+; written by: $3016, check_landing, position_ball_sprite, aim, $b765
 sprite7_y:		.byte	?
-; read by: draw_golfer, position_ball_sprite, draw_flag, read_aim_cursor, $b4ed, $b581, $b59f, $b750, $b757
-; written by: draw_golfer, $3019, position_ball_sprite, draw_flag, $b4f2, $b586, $b5a4, $b75c
+; read by: draw_golfer, position_ball_sprite, draw_flag, read_aim_cursor, aim, $b750, $b757
+; written by: draw_golfer, $3019, position_ball_sprite, draw_flag, aim, $b75c
 sprites_x_msb:		.byte	?
 ; read by: old_loader, screen_off, screen_on, bitmap_mode, text_mode, enable_raster_irq
 ; written by: old_loader, screen_off, screen_on, bitmap_mode, text_mode, enable_raster_irq
@@ -14507,8 +14470,8 @@ vic_control1:		.byte	?
 raster:		.byte	?
 light_pen_x:		.byte	?
 light_pen_y:		.byte	?
-; read by: check_terrain, l3C3F, $3d3b, $3d45, $3d59, $3d70, $3d8a, $b4cc, $b76d, $b785
-; written by: $2ec1, check_landing, $3159, check_terrain, l3C3F, $3d40, $3d5e, $3d75, $3d8f, new_game, shot_loop, $b4d1, $b772, $b78a
+; read by: check_terrain, l3C3F, $3d3b, $3d45, $3d59, $3d70, $3d8a, aim, $b76d, $b785
+; written by: swing, check_landing, check_out_of_bounds, check_terrain, l3C3F, $3d40, $3d5e, $3d75, $3d8f, new_game, shot_loop, aim, $b772, $b78a
 sprite_enable:		.byte	?
 ; read by: old_loader, bitmap_mode, text_mode
 ; written by: old_loader, bitmap_mode, text_mode
@@ -14535,7 +14498,7 @@ sprite_expand_x:		.byte	?
 sprite_sprite_collision:		.byte	?
 sprite_background_collision:		.byte	?
 ; written by: main
-; modified by: $c177
+; modified by: lC13B
 border_color:		.byte	?
 ; written by: old_loader, clear_screen, $a52d
 background_color:		.byte	?
@@ -14560,35 +14523,35 @@ sprite4_color:		.byte	?
 sprite5_color:		.byte	?
 ; written by: clear_screen
 sprite6_color:		.byte	?
-; written by: $b4db, $b777, $b77f
+; written by: aim, $b777, $b77f
 sprite7_color:		.byte	?
 vic_unused_2f:		.byte	?
 ; the C128's clock speed register; the decruncher runs at 2 MHz on a C128
-; modified by: d0103, decrunch
+; modified by: $0197, decrunch
 c128_clock:		.byte	?
 ; written by: beep
 vic_mirrors:
 		.fill	975
 ; ---- SID ----
-; written by: swing_sound, l2F79, beep, $bb5a, $bb60, silence_sid
+; written by: swing_sound, l2F79, beep, music_step, silence_sid
 voice1_frequency:		.word	?
 ; written by: init_sid
 voice1_pulse_width:		.word	?
-; written by: silence_voices, swing_sound, l2F5A, l2F79, l2F9B, beep, $bb49, $bb6b
+; written by: silence_voices, swing_sound, l2F5A, l2F79, l2F9B, beep, music_step
 voice1_control:		.byte	?
 ; written by: swing_sound, l2F79, beep, init_sid
 voice1_attack_decay:		.byte	?
 ; written by: swing_sound, l2F79, init_sid
 voice1_sustain_release:		.byte	?
-; written by: swing_sound, $bb02, $bb08
+; written by: swing_sound, music_step
 voice2_frequency:		.word	?
 ; written by: init_sid
 voice2_pulse_width:		.word	?
-; written by: silence_voices, swing_sound, click_sound, $bb0d, $bb2b
+; written by: silence_voices, swing_sound, click_sound, music_step
 voice2_control:		.byte	?
-; written by: swing_sound, $bada, $baea, init_sid
+; written by: swing_sound, music_step, init_sid
 voice2_attack_decay:		.byte	?
-; written by: swing_sound, $badd, $baef, init_sid
+; written by: swing_sound, music_step, init_sid
 voice2_sustain_release:		.byte	?
 voice3_frequency:		.word	?
 ; written by: init_sid
@@ -14604,7 +14567,7 @@ filter_cutoff:		.word	?
 ; written by: swing_sound, l2F79
 filter_control:		.byte	?
 ; read by: nmi
-; written by: swing_sound, l2F79, nmi, $a675, beep, init_sid
+; written by: swing_sound, l2F79, nmi, beep, init_sid
 volume_filter_mode:		.byte	?
 sid_mirrors:
 		.fill	999
@@ -14954,7 +14917,7 @@ memtop:
 		.fill	3
 membot:
 		.fill	3
-; called by: l0FF3, get_key, read_hex_digit, $a63e, read_hole_number, $bb81
+; called by: l0FF3, get_key, read_hex_digit, nmi, read_hole_number, music_step
 scnkey:
 		.fill	3
 settmo:
@@ -14976,7 +14939,7 @@ readst:
 ; called by: lC0F3
 setlfs:
 		.fill	3
-; called by: $08de, $c130
+; called by: $08de, lC0F3
 setnam:
 		.fill	3
 open:
@@ -15005,7 +14968,7 @@ rdtim:
 		.fill	3
 stop:
 		.fill	3
-; called by: l0FF3, read_hex_digit, read_hole_number, $bb84
+; called by: l0FF3, read_hex_digit, read_hole_number, music_step
 getin:
 		.fill	3
 ; called by: lC0F3
@@ -15074,8 +15037,7 @@ $00fb-$00fc virtual byte vfb
 $00fc-$00fd virtual byte vfc
 $00fd-$00ff virtual word pointer_fd
 $00ff-$0100 virtual byte unused_ff
-$0100-$0103 code
-$0103-$01a6 code d0103
+$0100-$01a6 code
 $01a6-$01c6 byte[32] decrunch_table
 $01c6-$01f9 byte[51] unused_stack
 $01f9-$0200 byte[7] stack
@@ -15400,7 +15362,7 @@ $2d91-$2d92 byte unused_2d91
 $2d92-$2da9 code swing
 $2da9-$2db4 char[11] text_swing_club
 $2db4-$2e55 code l2DB4
-$2e55-$2e56 byte
+$2e55-$2e56 char
 $2e56-$2eca code
 $2eca-$2ed2 char[8] text_down
 $2ed2-$2edf code l2ED2
@@ -15432,7 +15394,7 @@ $313e-$314c char[14] text_out_of_bounds
 $314c-$3167 code
 $3167-$3173 char[12] text_select_club
 $3173-$31a9 code
-$31a9-$31aa byte
+$31a9-$31aa char
 $31aa-$31ee code
 $31ee-$31f8 code wait_16_frames
 $31f8-$31fc byte[4] unused_31f8

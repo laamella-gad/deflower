@@ -135,7 +135,8 @@ class CrossReferences {
     /**
      * The address of the nearest routine label at or before the
      * instruction in `area`, looking back through the instructions right
-     * before it, or -1 when that code has none.
+     * before it, and past the inline data of a call (issue 0068), or -1
+     * when that code has none.
      */
     private static int referrerAddress(InstructionArea area, Subject subject) {
         Area current = area;
@@ -145,6 +146,10 @@ class CrossReferences {
                 return current.address;
             }
             Area previous = current.address > 0 ? subject.peek(current.address - 1) : null;
+            Integer call = subject.callsByReturnAddress.get(current.address);
+            if (call != null) {
+                previous = subject.peek(call);
+            }
             if (!(previous instanceof InstructionArea)) {
                 return -1;
             }

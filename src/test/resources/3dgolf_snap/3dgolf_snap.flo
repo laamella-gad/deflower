@@ -11,74 +11,38 @@ $a687 byte nmi_active
 ; where the CPU was when the snapshot was taken
 $2ef7 code snapshot_pc
 $2cd0 code start
-$2da9 char[11] text_swing_club
-$2db4 code
-$2e55 byte
-$2e56 code
-$2eca char[8] text_down
-$2ed2 code
-$30dd char[13] text_in_the_water
-$30ea code
-$313e char[14] text_out_of_bounds
-$314c code
-$3167 char[12] text_select_club
-$3173 code
-$31a9 byte
-$31aa code
-$a18f char[7] text_player
-$a196 code
-$a1a0 char[2] text_1
-$a1a2 code
+$2da9 text_swing_club
+$2eca text_down
+$30dd text_in_the_water
+$313e text_out_of_bounds
+$3167 text_select_club
+$a18f text_player
+$a1a0 text_1
 $a1a5 byte[2] newline
-$a1a7 code
-$a1b1 char[7] text_player2
-$a1b8 code
-$a1c2 char[2] text_2
-$a1c4 code
+$a1b1 text_player2
+$a1c2 text_2
 $a1c7 byte[2] newline2
-$a1c9 code
-$a1d3 char[9] text_hole
-$a1dc code
-$a1e6 char[5] text_club
-$a1eb code
+$a1d3 text_hole
+$a1e6 text_club
 $a1ee byte[2] newline3
-$a1f0 code
-$a1fa char[4] text_yds
-$a1fe code
+$a1fa text_yds
 $a201 byte[2] newline4
-$a203 code
-$a20d char[4] text_par
-$a211 code
-$a630 char[14] text_quit_y_n
-$a63e code
-$afdb char[9] text_over_par
-$afe4 code
-$afec char[10] text_under_par
-$aff6 code
-$affe char[10] text_level_par
-$b008 code
-$b2c6 char[13] text_f1_1_player
-$b2d3 code
+$a20d text_par
+$a630 text_quit_y_n
+$afdb text_over_par
+$afec text_under_par
+$affe text_level_par
+$b2c6 text_f1_1_player
 $b2d6 byte[2] newline5
-$b2d8 code
-$b2db char[17] text_f3_2_player
-$b2ec code
+$b2db text_f3_2_player
 $b2ef byte[2] newline6
-$b2f1 code
-$b2f4 char[17] text_f5_practice
-$b305 code
+$b2f4 text_f5_practice
 $b320 byte[2] newline7
-$b322 code
-$b325 char[17] text_hole_1_18
-$b336 code
-$b4c8 char[4] text_aim
-$b4cc code
-$b9c4 char[6] text_error
-$b9ca code
-$c114 char[18] text_error_in_setlfs
-$c126 code
-$c161 char[21] text_save_routine_error
-$c176 code
+$b325 text_hole_1_18
+$b4c8 text_aim
+$b9c4 text_error
+$c114 text_error_in_setlfs
+$c161 text_save_routine_error
 $0801-$080d byte basic_stub
 $080d code decrunch
 $0843-$0878 byte decruncher_leftover
@@ -883,7 +847,9 @@ $9ff1-$a000 byte leftover_9ff1
 $0900 to_log
 $0ffb print_char
 ; prints the $ff-terminated text after the jsr
-$2c75 print_inline
+$2c75 code print_inline (char[until $ff] text)
+; never returns: ends in a jmp to start
+$b5e8 code noreturn
 $2c93 print_nibble
 $2cf1 draw_golfer
 $2d21 set_golfer_colors

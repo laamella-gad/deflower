@@ -33,7 +33,7 @@
  *     printed above the next annotation line's address in the output;
  *     consecutive comment lines stay together.
  *
- * <address or range> [virtual] [<type>[<size>]] [<label>] [export <id>] [{]
+ * <address or range> [virtual] [<type>[<size>]] [<label>] [(<parameters>)] [noreturn] [export <id>] [{]
  *     An annotation line, its parts in exactly this order, each at most once:
  *     - address: $hex (either case) or decimal, e.g. $c000, 49152.
  *       range: start-end, with the end EXCLUSIVE ($c006-$c008 is two bytes).
@@ -57,10 +57,25 @@
  *     - size: [n], the element count, e.g. byte[8]. n is a number, or *
  *       and + over numbers (* binds tighter, no parentheses): byte[$af],
  *       byte[40*21], byte[40*19+5]. A count of 0 (or a range too short
- *       for one element) is an error.
+ *       for one element) is an error. Or [until n]: the elements up to and
+ *       including the first one that holds n, e.g. char[until $00] for a
+ *       null-terminated string. No such element before memory the image
+ *       doesn't load is an error.
  *     - label: a name for the address, from [A-Za-z0-9._?]. It can't be
  *       a reserved word: deflower, include, virtual, export, char, byte, word,
- *       long, dword, addr, sbyte, sword, slong, sdword, code.
+ *       long, dword, addr, sbyte, sword, slong, sdword, code, until,
+ *       noreturn.
+ *     - (parameters), only on a code line: the data that follows every
+ *       jsr to this address in memory, which the routine reads and steps
+ *       over, as a comma-separated list of <type>[<size>] [<name>], e.g.
+ *       $2c75 code print_inline (char[until $ff] text). At each call site
+ *       the data is registered, the names are printed after the jsr, and
+ *       the tracing carries on after the data. A data line at a call site
+ *       wins over the list for that call; the tracing then carries on
+ *       after that line's data.
+ *     - noreturn, only on a code line: a jsr to this address doesn't
+ *       return, so nothing after the call (or after its parameters) is
+ *       traced.
  *     - export <file>.bin or export <file>.prg: writes the memory the
  *       line covers to out/<file>.bin, or to out/<file>.prg after a
  *       2-byte load address (the region's start), and puts
@@ -102,7 +117,7 @@ prog:	(statement NEWLINE)* EOF;
 statement: COMMENT # comment
     | 'deflower' ID         # setFileName
     | 'include' ID          # include
-    | (address | memoryRange) setVirtual? datatype? setLabel? export? OPEN_BLOCK? # line
+    | (address | memoryRange) setVirtual? datatype? setLabel? parameters? noReturn? export? OPEN_BLOCK? # line
     | CLOSE_BLOCK                   # endBlock
     ;
 
@@ -111,8 +126,13 @@ memoryRange: number '-' number;
 setVirtual: 'virtual';
 setLabel: ID;
 export: 'export' ID;
+parameters: '(' parameter (',' parameter)* ')';
+parameter: datatype ID?;
+noReturn: 'noreturn';
 
-datatype: (CHAR|BYTE|WORD|LONG|DWORD|ADDR|SBYTE|SWORD|SLONG|SDWORD|CODE) ( '[' arraySize? ']')?;
+datatype: (CHAR|BYTE|WORD|LONG|DWORD|ADDR|SBYTE|SWORD|SLONG|SDWORD|CODE) ( '[' (arraySize | untilSize)? ']')?;
+// The elements up to and including the first one that equals the number.
+untilSize: 'until' number;
 // The element count of an array: a number, or * and + over numbers, with
 // * binding tighter.
 arraySize: arraySize '*' arraySize  # arraySizeMul

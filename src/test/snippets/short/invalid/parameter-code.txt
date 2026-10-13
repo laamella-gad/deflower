@@ -1,0 +1,10 @@
+>>> Issue 0068: a parameter can't be code. <<<
+===
+deflower test.prg
+$c000 code print (code here)
+^^^
+Failed to parse test.flo:
+line 2: a parameter can't be code
+~~~
+~~~
+vvv

@@ -1,0 +1,95 @@
+>>> Issue 0068: a code line's parameter list declares the data after each
+jsr to the routine. The data is registered at every call site, with the
+parameter names after the jsr, and the trace carries on after it: a
+$ff-terminated text (also an empty one), two bytes, and an .addr table
+after a routine that doesn't return. A .flo data line at a call site wins
+over the parameter list there. <<<
+*=$c000
+entry:
+		jsr print
+		.text "HI", $ff
+		jsr print
+		.byte $ff
+		jsr locate
+		.byte $05, $0a
+		jsr print
+		.text "OWN", $ff
+		jsr dispatch
+		.addr one, two
+one:
+		rts
+two:
+		rts
+print:
+		rts
+locate:
+		rts
+dispatch:
+		rts
+===
+deflower test.prg
+$c000 code entry
+$c01f code print (char[until $ff] text)
+$c020 code locate (byte column, byte row)
+$c021 code dispatch (addr[2] handlers) noreturn
+$c012 char[4] own_text
+$c01d code one
+$c01e code two
+^^^
+Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 34 bytes emitted, 0 differ, 0 virtual, 0 gaps
+~~~
+
+*=$c000
+
+entry:
+		jsr print	; text
+		.text	"HI", $ff
+		jsr print	; text
+		.text	$ff
+		jsr locate	; column, row
+		.byte	$05, $0a
+		jsr print
+
+own_text:
+		.text	"OWN", $ff
+		jsr dispatch	; handlers
+		.addr	one, two
+
+one:
+		rts 
+
+two:
+		rts 
+
+; called by: entry
+print:
+		rts 
+
+; called by: entry
+locate:
+		rts 
+
+; called by: entry
+dispatch:
+		rts 
+~~~
+--- test.map
+$c000-$c003 code entry
+$c003-$c006 char[3]
+$c006-$c009 code
+$c009-$c00a char
+$c00a-$c00d code
+$c00d-$c00e byte
+$c00e-$c00f byte
+$c00f-$c012 code
+$c012-$c016 char[4] own_text
+$c016-$c019 code
+$c019-$c01d addr[2]
+$c01d-$c01e code one
+$c01e-$c01f code two
+$c01f-$c020 code print
+$c020-$c021 code locate
+$c021-$c022 code dispatch
+vvv
