@@ -1,0 +1,44 @@
+>>> 3dgolf_snap, a VICE snapshot. <<<
+3dgolf_snap/3dgolf_snap.vsf
+^^^
+; 3dgolf_snap.vsf: VICE snapshot of a C64SC
+; $01 = $06: BASIC out, KERNAL in, I/O in
+; CPU: PC $2ef7 A $37 X $ff Y $00 SP $f8 P $20
+; stack $01f9-$0200: 05 0f 38 9f 31 a3 a2
+; top of stack as a jsr return address: $0f06
+; top of stack as an interrupt's return address: $380f
+; IRQ $0314 -> $a56b (RAM)
+; BRK $0316 -> $fe66 (ROM)
+; NMI $0318 -> $a5e9 (RAM)
+; VIC bank 1 ($4000-$7fff), multicolor bitmap, screen $4400, bitmap $6000
+; sprites on, pointers at $47f8: 0 $4980, 1 $4b80, 2 $4b80, 3 $52c0, 4 $4b80, 5 $4b40, 6 $4840, 7 $7a80
+; interrupt sources: VIC raster at line $05f, CIA1 timer A (IRQ)
+; BASIC program $0801-$ed08, SYS 2061 ($080d)
+deflower 3dgolf_snap.vsf
+$2ef7 code snapshot_pc
+$a56b code irq
+$a5e9 code nmi
+$4357-$4400 virtual byte untouched_4357
+$4b7e-$4bd6 virtual byte untouched_4b7e
+$5476-$5901 virtual byte untouched_5476
+$5c55-$6001 virtual byte untouched_5c55
+$6023-$6139 virtual byte untouched_6023
+$61c8-$6261 virtual byte unused_61c8
+$6310-$639b virtual byte unused_6310
+$6457-$64d8 virtual byte unused_6457
+$6598-$65e0 virtual byte unused_6598
+$6788-$67d0 virtual byte untouched_6788
+$68c8-$6928 virtual byte unused_68c8
+$6a08-$6a68 virtual byte unused_6a08
+$6b48-$6bab virtual byte untouched_6b48
+$6c88-$6cdb virtual byte unused_6c88
+$6dc8-$6e0c virtual byte unused_6dc8
+$9cc4-$9ff1 virtual byte untouched_9cc4
+$b660-$b6f8 virtual byte untouched_b660
+$ed13-$fd30 virtual byte untouched_ed13
+$fd50-$fe00 virtual byte untouched_fd50
+include c64_zeropage.flo
+include c64_system.flo
+include c64_io.flo
+include c64_kernal.flo
+vvv

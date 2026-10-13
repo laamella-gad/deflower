@@ -1,0 +1,10 @@
+>>> 1nvader, a program. <<<
+1nvader/1nvader.prg
+^^^
+; 1nvader.prg: loads at $0801-$257c
+; BASIC stub: SYS 2061
+deflower 1nvader.prg
+$080d code start
+$0801-$080d byte basic_stub
+include c64.flo
+vvv

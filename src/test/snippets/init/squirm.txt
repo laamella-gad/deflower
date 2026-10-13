@@ -1,0 +1,30 @@
+>>> squirm, a VICE snapshot. <<<
+squirm/squirm.vsf
+^^^
+; squirm.vsf: VICE snapshot of a C64
+; $01 = $07: BASIC in, KERNAL in, I/O in
+; CPU: PC $3122 A $fb X $00 Y $00 SP $f2 P $e1
+; stack $01f3-$0200: 88 32 19 3b 46 e1 e9 a7 a7 79 a6 9c e3
+; top of stack as a jsr return address: $3289
+; top of stack as an interrupt's return address: $1932
+; IRQ $0314 -> $3cb3 (RAM)
+; BRK $0316 -> $fe66 (ROM)
+; NMI $0318 -> $fe47 (ROM)
+; video unknown: VIC-II 1.1 isn't read
+; interrupt sources: CIA1 timer A (IRQ), unknown for VIC-II 1.1
+; BASIC program $0801-$3f49, SYS 15133 ($3b1d)
+deflower squirm.vsf
+$3122 code snapshot_pc
+$3cb3 code irq
+$2595-$25fe virtual byte unused_2595
+$2605-$2648 virtual byte untouched_2605
+$26dd-$2724 virtual byte untouched_26dd
+$272b-$278a virtual byte untouched_272b
+$2791-$2808 virtual byte untouched_2791
+$3f49-$a000 virtual byte untouched_3f49
+$a001-$c000 virtual byte untouched_a001
+$c000-$d000 virtual byte untouched_c000
+$e000-$fd30 virtual byte untouched_e000
+$fd50-$10000 virtual byte untouched_fd50
+include c64.flo
+vvv

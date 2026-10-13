@@ -1,8 +1,8 @@
 package com.laamella.vicevcf;
 
 public abstract class Module {
-    private final String moduleType;
-    private final Version version;
+    public final String moduleType;
+    public final Version version;
 
     protected Module(String moduleType, Version version) {
         this.moduleType = moduleType;

@@ -1,0 +1,44 @@
+>>> bigmac, a VICE snapshot. <<<
+bigmac/bigmac.vsf
+^^^
+; bigmac.vsf: VICE snapshot of a C64SC
+; $01 = $35: BASIC out, KERNAL out, I/O in
+; CPU: PC $c54d A $02 X $ec Y $00 SP $eb P $25
+; stack $01ec-$0200: 02 00 fa 7f 21 68 67 ae 4a 0e 4b 46 e1 e9 a7 a7 ...
+; top of stack as a jsr return address: $0003
+; top of stack as an interrupt's return address: $fa00
+; IRQ $0314 -> $c543 (RAM)
+; BRK $0316 -> $fe66 (RAM, untouched)
+; NMI $0318 -> $fe47 (RAM, untouched)
+; changed KERNAL vectors: STOP $0328 -> $f6fc (RAM, untouched)
+; hardware vectors in RAM at $fffa: NMI $0000 (RAM), reset $0000 (RAM), IRQ $ffff (RAM)
+; VIC bank 0 ($0000-$3fff), multicolor text, screen $0400, charset $2000
+; sprites on, pointers at $07f8: 0 $2d40
+; interrupt sources: CIA1 timer A (IRQ), IRQs masked by the I flag
+; BASIC program $0801-$9843
+; CHRGET at $0073 differs from the KERNAL's
+deflower bigmac.vsf
+$c54d code snapshot_pc
+$c543 code irq
+$092d-$0a02 virtual byte untouched_092d
+$0eff-$0f5e virtual byte untouched_0eff
+$0f9d-$0fff virtual byte untouched_0f9d
+$32ac-$32f9 virtual byte untouched_32ac
+$3400-$3521 virtual byte untouched_3400
+$36c0-$373f virtual byte untouched_36c0
+$3780-$387f virtual byte untouched_3780
+$68a6-$6b4e virtual byte unused_68a6
+$6d65-$6da8 virtual byte untouched_6d65
+$6fbe-$7000 virtual byte unused_6fbe
+$9252-$9800 virtual byte unused_9252
+$9a52-$b000 virtual byte unused_9a52
+$b217-$b800 virtual byte unused_b217
+$ba17-$c000 virtual byte unused_ba17
+$e252-$e800 virtual byte unused_e252
+$ea52-$f000 virtual byte unused_ea52
+$f000-$fd30 virtual byte untouched_f000
+$fd50-$fffa virtual byte untouched_fd50
+include c64_zeropage.flo
+include c64_system.flo
+include c64_io.flo
+vvv

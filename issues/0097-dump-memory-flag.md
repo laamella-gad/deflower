@@ -16,7 +16,7 @@ c540: c0 58 60 20 8d c4 ad cf c0 f0 1b 4a 48 90 06 20  .X` .......JH..
 The range is written as in a `.flo` file (`$c540-$c560`, end exclusive), so a `gap` line from `--verify` can be pasted. Memory the image doesn't load is shown as `..`, not as zeros. No `.flo` file is needed and nothing is written.
 
 Related:
-- [0072](0072-inspect-input-file.md) (`--inspect`) lists the facts of interest in an input file; `--dump` shows the bytes. They share the input reading, and the same decision on whether the path is classpath-relative or a file system path.
+- [0072](0072-inspect-input-file.md) (`--init`) writes a `.flo` skeleton with the facts of interest in an input file; `--dump` shows the bytes. They share the input reading, and the same decision on whether the path is classpath-relative or a file system path.
 - [0080](0080-show-memory-as-screen-text-and-glyphs.md) shows memory as screen text, glyphs or sprites; a later step on top of this one.
 
 Maybe later, not part of this: marking the bytes that still hold VICE's power-on pattern (which needs the tolerant match 0072 describes), and a disassembly view of the range.

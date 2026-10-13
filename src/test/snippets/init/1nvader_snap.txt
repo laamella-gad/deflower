@@ -1,0 +1,30 @@
+>>> 1nvader_snap, a VICE snapshot. <<<
+1nvader_snap/1nvader_snap.vsf
+^^^
+; 1nvader_snap.vsf: VICE snapshot of a C64SC
+; $01 = $37: BASIC in, KERNAL in, I/O in
+; CPU: PC $4395 A $60 X $01 Y $27 SP $f2 P $24
+; stack $01f3-$0200: 81 43 68 20 46 e1 e9 a7 a7 79 a6 9c e3
+; top of stack as a jsr return address: $4382
+; top of stack as an interrupt's return address: $6843
+; IRQ $0314 -> $ea7e (ROM)
+; BRK $0316 -> $fe66 (ROM)
+; NMI $0318 -> $fec1 (ROM)
+; changed KERNAL vectors: STOP $0328 -> $f6fc (ROM)
+; VIC bank 0 ($0000-$3fff), text, screen $0400, charset $2000
+; sprites on, pointers at $07f8: 0 $3200, 1 $3240, 2 $3240
+; interrupt sources: CIA1 timer A (IRQ), IRQs masked by the I flag
+; BASIC program $0801-$257c, SYS 2061 ($080d)
+deflower 1nvader_snap.vsf
+$4395 code snapshot_pc
+$1698-$2000 virtual byte untouched_1698
+$2800-$3208 virtual byte untouched_2800
+$3258-$4000 virtual byte untouched_3258
+$5650-$56f8 virtual byte untouched_5650
+$56f8-$a000 virtual byte unused_56f8
+$a000-$c000 virtual byte unused_a000
+$c213-$d000 virtual byte untouched_c213
+$e051-$fd30 virtual byte untouched_e051
+$fd50-$10000 virtual byte untouched_fd50
+include c64.flo
+vvv

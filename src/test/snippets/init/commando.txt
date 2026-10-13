@@ -1,0 +1,33 @@
+>>> commando, a VICE snapshot. <<<
+commando/commando.vsf
+^^^
+; commando.vsf: VICE snapshot of a C64SC
+; $01 = $36: BASIC out, KERNAL in, I/O in
+; CPU: PC $400f A $ed X $de Y $00 SP $ec P $23
+; stack $01ed-$0200: bb 0f 98 08 95 47 14 01 67 03 46 e1 e9 a7 a7 79 ...
+; top of stack as a jsr return address: $0fbc
+; top of stack as an interrupt's return address: $980f
+; IRQ $0314 -> $4116 (RAM)
+; BRK $0316 -> $fe66 (ROM)
+; NMI $0318 -> $0a4d (RAM)
+; VIC bank 3 ($c000-$ffff), multicolor text, screen $e000, charset $d000
+; sprites on, pointers at $e3f8: 0 $ffc0, 1 $ffc0, 2 $ffc0, 3 $ffc0, 4 $ffc0, 5 $fdc0, 6 $fd80, 7 $fe00
+; interrupt sources: VIC raster at line $0d5, CIA1 timer A (IRQ)
+; BASIC program $0817-$7e81
+deflower commando.vsf
+$400f code snapshot_pc
+$4116 code irq
+$0a4d code nmi
+$7faf-$8000 virtual byte untouched_7faf
+$9f40-$a000 virtual byte unused_9f40
+$bf40-$c008 virtual byte unused_bf40
+$e400-$e449 virtual byte untouched_e400
+$e45a-$e596 virtual byte untouched_e45a
+$f423-$f4cc virtual byte untouched_f423
+$fa6f-$fb21 virtual byte untouched_fa6f
+$ffbd-$10000 virtual byte untouched_ffbd
+include c64_zeropage.flo
+include c64_system.flo
+include c64_io.flo
+include c64_kernal.flo
+vvv

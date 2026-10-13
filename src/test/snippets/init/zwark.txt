@@ -1,0 +1,28 @@
+>>> zwark, a VICE snapshot. <<<
+zwark/zwark.vsf
+^^^
+; zwark.vsf: VICE snapshot of a C64SC
+; $01 = $37: BASIC in, KERNAL in, I/O in
+; CPU: PC $93d8 A $01 X $00 Y $00 SP $ee P $20
+; stack $01ef-$0200: ce 91 8c 9a e7 99 1c 90 00 00 00 ff a7 79 a6 9c ...
+; top of stack as a jsr return address: $91cf
+; top of stack as an interrupt's return address: $8c91
+; IRQ $0314 -> $ea31 (ROM)
+; BRK $0316 -> $fe66 (ROM)
+; NMI $0318 -> $fe47 (ROM)
+; VIC bank 0 ($0000-$3fff), text, screen $0400, charset $1000 (ROM)
+; sprites on, pointers at $07f8: 0 $0340, 2 $03c0, 3 $0800, 4 $0840
+; interrupt sources: CIA1 timer A (IRQ)
+; BASIC program $0801-$12e4
+; CHRGET at $0073 patched: jmp $9009
+deflower zwark.vsf
+$93d8 code snapshot_pc
+$9009 code chrget_patch
+$12e4-$9000 virtual byte untouched_12e4
+$9eab-$a000 virtual byte untouched_9eab
+$a001-$c000 virtual byte untouched_a001
+$c000-$d000 virtual byte untouched_c000
+$e000-$fd30 virtual byte untouched_e000
+$fd50-$10000 virtual byte untouched_fd50
+include c64.flo
+vvv

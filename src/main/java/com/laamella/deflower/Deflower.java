@@ -38,9 +38,18 @@ public class Deflower {
 
     /**
      * Usage: [--verify] &lt;classpath-relative .flo file&gt;. Exits with 1 when
-     * a run has errors or, with --verify, doesn't verify.
+     * a run has errors or, with --verify, doesn't verify. Or: --init
+     * &lt;.vsf or .prg file&gt;, which writes a .flo skeleton next to the
+     * file to start its disassembly (issue 0072), and exits with 1 when
+     * that .flo file exists already.
      */
     public static void main(String[] args) throws IOException, URISyntaxException {
+        if (args.length == 2 && args[0].equals("--init")) {
+            if (!new Initializer().write(Paths.get(args[1]))) {
+                System.exit(1);
+            }
+            return;
+        }
         boolean verify = false;
         String flowerFile = null;
         for (String arg : args) {
@@ -55,6 +64,7 @@ public class Deflower {
         }
         if (flowerFile == null) {
             System.err.println("Usage: deflower [--verify] <file.flo>");
+            System.err.println("       deflower --init <file.vsf or file.prg>");
             System.exit(2);
         }
         if (!new Deflower(verify).deflower(flowerFile)) {

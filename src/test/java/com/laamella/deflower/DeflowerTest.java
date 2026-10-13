@@ -45,6 +45,10 @@ import static org.assertj.core.api.Assertions.fail;
  * <p>
  * A large snippet ({@code large/}) names a {@code .flo} file on the test
  * classpath, for programs too big to keep as source in a snippet.
+ * <p>
+ * An init snippet ({@code init/}) names a {@code .vsf} or {@code .prg}
+ * file on the test classpath, and expects the {@code .flo} skeleton that
+ * {@code --init} writes for it (issue 0072).
  */
 class DeflowerTest {
     private static final SnippetFileFormat FORMAT = new SnippetFileFormat(
@@ -62,6 +66,11 @@ class DeflowerTest {
     @TestFactory
     Stream<DynamicTest> largeSnippets() throws IOException {
         return new SnippetTestFactory(FORMAT, snippets("large"), filesWithExtension("txt"), DeflowerTest::runLarge).stream();
+    }
+
+    @TestFactory
+    Stream<DynamicTest> initSnippets() throws IOException {
+        return new SnippetTestFactory(FORMAT, snippets("init"), filesWithExtension("txt"), DeflowerTest::runInit).stream();
     }
 
     /**
@@ -110,6 +119,12 @@ class DeflowerTest {
         assertThat(parts).as("input: one .flo path on the test classpath").hasSize(1);
         String flowerFile = parts.get(0).trim();
         return deflower(Paths.get(DeflowerTest.class.getResource("/" + flowerFile).toURI()));
+    }
+
+    private static List<String> runInit(List<String> parts) throws IOException, URISyntaxException {
+        assertThat(parts).as("input: one .vsf or .prg path on the test classpath").hasSize(1);
+        Path file = Paths.get(DeflowerTest.class.getResource("/" + parts.get(0).trim()).toURI());
+        return List.of(String.join("\n", new Initializer().skeleton(file)) + "\n");
     }
 
     /**

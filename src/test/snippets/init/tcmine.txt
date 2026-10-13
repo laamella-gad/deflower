@@ -1,0 +1,7 @@
+>>> tcmine, a program. <<<
+tcmine/tcmine.prg
+^^^
+; tcmine.prg: loads at $c000-$c7c0
+deflower tcmine.prg
+include c64.flo
+vvv

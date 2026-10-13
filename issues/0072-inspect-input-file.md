@@ -1,7 +1,6 @@
 ---
 title: A command line flag that lists what is of interest for disassembling an input file
-status: open
-priority: medium
+status: done
 labels: enhancement
 ---
 
@@ -37,3 +36,14 @@ For a program (`.prg`):
 Not part of this: using any of it automatically as `.flo` annotations. That changes the output and needs its own decision.
 
 Done when: the flag prints the list above for each snapshot fixture and for a `.prg` fixture, the values match what the fixtures' `.flo` files declare by hand (e.g. the `snapshot_pc` lines), and the flag is described in `CLAUDE.md`.
+
+## Closing note
+
+`deflower --init <file>` (renamed from `--inspect`: it is how a disassembly starts) takes a `.vsf` or `.prg` by file system path and writes a `.flo` skeleton next to it, `<file without extension>.flo`, unless that exists (`Initializer`). The skeleton holds the facts as `;` comments, then the `deflower` line, `code` lines for the entries, `virtual byte` lines for untouched (`untouched_xxxx`) and all-zero (`unused_xxxx`) ranges, and the includes that match the banking (`c64.flo` when everything is banked in). Every fixture's skeleton runs as a `.flo` file. `init/` snippets cover the eight snapshots, `1nvader.prg` and `tcmine.prg`.
+
+- **Parsing.** New handlers: `MainCpuModuleHandler` (1.1 has a 4-byte clock, 1.4 an 8-byte one), `VicIIModuleHandler` (x64sc's 1.3: one byte, then the 64 registers), `CiaModuleHandler` (2.x: ports, directions, timers, TOD, serial data, then the interrupt mask). The layouts were checked on the fixtures, e.g. `3dgolfpic_snap`'s `$d018` gives its `$5c00` screen in bank 1. Old snapshots get the RAM facts, CPU and CIA interrupts; their video says `VIC-II 1.1 isn't read`.
+- **Code entries.** Only for RAM outside the zero page, the hardware vectors and untouched memory, so `bigmac`'s and `2krace_snap`'s stale vectors into RAM under the KERNAL add none. They match the hand-written lines: the `snapshot_pc` of every snapshot, the irq/nmi of `commando`, `3dgolf_snap`, `bigmac` and `squirm`, `2krace_snap`'s hardware IRQ `$09fd`, and `zwark`'s CHRGET patch `jmp $9009`.
+- **Untouched memory.** A byte belongs to the pattern when it is `$00`/`$ff`, or one bit off it next to one that is. A screen of spaces then isn't the pattern. Runs of 64 bytes and more count, and a single odd byte inside them is allowed. Zero runs of 256 bytes or more inside them are `unused`. Scanning starts at `$0400`, skips I/O while it is banked in and the hardware vectors while the KERNAL is out, and stops at visible ROM boundaries. The ranges come within a few bytes of the hand-written ones, sometimes splitting where a hand-written range runs through sprite data.
+- **Stack.** Shows the top 16 bytes, and the top read as a `jsr` return address and as an interrupt's. `1nvader_snap`'s `$4382` is the one its `.flo` describes.
+
+`3dgolf_snap`'s skeleton traces into data and verifies with 3 differences: those are illegal opcodes that share a mnemonic, issue [0086](0086-duplicate-opcodes-do-not-reassemble.md).
