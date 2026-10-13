@@ -183,6 +183,8 @@ Unnamed target: l015F from address $0162
 Unnamed target: l0189 from address $018f
 Unnamed target: l0167 from address $0191
 Writing out/3dgolfpic_snap.asm
+Writing out/3dgolfpic_snap.map
+Verify out/3dgolfpic_snap.asm: 15072 bytes emitted, 0 differ, 50464 virtual, 0 gaps
 ~~~
 
 .virtual $0000
@@ -1589,4 +1591,134 @@ kernal_brk:
 		.fill	410
 .endv
 ~~~
+--- 3dgolfpic_snap.map
+$0000-$0001 virtual byte cpu_port_direction
+$0001-$0002 virtual byte cpu_port
+$0002-$002d virtual byte[43] basic_zero_page
+$002d-$002f virtual word decrunch_pointer
+$002f-$00c5 virtual byte[150] basic_kernal_zero_page
+$00c5-$00c6 virtual byte kernal_lstx
+$00c6-$00f7 virtual byte[49] kernal_zero_page
+$00f7-$00f8 byte bit_buffer
+$00f8-$00f9 byte escape_code
+$00f9-$0104 code store_byte
+$0104-$010e code new_escape_code
+$010e-$0116 code store_literal
+$0116-$0193 code decrunch_loop
+$0193-$01a6 code decrunch_done
+$01a6-$01c6 byte[32] decrunch_table
+$01c6-$01f7 byte[49] unused_stack
+$01f7-$0200 byte[9] stack
+$0200-$0211 code decrunch_get_byte
+$0211-$0223 code get_gamma
+$0223-$0225 code get_8_bits
+$0225-$0226 code l0225
+$0226-$022f code get_bits
+$022f-$0233 code l022F
+$0233-$0314 virtual byte[225] kernal_workspace
+$0314-$0316 virtual addr irq_vector
+$0316-$0318 virtual addr brk_vector
+$0318-$031a virtual addr nmi_vector
+$031a-$033c virtual byte[34] kernal_vectors
+$033c-$0400 virtual byte[196] tape_buffer
+$0400-$0800 virtual byte[1024] text_screen
+$0800-$0801 byte basic_start
+$0801-$080d byte[12] basic_stub
+$080d-$0843 code decrunch
+$0843-$0877 byte[52] get_byte_source
+$0877-$0944 byte[205] decruncher_source
+$0944-$1a12 byte[4302] packed_data
+$1a12-$5800 virtual byte[15854] untouched_1a12
+$5800-$5be8 byte[1000] picture_colors
+$5be8-$5c00 byte[24] unused_5be8
+$5c00-$5fe8 byte[1000] picture_screen
+$5fe8-$6000 byte[24] unused_5fe8
+$6000-$7f40 byte[8000] picture_bitmap
+$7f40-$7f80 code show_picture
+$7f80-$7f84 code wait_for_space
+$7f84-$7f89 code snapshot_pc
+$7f89-$7f92 byte[9] packed_data_end
+$7f92-$d000 virtual byte[20590] untouched_7f92
+$d000-$d001 virtual byte sprite0_x
+$d001-$d002 virtual byte sprite0_y
+$d002-$d003 virtual byte sprite1_x
+$d003-$d004 virtual byte sprite1_y
+$d004-$d005 virtual byte sprite2_x
+$d005-$d006 virtual byte sprite2_y
+$d006-$d007 virtual byte sprite3_x
+$d007-$d008 virtual byte sprite3_y
+$d008-$d009 virtual byte sprite4_x
+$d009-$d00a virtual byte sprite4_y
+$d00a-$d00b virtual byte sprite5_x
+$d00b-$d00c virtual byte sprite5_y
+$d00c-$d00d virtual byte sprite6_x
+$d00d-$d00e virtual byte sprite6_y
+$d00e-$d00f virtual byte sprite7_x
+$d00f-$d010 virtual byte sprite7_y
+$d010-$d011 virtual byte sprites_x_msb
+$d011-$d012 virtual byte vic_control1
+$d012-$d013 virtual byte raster
+$d013-$d014 virtual byte light_pen_x
+$d014-$d015 virtual byte light_pen_y
+$d015-$d016 virtual byte sprite_enable
+$d016-$d017 virtual byte vic_control2
+$d017-$d018 virtual byte sprite_expand_y
+$d018-$d019 virtual byte vic_memory
+$d019-$d01a virtual byte vic_irq_status
+$d01a-$d01b virtual byte vic_irq_enable
+$d01b-$d01c virtual byte sprite_priority
+$d01c-$d01d virtual byte sprite_multicolor
+$d01d-$d01e virtual byte sprite_expand_x
+$d01e-$d01f virtual byte sprite_sprite_collision
+$d01f-$d020 virtual byte sprite_background_collision
+$d020-$d021 virtual byte border_color
+$d021-$d022 virtual byte background_color
+$d022-$d023 virtual byte background_color1
+$d023-$d024 virtual byte background_color2
+$d024-$d025 virtual byte background_color3
+$d025-$d026 virtual byte sprite_multicolor0
+$d026-$d027 virtual byte sprite_multicolor1
+$d027-$d028 virtual byte sprite0_color
+$d028-$d029 virtual byte sprite1_color
+$d029-$d02a virtual byte sprite2_color
+$d02a-$d02b virtual byte sprite3_color
+$d02b-$d02c virtual byte sprite4_color
+$d02c-$d02d virtual byte sprite5_color
+$d02d-$d02e virtual byte sprite6_color
+$d02e-$d02f virtual byte sprite7_color
+$d02f-$d030 virtual byte vic_unused_2f
+$d030-$d031 virtual byte c128_clock
+$d031-$d400 virtual byte[975] vic_mirrors
+$d400-$d402 virtual word voice1_frequency
+$d402-$d404 virtual word voice1_pulse_width
+$d404-$d405 virtual byte voice1_control
+$d405-$d406 virtual byte voice1_attack_decay
+$d406-$d407 virtual byte voice1_sustain_release
+$d407-$d409 virtual word voice2_frequency
+$d409-$d40b virtual word voice2_pulse_width
+$d40b-$d40c virtual byte voice2_control
+$d40c-$d40d virtual byte voice2_attack_decay
+$d40d-$d40e virtual byte voice2_sustain_release
+$d40e-$d410 virtual word voice3_frequency
+$d410-$d412 virtual word voice3_pulse_width
+$d412-$d413 virtual byte voice3_control
+$d413-$d414 virtual byte voice3_attack_decay
+$d414-$d415 virtual byte voice3_sustain_release
+$d415-$d417 virtual word filter_cutoff
+$d417-$d418 virtual byte filter_control
+$d418-$d419 virtual byte volume_filter_mode
+$d419-$d800 virtual byte[999] sid_mirrors
+$d800-$dc00 virtual byte[1024] color_ram
+$dc00-$dc01 virtual byte cia1_port_a
+$dc01-$dc02 virtual byte cia1_port_b
+$dc02-$dc0d virtual byte[11] cia1_unused
+$dc0d-$dc0e virtual byte cia1_interrupt_control
+$dc0e-$dd00 virtual byte[242] cia1_rest
+$dd00-$dd01 virtual byte cia2_port_a
+$dd01-$dd02 virtual byte cia2_port_b
+$dd02-$dd03 virtual byte cia2_direction_a
+$dd03-$de00 virtual byte[253] cia2_rest
+$de00-$e000 virtual byte[512] io_expansion
+$e000-$fce2 virtual byte[7394] untouched_e000
+$fce2-$10000 virtual byte[798] kernal_reset
 vvv

@@ -28,6 +28,8 @@ Marking area of 3 char at C008 "greeting"
 Starting flow analysis.
 No entry points defined, nothing to do.
 Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 11 bytes emitted, 0 differ, 0 virtual, 0 gaps
 ~~~
 
 *=$c000
@@ -41,4 +43,8 @@ dword_val:
 greeting:
 		.text	"Hi!"
 ~~~
+--- test.map
+$c000-$c004 word[2] two_words
+$c004-$c008 dword dword_val
+$c008-$c00b char[3] greeting
 vvv

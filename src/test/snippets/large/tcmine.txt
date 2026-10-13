@@ -340,6 +340,8 @@ Unnamed target: lC058 from address $c054
 Unnamed target: lC02A from address $c05a
 Unnamed target: lC069 from address $c065
 Writing out/tcmine.asm
+Writing out/tcmine.map
+Verify out/tcmine.asm: 1984 bytes emitted, 0 differ, 22651 virtual, 0 gaps
 ~~~
 
 .virtual $008e
@@ -1893,4 +1895,127 @@ cia1_timer_a_control:		.byte	?
 ; jumped to by: animate_enemies
 kernal_irq = $ea31
 ~~~
+--- tcmine.map
+$008e-$008f virtual byte stray_8e
+$00da-$00dc virtual word voice1_music
+$00dc-$00dd virtual byte voice2_duration
+$00dd-$00de virtual byte voice1_duration
+$00de-$00e0 virtual word voice2_music
+$00e4-$00e6 virtual word air_pointer
+$00fa-$00fc virtual word level_pointer
+$00fc-$00fe virtual word screen_pointer
+$00fe-$00ff virtual byte draw_column
+$00ff-$0100 virtual byte draw_row
+$0314-$0316 virtual addr irq_vector
+$033f-$0340 virtual byte level
+$0341-$034b virtual byte[10] enemies
+$034b-$034c virtual byte unused_034b
+$034c-$0350 virtual byte[4] enemy_steps
+$0400-$07e8 virtual byte[1000] screen_ram
+$07f8-$0800 virtual byte[8] sprite_pointers
+$3238-$3248 virtual byte[16] animated_chars
+$3248-$3250 virtual byte[8] conveyor_char_1
+$3250-$3258 virtual byte[8] conveyor_char_2
+$8407-$8461 virtual byte[90] jump_table
+$c000-$c074 code draw_level
+$c074-$c076 byte[2] unused_c074
+$c076-$c080 char[10] tile_chars_left
+$c080-$c08a char[10] tile_chars_right
+$c08a-$c0b0 code unused_c08a
+$c0b0-$c0c5 code unused_c0b0
+$c0c5-$c0e7 code install_irq
+$c0e7-$c152 code irq
+$c152-$c156 byte[4] char_animation_bits
+$c156-$c15c byte[6] unused_c156
+$c15c-$c174 code init_player
+$c174-$c175 byte controls
+$c175-$c1ce code read_controls
+$c1ce-$c1cf byte unused_c1ce
+$c1cf-$c201 code find_player_cell
+$c201-$c20f code is_wall
+$c20f-$c210 byte unused_c20f
+$c210-$c233 code walk
+$c233-$c24b code check_walls
+$c24b-$c24e code continue_walk
+$c24e-$c25e code check_floor
+$c25e-$c276 code unused_c25e
+$c276-$c2c8 code animate_player
+$c2c8-$c2c9 byte jump_direction
+$c2c9-$c2ca byte jump_step
+$c2ca-$c2dd code start_jump
+$c2dd-$c2ed code jump
+$c2ed-$c30d code next_jump_step
+$c30d-$c322 code jump_sideways
+$c322-$c349 code check_landing
+$c349-$c350 byte[7] unused_c349
+$c350-$c385 code main_loop
+$c385-$c38e code fall
+$c38e-$c38f byte falling
+$c38f-$c397 code not_falling
+$c397-$c3a0 code check_jump
+$c3a0-$c3c1 code jump_sideways_checked
+$c3c1-$c3ce code jump_direction_controls
+$c3ce-$c40e code jump_height
+$c40e-$c417 code init_draw_pointers
+$c417-$c418 byte unused_c417
+$c418-$c41f code conveyor
+$c41f-$c43b code check_conveyor
+$c43b-$c451 code check_slope
+$c451-$c459 code unused_c451
+$c459-$c45b byte[2] unused_c459
+$c45b-$c45c byte music_divider
+$c45c-$c471 code tick_music
+$c471-$c4f4 code play_music
+$c4f4-$c51d code init_music
+$c51d-$c51e byte items_collected
+$c51e-$c535 code check_pickups
+$c535-$c548 code check_pickup
+$c548-$c550 code collect_item
+$c550-$c553 code die
+$c553-$c586 code play_level
+$c586-$c587 byte air_divider
+$c587-$c591 code drain_air
+$c591-$c5c2 code drain_air_step
+$c5c2-$c5da code animate_portal
+$c5da-$c5db byte sprite_collisions
+$c5db-$c5fd code add_score
+$c5fd-$c614 code check_collisions
+$c614-$c61a code level_done
+$c61a-$c666 code move_enemies
+$c666-$c6d1 code init_enemies
+$c6d1-$c6d2 byte animation_divider
+$c6d2-$c707 code animate_enemies
+$c707-$c719 code check_enemy_collision
+$c719-$c71a byte air_empty
+$c71a-$c750 code drain_air_once
+$c750-$c794 code count_air_bonus
+$c794-$c795 byte bonus_sound_frequency
+$c795-$c7b1 code remove_irq
+$c7b1-$c7b9 code add_to_level_pointer
+$c7b9-$c7c0 byte[7] unused_c7b9
+$cfff-$d000 virtual byte frame_counter
+$d000-$d010 virtual byte[16] vic_sprite_coords
+$d011-$d012 virtual byte vic_control_1
+$d012-$d013 virtual byte vic_raster
+$d015-$d016 virtual byte vic_sprite_enable
+$d019-$d01a virtual byte vic_irq_status
+$d01a-$d01b virtual byte vic_irq_enable
+$d01c-$d01d virtual byte vic_sprite_multicolor
+$d01e-$d01f virtual byte vic_sprite_collision
+$d400-$d402 virtual word voice1_frequency
+$d402-$d404 virtual word voice1_pulse_width
+$d404-$d405 virtual byte voice1_control
+$d405-$d406 virtual byte voice1_attack_decay
+$d407-$d409 virtual word voice2_frequency
+$d409-$d40b virtual word voice2_pulse_width
+$d40b-$d40c virtual byte voice2_control
+$d40c-$d40d virtual byte voice2_attack_decay
+$d40e-$d410 virtual word voice3_frequency
+$d410-$d412 virtual word voice3_pulse_width
+$d412-$d413 virtual byte voice3_control
+$d413-$d414 virtual byte voice3_attack_decay
+$d418-$d419 virtual byte sid_vol_filter
+$dc00-$dc01 virtual byte cia1_port_a
+$dc01-$dc02 virtual byte cia1_port_b
+$dc0e-$dc0f virtual byte cia1_timer_a_control
 vvv

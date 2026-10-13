@@ -23,6 +23,8 @@ Will disassemble from C000
 Marking area of 5 unknown at C004 "blob"
 Starting flow analysis.
 Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 9 bytes emitted, 0 differ, 0 virtual, 0 gaps
 ~~~
 
 *=$c000
@@ -37,4 +39,8 @@ blob:
 		rts 
 		.byte	$11, $22
 ~~~
+--- test.map
+$c000-$c004 code entry
+$c004-$c007 code blob
+$c007-$c009 untyped[2] blob + $3
 vvv

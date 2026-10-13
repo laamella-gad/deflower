@@ -27,6 +27,8 @@ Will disassemble from C000
 Starting flow analysis.
 Unnamed target: dC003 from address $c006
 Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 16 bytes emitted, 0 differ, 0 virtual, 0 gaps
 ~~~
 
 *=$c000
@@ -44,4 +46,6 @@ count = $c005
 		inc entry + 1
 		rts 
 ~~~
+--- test.map
+$c000-$c010 code entry
 vvv

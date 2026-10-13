@@ -46,6 +46,8 @@ Marking area of 1 word at FB "ptr"
 Will disassemble from C000
 Starting flow analysis.
 Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 14 bytes emitted, 0 differ, 7 virtual, 0 gaps
 ~~~
 
 .virtual $00fb
@@ -76,4 +78,11 @@ second_color:
 		.fill	3
 .endv
 ~~~
+--- test.map
+$00fb-$00fd virtual word ptr
+$c000-$c00e code entry
+$d020-$d021 virtual byte border_color
+$d800-$d801 virtual byte color_ram
+$d801-$d802 virtual byte second_color
+$d802-$d804 virtual byte[2] color_ram + $2
 vvv

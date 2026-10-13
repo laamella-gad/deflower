@@ -52,6 +52,8 @@ Unnamed target: lC002 from address $c006
 Unnamed target: lC021 from address $c008
 Unnamed target: lC00F from address $c00c
 Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 38 bytes emitted, 0 differ, 0 virtual, 0 gaps
 ~~~
 
 *=$c000
@@ -97,4 +99,9 @@ lC024:
 value:
 		.byte	$00
 ~~~
+--- test.map
+$c000-$c016 code entry
+$c016-$c021 code lC016
+$c021-$c025 code lC021
+$c025-$c026 byte value
 vvv

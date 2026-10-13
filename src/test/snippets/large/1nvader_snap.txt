@@ -615,6 +615,13 @@ Unnamed target: l45AF from address $45a3
 Unnamed target: l45BE from address $45b9
 Unnamed target: l4131 from address $4137
 Writing out/1nvader_snap.asm
+Writing out/1nvader_snap.map
+Verify out/1nvader_snap.asm: 6414 bytes emitted, 0 differ, 24832 virtual, 5 gaps
+gap $0800-$2000
+gap $2800-$3200
+gap $3300-$4000
+gap $56f8-$a000
+gap $c216-$d000
 ~~~
 
 .virtual $0001
@@ -3921,4 +3928,268 @@ iobase:
 		.fill	3
 .endv
 ~~~
+--- 1nvader_snap.map
+$0001-$0002 virtual byte cpu_port
+$0090-$0091 virtual byte io_status
+$009d-$009e virtual byte kernal_msgflag
+$00ba-$00bb virtual byte kernal_device
+$00c1-$00c3 virtual word kernal_save_start
+$0286-$0287 virtual byte kernal_text_color
+$0291-$0292 virtual byte kernal_case_lock
+$0314-$0316 virtual word irq_vector
+$0328-$032a virtual word stop_vector
+$0400-$07e8 virtual byte[1000] screen
+$07f8-$0800 virtual byte[8] sprite_pointers
+$0800-$2000 gap
+$2000-$2800 virtual byte[2048] charset
+$2800-$3200 gap
+$3200-$3300 virtual byte[256] sprites
+$3300-$4000 gap
+$4000-$404b code start
+$404b-$40a8 code title_screen
+$40a8-$4102 code title_loop
+$4102-$4111 code start_game
+$4111-$411f code draw_title
+$411f-$412c code clear_title
+$412c-$413a code fill_title_color
+$413a-$4187 code draw_ground
+$4187-$41ca code stripe_title_colors
+$41ca-$41d5 code cycle_title_colors
+$41d5-$422d code reset_game
+$422d-$426d code reset_scores
+$426d-$4379 code countdown
+$4379-$437f code play
+$437f-$4395 code game_loop
+$4395-$43a3 code wait_frame
+$43a3-$43da code read_fire_buttons
+$43da-$4402 code read_p1_fire
+$4402-$442a code read_p2_fire
+$442a-$4451 code update_game
+$4451-$45f1 code check_shot_hits
+$45f1-$465a code invader_hit
+$465a-$4698 code move_shots
+$4698-$46af code move_invader
+$46af-$46fe code step_invader
+$46fe-$4700 code row_add_right
+$4700-$4722 code row_store_right
+$4722-$4724 code row_add_left
+$4724-$473e code row_store_left
+$473e-$477e code bounce_cannons
+$477e-$47ef code check_cannon_edges
+$47ef-$4864 code move_p1
+$4864-$48d9 code move_p2
+$48d9-$48e8 code clear_fire_flags
+$48e8-$490f code update_screen
+$490f-$4a59 code draw_scores
+$4a59-$4a8b code position_invader
+$4a8b-$4aba code position_p1
+$4aba-$4ae9 code position_p2
+$4ae9-$4b30 code position_p1_shot
+$4b30-$4b77 code position_p2_shot
+$4b77-$4bd8 code draw_status
+$4bd8-$4be5 code clear_status
+$4be5-$4c2e code game_over
+$4c2e-$4cb1 code show_game_over
+$4cb1-$4cbf code wait_6_frames
+$4cbf-$4d07 code check_invader_collision
+$4d07-$4d63 code number_rows
+$4d63-$4ede code set_hit_points
+$4ede-$4f05 code play_voice1
+$4f05-$4f2c code play_voice2
+$4f2c-$4f53 code play_voice3
+$4f53-$4f59 code stop_voice1
+$4f59-$4f5f code stop_voice2
+$4f5f-$4f65 code stop_voice3
+$4f65-$4f8a code p1_shot_sound
+$4f8a-$4faf code p2_shot_sound
+$4faf-$4fd4 code hit_sound
+$4fd4-$5020 code build_charset
+$5020-$5040 code build_sprites
+$5040-$509d code twinkle_stars
+$509d-$50a9 code next_star_position
+$50a9-$50ac byte[3] high_score
+$50ac-$50ae word hit_points
+$50ae-$50af byte game_over_flag
+$50af-$50b0 byte scores_changed
+$50b0-$50b1 byte collisions
+$50b1-$50b2 byte title_color
+$50b2-$50b3 byte unused_50b2
+$50b3-$50b4 byte scroll_offset
+$50b4-$50b5 byte unused_50b4
+$50b5-$50b6 byte countdown_digit
+$50b6-$50b7 byte countdown_timer
+$50b7-$50b8 byte scroll_timer
+$50b8-$50ba word hit_counter
+$50ba-$50bb byte sound_attack_decay
+$50bb-$50bc byte sound_sustain_release
+$50bc-$50bd byte sound_volume
+$50bd-$50bf word sound_frequency
+$50bf-$50c0 byte sound_waveform
+$50c0-$50c2 word p1_x
+$50c2-$50c3 byte p1_y
+$50c3-$50c4 byte p1_direction
+$50c4-$50c5 byte p1_fire
+$50c5-$50c8 byte[3] p1_score
+$50c8-$50c9 byte p1_color
+$50c9-$50ca byte p1_playing
+$50ca-$50cb byte p1_turned
+$50cb-$50cd word p1_shot_x
+$50cd-$50ce byte p1_shot_y
+$50ce-$50cf byte p1_shot_state
+$50cf-$50d1 word p2_x
+$50d1-$50d2 byte p2_y
+$50d2-$50d3 byte p2_direction
+$50d3-$50d4 byte p2_fire
+$50d4-$50d7 byte[3] p2_score
+$50d7-$50d8 byte p2_color
+$50d8-$50d9 byte p2_playing
+$50d9-$50da byte p2_turned
+$50da-$50dc word p2_shot_x
+$50dc-$50dd byte p2_shot_y
+$50dd-$50de byte p2_shot_state
+$50de-$50e0 word invader_x
+$50e0-$50e1 byte invader_y
+$50e1-$50e2 byte invader_direction
+$50e2-$50e3 byte invader_color
+$50e3-$50e4 byte invader_speed
+$50e4-$50e5 byte invader_steps
+$50e5-$50e6 byte speedup_interval
+$50e6-$50e7 byte speedup_counter
+$50e7-$50e8 byte invader_row
+$50e8-$50e9 byte unused_50e8
+$50e9-$50ea byte p1_fire_held
+$50ea-$50eb byte unused_50ea
+$50eb-$50ec byte p2_fire_held
+$50ec-$50f2 byte[6] star_positions
+$50f2-$50f4 byte[2] unused_50f2
+$50f4-$50f5 byte star_index
+$50f5-$5118 byte[35] row_y
+$5118-$5218 char[256] scroll_text
+$5218-$5308 byte[240] title_chars
+$5308-$53f8 byte[240] ground_chars
+$53f8-$55f8 byte[512] custom_chars
+$55f8-$56f8 byte[256] sprite_shapes
+$56f8-$a000 gap
+$c000-$c04e code crack_intro
+$c04e-$c0ac code ask_trainer
+$c0ac-$c0ad byte trainer_flag
+$c0ad-$c0af byte[2] unused_c0ad
+$c0af-$c0eb code apply_trainer
+$c0eb-$c0f8 code trainer_next_row
+$c0f8-$c120 char[40] title_line
+$c120-$c148 char[40] question_line
+$c148-$c1b7 code save_highscore
+$c1b7-$c1b8 byte saved_volume
+$c1b8-$c1ba char[2] scratch_command
+$c1ba-$c1c3 char[9] highscore_filename
+$c1c3-$c213 code load_highscore
+$c213-$c216 byte[3] loaded_highscore
+$c216-$d000 gap
+$d000-$d001 virtual byte sprite0_x
+$d001-$d002 virtual byte sprite0_y
+$d002-$d003 virtual byte sprite1_x
+$d003-$d004 virtual byte sprite1_y
+$d004-$d005 virtual byte sprite2_x
+$d005-$d006 virtual byte sprite2_y
+$d006-$d007 virtual byte sprite3_x
+$d007-$d008 virtual byte sprite3_y
+$d008-$d009 virtual byte sprite4_x
+$d009-$d00a virtual byte sprite4_y
+$d00a-$d00b virtual byte sprite5_x
+$d00b-$d00c virtual byte sprite5_y
+$d00c-$d00d virtual byte sprite6_x
+$d00d-$d00e virtual byte sprite6_y
+$d00e-$d00f virtual byte sprite7_x
+$d00f-$d010 virtual byte sprite7_y
+$d010-$d011 virtual byte sprites_x_msb
+$d011-$d012 virtual byte vic_control1
+$d012-$d013 virtual byte raster
+$d013-$d014 virtual byte light_pen_x
+$d014-$d015 virtual byte light_pen_y
+$d015-$d016 virtual byte sprite_enable
+$d016-$d017 virtual byte vic_control2
+$d017-$d018 virtual byte sprite_expand_y
+$d018-$d019 virtual byte vic_memory
+$d019-$d01a virtual byte vic_irq_status
+$d01a-$d01b virtual byte vic_irq_enable
+$d01b-$d01c virtual byte sprite_priority
+$d01c-$d01d virtual byte sprite_multicolor
+$d01d-$d01e virtual byte sprite_expand_x
+$d01e-$d01f virtual byte sprite_sprite_collision
+$d01f-$d020 virtual byte sprite_background_collision
+$d020-$d021 virtual byte border_color
+$d021-$d022 virtual byte background_color
+$d022-$d023 virtual byte background_color1
+$d023-$d024 virtual byte background_color2
+$d024-$d025 virtual byte background_color3
+$d025-$d026 virtual byte sprite_multicolor0
+$d026-$d027 virtual byte sprite_multicolor1
+$d027-$d028 virtual byte sprite0_color
+$d028-$d029 virtual byte sprite1_color
+$d029-$d02a virtual byte sprite2_color
+$d02a-$d02b virtual byte sprite3_color
+$d02b-$d02c virtual byte sprite4_color
+$d02c-$d02d virtual byte sprite5_color
+$d02d-$d02e virtual byte sprite6_color
+$d02e-$d02f virtual byte sprite7_color
+$d400-$d402 virtual word voice1_frequency
+$d402-$d404 virtual word voice1_pulse_width
+$d404-$d405 virtual byte voice1_control
+$d405-$d406 virtual byte voice1_attack_decay
+$d406-$d407 virtual byte voice1_sustain_release
+$d407-$d409 virtual word voice2_frequency
+$d409-$d40b virtual word voice2_pulse_width
+$d40b-$d40c virtual byte voice2_control
+$d40c-$d40d virtual byte voice2_attack_decay
+$d40d-$d40e virtual byte voice2_sustain_release
+$d40e-$d410 virtual word voice3_frequency
+$d410-$d412 virtual word voice3_pulse_width
+$d412-$d413 virtual byte voice3_control
+$d413-$d414 virtual byte voice3_attack_decay
+$d414-$d415 virtual byte voice3_sustain_release
+$d415-$d417 virtual word filter_cutoff
+$d417-$d418 virtual byte filter_control
+$d418-$d419 virtual byte volume_filter_mode
+$d800-$dbe8 virtual byte[1000] color_ram
+$dc00-$dc01 virtual byte cia1_port_a
+$dc01-$dc02 virtual byte cia1_port_b
+$ff81-$ff84 virtual byte[3] cint
+$ff84-$ff87 virtual byte[3] ioinit
+$ff87-$ff8a virtual byte[3] ramtas
+$ff8a-$ff8d virtual byte[3] restor
+$ff8d-$ff90 virtual byte[3] vector
+$ff90-$ff93 virtual byte[3] setmsg
+$ff93-$ff96 virtual byte[3] second
+$ff96-$ff99 virtual byte[3] tksa
+$ff99-$ff9c virtual byte[3] memtop
+$ff9c-$ff9f virtual byte[3] membot
+$ff9f-$ffa2 virtual byte[3] scnkey
+$ffa2-$ffa5 virtual byte[3] settmo
+$ffa5-$ffa8 virtual byte[3] acptr
+$ffa8-$ffab virtual byte[3] ciout
+$ffab-$ffae virtual byte[3] untlk
+$ffae-$ffb1 virtual byte[3] unlsn
+$ffb1-$ffb4 virtual byte[3] listen
+$ffb4-$ffb7 virtual byte[3] talk
+$ffb7-$ffba virtual byte[3] readst
+$ffba-$ffbd virtual byte[3] setlfs
+$ffbd-$ffc0 virtual byte[3] setnam
+$ffc0-$ffc3 virtual byte[3] open
+$ffc3-$ffc6 virtual byte[3] close
+$ffc6-$ffc9 virtual byte[3] chkin
+$ffc9-$ffcc virtual byte[3] chkout
+$ffcc-$ffcf virtual byte[3] clrchn
+$ffcf-$ffd2 virtual byte[3] chrin
+$ffd2-$ffd5 virtual byte[3] chrout
+$ffd5-$ffd8 virtual byte[3] load
+$ffd8-$ffdb virtual byte[3] save
+$ffdb-$ffde virtual byte[3] settim
+$ffde-$ffe1 virtual byte[3] rdtim
+$ffe1-$ffe4 virtual byte[3] stop
+$ffe4-$ffe7 virtual byte[3] getin
+$ffe7-$ffea virtual byte[3] clall
+$ffea-$ffed virtual byte[3] udtim
+$ffed-$fff0 virtual byte[3] screen_size
+$fff0-$fff3 virtual byte[3] plot
+$fff3-$fff6 virtual byte[3] iobase
 vvv

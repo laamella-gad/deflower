@@ -26,6 +26,8 @@ Marking area of 2 byte at C004 "after"
 Starting flow analysis.
 No entry points defined, nothing to do.
 Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 6 bytes emitted, 0 differ, 0 virtual, 0 gaps
 ~~~
 
 *=$c000
@@ -36,4 +38,8 @@ middle:		.byte	$44
 after:
 		.byte	$55, $66
 ~~~
+--- test.map
+$c000-$c003 byte[3] before
+$c003-$c004 byte middle
+$c004-$c006 byte[2] after
 vvv

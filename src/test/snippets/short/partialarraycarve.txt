@@ -36,6 +36,8 @@ Marking area of 1 word at C006 "mid_ptr"
 Will disassemble from C010
 Starting flow analysis.
 Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 26 bytes emitted, 0 differ, 0 virtual, 0 gaps
 ~~~
 
 *=$c000
@@ -55,4 +57,9 @@ entry:
 		sta mid_ptr
 		rts 
 ~~~
+--- test.map
+$c000-$c006 untyped[6] my_array
+$c006-$c008 word mid_ptr
+$c008-$c010 untyped[8] my_array + $8
+$c010-$c01a code entry
 vvv

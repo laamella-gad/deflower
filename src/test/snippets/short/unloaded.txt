@@ -34,6 +34,9 @@ Unnamed target: lC040 from address $c003
 Instruction at $c007 runs past the memory the image contains, not disassembling
 Jumping into memory the image doesn't contain: $c040
 Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 7 bytes emitted, 0 differ, 0 virtual, 1 gap
+gap $c007-$c008
 ~~~
 ; called by: entry
 l0100 = $0100
@@ -48,4 +51,7 @@ entry:
 ; jumped to by: entry
 lC040 = $c040
 ~~~
+--- test.map
+$c000-$c007 code entry
+$c007-$c008 gap
 vvv

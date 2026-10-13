@@ -258,6 +258,16 @@ Unnamed target: lC3B0 from address $c39a
 Unnamed target: lC494 from address $c566
 Unnamed target: lC48D from address $c543
 Writing out/bigmac.asm
+Writing out/bigmac.map
+Verify out/bigmac.asm: 822 bytes emitted, 0 differ, 22526 virtual, 8 gaps
+gap $0800-$a000
+gap $c000-$c100
+gap $c1ba-$c1bb
+gap $c2ba-$c2bb
+gap $c3ba-$c3bb
+gap $c400-$c48d
+gap $c49b-$c543
+gap $c56c-$d000
 ~~~
 
 .virtual $0001
@@ -834,4 +844,41 @@ voice3_control:		.byte	?
 ; jumped to by: snapshot_pc
 kernal_irq = $ea31
 ~~~
+--- bigmac.map
+$0001-$0002 virtual byte cpu_port
+$0314-$0316 addr irq_vector
+$0800-$a000 gap
+$a000-$a002 virtual addr basic_cold_start_vector
+$c000-$c100 gap
+$c100-$c1ba code lC100
+$c1ba-$c1bb gap
+$c1bb-$c1ca code lC1BB
+$c1ca-$c1d8 code lC1CA
+$c1d8-$c1df code lC1D8
+$c1df-$c200 code lC1DF
+$c200-$c2ba code lC200
+$c2ba-$c2bb gap
+$c2bb-$c2ca code lC2BB
+$c2ca-$c2d8 code lC2CA
+$c2d8-$c2df code lC2D8
+$c2df-$c300 code lC2DF
+$c300-$c3ba code lC300
+$c3ba-$c3bb gap
+$c3bb-$c3ca code lC3BB
+$c3ca-$c3d8 code lC3CA
+$c3d8-$c3df code lC3D8
+$c3df-$c400 code lC3DF
+$c400-$c48d gap
+$c48d-$c494 code lC48D
+$c494-$c49b code lC494
+$c49b-$c543 gap
+$c543-$c54d code irq
+$c54d-$c56c code snapshot_pc
+$c56c-$d000 gap
+$d400-$d402 virtual word voice1_frequency
+$d404-$d405 virtual byte voice1_control
+$d407-$d409 virtual word voice2_frequency
+$d40b-$d40c virtual byte voice2_control
+$d40e-$d410 virtual word voice3_frequency
+$d412-$d413 virtual byte voice3_control
 vvv

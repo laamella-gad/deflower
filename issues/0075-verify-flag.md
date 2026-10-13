@@ -1,7 +1,6 @@
 ---
 title: A flag that reassembles the output and checks it against the input
-status: open
-priority: high
+status: done
 labels: enhancement
 ---
 
@@ -29,3 +28,14 @@ Want: a flag, e.g. `--verify`, that does this as part of a run and prints:
 - **Timing.** The other command line flags wait for [0059](0059-convert-to-nim.md); this one probably should too.
 
 Done when: `--verify` reports 0 differences and 0 gaps for `zwark`, `tcmine` and `squirm`, reports a difference and a gap for a small fixture made to have them, and the flag is described in `CLAUDE.md`.
+
+## Closing note
+
+`--verify` on `Deflower.main` (or `new Deflower(true)`) runs `Verifier` after each `.asm` is written:
+- **Assembler:** mpu6502's `SourceParser`, the one the snippet round trip uses, so no 64tass is needed.
+- **Region:** the loaded bytes. A gap is loaded memory no area covers. Memory under an included virtual area that `dropUnusedIncludes` leaves out still counts as covered, otherwise every unused C64 register would be a gap. Untouched snapshot RAM still needs lines of its own; detecting the power-on pattern is left to [0072](0072-inspect-input-file.md).
+- **Output:** `Verify out/<binary>.asm: N bytes emitted, N differ, N virtual, N gaps`, then up to 10 `differ $addr expected $xx got $yy` lines (with `... N more differ`) and every `gap $start-$end`, end exclusive as in a `.flo` range. Emitted bytes on memory the image doesn't load are `expected nothing`. The exit code is 1 when anything differs, there is a gap or a run has errors, and 2 for bad arguments.
+- **Map file:** `out/<binary>.map` is written on every run, one line per code run (split at routine labels), per array (a virtual tail separately) and per gap, e.g. `$c007-$c009 word table`. Verify computes the gaps from the same walk.
+- **Timing:** done now, without waiting for [0059](0059-convert-to-nim.md).
+
+The snippets all run with verify on, so each one's printed part ends with the report, and the third expectation holds the `.map`. squirm reports `14153 bytes emitted, 0 differ, 51383 virtual, 0 gaps`, the numbers from the hand check; zwark and tcmine also have 0 differ and 0 gaps. `short/verify.txt` has an `$eb` (`sbc #`, issue [0086](0086-duplicate-opcodes-do-not-reassemble.md)) that comes back as `$e9`, and two uncovered bytes; it skips the harness's own round trip with a `; no round trip` line.

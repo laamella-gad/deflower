@@ -34,6 +34,8 @@ Marking area of 2 word at C011 "sum"
 Starting flow analysis.
 No entry points defined, nothing to do.
 Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 21 bytes emitted, 0 differ, 0 virtual, 0 gaps
 ~~~
 
 *=$c000
@@ -50,4 +52,10 @@ precedence:
 sum:
 		.word	$2221, $2423
 ~~~
+--- test.map
+$c000-$c004 byte[4] plain
+$c004-$c008 byte[4] hex
+$c008-$c00c byte[4] product
+$c00c-$c011 byte[5] precedence
+$c011-$c015 word[2] sum
 vvv

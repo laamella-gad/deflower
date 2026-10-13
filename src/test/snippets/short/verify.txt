@@ -1,0 +1,37 @@
+>>> Issue 0075: verify reassembles the output and compares it with the
+image. $eb is an illegal duplicate of sbc # (issue 0086), so it comes back
+as $e9 and differs; the two bytes after the rts are covered by nothing, so
+they are a gap. <<<
+; no round trip
+*=$c000
+
+entry:
+		.byte	$eb, $01
+		rts 
+		.byte	$ff, $ff
+===
+deflower test.prg
+$c000 code entry
+^^^
+Reading test.prg
+Reading prg test.prg
+load address 49152
+Will disassemble from C000
+Starting flow analysis.
+Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 3 bytes emitted, 1 differ, 0 virtual, 1 gap
+differ $c000 expected $eb got $e9
+gap $c003-$c005
+~~~
+
+*=$c000
+
+entry:
+		sbc #$01
+		rts 
+~~~
+--- test.map
+$c000-$c003 code entry
+$c003-$c005 gap
+vvv

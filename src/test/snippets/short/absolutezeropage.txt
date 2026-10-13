@@ -37,6 +37,8 @@ Marking area of 2 byte at 11 "pair"
 Will disassemble from C000
 Starting flow analysis.
 Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 29 bytes emitted, 0 differ, 3 virtual, 0 gaps
 ~~~
 
 .virtual $0010
@@ -63,4 +65,8 @@ entry:
 		lda @w pair + $1
 		jmp entry
 ~~~
+--- test.map
+$0010-$0011 virtual byte counter
+$0011-$0013 virtual byte[2] pair
+$c000-$c01d code entry
 vvv

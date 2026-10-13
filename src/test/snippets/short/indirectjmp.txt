@@ -34,6 +34,10 @@ Starting flow analysis.
 Unnamed target: aC010 from address $c000
 Unnamed target: lC020 from address $c000
 Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 8 bytes emitted, 0 differ, 0 virtual, 2 gaps
+gap $c003-$c010
+gap $c012-$c020
 ~~~
 
 *=$c000
@@ -51,4 +55,10 @@ lC020:
 		lda #$42
 		rts 
 ~~~
+--- test.map
+$c000-$c003 code entry
+$c003-$c010 gap
+$c010-$c012 addr aC010
+$c012-$c020 gap
+$c020-$c023 code lC020
 vvv

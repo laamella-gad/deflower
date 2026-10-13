@@ -29,6 +29,8 @@ Marking area of 1 byte at C000 "val"
 Will disassemble from C001
 Starting flow analysis.
 Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 4 bytes emitted, 0 differ, 0 virtual, 0 gaps
 ~~~
 
 *=$c000
@@ -43,4 +45,7 @@ entry_point:
 		lda #$01
 		rts 
 ~~~
+--- test.map
+$c000-$c001 byte val
+$c001-$c004 code entry_point
 vvv

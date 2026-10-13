@@ -84,6 +84,8 @@ Unnamed target: lC01F from address $c020
 Unnamed target: aC02B from address $c022
 Unnamed target: lC02A from address $c022
 Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 54 bytes emitted, 0 differ, 6 virtual, 0 gaps
 ~~~
 
 .virtual $0002
@@ -153,4 +155,14 @@ chrout:
 		.fill	3
 .endv
 ~~~
+--- test.map
+$0002-$0003 virtual byte counter
+$00fb-$00fd virtual word pointer
+$c000-$c025 code entry
+$c025-$c02b code sub
+$c02b-$c02d addr aC02B
+$c02d-$c02e byte value
+$c02e-$c032 byte[4] table
+$c032-$c036 code
+$ffd2-$ffd5 virtual byte[3] chrout
 vvv

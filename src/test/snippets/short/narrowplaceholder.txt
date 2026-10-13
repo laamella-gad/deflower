@@ -34,6 +34,9 @@ Marking area of 1 word at C004 "carved_word"
 Will disassemble from C008
 Starting flow analysis.
 Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 15 bytes emitted, 0 differ, 0 virtual, 1 gap
+gap $c00f-$c010
 ~~~
 
 *=$c000
@@ -49,4 +52,11 @@ carved_code:
 		rts 
 		.byte	$77, $88, $99, $aa, $bb, $cc
 ~~~
+--- test.map
+$c000-$c004 untyped[4] unknown_block
+$c004-$c006 word carved_word
+$c006-$c008 untyped[2] unknown_block + $6
+$c008-$c009 code carved_code
+$c009-$c00f untyped[6] unknown_block + $9
+$c00f-$c010 gap
 vvv

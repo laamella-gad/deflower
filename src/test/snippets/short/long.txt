@@ -32,6 +32,8 @@ Marking area of 2 long at C004 "scores"
 Marking area of 2 slong at C00A "offsets"
 Starting flow analysis.
 Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 16 bytes emitted, 0 differ, 3 virtual, 0 gaps
 ~~~
 
 .virtual $0004
@@ -51,4 +53,9 @@ scores:
 offsets:
 		.lint	-3, -8388608
 ~~~
+--- test.map
+$0004-$0007 virtual long timer
+$c000-$c004 code start
+$c004-$c00a long[2] scores
+$c00a-$c010 slong[2] offsets
 vvv

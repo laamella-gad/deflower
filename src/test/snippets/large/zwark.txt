@@ -487,6 +487,8 @@ Unnamed target: l01C3 from address $01bf
 Unnamed target: l0187 from address $018c
 Unnamed target: l0108 from address $018e
 Writing out/zwark.asm
+Writing out/zwark.map
+Verify out/zwark.asm: 6991 bytes emitted, 0 differ, 58545 virtual, 0 gaps
 ~~~
 
 .virtual $0001
@@ -2920,4 +2922,191 @@ stop = $ffe1
 ; called by: title_screen, demo, show_top_score_row_14, start
 getin = $ffe4
 ~~~
+--- zwark.map
+$0001-$0002 virtual byte cpu_port
+$0002-$0003 virtual byte decrunch_count
+$0003-$0004 virtual byte decrunch_bits
+$002d-$002f virtual word basic_end
+$0050-$0052 virtual word clear_pointer
+$0057-$0059 virtual word sprite_source
+$0059-$005b virtual word sprite_destination
+$0073-$0076 virtual byte[3] chrget
+$00ae-$00b0 virtual word decrunch_output
+$00fb-$00fc virtual byte decrunch_byte
+$00fc-$00fe virtual word decrunch_input
+$00fe-$0100 virtual word decrunch_end
+$0100-$019f code decrunch
+$019f-$01ad code l019F
+$01ad-$01b8 code l01AD
+$01b8-$01c5 code l01B8
+$01c5-$01cd code l01C5
+$01cd-$01d1 byte[4] decrunch_table
+$01d1-$01ef byte[30] unused_stack
+$01ef-$0200 byte[17] stack
+$0340-$037f byte[63] player_image
+$037f-$0380 byte unused_037f
+$0380-$03bf byte[63] bullet_image
+$03bf-$03c0 byte unused_03bf
+$03c0-$03ff byte[63] enemy_image_2
+$03ff-$0400 byte unused_03ff
+$0400-$07e8 virtual byte[1000] screen_ram
+$07f8-$0800 virtual byte[8] sprite_pointers
+$0800-$083f byte[63] enemy_image_3
+$083f-$0840 byte unused_083f
+$0840-$087f byte[63] enemy_image_4
+$087f-$0880 byte unused_087f
+$0880-$08bf byte[63] enemy_image_5
+$08bf-$08c0 byte unused_08bf
+$08c0-$08ff byte[63] enemy_image_6
+$08ff-$0900 byte unused_08ff
+$0900-$1217 byte[2327] packed_data
+$1217-$12e4 byte[205] decruncher_source
+$12e4-$9000 virtual byte[32028] untouched_12e4
+$9000-$9003 code start_game
+$9003-$9006 char[3] signature
+$9006-$9009 byte[3] unused_9006
+$9009-$9010 code actual_start_game
+$9010-$9049 code main_loop
+$9049-$904a byte player_state
+$904a-$9089 byte[63] player_sprite
+$9089-$90c8 byte[63] bullet_sprite
+$90c8-$9107 byte[63] enemy_sprite
+$9107-$9146 byte[63] explosion_sprite_1
+$9146-$9185 byte[63] explosion_sprite_2
+$9185-$91c4 byte[63] explosion_sprite_3
+$91c4-$91dc code move_player
+$91dc-$9201 code lose_life
+$9201-$9205 code check_joystick
+$9205-$9216 code check_right
+$9216-$9226 code check_left
+$9226-$924e code move_bullet
+$924e-$92f9 code fire_pressed
+$92f9-$92fa byte bullet_hit
+$92fa-$93b6 code explode
+$93b6-$93d8 code flash_sprite
+$93d8-$93f9 code check_hit
+$93f9-$944d code move_right
+$944d-$9486 code move_left
+$9486-$94bd code move_up
+$94bd-$94de code move_down
+$94de-$94fd code copy_sprite
+$94fd-$9530 code select_sprite
+$9530-$9541 code reset_screen
+$9541-$9549 code sound_off
+$9549-$9563 code update_vic_sprite_positions
+$9563-$9570 code delay
+$9570-$96b5 code move_enemies
+$96b5-$9753 code init_game
+$9753-$9773 code sid_clear_loop
+$9773-$978b code update_directions
+$978b-$9803 code draw_scores
+$9803-$9819 code draw_turns
+$9819-$982d code show_top_score_line
+$982d-$9841 code show_copyright
+$9841-$984a code make_scores_red
+$984a-$986c char[34] robert_copyright
+$986c-$9894 char[40] top_score_line
+$9894-$989c char[8] turns_text
+$989c-$993c code play_sound
+$993c-$9985 code update_high_score
+$9985-$999a code hi_score_draw
+$999a-$99bd code next_turn
+$99bd-$9a4b code title_screen
+$9a4b-$9ab7 code demo
+$9ab7-$9acb char[20] f1_1_player_text
+$9acb-$9adf char[20] f3_2_player_text
+$9adf-$9af7 code show_game_over
+$9af7-$9b02 code show_player
+$9b02-$9b41 code show_top_score_row_14
+$9b41-$9b42 byte show_player_countdown
+$9b42-$9b4d char[11] game_over_text
+$9b4d-$9bcc code switch_player
+$9bcc-$9c45 code draw_logo
+$9c45-$9c61 byte[28] logo0
+$9c61-$9c7d byte[28] logo1
+$9c7d-$9c98 byte[27] logo2
+$9c98-$9cb7 byte[31] logo3
+$9cb7-$9cd5 byte[30] logo4
+$9cd5-$9d0c code check_protection
+$9d0c-$9d0d code nothing_just_rts
+$9d0d-$9d2a code to_digits
+$9d2a-$9d32 byte[8] sprite_images_lo
+$9d32-$9d3a byte[8] sprite_images_hi
+$9d3a-$9d42 byte[8] sprite_pointer_values
+$9d42-$9d4a byte[8] explosion_timers
+$9d4a-$9d5a byte[16] sprite_coords
+$9d5a-$9d5b byte sprite_x_high_bits
+$9d5b-$9d5c byte sprite_enable
+$9d5c-$9d6c byte[16] saved_sprite_colors
+$9d6c-$9d6e byte[2] saved_sprite_enable
+$9d6e-$9d76 byte[8] enemy_directions
+$9d76-$9d7e byte[8] direction_timers
+$9d7e-$9d86 byte[8] explosion_steps
+$9d86-$9d87 byte exploding
+$9d87-$9d88 byte fire_state
+$9d88-$9d89 byte joystick_state
+$9d89-$9d8a byte sprite_coll_state
+$9d8a-$9d8c byte[2] lives
+$9d8c-$9d8d byte current_player
+$9d8d-$9d8f byte[2] score_lo
+$9d8f-$9d91 byte[2] score_hi
+$9d91-$9d92 byte high_score_lo
+$9d92-$9d93 byte high_score_hi
+$9d93-$9d94 byte two_players
+$9d94-$9d95 byte delay_outer
+$9d95-$9d96 byte delay_inner
+$9d96-$9d97 byte copy_source_lo
+$9d97-$9d98 byte copy_index
+$9d98-$9d99 byte sprite_mask
+$9d99-$9d9a byte sprite_index
+$9d9a-$9d9b byte sprite_coord_index
+$9d9b-$9d9c byte move_result
+$9d9c-$9d9d byte move_count
+$9d9d-$9d9e byte unused_9d9d
+$9d9e-$9d9f byte digit
+$9d9f-$9da0 byte score_player
+$9da0-$9da1 byte score_column
+$9da1-$9da2 byte unused_9da1
+$9da2-$9da3 byte title_countdown_lo
+$9da3-$9da4 byte title_countdown_hi
+$9da4-$9dd3 byte[47] vic_init
+$9dd3-$9dd4 byte shot_attack_decay
+$9dd4-$9dd5 byte shot_sustain_release
+$9dd5-$9dd6 byte shot_frequency_hi
+$9dd6-$9dd7 byte shot_frequency_lo
+$9dd7-$9dd8 byte shot_sweep_hi
+$9dd8-$9dd9 byte shot_sweep_lo
+$9dd9-$9dda byte explosion_attack_decay
+$9dda-$9ddb byte explosion_sustain_release
+$9ddb-$9e00 byte[37] unused_9ddb
+$9e00-$9e2c code start
+$9e2c-$9e34 code no_trainer
+$9e34-$9e40 byte[12] unused_9e34
+$9e40-$9ea9 char[105] crack_trainer_msg
+$9ea9-$9eab byte[2] unused_9ea9
+$9eab-$d000 virtual byte[12629] untouched_9eab
+$d000-$d010 virtual byte[16] vic_sprite_coords
+$d010-$d011 virtual byte vic_sprite_x_high_bits
+$d015-$d016 virtual byte vic_sprite_enable
+$d01e-$d01f virtual byte vic_sprite_collision
+$d020-$d021 virtual byte border_color
+$d021-$d022 virtual byte background_color
+$d027-$d02f virtual byte[8] vic_sprite_colors
+$d400-$d402 virtual word voice1_frequency
+$d404-$d405 virtual byte voice1_control
+$d405-$d406 virtual byte voice1_attack_decay
+$d406-$d407 virtual byte voice1_sustain_release
+$d407-$d409 virtual word voice2_frequency
+$d40b-$d40c virtual byte voice2_control
+$d40c-$d40d virtual byte voice2_attack_decay
+$d40d-$d40e virtual byte voice2_sustain_release
+$d40e-$d410 virtual word voice3_frequency
+$d410-$d412 virtual word voice3_pulse_width
+$d412-$d413 virtual byte voice3_control
+$d413-$d414 virtual byte voice3_attack_decay
+$d414-$d415 virtual byte voice3_sustain_release
+$d418-$d419 virtual byte sid_vol_filter
+$d800-$dbe8 virtual byte[1000] color_ram
+$dc01-$dc02 virtual byte cia1_port_b
+$dc04-$dc06 virtual word cia1_timer_a
 vvv

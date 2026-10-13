@@ -15,6 +15,9 @@ Unnamed target: d0830 from address $083a
 Unnamed target: l0116 from address $0840
 Jumping into memory the image doesn't contain: $0116
 Writing out/3dgolf.asm
+Writing out/3dgolf.map
+Verify out/3dgolf.asm: 66 bytes emitted, 0 differ, 0 virtual, 1 gap
+gap $0843-$717b
 ~~~
 ; jumped to by: start
 l0116 = $0116
@@ -61,4 +64,8 @@ d0833 = $0833
 		bne l082D
 		jmp l0116
 ~~~
+--- 3dgolf.map
+$0801-$080d byte[12] basic_stub
+$080d-$0843 code start
+$0843-$717b gap
 vvv

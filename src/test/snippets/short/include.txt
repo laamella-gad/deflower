@@ -244,6 +244,8 @@ Marking area of 1 addr at FFFE "irq_hardware_vector"
 Marking area of 1 byte at C100 "mine"
 Starting flow analysis.
 Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 36 bytes emitted, 0 differ, 22529 virtual, 0 gaps
 ~~~
 
 .virtual $00c5
@@ -317,4 +319,16 @@ kernal_irq = $ea31
 ; called by: start
 chrout = $ffd2
 ~~~
+--- test.map
+$00c5-$00c6 virtual byte last_key
+$00fb-$00fd virtual word pointer
+$0314-$0316 virtual addr irq_vector
+$033c-$0340 virtual byte[4] my_buffer
+$0400-$07e8 virtual byte[1000] screen_ram
+$c000-$c020 code start
+$c020-$c024 addr[2] vectors
+$c100-$c101 virtual byte mine
+$d020-$d021 virtual byte border_color
+$d021-$d022 virtual byte screen_color
+$dc01-$dc02 virtual byte cia1_port_b
 vvv

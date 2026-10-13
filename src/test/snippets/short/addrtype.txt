@@ -25,6 +25,8 @@ Will disassemble from C006
 Will disassemble from C007
 Starting flow analysis.
 Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 8 bytes emitted, 0 differ, 0 virtual, 0 gaps
 ~~~
 
 *=$c000
@@ -38,4 +40,8 @@ first:
 second:
 		rts 
 ~~~
+--- test.map
+$c000-$c006 addr[3] vectors
+$c006-$c007 code first
+$c007-$c008 code second
 vvv

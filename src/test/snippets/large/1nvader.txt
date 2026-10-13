@@ -17,6 +17,10 @@ Unnamed target: l245B from address $2487
 Unnamed target: l0147 from address $248b
 Jumping into memory the image doesn't contain: $0147
 Writing out/1nvader.asm
+Writing out/1nvader.map
+Verify out/1nvader.asm: 87 bytes emitted, 0 differ, 0 virtual, 2 gaps
+gap $081c-$2452
+gap $248e-$257c
 ~~~
 ; called by: $247e
 l0100 = $0100
@@ -79,4 +83,10 @@ l2475:
 		ldy #$00
 		jmp l0147
 ~~~
+--- 1nvader.map
+$0801-$080d byte[12] basic_stub
+$080d-$081c code start
+$081c-$2452 gap
+$2452-$248e code l2452
+$248e-$257c gap
 vvv

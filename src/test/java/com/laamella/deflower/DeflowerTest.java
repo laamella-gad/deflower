@@ -31,15 +31,17 @@ import static org.assertj.core.api.Assertions.fail;
 /**
  * Runs the snippet files in {@code src/test/snippets} (issue 0062). Every
  * snippet has three expectations: what Deflower printed (stdout and stderr
- * together), the generated {@code .asm} files, and the exported binaries as
- * hex dumps.
+ * together), the generated {@code .asm} files, and the other files in
+ * {@code out/}: the memory maps as text and the exported binaries as hex
+ * dumps. Deflower runs with verify on (issue 0075), so the printed part
+ * ends with each run's verify report.
  * <p>
  * A short snippet ({@code short/}) holds its whole test: assembly source,
  * assembled into {@code test.prg}, then the {@code .flo} file, written as
  * {@code test.flo}. More input parts are more files, each starting with a
  * {@code ; file: <name>} line; a {@code .prg} one is assembled. Every
  * generated {@code .asm} must reassemble to the bytes of the {@code .prg}
- * with its name.
+ * with its name, unless the assembly has a {@code ; no round trip} line.
  * <p>
  * A large snippet ({@code large/}) names a {@code .flo} file on the test
  * classpath, for programs too big to keep as source in a snippet.
@@ -48,6 +50,9 @@ class DeflowerTest {
     private static final SnippetFileFormat FORMAT = new SnippetFileFormat(
             ">>>", "<<<\n", "===\n", "^^^\n", "~~~\n", "vvv\n");
     private static final String FILE_HEADER = "; file: ";
+    // In a snippet's assembly, skips the round trip, for a snippet that
+    // shows what verify reports when the output doesn't reassemble.
+    private static final String NO_ROUND_TRIP = "; no round trip";
 
     @TestFactory
     Stream<DynamicTest> shortSnippets() throws IOException {
@@ -92,7 +97,9 @@ class DeflowerTest {
                 writeFile(dir, part.substring(FILE_HEADER.length(), endOfHeader).trim(), part.substring(endOfHeader + 1));
             }
             List<String> outputs = deflower(dir.resolve("test.flo"));
-            assertReassembles(dir);
+            if (!parts.get(0).contains(NO_ROUND_TRIP)) {
+                assertReassembles(dir);
+            }
             return outputs;
         } finally {
             deleteRecursively(dir);
@@ -147,7 +154,7 @@ class DeflowerTest {
         System.setOut(capture);
         System.setErr(capture);
         try {
-            new Deflower().deflower(flowerFile);
+            new Deflower(true).deflower(flowerFile);
         } finally {
             System.setOut(originalOut);
             System.setErr(originalErr);
@@ -163,7 +170,8 @@ class DeflowerTest {
         }
         StringBuilder binaries = new StringBuilder();
         for (Path file : outFiles(out, false)) {
-            binaries.append("--- ").append(file.getFileName()).append('\n').append(hexDump(Files.readAllBytes(file)));
+            binaries.append("--- ").append(file.getFileName()).append('\n')
+                    .append(file.toString().endsWith(".map") ? Files.readString(file) : hexDump(Files.readAllBytes(file)));
         }
         return List.of(endLine(printed.toString(UTF_8)), endLine(asm.toString()), binaries.toString());
     }

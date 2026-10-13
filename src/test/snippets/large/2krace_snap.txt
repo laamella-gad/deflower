@@ -311,6 +311,27 @@ Unnamed target: l098A from address $0994
 Unnamed target: l0988 from address $0997
 Unnamed target: l09B9 from address $09aa
 Writing out/2krace_snap.asm
+Writing out/2krace_snap.map
+Verify out/2krace_snap.asm: 3939 bytes emitted, 0 differ, 2867 virtual, 19 gaps
+gap $0000-$0002
+gap $0003-$0004
+gap $000a-$00d0
+gap $00d2-$00fb
+gap $00ff-$0801
+gap $0da0-$1000
+gap $1592-$4040
+gap $4240-$4400
+gap $47e8-$47f8
+gap $4a80-$7800
+gap $78b0-$7fff
+gap $8200-$d000
+gap $d02f-$d400
+gap $d419-$d800
+gap $dbe8-$dc00
+gap $dc02-$dc0d
+gap $dc0e-$dd00
+gap $dd01-$dd0d
+gap $dd0e-$fffe
 ~~~
 
 .virtual $0002
@@ -2026,4 +2047,221 @@ cia2_interrupt_control:		.byte	?
 irq_vector:
 		.addr	irq
 ~~~
+--- 2krace_snap.map
+$0000-$0002 gap
+$0002-$0003 virtual byte road_row
+$0003-$0004 gap
+$0004-$0005 virtual byte fine_scroll
+$0005-$0006 virtual byte speed
+$0006-$0007 virtual byte max_speed
+$0007-$0008 virtual byte car_state
+$0008-$0009 virtual byte car_step
+$0009-$000a virtual byte difficulty
+$000a-$00d0 gap
+$00d0-$00d2 virtual word music_pointer
+$00d2-$00fb gap
+$00fb-$00fd virtual word draw_pointer
+$00fd-$00ff virtual word draw_pointer2
+$00ff-$0801 gap
+$0801-$080d byte[12] basic_stub
+$080d-$0820 byte[19] decruncher_leftover
+$0820-$0850 code start
+$0850-$087b code new_game
+$087b-$091a code game_loop
+$091a-$099f code snapshot_pc
+$099f-$09c4 code steer
+$09c4-$09db code position_car
+$09db-$09fd code irq_bottom
+$09fd-$0a30 code irq
+$0a30-$0a57 code irq_lower
+$0a57-$0a73 code init_road
+$0a73-$0a7e code wait_frame
+$0a7e-$0b0f code init_video
+$0b0f-$0b3c code read_joystick
+$0b3c-$0b66 code check_stage
+$0b66-$0b67 byte stage
+$0b67-$0b6b byte[4] stage_color
+$0b6b-$0b6f byte[4] stage_max_speed
+$0b6f-$0b73 byte[4] stage_difficulty
+$0b73-$0b77 byte[4] stage_car_sprite
+$0b77-$0b8f code clear_screen
+$0b8f-$0bb5 code draw_road_sprite
+$0bb5-$0bc7 code reset_score
+$0bc7-$0bfd code add_score
+$0bfd-$0c02 byte[5] score
+$0c02-$0c07 byte[5] score_add
+$0c07-$0c0c byte[5] score_carry
+$0c0c-$0c11 byte[5] high_score
+$0c11-$0c41 code update_high_score
+$0c41-$0c61 byte[32] flash_colors
+$0c61-$0c98 code title
+$0c98-$0c99 byte left_wall
+$0c99-$0c9a byte right_wall
+$0c9a-$0ca4 byte[10] wall_switch_length
+$0ca4-$0cae byte[10] wall_max_length
+$0cae-$0cb8 byte[10] wall_end_chance
+$0cb8-$0cc2 byte[10] wall_start_chance
+$0cc2-$0cd9 code init_walls
+$0cd9-$0d4d code next_row
+$0d4d-$0d7f code random
+$0d7f-$0d83 dword random_seed
+$0d83-$0d90 byte[13] unused_0d83
+$0d90-$0da0 byte[16] car_x
+$0da0-$1000 gap
+$1000-$1003 code music_init
+$1003-$1006 code music_play
+$1006-$103a code music_set_volume
+$103a-$10ae code l103A
+$10ae-$1248 code l10AE
+$1248-$1249 byte order_position
+$1249-$124a byte transpose
+$124a-$124b untyped
+$124b-$124c byte pattern_position
+$124c-$124d byte note_delay
+$124d-$125f untyped[18]
+$125f-$1260 byte new_note
+$1260-$1261 byte wave_position
+$1261-$1262 byte waveform
+$1262-$1263 byte pulse_position
+$1263-$1264 byte pulse_timer
+$1264-$1272 untyped[14]
+$1272-$1273 byte order_list_index
+$1273-$1274 byte pattern_number
+$1274-$1275 byte tempo
+$1275-$1276 byte tick
+$1276-$1277 byte note
+$1277-$1278 byte instrument
+$1278-$1279 byte gate
+$1279-$128a untyped[17]
+$128a-$128c word frequency
+$128c-$128e word pulse_width
+$128e-$129c untyped[14]
+$129c-$129d byte attack_decay
+$129d-$129e byte sustain_release
+$129e-$12b1 untyped[19]
+$12b1-$1311 byte[96] frequency_lo
+$1311-$1371 byte[96] frequency_hi
+$1371-$1374 byte[3] order_list_lo
+$1374-$1377 byte[3] order_list_hi
+$1377-$1382 byte[11] pattern_lo
+$1382-$138c byte[10] pattern_hi
+$138c-$1397 byte[11] instrument_attack_decay
+$1397-$13a2 byte[11] instrument_sustain_release
+$13a2-$13ad byte[11] instrument_wave
+$13ad-$13b8 byte[11] instrument_pulse
+$13b8-$13c3 byte[11] instrument_filter
+$13c3-$13fa byte[55] wave_left
+$13fa-$1433 byte[57] wave_right
+$1433-$1439 byte[6] pulse_left
+$1439-$143f byte[6] pulse_right
+$143f-$1442 byte[3] filter_left
+$1442-$1446 byte[4] filter_right
+$1446-$1457 byte[17] order_list1
+$1457-$1468 byte[17] order_list2
+$1468-$1479 byte[17] order_list3
+$1479-$1493 byte[26] pattern0
+$1493-$14bf byte[44] pattern1
+$14bf-$14c2 byte[3] pattern2
+$14c2-$14d5 byte[19] pattern3
+$14d5-$14ef byte[26] pattern4
+$14ef-$1504 byte[21] pattern5
+$1504-$151e byte[26] pattern6
+$151e-$154a byte[44] pattern7
+$154a-$155f byte[21] pattern8
+$155f-$1578 byte[25] pattern9
+$1578-$1592 byte[26] pattern10
+$1592-$4040 gap
+$4040-$4140 virtual byte[256] road_sprites
+$4140-$4240 byte[256] car_sprites
+$4240-$4400 gap
+$4400-$47e8 virtual byte[1000] screen
+$47e8-$47f8 gap
+$47f8-$4800 virtual byte[8] sprite_pointers
+$4800-$4a80 byte[640] digit_sprites
+$4a80-$7800 gap
+$7800-$78b0 byte[176] charset
+$78b0-$7fff gap
+$7fff-$8000 virtual byte idle_byte
+$8000-$8100 virtual byte[256] left_road
+$8100-$8200 virtual byte[256] right_road
+$8200-$d000 gap
+$d000-$d001 virtual byte sprite0_x
+$d001-$d002 virtual byte sprite0_y
+$d002-$d003 virtual byte sprite1_x
+$d003-$d004 virtual byte sprite1_y
+$d004-$d005 virtual byte sprite2_x
+$d005-$d006 virtual byte sprite2_y
+$d006-$d007 virtual byte sprite3_x
+$d007-$d008 virtual byte sprite3_y
+$d008-$d009 virtual byte sprite4_x
+$d009-$d00a virtual byte sprite4_y
+$d00a-$d00b virtual byte sprite5_x
+$d00b-$d00c virtual byte sprite5_y
+$d00c-$d00d virtual byte sprite6_x
+$d00d-$d00e virtual byte sprite6_y
+$d00e-$d00f virtual byte sprite7_x
+$d00f-$d010 virtual byte sprite7_y
+$d010-$d011 virtual byte sprites_x_msb
+$d011-$d012 virtual byte vic_control1
+$d012-$d013 virtual byte raster
+$d013-$d014 virtual byte light_pen_x
+$d014-$d015 virtual byte light_pen_y
+$d015-$d016 virtual byte sprite_enable
+$d016-$d017 virtual byte vic_control2
+$d017-$d018 virtual byte sprite_expand_y
+$d018-$d019 virtual byte vic_memory
+$d019-$d01a virtual byte vic_irq_status
+$d01a-$d01b virtual byte vic_irq_enable
+$d01b-$d01c virtual byte sprite_priority
+$d01c-$d01d virtual byte sprite_multicolor
+$d01d-$d01e virtual byte sprite_expand_x
+$d01e-$d01f virtual byte sprite_sprite_collision
+$d01f-$d020 virtual byte sprite_background_collision
+$d020-$d021 virtual byte border_color
+$d021-$d022 virtual byte background_color
+$d022-$d023 virtual byte background_color1
+$d023-$d024 virtual byte background_color2
+$d024-$d025 virtual byte background_color3
+$d025-$d026 virtual byte sprite_multicolor0
+$d026-$d027 virtual byte sprite_multicolor1
+$d027-$d028 virtual byte sprite0_color
+$d028-$d029 virtual byte sprite1_color
+$d029-$d02a virtual byte sprite2_color
+$d02a-$d02b virtual byte sprite3_color
+$d02b-$d02c virtual byte sprite4_color
+$d02c-$d02d virtual byte sprite5_color
+$d02d-$d02e virtual byte sprite6_color
+$d02e-$d02f virtual byte sprite7_color
+$d02f-$d400 gap
+$d400-$d402 virtual word voice1_frequency
+$d402-$d404 virtual word voice1_pulse_width
+$d404-$d405 virtual byte voice1_control
+$d405-$d406 virtual byte voice1_attack_decay
+$d406-$d407 virtual byte voice1_sustain_release
+$d407-$d409 virtual word voice2_frequency
+$d409-$d40b virtual word voice2_pulse_width
+$d40b-$d40c virtual byte voice2_control
+$d40c-$d40d virtual byte voice2_attack_decay
+$d40d-$d40e virtual byte voice2_sustain_release
+$d40e-$d410 virtual word voice3_frequency
+$d410-$d412 virtual word voice3_pulse_width
+$d412-$d413 virtual byte voice3_control
+$d413-$d414 virtual byte voice3_attack_decay
+$d414-$d415 virtual byte voice3_sustain_release
+$d415-$d417 virtual word filter_cutoff
+$d417-$d418 virtual byte filter_control
+$d418-$d419 virtual byte volume_filter_mode
+$d419-$d800 gap
+$d800-$dbe8 virtual byte[1000] color_ram
+$dbe8-$dc00 gap
+$dc00-$dc01 virtual byte cia1_port_a
+$dc01-$dc02 virtual byte cia1_port_b
+$dc02-$dc0d gap
+$dc0d-$dc0e virtual byte cia1_interrupt_control
+$dc0e-$dd00 gap
+$dd00-$dd01 virtual byte cia2_port_a
+$dd01-$dd0d gap
+$dd0d-$dd0e virtual byte cia2_interrupt_control
+$dd0e-$fffe gap
+$fffe-$10000 addr irq_vector
 vvv

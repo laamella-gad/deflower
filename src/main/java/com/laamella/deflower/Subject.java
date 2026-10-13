@@ -18,6 +18,9 @@ class MemoryLocation {
     List<String> comment = List.of();
     // True when the comment came from an included file (issue 0078).
     boolean commentIncluded = false;
+    // True when an included virtual area covered this byte but was dropped
+    // as unused: still covered, not a gap (issue 0075).
+    boolean droppedVirtual = false;
 
     MemoryLocation(int address, int data, boolean loaded) {
         this.address = address;
@@ -385,6 +388,7 @@ class Subject {
             DataArea area = includedVirtualArea(address);
             if (area != null && !usedArrays.contains(area.arrayStart())) {
                 memory[address].area = null;
+                memory[address].droppedVirtual = true;
             }
         }
         Set<Integer> labelAddresses = new HashSet<>();

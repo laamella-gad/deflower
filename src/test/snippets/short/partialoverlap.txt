@@ -24,6 +24,9 @@ Will disassemble from C000
 Starting flow analysis.
 Instruction at $c000 would run into $c002 1 byte, not disassembling
 Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 1 bytes emitted, 0 differ, 0 virtual, 1 gap
+gap $c000-$c002
 ~~~
 entry = $c000
 *=$c002
@@ -31,4 +34,7 @@ entry = $c000
 guard:
 		.byte	$42
 ~~~
+--- test.map
+$c000-$c002 gap
+$c002-$c003 byte guard
 vvv

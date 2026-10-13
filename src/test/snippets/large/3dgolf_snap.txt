@@ -1682,6 +1682,8 @@ Unnamed target: lA526 from address $a5a9
 Unnamed target: lA379 from address $a5ac
 Unnamed target: lA3F7 from address $a381
 Writing out/3dgolf_snap.asm
+Writing out/3dgolf_snap.map
+Verify out/3dgolf_snap.asm: 45859 bytes emitted, 0 differ, 19677 virtual, 0 gaps
 ~~~
 
 .virtual $0000
@@ -16665,4 +16667,1008 @@ reset_hw_vector:		.addr	?
 irq_hw_vector:		.addr	?
 .endv
 ~~~
+--- 3dgolf_snap.map
+$0000-$0001 virtual byte cpu_port_direction
+$0001-$0002 virtual byte cpu_port
+$0002-$0004 virtual word text_pointer
+$0004-$0006 virtual word pointer_04
+$0006-$0008 virtual word pointer_06
+$0008-$000a virtual word pointer_08
+$000a-$000c virtual word bitmap_pointer
+$000c-$000d virtual byte v0c
+$000d-$000e virtual byte v0d
+$000e-$0010 virtual word log_value
+$0010-$0012 virtual word point_x
+$0012-$0014 virtual word point_y
+$0014-$0016 virtual word line_x
+$0016-$0018 virtual word line_y
+$0018-$0019 virtual byte plot_y
+$0019-$001b virtual byte[2] unused_19
+$001b-$001d virtual word ball_x
+$001d-$001f virtual word ball_y
+$001f-$0020 virtual byte text_x
+$0020-$0021 virtual byte text_y
+$0021-$0022 virtual byte v21
+$0022-$0023 virtual byte octant
+$0023-$0025 virtual word base_x
+$0025-$0027 virtual word base_y
+$0027-$0028 virtual byte object_count
+$0028-$0029 virtual byte object_depth
+$0029-$002a virtual byte clip_top
+$002a-$002d virtual byte[3] unused_2a
+$002d-$002f virtual word decrunch_pointer
+$002f-$0061 virtual byte[50] unused_2f
+$0061-$0063 virtual word pointer_61
+$0063-$0064 virtual byte v63
+$0064-$0066 virtual word pointer_64
+$0066-$0067 virtual byte hole_distance
+$0067-$0068 virtual byte clip_bottom
+$0068-$00c5 virtual byte[93] unused_68
+$00c5-$00c6 virtual byte kernal_lstx
+$00c6-$00f7 virtual byte[49] unused_c6
+$00f7-$00f8 virtual byte vf7
+$00f8-$00f9 virtual byte vf8
+$00f9-$00fa virtual byte vf9
+$00fa-$00fb virtual byte vfa
+$00fb-$00fc virtual byte vfb
+$00fc-$00fd virtual byte vfc
+$00fd-$00ff virtual word pointer_fd
+$00ff-$0100 virtual byte unused_ff
+$0100-$0103 code
+$0103-$01a6 code d0103
+$01a6-$01c6 byte[32] decrunch_table
+$01c6-$01f9 byte[51] unused_stack
+$01f9-$0200 byte[7] stack
+$0200-$0211 code decrunch_get_byte
+$0211-$0223 code l0211
+$0223-$0225 code l0223
+$0225-$0226 code l0225
+$0226-$022f code l0226
+$022f-$0233 code l022F
+$0233-$0314 virtual byte[225] kernal_workspace
+$0314-$0316 addr irq_vector
+$0316-$0318 virtual addr brk_vector
+$0318-$031a addr nmi_vector
+$031a-$033c virtual byte[34] kernal_vectors
+$033c-$0341 byte[5] tape_header
+$0341-$0351 char[16] tape_name
+$0351-$0400 virtual byte[175] tape_buffer_rest
+$0400-$0402 virtual word hole_x
+$0402-$0404 virtual word hole_y
+$0404-$0405 virtual byte green_view
+$0405-$0409 virtual word[2] safe_ball_x
+$0409-$040d virtual word[2] safe_ball_y
+$040d-$040e virtual byte v040d
+$040e-$040f virtual byte v040e
+$040f-$0410 virtual byte v040f
+$0410-$0411 virtual byte v0410
+$0411-$0412 virtual byte v0411
+$0412-$0413 virtual byte v0412
+$0413-$0414 virtual byte v0413
+$0414-$0416 virtual byte[2] unused_0414
+$0416-$0417 virtual byte v0416
+$0417-$0418 virtual byte v0417
+$0418-$0419 virtual byte unused_0418
+$0419-$041a virtual byte v0419
+$041a-$041b virtual byte v041a
+$041b-$041d virtual byte[2] unused_041b
+$041d-$041e virtual byte v041d
+$041e-$041f virtual byte v041e
+$041f-$0420 virtual byte unused_041f
+$0420-$0421 virtual byte v0420
+$0421-$0422 virtual byte v0421
+$0422-$0424 virtual byte[2] unused_0422
+$0424-$0425 virtual byte v0424
+$0425-$0426 virtual byte v0425
+$0426-$0427 virtual byte unused_0426
+$0427-$0428 virtual byte v0427
+$0428-$0429 virtual byte v0428
+$0429-$042a virtual byte v0429
+$042a-$042b virtual byte v042a
+$042b-$042c virtual byte music_note
+$042c-$042d virtual byte music_duration
+$042d-$042e virtual byte music_tempo
+$042e-$042f virtual byte music_voice
+$042f-$0430 virtual byte v042f
+$0430-$0431 virtual byte v0430
+$0431-$0432 virtual byte v0431
+$0432-$0433 virtual byte v0432
+$0433-$0434 virtual byte v0433
+$0434-$0435 virtual byte v0434
+$0435-$0436 virtual byte v0435
+$0436-$0437 virtual byte v0436
+$0437-$0438 virtual byte v0437
+$0438-$0439 virtual byte music_saved_stack
+$0439-$043a virtual byte v0439
+$043a-$043b virtual byte v043a
+$043b-$043c virtual byte v043b
+$043c-$043d virtual byte v043c
+$043d-$043e virtual byte v043d
+$043e-$043f virtual byte v043e
+$043f-$0440 virtual byte v043f
+$0440-$0441 virtual byte v0440
+$0441-$0442 virtual byte v0441
+$0442-$0443 virtual byte v0442
+$0443-$0444 virtual byte v0443
+$0444-$0448 virtual byte[4] unused_0444
+$0448-$0449 virtual byte v0448
+$0449-$044a virtual byte v0449
+$044a-$044b virtual byte v044a
+$044b-$044c virtual byte v044b
+$044c-$044d virtual byte unused_044c
+$044d-$044e virtual byte v044d
+$044e-$044f virtual byte game_mode
+$044f-$0450 virtual byte current_player
+$0450-$0451 virtual byte par
+$0451-$0452 virtual byte hole_number
+$0452-$0453 virtual byte v0452
+$0453-$0454 virtual byte v0453
+$0454-$0455 virtual byte v0454
+$0455-$0456 virtual byte v0455
+$0456-$0457 virtual byte v0456
+$0457-$0458 virtual byte v0457
+$0458-$0459 virtual byte v0458
+$0459-$045a virtual byte v0459
+$045a-$045b virtual byte wind_direction
+$045b-$045c virtual byte wind_strength
+$045c-$045d virtual byte frame_timer_reload
+$045d-$045e virtual byte frame_timer
+$045e-$045f virtual byte v045e
+$045f-$0460 virtual byte v045f
+$0460-$0461 virtual byte v0460
+$0461-$0462 virtual byte v0461
+$0462-$0463 virtual byte unused_0462
+$0463-$0464 virtual byte v0463
+$0464-$0465 virtual byte golfer_x
+$0465-$0466 virtual byte unused_0465
+$0466-$0467 virtual byte golfer_y
+$0467-$046a virtual byte[3] unused_0467
+$046a-$046b virtual byte power_level
+$046b-$046c virtual byte unused_046b
+$046c-$046d virtual byte v046c
+$046d-$046e virtual byte v046d
+$046e-$046f virtual byte v046e
+$046f-$0470 virtual byte v046f
+$0470-$0471 virtual byte green_flag_x
+$0471-$0472 virtual byte green_flag_y
+$0472-$0473 virtual byte aim_x
+$0473-$0474 virtual byte aim_y
+$0474-$0475 virtual byte aim_max
+$0475-$0476 virtual byte aim_min
+$0476-$0477 virtual byte aim_offset
+$0477-$0478 virtual byte v0477
+$0478-$0479 virtual byte text_color
+$0479-$047a virtual byte v0479
+$047a-$047b virtual byte v047a
+$047b-$047c virtual byte v047b
+$047c-$047d virtual byte v047c
+$047d-$047e virtual byte v047d
+$047e-$07e8 virtual byte[874] old_screen
+$07e8-$0800 virtual byte[24] unused_07e8
+$0800-$0801 byte basic_start
+$0801-$080d byte[12] basic_stub
+$080d-$0843 code decrunch
+$0843-$0878 byte[53] decruncher_leftover
+$0878-$08d0 code old_loader
+$08d0-$08da code l08D0
+$08da-$08dc byte[2] loader_part
+$08dc-$08ea code
+$08ea-$08eb byte loader_part2
+$08eb-$0900 byte[21] unused_08eb
+$0900-$091f code to_log
+$091f-$094c code from_log
+$094c-$094f code log_divide
+$094f-$0960 code log_multiply
+$0960-$0975 code log_negate
+$0975-$0986 code log_divide_into
+$0986-$0a86 byte[256] log_table
+$0a86-$0b06 byte[128] exp_table
+$0b06-$0b95 code project
+$0b95-$0b96 code l0B95
+$0b96-$0ba4 word[7] math_words
+$0ba4-$0c07 code to_view
+$0c07-$0c08 byte direction_flag
+$0c08-$0c10 byte[8] direction_order
+$0c10-$0c2a code rotate_0
+$0c2a-$0c3f code rotate_1
+$0c3f-$0c59 code rotate_2
+$0c59-$0c73 code rotate_3
+$0c73-$0d04 code rotate_45
+$0d04-$0d26 code rotate_4
+$0d26-$0d27 code rotate_5
+$0d27-$0d4d code rotate_6
+$0d4d-$0d73 code rotate_7
+$0d73-$0d79 code direction_down
+$0d79-$0da8 code set_direction
+$0da8-$0db8 addr[8] rotations
+$0db8-$0db9 byte direction
+$0db9-$0dc1 code direction_up
+$0dc1-$0dc7 code draw_char
+$0dc7-$0e4f code l0DC7
+$0e4f-$0e79 code l0E4F
+$0e79-$0ec7 code scroll_text
+$0ec7-$0edd code l0EC7
+$0edd-$0eed byte[16] double_bits
+$0eed-$0eee byte v0eed
+$0eee-$0ef0 word font_pointer
+$0ef0-$0f24 byte[52] fill_stack
+$0f24-$0ff3 byte[207] unused_z80_junk
+$0ff3-$0ffb code l0FF3
+$0ffb-$0ffe code print_char
+$0ffe-$1007 code screen_off
+$1007-$1010 code screen_on
+$1010-$1034 code clear_bitmap
+$1034-$1057 code bitmap_mode
+$1057-$107a code text_mode
+$107a-$107b byte seed_countdown
+$107b-$107c byte seed_enable
+$107c-$117c byte[256] fill_seeds
+$117c-$127c byte[256] seed_edges
+$127c-$127d byte seed_count
+$127d-$129a code add_fill_seed
+$129a-$12ec code d129A
+$12ec-$12ed byte v12ec
+$12ed-$12ee byte v12ed
+$12ee-$12ef byte v12ee
+$12ef-$12f0 byte pixel_hit
+$12f0-$1306 code pixel_address
+$1306-$1321 code test_pixel
+$1321-$1368 code plot_pixel
+$1368-$1369 byte pixel_pattern
+$1369-$136d byte[4] pixel_clear_masks
+$136d-$1371 byte[4] pixel_bits
+$1371-$1439 byte[200] bitmap_row_lo
+$1439-$1501 byte[200] bitmap_row_hi
+$1501-$154e code l1501
+$154e-$15c9 code horizontal_line
+$15c9-$165f code vertical_line
+$165f-$17ac code draw_line
+$17ac-$17ad byte v17ac
+$17ad-$17ae byte v17ad
+$17ae-$17e3 code set_cell_color
+$17e3-$18ab word[100] screen_rows
+$18ab-$18ef code flood_fill
+$18ef-$1bb2 code l18EF
+$1bb2-$1bb3 byte fill_color
+$1bb3-$1bb4 byte fill_color_high
+$1bb4-$1be6 code replot_seeds
+$1be6-$1bfb code draw_object
+$1bfb-$1bfc byte unused_1bfb
+$1bfc-$1d59 code draw_shape
+$1d59-$1d75 code scale_x
+$1d75-$1d90 code scale_y
+$1d90-$1dcb code scale_step
+$1dcb-$1dcd byte[2] unused_1dcb
+$1dcd-$1de4 code line_start_on_screen
+$1de4-$1dff code pen_on_screen
+$1dff-$1f12 code draw_clipped_line
+$1f12-$1f14 byte[2] unused_1f12
+$1f14-$1f15 byte v1f14
+$1f15-$1f16 byte v1f15
+$1f16-$1f17 byte v1f16
+$1f17-$1f18 byte v1f17
+$1f18-$1f19 byte v1f18
+$1f19-$1f1a byte v1f19
+$1f1a-$1f1b byte v1f1a
+$1f1b-$1f1c byte v1f1b
+$1f1c-$1f1d byte v1f1c
+$1f1d-$1f1e byte v1f1d
+$1f1e-$1f1f byte v1f1e
+$1f1f-$1f20 byte v1f1f
+$1f20-$1f22 word pen_x
+$1f22-$1f24 word pen_y
+$1f24-$1f26 word proj_x
+$1f26-$1f28 word proj_y
+$1f28-$1f2a byte[2] unused_1f28
+$1f2a-$1fc7 code draw_objects
+$1fc7-$1fe7 word[16] near_scales
+$1fe7-$2007 word[16] far_scales
+$2007-$2008 byte v2007
+$2008-$20de code draw_view
+$20de-$20df byte v20de
+$20df-$211f sbyte[64] direction_steps
+$211f-$2121 word step_pointer
+$2121-$2193 code collect_objects
+$2193-$21db code sort_objects
+$21db-$22db byte[256] object_types
+$22db-$23db byte[256] object_x
+$23db-$24db byte[256] object_y
+$24db-$252e code find_cell
+$252e-$2536 byte[8] empty_cell
+$2536-$2537 byte cell_x
+$2537-$2538 byte cell_y
+$2538-$2539 byte object_pass
+$2539-$25f4 code draw_terrain
+$25f4-$2703 code draw_hole_shape
+$2703-$2862 code draw_polygon
+$2862-$286b code l2862
+$286b-$28c0 code l286B
+$28c0-$28c5 code reset_clip
+$28c5-$28c6 byte unused_28c5
+$28c6-$28e9 code l28C6
+$28e9-$2920 code l28E9
+$2920-$2ac5 code clip_edge
+$2ac5-$2b87 code project_vertex
+$2b87-$2bfc code collect_features
+$2bfc-$2c1a byte[30] shape_visible
+$2c1a-$2c26 word[6] feature_pointers
+$2c26-$2c32 word[6] feature_x
+$2c32-$2c3e word[6] feature_y
+$2c3e-$2c3f byte feature_count
+$2c3f-$2c40 byte v2c3f
+$2c40-$2c41 byte v2c40
+$2c41-$2c42 byte v2c41
+$2c42-$2c43 byte v2c42
+$2c43-$2c44 byte v2c43
+$2c44-$2c45 byte v2c44
+$2c45-$2c46 byte v2c45
+$2c46-$2c47 byte v2c46
+$2c47-$2c48 byte v2c47
+$2c48-$2c49 byte v2c48
+$2c49-$2c4a byte v2c49
+$2c4a-$2c4b byte v2c4a
+$2c4b-$2c4c byte v2c4b
+$2c4c-$2c4d byte v2c4c
+$2c4d-$2c4e byte v2c4d
+$2c4e-$2c4f byte v2c4e
+$2c4f-$2c5b byte[12] polygon_color
+$2c5b-$2c5d word view_x
+$2c5d-$2c5f word view_y
+$2c5f-$2c60 byte horizon
+$2c60-$2c75 code l2C60
+$2c75-$2c8b code print_inline
+$2c8b-$2c93 code print_hex
+$2c93-$2c99 code print_nibble
+$2c99-$2cb4 code store_hex
+$2cb4-$2cbb code l2CB4
+$2cbb-$2cca code l2CBB
+$2cca-$2cd0 byte[6] unused_2cca
+$2cd0-$2cd3 code start
+$2cd3-$2ce5 code start2
+$2ce5-$2ce7 addr a2CE5
+$2ce7-$2ce9 addr a2CE7
+$2ce9-$2ceb addr a2CE9
+$2ceb-$2ced addr a2CEB
+$2ced-$2cef addr a2CED
+$2cef-$2cf1 addr a2CEF
+$2cf1-$2d21 code draw_golfer
+$2d21-$2d62 code set_golfer_colors
+$2d62-$2d68 code shift_right_signed
+$2d68-$2d7e code raise_meter
+$2d7e-$2d91 code lower_meter
+$2d91-$2d92 byte unused_2d91
+$2d92-$2da9 code swing
+$2da9-$2db4 char[11] text_swing_club
+$2db4-$2e55 code l2DB4
+$2e55-$2e56 byte
+$2e56-$2eca code
+$2eca-$2ed2 char[8] text_down
+$2ed2-$2edf code l2ED2
+$2edf-$2eed code silence_voices
+$2eed-$2ef7 code get_key
+$2ef7-$2f11 code snapshot_pc
+$2f11-$2f21 byte[16] golfer_colors
+$2f21-$2f5a code swing_sound
+$2f5a-$2f60 code l2F5A
+$2f60-$2f6d code l2F60
+$2f6d-$2f77 code click_sound
+$2f77-$2f78 byte swing_cutoff
+$2f78-$2f79 code l2F78
+$2f79-$2f9b code l2F79
+$2f9b-$2fae code l2F9B
+$2fae-$2fb1 byte[3] unused_2fae
+$2fb1-$301d code l2FB1
+$301d-$3027 code l301D
+$3027-$303c code l3027
+$303c-$305e code mirror_golfer
+$305e-$3096 code mirror_sprite
+$3096-$30ae code reverse_bits
+$30ae-$30af byte sprite_mode
+$30af-$30dd code check_landing
+$30dd-$30ea char[13] text_in_the_water
+$30ea-$3113 code l30EA
+$3113-$313e code check_out_of_bounds
+$313e-$314c char[14] text_out_of_bounds
+$314c-$3167 code
+$3167-$3173 char[12] text_select_club
+$3173-$31a9 code
+$31a9-$31aa byte
+$31aa-$31ee code
+$31ee-$31f8 code wait_16_frames
+$31f8-$31fc byte[4] unused_31f8
+$31fc-$3202 code l31FC
+$3202-$3208 code l3202
+$3208-$3209 byte unused_3208
+$3209-$3253 code check_terrain
+$3253-$3275 code l3253
+$3275-$327d addr[4] pointers_3275
+$327d-$327e byte v327d
+$327e-$328e byte[16] table_327e
+$328e-$3293 byte[5] buffer_328e
+$3293-$3294 code l3293
+$3294-$3295 byte v3294
+$3295-$32ad code message_line
+$32ad-$32b0 code l32AD
+$32b0-$32b3 code l32B0
+$32b3-$32b9 code l32B3
+$32b9-$32bc code l32B9
+$32bc-$32bd byte v32bc
+$32bd-$32cb code
+$32cb-$32dc code wait_frames
+$32dc-$32dd byte frame_delay
+$32dd-$3360 code load_animation
+$3360-$3368 byte[8] bit_values
+$3368-$3369 byte v3368
+$3369-$336a byte v3369
+$336a-$336b byte anim_pointer_base
+$336b-$336c byte anim_sprite_count
+$336c-$3375 byte[9] anim_sprite_flags
+$3375-$33c0 code draw_animation_frame
+$33c0-$3417 code l33C0
+$3417-$341f byte[8] unused_3417
+$341f-$3470 code play_animation
+$3470-$3471 byte anim_frame_count
+$3471-$347f byte[14] club_power
+$347f-$34c1 code compute_shot
+$34c1-$357a code l34C1
+$357a-$3589 code l357A
+$3589-$3594 code l3589
+$3594-$3595 byte v3594
+$3595-$3596 byte shot_speed
+$3596-$3597 byte shot_sideways
+$3597-$3598 byte club
+$3598-$3599 byte terrain_type
+$3599-$359a byte v3599
+$359a-$359b byte v359a
+$359b-$359d byte[2] unused_359b
+$359d-$359e byte v359d
+$359e-$359f byte v359e
+$359f-$35a0 byte v359f
+$35a0-$35a1 byte v35a0
+$35a1-$35bc code l35A1
+$35bc-$366e code l35BC
+$366e-$368b code l366E
+$368b-$369a code l368B
+$369a-$36e6 code l369A
+$36e6-$3711 code l36E6
+$3711-$377c code l3711
+$377c-$377d byte v377c
+$377d-$377e byte v377d
+$377e-$377f byte v377e
+$377f-$3780 byte v377f
+$3780-$3781 byte v3780
+$3781-$3782 byte v3781
+$3782-$3783 byte v3782
+$3783-$3784 byte v3783
+$3784-$3785 byte v3784
+$3785-$3786 byte v3785
+$3786-$3787 byte v3786
+$3787-$3788 byte v3787
+$3788-$3789 byte v3788
+$3789-$378a byte v3789
+$378a-$378b byte v378a
+$378b-$378c byte v378b
+$378c-$37ff code l378C
+$37ff-$382b code select_club
+$382b-$3879 code l382B
+$3879-$389a code print_club_name
+$389a-$38b6 char[28] club_names
+$38b6-$3956 code face_hole
+$3956-$3965 code l3956
+$3965-$3982 code l3965
+$3982-$3983 byte v3982
+$3983-$398b byte[8] octant_directions
+$398b-$3a4a code setup_hole
+$3a4a-$3a73 code setup_practice_hole
+$3a73-$3a93 code l3A73
+$3a93-$3a94 byte digit_text_index
+$3a94-$3aa6 code turn_left
+$3aa6-$3ab8 code turn_right
+$3ab8-$3ac4 code l3AB8
+$3ac4-$3ac7 code l3AC4
+$3ac7-$3b35 code l3AC7
+$3b35-$3b3d sbyte[8] steps_x
+$3b3d-$3b45 sbyte[8] steps_y
+$3b45-$3b46 code l3B45
+$3b46-$3b51 code read_hex_word
+$3b51-$3b62 code read_hex_byte
+$3b62-$3b63 byte hex_high_nibble
+$3b63-$3b87 code read_hex_digit
+$3b87-$3bee code position_ball_sprite
+$3bee-$3c3c code l3BEE
+$3c3c-$3c3d byte v3c3c
+$3c3d-$3c3e byte v3c3d
+$3c3e-$3c3f byte ball_landed
+$3c3f-$3cb7 code l3C3F
+$3cb7-$3cf8 code l3CB7
+$3cf8-$3cf9 byte shadow_offset
+$3cf9-$3cfa byte v3cf9
+$3cfa-$3d9f code l3CFA
+$3d9f-$3e04 code l3D9F
+$3e04-$3e8d code l3E04
+$3e8d-$3ef4 code ball_flight
+$3ef4-$417d code l3EF4
+$417d-$417e byte unused_417d
+$417e-$417f byte v417e
+$417f-$4180 byte flight_time
+$4180-$4200 code color_text
+$4200-$4203 byte[3] unused_4200
+$4203-$4204 byte v4203
+$4204-$4205 byte v4204
+$4205-$4206 byte v4205
+$4206-$4207 byte v4206
+$4207-$4208 byte v4207
+$4208-$4209 byte v4208
+$4209-$420a byte v4209
+$420a-$420b byte v420a
+$420b-$420c byte v420b
+$420c-$420d byte v420c
+$420d-$420e byte v420d
+$420e-$4210 byte[2] unused_420e
+$4210-$423d code l4210
+$423d-$4341 code l423D
+$4341-$4342 byte v4341
+$4342-$4343 byte v4342
+$4343-$4344 byte v4343
+$4344-$4345 byte v4344
+$4345-$4348 code l4345
+$4348-$434b code l4348
+$434b-$434e code l434B
+$434e-$4351 code l434E
+$4351-$4354 code l4351
+$4354-$4357 code l4354
+$4357-$4400 byte[169] unused_4357
+$4400-$47e8 virtual byte[1000] bitmap_colors
+$47e8-$47f8 byte[16] unused_47e8
+$47f8-$4800 virtual byte[8] sprite_pointers
+$4800-$5900 byte[4352] sprites
+$5900-$5c58 byte[856] unknown_5900
+$5c58-$6000 byte[936] unused_5c58
+$6000-$7f40 virtual byte[8000] bitmap
+$7f40-$7f4e addr[7] data_pointers
+$7f4e-$824e byte[768] font
+$824e-$82bc word[55] terrain_pointers
+$82bc-$8379 byte[189] terrain_82bc
+$8379-$8413 byte[154] terrain_8379
+$8413-$8460 byte[77] terrain_8413
+$8460-$84cd byte[109] terrain_8460
+$84cd-$852a byte[93] terrain_84cd
+$852a-$8562 byte[56] terrain_852a
+$8562-$863b byte[217] terrain_8562
+$863b-$86b6 byte[123] terrain_863b
+$86b6-$8731 byte[123] terrain_86b6
+$8731-$876e byte[61] terrain_8731
+$876e-$87a1 byte[51] terrain_876e
+$87a1-$87ff byte[94] terrain_87a1
+$87ff-$8860 byte[97] terrain_87ff
+$8860-$88ba byte[90] terrain_8860
+$88ba-$8904 byte[74] terrain_88ba
+$8904-$896c byte[104] terrain_8904
+$896c-$89d6 byte[106] terrain_896c
+$89d6-$8a01 byte[43] terrain_89d6
+$8a01-$8a68 byte[103] terrain_8a01
+$8a68-$8af0 byte[136] terrain_8a68
+$8af0-$8b3c byte[76] terrain_8af0
+$8b3c-$8b9f byte[99] terrain_8b3c
+$8b9f-$8c75 byte[214] terrain_8b9f
+$8c75-$8cd9 byte[100] terrain_8c75
+$8cd9-$8d29 byte[80] terrain_8cd9
+$8d29-$8d5d byte[52] terrain_8d29
+$8d5d-$8db2 byte[85] terrain_8d5d
+$8db2-$8e06 byte[84] terrain_8db2
+$8e06-$8e4f byte[73] terrain_8e06
+$8e4f-$8e7d byte[46] terrain_8e4f
+$8e7d-$8f02 byte[133] terrain_8e7d
+$8f02-$8f4b byte[73] terrain_8f02
+$8f4b-$8fc5 byte[122] terrain_8f4b
+$8fc5-$9021 byte[92] terrain_8fc5
+$9021-$90bb byte[154] terrain_9021
+$90bb-$9113 byte[88] terrain_90bb
+$9113-$9171 byte[94] terrain_9113
+$9171-$919f byte[46] terrain_9171
+$919f-$91b8 byte[25] terrain_919f
+$91b8-$91ff byte[71] terrain_91b8
+$91ff-$9272 byte[115] terrain_91ff
+$9272-$931b byte[169] terrain_9272
+$931b-$9327 byte[12] terrain_931b
+$9327-$9340 byte[25] terrain_9327
+$9340-$934d byte[13] terrain_9340
+$934d-$9359 byte[12] terrain_934d
+$9359-$9382 byte[41] terrain_9359
+$9382-$93bd byte[59] terrain_9382
+$93bd-$93f5 byte[56] terrain_93bd
+$93f5-$9419 addr[18] hole_shapes
+$9419-$9421 addr[4] pointers_9419
+$9421-$942f addr[7] pointers_9421
+$942f-$9477 word[36] hole_positions
+$9477-$94c5 byte[78] shape_9477
+$94c5-$9507 byte[66] shape_94c5
+$9507-$9541 byte[58] shape_9507
+$9541-$9587 byte[70] shape_9541
+$9587-$9607 byte[128] shape_9587
+$9607-$9659 byte[82] shape_9607
+$9659-$969f byte[70] shape_9659
+$969f-$970f byte[112] shape_969f
+$970f-$9775 byte[102] shape_970f
+$9775-$97cb byte[86] shape_9775
+$97cb-$980b byte[64] shape_97cb
+$980b-$984d byte[66] shape_980b
+$984d-$989d byte[80] shape_984d
+$989d-$9907 byte[106] shape_989d
+$9907-$9963 byte[92] shape_9907
+$9963-$99a9 byte[70] shape_9963
+$99a9-$9a0f byte[102] shape_99a9
+$9a0f-$9a63 byte[84] shape_9a0f
+$9a63-$9abc byte[89] shape_9a63
+$9abc-$9b6d byte[177] shape_9abc
+$9b6d-$9b8e byte[33] shape_9b6d
+$9b8e-$9ba9 byte[27] shape_9b8e
+$9ba9-$9bd0 byte[39] shape_9ba9
+$9bd0-$9c19 byte[73] shape_9bd0
+$9c19-$9c36 byte[29] shape_9c19
+$9c36-$9c7b byte[69] shape_9c36
+$9c7b-$9c90 byte[21] shape_9c7b
+$9c90-$9cb1 byte[33] shape_9c90
+$9cb1-$9cc6 byte[21] shape_9cb1
+$9cc6-$9ff1 byte[811] unused_9cc6
+$9ff1-$a000 byte[15] leftover_9ff1
+$a000-$a00c code lA000
+$a00c-$a020 addr[10] vectors
+$a020-$a026 code lA020
+$a026-$a029 code lA026
+$a029-$a02b addr aA029
+$a02b-$a09d char[114] digit_text
+$a09d-$a0ff code main
+$a0ff-$a14c code new_game
+$a14c-$a178 code hole_loop
+$a178-$a18f code print_score_labels
+$a18f-$a196 char[7] text_player
+$a196-$a1a0 code
+$a1a0-$a1a2 char[2] text_1
+$a1a2-$a1a5 code
+$a1a5-$a1a7 byte[2] newline
+$a1a7-$a1b1 code
+$a1b1-$a1b8 char[7] text_player2
+$a1b8-$a1c2 code
+$a1c2-$a1c4 char[2] text_2
+$a1c4-$a1c7 code
+$a1c7-$a1c9 byte[2] newline2
+$a1c9-$a1d3 code
+$a1d3-$a1dc char[9] text_hole
+$a1dc-$a1e6 code
+$a1e6-$a1eb char[5] text_club
+$a1eb-$a1ee code
+$a1ee-$a1f0 byte[2] newline3
+$a1f0-$a1fa code
+$a1fa-$a1fe char[4] text_yds
+$a1fe-$a201 code
+$a201-$a203 byte[2] newline4
+$a203-$a20d code
+$a20d-$a211 char[4] text_par
+$a211-$a212 code
+$a212-$a2e9 code shot_loop
+$a2e9-$a42c code clear_screen
+$a42c-$a42d byte menu_sprite_flag
+$a42d-$a533 code lA42D
+$a533-$a55b byte[40] saved_sprite_registers
+$a55b-$a56b byte[16] menu_sprite_registers
+$a56b-$a5af code irq
+$a5af-$a5e9 code install_interrupts
+$a5e9-$a630 code nmi
+$a630-$a63e char[14] text_quit_y_n
+$a63e-$a687 code lA63E
+$a687-$a688 byte nmi_active
+$a688-$a6aa code enable_raster_irq
+$a6aa-$a8cb code fill_colors
+$a8cb-$a901 code lA8CB
+$a901-$a927 code lA901
+$a927-$a95b code lA927
+$a95b-$a95e code lA95B
+$a95e-$a961 code lA95E
+$a961-$a964 code lA961
+$a964-$a967 code lA964
+$a967-$a99a code lA967
+$a99a-$a99d code lA99A
+$a99d-$a9fb code lA99D
+$a9fb-$aa03 sbyte[8] steps_x2
+$aa03-$aa0b sbyte[8] steps_y2
+$aa0b-$abe8 code tamper_check
+$abe8-$abeb code tamper_crash
+$abeb-$abee byte[3] never_reached_abeb
+$abee-$abf1 code tamper_crash2
+$abf1-$abf4 byte[3] never_reached_abf1
+$abf4-$abf5 byte vabf4
+$abf5-$ac2b code add_stroke
+$ac2b-$ac4e code lAC2B
+$ac4e-$ad21 code update_scores
+$ad21-$ad27 code lAD21
+$ad27-$ad35 code lAD27
+$ad35-$ad45 code lAD35
+$ad45-$ad46 byte bcd_leading_zero
+$ad46-$ad47 byte vad46
+$ad47-$ad48 byte vad47
+$ad48-$ad4a byte[2] strokes
+$ad4a-$ad4e word[2] score_vs_par
+$ad4e-$ad52 word[2] total_strokes
+$ad52-$ad53 byte vad52
+$ad53-$ad54 byte vad53
+$ad54-$ae18 code draw_flag
+$ae18-$ae48 code lAE18
+$ae48-$ae92 code read_aim_cursor
+$ae92-$af2e code lAE92
+$af2e-$af2f byte leader
+$af2f-$af65 code select_player
+$af65-$afb6 code save_player
+$afb6-$afdb code print_par_result
+$afdb-$afe4 char[9] text_over_par
+$afe4-$afec code
+$afec-$aff6 char[10] text_under_par
+$aff6-$affe code
+$affe-$b008 char[10] text_level_par
+$b008-$b00d code
+$b00d-$b061 code change_wind
+$b061-$b075 code random_wind
+$b075-$b0be code compute_drift
+$b0be-$b0dd code lB0BE
+$b0dd-$b0e5 sbyte[8] table_b0dd
+$b0e5-$b0ed sbyte[8] table_b0e5
+$b0ed-$b0f7 byte[10] strength_scale
+$b0f7-$b0f8 byte drift_strength
+$b0f8-$b0f9 byte drift_direction
+$b0f9-$b0fa byte tilt_strength
+$b0fa-$b0fb byte tilt_direction
+$b0fb-$b0fc byte wind_or_tilt
+$b0fc-$b104 char[8] text_wind_tilt
+$b104-$b116 byte[18] green_tilt
+$b116-$b135 code random
+$b135-$b200 code draw_wind
+$b200-$b201 byte arrow_x
+$b201-$b202 byte arrow_y
+$b202-$b222 byte[32] arrow_lines
+$b222-$b23a sbyte[24] arrow_points
+$b23a-$b24d code lB23A
+$b24d-$b2c6 code title_screen
+$b2c6-$b2d3 char[13] text_f1_1_player
+$b2d3-$b2d6 code
+$b2d6-$b2d8 byte[2] newline5
+$b2d8-$b2db code
+$b2db-$b2ec char[17] text_f3_2_player
+$b2ec-$b2ef code
+$b2ef-$b2f1 byte[2] newline6
+$b2f1-$b2f4 code
+$b2f4-$b305 char[17] text_f5_practice
+$b305-$b320 code lB305
+$b320-$b322 byte[2] newline7
+$b322-$b325 code
+$b325-$b336 char[17] text_hole_1_18
+$b336-$b353 code lB336
+$b353-$b396 code read_hole_number
+$b396-$b41d code lB396
+$b41d-$b458 code read_joystick
+$b458-$b467 code lB458
+$b467-$b46f byte[8] aim_limits
+$b46f-$b4a0 code beep
+$b4a0-$b4b1 code delay
+$b4b1-$b4c8 code aim
+$b4c8-$b4cc char[4] text_aim
+$b4cc-$b5b0 code
+$b5b0-$b5bc code lB5B0
+$b5bc-$b5c3 code bank_out_io
+$b5c3-$b5e8 code bank_in_io
+$b5e8-$b5ee code lB5E8
+$b5ee-$b5fb code lB5EE
+$b5fb-$b5fc byte unused_b5fb
+$b5fc-$b660 code lB5FC
+$b660-$b678 byte[24] table_b660
+$b678-$b6f8 byte[128] table_b678
+$b6f8-$b78e code lB6F8
+$b78e-$b800 code lB78E
+$b800-$b801 byte vb800
+$b801-$b802 byte vb801
+$b802-$b803 byte vb802
+$b803-$b804 byte vb803
+$b804-$b805 byte vb804
+$b805-$b853 code lB805
+$b853-$b854 byte vb853
+$b854-$b855 byte vb854
+$b855-$b872 code music_push
+$b872-$b88f code music_pop
+$b88f-$b8a8 code next_music_byte
+$b8a8-$b90d code lB8A8
+$b90d-$b916 code play_tune
+$b916-$b97f code music_start
+$b97f-$b9c4 code music_step
+$b9c4-$b9ca char[6] text_error
+$b9ca-$bbb8 code
+$bbb8-$bbbd byte[5] voice_offsets
+$bbbd-$bc01 code lBBBD
+$bc01-$bc0c code silence_sid
+$bc0c-$bc51 code init_sid
+$bc51-$bd19 code select_tune
+$bd19-$bf16 byte[509] music_data
+$bf16-$c00e word[124] note_frequencies
+$c00e-$c00f byte vc00e
+$c00f-$c013 char[4] unused_golf
+$c013-$c014 byte vc013
+$c014-$c015 byte vc014
+$c015-$c017 word vc015
+$c017-$c018 byte vc017
+$c018-$c01a word vc018
+$c01a-$c0f3 code lC01A
+$c0f3-$c114 code lC0F3
+$c114-$c126 char[18] text_error_in_setlfs
+$c126-$c13b code lC126
+$c13b-$c161 code lC13B
+$c161-$c176 char[21] text_save_routine_error
+$c176-$c17d code lC176
+$c17d-$cb00 byte[2435] unused_nops
+$cb00-$cee8 byte[1000] cell_depths
+$cee8-$d000 byte[280] unused_nops2
+$d000-$d001 virtual byte sprite0_x
+$d001-$d002 virtual byte sprite0_y
+$d002-$d003 virtual byte sprite1_x
+$d003-$d004 virtual byte sprite1_y
+$d004-$d005 virtual byte sprite2_x
+$d005-$d006 virtual byte sprite2_y
+$d006-$d007 virtual byte sprite3_x
+$d007-$d008 virtual byte sprite3_y
+$d008-$d009 virtual byte sprite4_x
+$d009-$d00a virtual byte sprite4_y
+$d00a-$d00b virtual byte sprite5_x
+$d00b-$d00c virtual byte sprite5_y
+$d00c-$d00d virtual byte sprite6_x
+$d00d-$d00e virtual byte sprite6_y
+$d00e-$d00f virtual byte sprite7_x
+$d00f-$d010 virtual byte sprite7_y
+$d010-$d011 virtual byte sprites_x_msb
+$d011-$d012 virtual byte vic_control1
+$d012-$d013 virtual byte raster
+$d013-$d014 virtual byte light_pen_x
+$d014-$d015 virtual byte light_pen_y
+$d015-$d016 virtual byte sprite_enable
+$d016-$d017 virtual byte vic_control2
+$d017-$d018 virtual byte sprite_expand_y
+$d018-$d019 virtual byte vic_memory
+$d019-$d01a virtual byte vic_irq_status
+$d01a-$d01b virtual byte vic_irq_enable
+$d01b-$d01c virtual byte sprite_priority
+$d01c-$d01d virtual byte sprite_multicolor
+$d01d-$d01e virtual byte sprite_expand_x
+$d01e-$d01f virtual byte sprite_sprite_collision
+$d01f-$d020 virtual byte sprite_background_collision
+$d020-$d021 virtual byte border_color
+$d021-$d022 virtual byte background_color
+$d022-$d023 virtual byte background_color1
+$d023-$d024 virtual byte background_color2
+$d024-$d025 virtual byte background_color3
+$d025-$d026 virtual byte sprite_multicolor0
+$d026-$d027 virtual byte sprite_multicolor1
+$d027-$d028 virtual byte sprite0_color
+$d028-$d029 virtual byte sprite1_color
+$d029-$d02a virtual byte sprite2_color
+$d02a-$d02b virtual byte sprite3_color
+$d02b-$d02c virtual byte sprite4_color
+$d02c-$d02d virtual byte sprite5_color
+$d02d-$d02e virtual byte sprite6_color
+$d02e-$d02f virtual byte sprite7_color
+$d02f-$d030 virtual byte vic_unused_2f
+$d030-$d031 virtual byte c128_clock
+$d031-$d400 virtual byte[975] vic_mirrors
+$d400-$d402 virtual word voice1_frequency
+$d402-$d404 virtual word voice1_pulse_width
+$d404-$d405 virtual byte voice1_control
+$d405-$d406 virtual byte voice1_attack_decay
+$d406-$d407 virtual byte voice1_sustain_release
+$d407-$d409 virtual word voice2_frequency
+$d409-$d40b virtual word voice2_pulse_width
+$d40b-$d40c virtual byte voice2_control
+$d40c-$d40d virtual byte voice2_attack_decay
+$d40d-$d40e virtual byte voice2_sustain_release
+$d40e-$d410 virtual word voice3_frequency
+$d410-$d412 virtual word voice3_pulse_width
+$d412-$d413 virtual byte voice3_control
+$d413-$d414 virtual byte voice3_attack_decay
+$d414-$d415 virtual byte voice3_sustain_release
+$d415-$d417 virtual word filter_cutoff
+$d417-$d418 virtual byte filter_control
+$d418-$d419 virtual byte volume_filter_mode
+$d419-$d800 virtual byte[999] sid_mirrors
+$d800-$dc00 virtual byte[1024] color_ram
+$dc00-$dc01 virtual byte cia1_port_a
+$dc01-$dc02 virtual byte cia1_port_b
+$dc02-$dc0d virtual byte[11] cia1_unused
+$dc0d-$dc0e virtual byte cia1_interrupt_control
+$dc0e-$dd00 virtual byte[242] cia1_rest
+$dd00-$dd01 virtual byte cia2_port_a
+$dd01-$dd02 virtual byte cia2_port_b
+$dd02-$dd03 virtual byte cia2_direction_a
+$dd03-$de00 virtual byte[253] cia2_rest
+$de00-$e000 virtual byte[512] io_expansion
+$e000-$e026 addr[19] shapes
+$e026-$e0b1 byte[139] shape_e026
+$e0b1-$e11c byte[107] shape_e0b1
+$e11c-$e1d0 byte[180] shape_e11c
+$e1d0-$e2a6 byte[214] shape_e1d0
+$e2a6-$e2bd byte[23] shape_e2a6
+$e2bd-$e35c byte[159] shape_e2bd
+$e35c-$e3c5 byte[105] shape_e35c
+$e3c5-$e3fe byte[57] shape_e3c5
+$e3fe-$e443 byte[69] shape_e3fe
+$e443-$e4e4 byte[161] shape_e443
+$e4e4-$e8ef byte[1035] shape_e4e4
+$e8ef-$e9a0 byte[177] shape_e8ef
+$e9a0-$ea63 byte[195] shape_e9a0
+$ea63-$ea86 byte[35] shape_ea63
+$ea86-$eb0d byte[135] shape_ea86
+$eb0d-$eb26 byte[25] shape_eb0d
+$eb26-$eb36 byte[16] shape_eb26
+$eb36-$eb37 byte shape_eb36
+$eb37-$eb63 addr[22] shapes2
+$eb63-$eb70 byte[13] shape_eb63
+$eb70-$eb7d byte[13] shape_eb70
+$eb7d-$eb8a byte[13] shape_eb7d
+$eb8a-$eb97 byte[13] shape_eb8a
+$eb97-$eba8 byte[17] shape_eb97
+$eba8-$ebb9 byte[17] shape_eba8
+$ebb9-$ebca byte[17] shape_ebb9
+$ebca-$ebdb byte[17] shape_ebca
+$ebdb-$ebf0 byte[21] shape_ebdb
+$ebf0-$ec05 byte[21] shape_ebf0
+$ec05-$ec1a byte[21] shape_ec05
+$ec1a-$ec2f byte[21] shape_ec1a
+$ec2f-$ec44 byte[21] shape_ec2f
+$ec44-$ec59 byte[21] shape_ec44
+$ec59-$ec6e byte[21] shape_ec59
+$ec6e-$ec83 byte[21] shape_ec6e
+$ec83-$ec94 byte[17] shape_ec83
+$ec94-$eca5 byte[17] shape_ec94
+$eca5-$ecc4 byte[31] shape_eca5
+$ecc4-$ecdd byte[25] shape_ecc4
+$ecdd-$ecf2 byte[21] shape_ecdd
+$ecf2-$ed07 byte[21] shape_ecf2
+$ed07-$fe00 virtual byte[4345] unused_ed07
+$fe00-$ff81 virtual byte[385] kernal_copy
+$ff81-$ff84 virtual byte[3] cint
+$ff84-$ff87 virtual byte[3] ioinit
+$ff87-$ff8a virtual byte[3] ramtas
+$ff8a-$ff8d virtual byte[3] restor
+$ff8d-$ff90 virtual byte[3] vector
+$ff90-$ff93 virtual byte[3] setmsg
+$ff93-$ff96 virtual byte[3] second
+$ff96-$ff99 virtual byte[3] tksa
+$ff99-$ff9c virtual byte[3] memtop
+$ff9c-$ff9f virtual byte[3] membot
+$ff9f-$ffa2 virtual byte[3] scnkey
+$ffa2-$ffa5 virtual byte[3] settmo
+$ffa5-$ffa8 virtual byte[3] acptr
+$ffa8-$ffab virtual byte[3] ciout
+$ffab-$ffae virtual byte[3] untlk
+$ffae-$ffb1 virtual byte[3] unlsn
+$ffb1-$ffb4 virtual byte[3] listen
+$ffb4-$ffb7 virtual byte[3] talk
+$ffb7-$ffba virtual byte[3] readst
+$ffba-$ffbd virtual byte[3] setlfs
+$ffbd-$ffc0 virtual byte[3] setnam
+$ffc0-$ffc3 virtual byte[3] open
+$ffc3-$ffc6 virtual byte[3] close
+$ffc6-$ffc9 virtual byte[3] chkin
+$ffc9-$ffcc virtual byte[3] chkout
+$ffcc-$ffcf virtual byte[3] clrchn
+$ffcf-$ffd2 virtual byte[3] chrin
+$ffd2-$ffd5 virtual byte[3] chrout
+$ffd5-$ffd8 virtual byte[3] load
+$ffd8-$ffdb virtual byte[3] save
+$ffdb-$ffde virtual byte[3] settim
+$ffde-$ffe1 virtual byte[3] rdtim
+$ffe1-$ffe4 virtual byte[3] stop
+$ffe4-$ffe7 virtual byte[3] getin
+$ffe7-$ffea virtual byte[3] clall
+$ffea-$ffed virtual byte[3] udtim
+$ffed-$fff0 virtual byte[3] screen_size
+$fff0-$fff3 virtual byte[3] plot
+$fff3-$fff6 virtual byte[3] iobase
+$fff6-$fffa virtual byte[4] unused_fff6
+$fffa-$fffc virtual addr nmi_hw_vector
+$fffc-$fffe virtual addr reset_hw_vector
+$fffe-$10000 virtual addr irq_hw_vector
 vvv

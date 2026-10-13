@@ -53,6 +53,8 @@ Marking area of 1 byte at C00C "waveform"
 Marking area of 3 byte at C00D "notes"
 Starting flow analysis.
 Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 16 bytes emitted, 0 differ, 4 virtual, 0 gaps
 ~~~
 
 *=$c000
@@ -85,4 +87,11 @@ control1:		.byte	?
 volume:		.byte	?
 .endv
 ~~~
+--- test.map
+$c000-$c00c code entry
+$c00c-$c00d byte waveform
+$c00d-$c010 byte[3] notes
+$d400-$d402 virtual word freq1
+$d404-$d405 virtual byte control1
+$d418-$d419 virtual byte volume
 vvv

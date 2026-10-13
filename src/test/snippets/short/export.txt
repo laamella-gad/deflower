@@ -55,6 +55,9 @@ Unnamed target: aC032 from address $c00e
 Writing out/test.asm
 Writing out/font.bin
 Writing out/table.prg
+Writing out/test.map
+Verify out/test.asm: 39 bytes emitted, 0 differ, 0 virtual, 1 gap
+gap $c011-$c020
 ~~~
 
 *=$c000
@@ -91,4 +94,10 @@ tail:
 0000: 00 3c 66 7e 66 66 66 00 00 7c 66 7c 66 66 7c 00
 --- table.prg
 0000: 30 c0 34 12 00 c0
+--- test.map
+$c000-$c011 code entry
+$c011-$c020 gap
+$c020-$c030 untyped[16] export font.bin font
+$c030-$c034 word[2] export table.prg table
+$c034-$c036 untyped[2] tail
 vvv

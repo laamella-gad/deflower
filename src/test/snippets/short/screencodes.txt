@@ -54,6 +54,8 @@ Marking area of 2 char at C01F "null"
 Marking area of 3 char at C021 "upper_ascii"
 Starting flow analysis.
 Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 36 bytes emitted, 0 differ, 0 virtual, 0 gaps
 ~~~
 
 *=$c000
@@ -81,4 +83,13 @@ upper_ascii:
 		.enc	"none"
 		.text	"XYZ"
 ~~~
+--- test.map
+$c000-$c004 code entry
+$c004-$c011 char[13] greeting
+$c011-$c017 char[6] odd_codes
+$c017-$c01a char[3] ascii_text
+$c01a-$c01c char[2] ok_text
+$c01c-$c01f char[3] digits
+$c01f-$c021 char[2]
+$c021-$c024 char[3] upper_ascii
 vvv

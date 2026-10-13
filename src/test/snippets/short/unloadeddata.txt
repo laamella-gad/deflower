@@ -28,6 +28,8 @@ Marking area of 3 word at C007 "table"
 Warning: word table at $c007: the image doesn't load $c009-$c00d, printed as virtual
 Starting flow analysis.
 Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 9 bytes emitted, 0 differ, 52 virtual, 0 gaps
 ~~~
 
 .virtual $0400
@@ -51,4 +53,9 @@ table:
 		.fill	4
 .endv
 ~~~
+--- test.map
+$0400-$0430 virtual byte[48] screen
+$c000-$c007 code entry
+$c007-$c009 word table
+$c009-$c00d virtual word[2] table + $2
 vvv

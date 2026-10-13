@@ -533,6 +533,8 @@ Unnamed target: l32EC from address $32e3
 Unnamed target: l2445 from address $245a
 Unnamed target: l245E from address $2467
 Writing out/squirm.asm
+Writing out/squirm.map
+Verify out/squirm.asm: 14153 bytes emitted, 0 differ, 51383 virtual, 0 gaps
 ~~~
 
 .virtual $0057
@@ -3918,4 +3920,233 @@ cia1_port_b:		.byte	?
 ; jumped to by: skip_irq, countdown_irq
 kernal_irq = $ea31
 ~~~
+--- squirm.map
+$0057-$0058 virtual byte player_direction
+$0058-$0059 virtual byte joy_dir_for_move
+$00a0-$00a2 virtual byte[2] jiffy_clock
+$00a2-$00a3 virtual byte jiffy_timer
+$00c5-$00c6 virtual byte last_key
+$00fb-$00fc virtual byte new_loc_lo
+$00fc-$00fd virtual byte new_loc_hi
+$00fd-$00fe virtual byte tmp_loc_lo
+$00fe-$00ff virtual byte tmp_loc_hi
+$00ff-$0100 virtual byte unused_00ff
+$0314-$0316 virtual addr irq_vector
+$0400-$07e8 virtual byte[1000] screen_ram
+$0800-$0801 byte basic_start
+$0801-$0803 addr basic_next_line
+$0803-$0805 word basic_line_number
+$0805-$0806 byte basic_sys_token
+$0806-$080b char[5] basic_sys_address
+$080b-$080c byte basic_line_end
+$080c-$080e word basic_program_end
+$080e-$0fa0 byte[1938] unused_080e
+$0fa0-$0fa4 byte[4] top_line
+$0fa4-$0faa byte[6] hi_text
+$0faa-$0ff0 byte[70] top_line_rest
+$0ff0-$0ff1 byte unused_0ff0
+$0ff1-$1019 byte[40] empty_line
+$1019-$1041 byte[40] bottom_line
+$1041-$1042 byte unused_1041
+$1042-$10f0 byte[174] high_score_screen
+$10f0-$10fa byte[10] high_score_table_1
+$10fa-$1140 byte[70] high_score_screen_2
+$1140-$114a byte[10] high_score_table_2
+$114a-$1190 byte[70] high_score_screen_3
+$1190-$119a byte[10] high_score_table_3
+$119a-$11e0 byte[70] high_score_screen_4
+$11e0-$11ea byte[10] high_score_table_4
+$11ea-$1230 byte[70] high_score_screen_5
+$1230-$123a byte[10] high_score_table_5
+$123a-$138a byte[336] high_score_screen_6
+$138a-$1687 byte[765] title
+$1687-$16d2 byte[75] rest_of_title
+$16d2-$1a1a byte[840] level_1
+$1a1a-$1d62 byte[840] level_2
+$1d62-$20aa byte[840] level_3
+$20aa-$20ab byte unused_20aa
+$20ab-$23f3 byte[840] title_screen_colors
+$23f3-$23fa byte[7] unused_23f3
+$23fa-$23fc code set_top_bottom_text
+$23fc-$240e code more_chars
+$240e-$2410 code set_top_bottom_red
+$2410-$241c code more_colors
+$241c-$2443 code draw_high_score_screen
+$2443-$246a code draw_title_screen
+$246a-$2491 code draw_level_1
+$2491-$24b8 code draw_level_2
+$24b8-$24df code draw_level_3
+$24df-$2506 code draw_screen_colors
+$2506-$2508 byte[2] unused_2506
+$2508-$2542 code animate_player_chars
+$2542-$2572 code color_lines
+$2572-$2648 byte[214] unused_2572
+$2648-$264a word snake_0_head
+$264a-$2658 word[7] snake_0_body
+$2658-$265a word snake_1_head
+$265a-$2662 word[4] snake_1_body
+$2662-$2664 word snake_2_head
+$2664-$266c word[4] snake_2_body
+$266c-$266e word snake_3_head
+$266e-$2676 word[4] snake_3_body
+$2676-$2678 word snake_4_head
+$2678-$2680 word[4] snake_4_body
+$2680-$2681 byte snake_direction
+$2681-$2682 byte snake_tries
+$2682-$2683 byte level_nr
+$2683-$2684 byte irq_delay_counter
+$2684-$2685 byte bonus_value
+$2685-$2686 byte lives
+$2686-$2688 word move_candidate
+$2688-$2689 byte difficulty
+$2689-$268a byte game_speed
+$268a-$268b byte bon_gy_loc_lo
+$268b-$268c byte bon_gy_loc_hi
+$268c-$268d byte unused_268c
+$268d-$268e byte points_shown_timer
+$268e-$268f byte bonus_guy_char_2
+$268f-$2690 byte bonus_guy_note
+$2690-$2691 byte dots_eaten
+$2691-$2692 byte bonus_points_char
+$2692-$2693 byte note_idx
+$2693-$2694 byte unused_2693
+$2694-$26ac byte[24] unused_2694
+$26ac-$26bf char[19] press_fire_to_start_
+$26bf-$26c0 byte unused_26bf
+$26c0-$26ca char[10] get_ready_text
+$26ca-$26d4 char[10] level_text
+$26d4-$26dd char[9] bonus_run_text
+$26dd-$2800 byte[291] unused_26dd
+$2800-$2a00 byte[512] charset
+$2a00-$2a08 byte[8] arrow_char_1
+$2a08-$2a10 byte[8] arrow_char_2
+$2a10-$2a18 byte[8] arrow_char_3
+$2a18-$2a20 byte[8] snake_head_char
+$2a20-$2a28 byte[8] snake_body_char
+$2a28-$2a30 byte[8] unused_char
+$2a30-$2a38 byte[8] dot_char
+$2a38-$2a40 byte[8] bonus_gy_1_char_1
+$2a40-$2a48 byte[8] bonus_gy_1_char_2
+$2a48-$2a50 byte[8] bonus_gy_2_char_1
+$2a50-$2a58 byte[8] bonus_gy_2_char_2
+$2a58-$2a60 byte[8] points_100_char
+$2a60-$2a68 byte[8] points_10_char
+$2a68-$2a70 byte[8] no_points_char
+$2a70-$2a78 byte[8] player_char_1
+$2a78-$2a80 byte[8] player_char_2
+$2a80-$2a88 byte[8] player_char_3
+$2a88-$2a90 byte[8] player_char_4
+$2a90-$2a98 byte[8] player_char_5
+$2a98-$2aa0 byte[8] player_char_6
+$2aa0-$2aa8 byte[8] player_char_7
+$2aa8-$2ab0 byte[8] player_char_8
+$2ab0-$2af0 byte[64] more_chars_56
+$2af0-$2ff9 byte[1289] charset_rest
+$2ff9-$3011 code check_move_possible
+$3011-$3014 code move_is_possible
+$3014-$3028 code check_move_up
+$3028-$303c code check_move_down
+$303c-$304e code check_move_right
+$304e-$3060 code check_move_left
+$3060-$306e code check_fire
+$306e-$30a0 code try_move
+$30a0-$30a2 byte[2] unused_30a0
+$30a2-$30b8 code sfx_hi_char_entry
+$30b8-$30de code move_hi_from_scr_to_
+$30de-$3183 code update_hi
+$3183-$324b code sort_high_scores
+$324b-$3266 code copy_hi_text
+$3266-$32d0 code game_over
+$32d0-$32d2 byte[2] unused_32d0
+$32d2-$32d5 code test_candidate
+$32d5-$32ef code old_test_cell
+$32ef-$333d code step_candidate
+$333d-$334d code next_snake_direction
+$334d-$33d2 code move_snake_0
+$33d2-$3429 code move_snake_1
+$3429-$3433 code snake_1_home
+$3433-$3435 code draw_snake_1
+$3435-$3457 code draw_snake_1_body
+$3457-$346e code move_snake_2
+$346e-$34dc code shift_snake_2
+$34dc-$3561 code move_snake_3
+$3561-$35e7 code move_snake_4
+$35e7-$35e8 byte unused_35e7
+$35e8-$360b code colorize_maze
+$360b-$362a code colorize_maze_2
+$362a-$3649 code colorize_maze_3
+$3649-$3669 code colorize_maze_4
+$3669-$3724 code initialize_pointers
+$3724-$373b code inc_score_digit_x
+$373b-$3742 code bonus_guy_hit_handle
+$3742-$3752 code no_bonus
+$3752-$376b code bonus_10_points
+$376b-$3780 code bonus_100_points
+$3780-$378f code bonus_round
+$378f-$37c7 code burp_bonus_text
+$37c7-$37f1 code bonus_get_ready
+$37f1-$37f8 code bonus_round_loop
+$37f8-$3809 code bonus_walk_on_44
+$3809-$381f code bonus_walk_on_43
+$381f-$3862 code bonus_walk_on_46
+$3862-$3879 code end_bonus_round
+$3879-$3961 code end_level
+$3961-$39df code move_bonus_guy
+$39df-$3a46 code update_bonus_guy
+$3a46-$3a7d code var_2_stuff
+$3a7d-$3b0c code life_lost_handler
+$3b0c-$3b1d code restart_to_title
+$3b1d-$3b25 code entry
+$3b25-$3bb4 code reset_everything
+$3bb4-$3bc4 code play_music_loop
+$3bc4-$3bcf code play_music_wait_loop
+$3bcf-$3bf6 code check_space
+$3bf6-$3c00 code game_loop
+$3c00-$3c1c code check_hit_dot
+$3c1c-$3c2c code check_hit_bonus_guy
+$3c2c-$3c34 code check_hit_snake
+$3c34-$3c41 code hit_snake
+$3c41-$3c44 code life_lost
+$3c44-$3c52 code nothing_hit
+$3c52-$3c73 code player_not_moving
+$3c73-$3c8d code pause
+$3c8d-$3c93 code multicolor_2
+$3c93-$3cb3 code test_cell
+$3cb3-$3cc4 code irq
+$3cc4-$3d08 code animate_charset
+$3d08-$3d0b code skip_irq
+$3d0b-$3d18 code setup_irq
+$3d18-$3d27 code unused_3d18
+$3d27-$3d4b code countdown_irq
+$3d4b-$3d5c code reset_bonus_notes
+$3d5c-$3d70 code play_next_note
+$3d70-$3d76 byte[6] unused_3d70
+$3d76-$3d87 code quiet
+$3d87-$3db8 byte[49] unused_3d87
+$3db8-$3e80 byte[200] bonus_notes
+$3e80-$3ee4 byte[100] voice_1_notes
+$3ee4-$3f48 byte[100] voice_2_notes
+$3f48-$3f49 byte unused_3f48
+$3f49-$a000 virtual byte[24759] untouched_3f49
+$c000-$d000 virtual byte[4096] untouched_c000
+$d016-$d017 virtual byte vic_control_2
+$d018-$d019 virtual byte vic_memory_setup
+$d020-$d021 virtual byte border_color
+$d021-$d022 virtual byte background_color
+$d022-$d023 virtual byte background_color_1
+$d023-$d024 virtual byte background_color_2
+$d400-$d402 virtual word voice1_frequency
+$d402-$d404 virtual word voice1_pulse_width
+$d404-$d405 virtual byte voice1_control
+$d405-$d406 virtual byte voice1_attack_decay
+$d406-$d407 virtual byte voice1_sustain_release
+$d407-$d409 virtual word voice2_frequency
+$d409-$d40b virtual word voice2_pulse_width
+$d40b-$d40c virtual byte voice2_control
+$d40c-$d40d virtual byte voice2_attack_decay
+$d40d-$d40e virtual byte voice2_sustain_release
+$d412-$d413 virtual byte voice3_control
+$d418-$d419 virtual byte sid_vol_filter
+$d800-$dbe8 virtual byte[1000] color_ram
+$dc01-$dc02 virtual byte cia1_port_b
 vvv

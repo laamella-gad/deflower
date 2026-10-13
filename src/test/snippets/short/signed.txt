@@ -37,6 +37,8 @@ Marking area of 2 sword at C008 "speeds"
 Marking area of 1 sdword at C00C "offset"
 Starting flow analysis.
 Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 16 bytes emitted, 0 differ, 1 virtual, 0 gaps
 ~~~
 
 .virtual $0002
@@ -59,4 +61,10 @@ speeds:
 offset:
 		.dint	-2
 ~~~
+--- test.map
+$0002-$0003 virtual sbyte velocity
+$c000-$c004 code start
+$c004-$c008 sbyte[4] deltas
+$c008-$c00c sword[2] speeds
+$c00c-$c010 sdword offset
 vvv
