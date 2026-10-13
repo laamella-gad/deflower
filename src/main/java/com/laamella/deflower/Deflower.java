@@ -4,7 +4,6 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.net.URISyntaxException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,14 +36,14 @@ public class Deflower {
     }
 
     /**
-     * Usage: [--verify] &lt;classpath-relative .flo file&gt;. Exits with 1 when
+     * Usage: [--verify] &lt;.flo file&gt;. Exits with 1 when
      * a run has errors or, with --verify, doesn't verify. Or: --init
      * &lt;.vsf or .prg file&gt;, which writes a .flo skeleton next to the
      * file to start its disassembly (issue 0072), and exits with 1 when
      * that .flo file exists already. Or: --dump &lt;.vsf or .prg file&gt;
      * &lt;range&gt;, which hex-dumps that memory of the file (issue 0097).
      */
-    public static void main(String[] args) throws IOException, URISyntaxException {
+    public static void main(String[] args) throws IOException {
         if (args.length == 2 && args[0].equals("--init")) {
             if (!new Initializer().write(Paths.get(args[1]))) {
                 System.exit(1);
@@ -78,16 +77,14 @@ public class Deflower {
             System.err.println("       deflower --dump <file.vsf or file.prg> <start>-<end>");
             System.exit(2);
         }
-        if (!new Deflower(verify).deflower(flowerFile)) {
+        Path flowerPath = Paths.get(flowerFile);
+        if (!Files.isRegularFile(flowerPath)) {
+            System.err.println("No such file: " + flowerFile);
+            System.exit(2);
+        }
+        if (!new Deflower(verify).deflower(flowerPath)) {
             System.exit(1);
         }
-    }
-
-    /**
-     * Runs the .flo file at this classpath-relative path.
-     */
-    public boolean deflower(String flowerFile) throws IOException, URISyntaxException {
-        return deflower(Paths.get(Deflower.class.getResource("/" + flowerFile).toURI()));
     }
 
     /**
