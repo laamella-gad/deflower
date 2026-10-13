@@ -1,3 +1,22 @@
+; Big Mac - the Mad Maintenance Man (Mastertronic), from a VICE snapshot of its title screen.
+;
+; The game: the player walks, climbs and jumps through 18 single-screen levels. Each level has
+; up to 10 numbered switches (levers, chars $59-$5c, numbered by their colour). Every switch
+; drives machinery: conveyors, bridges, force beams, lifts, pistons and sprite enemies, which run
+; while their switch is on. Turning all switches off and touching the exit char $5e "closes" the
+; level. Air and bonus count down; air at 0, a deadly char or a sprite collision costs a man.
+; One or two players take turns; the top 5 scores are saved to disk as "HIGHSCOREBM".
+;
+; Structure:
+; - title_screen shows the title, then a demo of levels 1-9, then the highscores, round and round.
+;   H shows the highscores, fire or space goes to the 1/2 players, joystick/keyboard choice.
+; - start_level draws the level from the level stream (draw_level, setup_enemies), then
+;   main_loop runs, once per pass: music keys, player, hotkeys and objects, enemies, the
+;   charset animation and the air/bonus count, until sprite 0 (the player) collides.
+; - The screen is 40x25 multicolor characters, the bottom row is the status line. The score,
+;   men, air and bonus are kept as screen code digits in the status line itself.
+; - The music player at $c100 runs in the IRQ at $c543.
+;
 ; bigmac.vsf: VICE snapshot of a C64SC
 ; $01 = $35: BASIC out, KERNAL out, I/O in
 ; CPU: PC $c54d A $02 X $ec Y $00 SP $eb P $25
@@ -7,96 +26,346 @@
 ; interrupt sources: CIA1 timer A (IRQ), IRQs masked by the I flag
 deflower bigmac.vsf
 
+; ---- zero page ----
+; the current level, 1-18
+$02 virtual byte level
+; 1: keyboard (W A X D and shift), 0: joystick in port 2
+$03 virtual byte keyboard_control
+; the joystick bits read by read_controls: direction, and fire
+$04 virtual byte direction
+$05 virtual byte fire
+; 1 while the player jumps or falls
+$06 virtual byte jumping
+; the player sprite's position: x (9 bits) and y
+$07 virtual byte player_x
+$08 virtual byte player_x_high
+$09 virtual byte player_y
+$0a virtual byte player_frame
+; player_y & 7: 7 when standing on a character row
+$0d virtual byte player_y_fine
+; the position before this move, restored when the move is blocked
+$0e virtual byte previous_x
+$0f virtual byte previous_x_high
+$10 virtual byte previous_y
+$11 virtual byte previous_frame
+$12 virtual byte jump_timer
+$13 virtual byte jump_phase
+; update_player moves the player once every move_delay passes
+$14 virtual byte move_countdown
+$15 virtual byte move_delay
+; the number of object slots used while drawing the level
+$56 virtual byte object_count
+$57 virtual byte temp_1
+$58 virtual byte temp_2
+; the colour RAM address of screen_pointer, by color_pointer
+$59 virtual byte color_pointer_lo
+$5a virtual byte color_pointer_hi
+$fb virtual byte screen_pointer_lo
+$fc virtual byte screen_pointer_hi
+; where the level stream is read, by next_level_byte
+$fd virtual byte level_pointer_lo
+$fe virtual byte level_pointer_hi
+
 ; ---- system ----
+; the cheat bits, cleared for each cheat, from the loader's menu; $ff is no cheats
+$0200 virtual byte cheat_bits
 ; the IRQ vector
 $0314 addr irq_vector
+; variables in the tape buffer
+; 1: player 1 plays, 3: both play; a player's bit is cleared at game over
+$033c virtual byte players_left
+$033d virtual byte current_player
+$033e-$0340 virtual byte
+; counts down the passes between charset animation steps
+$0340 virtual byte animation_countdown
+; the level each player is on, indexed by the player number
+$0341 virtual byte[2] player_levels
+$0343-$0379 virtual byte
+; counts down the passes between air ticks
+$0379 virtual byte air_countdown
+$037a-$0384 virtual byte
+; each player's status line, saved while the other one plays
+$0384 virtual screencode[40] status_line_1
+$03ac virtual screencode[40] status_line_2
 
 ; ---- game state ----
-$0800-$080c byte[12] flags
-; one entry per screen column
-$080c byte[40] column_active
-$0834 byte[40] column_flag_index
-$085c byte[40] column_timer
-$0884 byte[40] column_delay
-$08ac byte[40] column_pointer_lo
-$08d4 byte[40] column_pointer_hi
-$08fc byte[40] column_direction
-$0924 byte[40] column_position
-$094c byte[40] column_limit
+; on (1) or off (0), one per switch number
+$0800-$080c byte[12] switches
+; Object slots, for the machinery drawn by the level stream. The fields mean per type:
+; type 1 conveyor: switch, delay countdown, delay, screen pointer at object_c/object_d,
+;   direction, belt position, length
+; type 2 bridge: switch, length, screen pointer at object_b/object_c
+; type 3 force beam: switch, length, screen pointer at object_b/object_c
+; type 4 force column: switch, height, screen pointer at object_b/object_c
+; type 5 lift: switch, width, screen pointer at object_b/object_c, delay at object_c and
+;   object_d, position at object_f
+; type 9 piston: switch and its own fields
+$080c byte[40] object_type
+$0834 byte[40] object_switch
+$085c byte[40] object_a
+$0884 byte[40] object_b
+$08ac byte[40] object_c
+$08d4 byte[40] object_d
+$08fc byte[40] object_e
+$0924 byte[40] object_f
+$094c byte[40] object_g
 $0974-$097e virtual byte untouched_0974
-; one entry per sprite, cleared by $3c5d
-$097e byte[10] sprite_a
-$0988 byte[10] sprite_b
-$0992 byte[10] sprite_c
-$099c byte[10] sprite_d
-$09a6 byte[10] sprite_e
-$09b0 byte[10] sprite_f
-$09ba byte[10] sprite_g
-$09c4 byte[10] sprite_h
-$09ce byte[10] sprite_i
-$09d8 byte[10] sprite_j
-$09e2 byte[10] sprite_k
-$09ec byte[10] sprite_l
+; Enemy slots, for the sprites after the level's $fe. Only 7 are updated. The fields mean per type:
+; type 1 turret (two sprites, the gun and its bullet): switch, frame delay, bullet flying,
+;   bullet direction, bullet delay
+; type 2 crusher: switch, frame delay, opening or closing
+; type 3 hopper: switch, delay, hopping, direction, steps per turn, step count, steps per hop,
+;   hop count, hop direction, hop height
+; type 5 ball: switch, delay, visible, x direction, y direction
+; type 7 dropper: switch, delay, distance, moved, falling
+; others (4 walks with animation): switch, delay, delay reload, direction, steps per turn, step count
+$097e byte[10] enemy_type
+$0988 byte[10] enemy_switch
+$0992 byte[10] enemy_timer
+$099c byte[10] enemy_d
+$09a6 byte[10] enemy_e
+$09b0 byte[10] enemy_f
+$09ba byte[10] enemy_g
+$09c4 byte[10] enemy_h
+$09ce byte[10] enemy_i
+$09d8 byte[10] enemy_j
+$09e2 byte[10] enemy_k
+$09ec byte[10] enemy_l
 $09f6-$0a00 virtual byte untouched_09f6
 
-; ---- game code ----
-; patches the game by the option bits at $0200
+; ---- options, highscore saving and hotkeys ----
+; patches the game by cheat_bits, cleared bits switch a cheat on:
+; bit 0: men don't run out, bit 1: bonus doesn't count down, bit 2: air doesn't run out,
+; bit 3: deadly chars and sprites don't kill, bit 4: C= skips a level, bit 5: B toggles all switches
 $0a00 code apply_options
-$0b15 byte
+; saves the highscore table (part of highscore_screen) with the KERNAL, after a new entry,
+; unless cheats were on, then back to the title
+$0a72 save_highscores
+$0aed enter_highscore_name
+$0b15 byte saved_rank_digit
+; per pass: the cheat keys, R to restart the level, then the objects
+$0b16 check_keys
+$0b2d check_restart_key
+$0b6c check_switch_cheat_key
+$0bd5 check_level_skip_key
 ; leftover of a copy of the KERNAL's reset code, partly overwritten
 $0c25-$0eb0 byte kernal_copy
-$0ec0-$0f00 screencode texts
+$0eb0 first_level_byte
+$0eb9 find_level_and_read
+$0ec0 screencode[6] closed_text
+$0ec6 screencode[18] game_over_text
+$0ed8 screencode[20] players_text
+$0eec screencode[20] control_text
 $0f00-$0f5e virtual byte untouched_0f00
+; read by nothing
 $0f5e-$0f9d byte
 $0f9d-$0fff virtual byte untouched_0f9d
 $0fff-$1026 byte
 $1026 screencode[18] player_text
-$1038 byte[40] row_template
-$1060 byte[1000] colors_1
-$1448 byte[1000] screen_1
-$1830 byte[1000] colors_2
-$1c18 byte[1000] screen_2
+; copied to both players' status lines at the start of a game
+$1038 screencode[40] status_line_template
+; the saved screens, colour RAM (high nibbles undefined) and characters
+$1060 byte[1000] highscore_colors
+$1448 byte[1000] highscore_screen
+$1830 byte[1000] title_colors
+$1c18 byte[1000] title_screen
 
-; ---- graphics ----
+; ---- graphics, level drawing and objects ----
+; multicolor; chars $20-$6f are the playfield, see update_player for what they do
 $2000 byte[8*130] charset
+$2410 next_screen_cell
+$241b next_level_byte
+$2428 color_pointer
+$2434 next_screen_row
+$247f previous_screen_row
+$2442 clear_screen
+$2458 object_screen_pointer
+; points level_pointer at level `level`: the levels follow each other, each ends with $ff
+$2465 find_level
+; switches on every switch an object uses
+$248d switch_on_objects
+; draws the level: the border char and colour, then the level stream from screen $0429:
+; $fe ends it and starts the enemy list, 0 n skips n cells, 1 a conveyor, 2 a bridge,
+; 3 a force beam, 4 a force column, 5 a lift, 6 an escalator, 7 a rope, 9 a piston,
+; 10 a ladder, else a run of (char, colour, count)
+$24a8 draw_level
+$2511 next_level_command
+$2516 level_command
+$2570 update_objects
+$25be draw_run
+$25e5 skip_cells
+$25fa draw_ladder
+$2635 draw_rope
+$2665 add_conveyor
+$26b2 update_conveyor
+$272f add_bridge
+$275f update_bridge
+$2798 add_force_beam
+$27dd update_force_beam
+$281c add_force_column
+$2865 update_force_column
+$289a add_lift
+$28fc update_lift
+$2972 draw_escalator
+$29c0 add_piston
+$2a28 update_piston
 ; dead code between flow ends, left from patching
 $251f code
 $28f9 code
 $2acb-$2b00 byte
 $2b00 byte[64*54] sprites
+
+; ---- player and enemies ----
 $3880 code
+$38ab player_screen_address
+; the cell two rows below the player's position (the body), and three (under the feet)
+$3891 player_body_cell
+$389e player_feet_cell
+$38fb read_controls
+$394c restore_position
+$395d move_player
 $39b0 code
+$3a79 jump
 $3a85 code
+$3a8a start_jump
+$3b10 check_landing
 $3b2c code
+$3b36 show_title_screen
+$3b85 show_highscore_screen
+$3bd4 sprite_bit_y
+$3be5 player_on_turret_side
+$3c0f fire_bullet
+$3c38 next_enemy_byte
+$3c40 read_enemy_position
+; reads the enemy list after the level's $fe: per enemy its type and position, then per type
+; its parameters, ending with $fe
+$3c5d setup_enemies
+$3e07 update_enemies
 $3e5a code
+$3e5b sprite_bit_x
+$3e6c update_turret
+$3f66 update_crusher
+$3fc2 update_hopper
+$40ad update_dropper
+$411a enemy_to_position
+$4133 update_ball
+$4231 update_walker
 $42e6 byte
+$42e7 object_switch_state
+$42f1 setup_level
 $434d code
+$434e update_player_sprite
+; the player moves, then the char under the feet acts: $24 slows, $25 and $2b kill,
+; $27 starts to crumble ($44-$4a, then gone), $28 bounces, $2f is sticky;
+; at the body $3a, $3d, $3e and $4e-$52 kill, $3f/$40 (escalator) carry up,
+; $59-$5c are switches, $5e is the exit, $61-$63 are items worth 100;
+; off a ladder ($57/$58), rope ($43) or escalator the player falls
+$4373 update_player
 $4372 code
+$43a3 deadly_check
 $4488 code
+$44ab conveyor_push
+$451d conveyor_push_saving_pointer
+$4527 delay
+$4532 status_line_offset
+$453e scroll_status_line
+$4550 init_status_lines
+$4561 show_player_and_status
 $45b5 code
+$45ba add_100_points
+$45bc add_to_score_digit
+$45d6 collect_item
+; the charset animation: rotates the pixels of chars $25, $28 and $2e, and scrolls $3a, $3f and $40 up
+$4640 animate_charset
+$4657 explode_player
+$46db death_animation
+$46ee set_player_frame_and_speed
+$4738 touch_switch
+$477e save_status_line
+; patched to rts by the invincibility cheat
+$4790 lose_life
+$47b5 decrement_men
+$47c5 next_player
+$47eb game_over
+$483e fill_row
+$4853 close_level_wipe
+$489a bonus_is_zero
+; the level is done when all switches are off: the bonus goes to the score, plus a man
+$48ac touch_exit
+$4928 name_entry
 $4944 code
+$496a enter_highscore
+$4979 sort_highscores
+$4a22 check_highscores
+; ---- main flow ----
+$4a80 title
 ; where the IRQ interrupted the main code (the KERNAL's $ff48 pushed A, X and Y, the handler did a pha)
 $4aaf code after_read_input
+$4ab5 run_demo
+$4ac8 select_players
 ; the return address under it on the stack
-$4b0f code after_67a0
+$4b0f code after_wait_choice
+$4b62 start_game
+$4b77 start_level
+$4b9a main_loop
+; the demo: shows levels 1-9 for a moment each
+$4bbb demo
+$4bfc wait_key_and_save
+$4c0e switch_on_sound
+$4c1e switch_off_sound
+$4c2e wipe_sound
+; every 10 passes: air one down (dying at 0), and the bonus one down
+$4c41 count_air_and_bonus
+$4c5f decrement_air
+$4c7c decrement_bonus
 $4c87 code
 $4c92 code
+$4c93 wrap_level
 $4c99 code
 $4c9a byte
 $4c9b code sid_init
+$4cb4 store_highscore_screen
+$4cd6 play_title_music
+$4d0b play_game_music
+$4d36 set_music
 $4d3d code
+; F5 turns the music off, F7 on
+$4d45 music_keys
+$4d5b clear_force_beam
+$4d70 draw_force_beam
 
 ; ---- levels ----
 $4d85-$4e1f byte
-; set up into $fd/$fe by $2465
+; the level stream, read by draw_level and setup_enemies
 $4e1f-$66a0 byte level_data
+$66a0 name_entry_keys
 $6721 code
+$673b wait_raster
+$6741 show_top5_text
+; returns 1 when fire or space is pressed; H shows the highscores
 $6750 code read_input
+$67a0 wait_choice
 $67bf code
-$6810-$6860 screencode messages
+$67cc show_start_messages
+$67eb stop_sound_game_over
+$67f3 wait_no_key
+$6804 prepare_level
+$6810 screencode[40] continue_message
+$6838 screencode[40] restart_message
 $6860-$686d ascii highscore_filename
-$686d-$6875 byte
-$6875-$68a6 screencode highscore_texts
+$686d byte name_column
+; set when the table got a new name
+$686e byte highscores_changed
+; set when cheats are on: the highscores aren't saved
+$686f byte cheats_on
+$6870 byte level_skip_enabled
+$6871 byte switch_cheat_enabled
+$6872 byte saved_a
+$6873 byte saved_port_a
+$6874 byte last_port_b
+$6875 byte
+$6876 screencode[24] name_prompt
+$688e screencode[24] top5_text
 $68a6-$6b4e virtual byte unused_68a6
 $6b4e-$6d65 byte
 $6d65-$6da8 virtual byte untouched_6d65
@@ -104,27 +373,115 @@ $6da8-$6fbe byte
 $6fbe-$7000 virtual byte unused_6fbe
 
 ; ---- music ----
+; The music player plays up to three voices, each with its own copy of the player code
+; (voice_1_play at $c100, voice_2_play at $c200, voice_3_play at $c300) and its own two
+; parallel streams: a note stream and, $800 further, a parameter stream, read at the same index.
+; Voice 1 reads $e000/$e800 (under the KERNAL ROM, copied there from $9000/$9800), voice 2
+; $a000/$a800 (empty, the game never plays voice 2), voice 3 $b000/$b800.
+; A note byte with its parameter means:
+; - $00: return from a call, or stop the voice when not in one;
+; - $ff with 0: call: the next pair holds the position (note stream) and page (parameter stream)
+;   to go to; the return position goes to the voice's call slot (one level only);
+; - $ff with n: repeat: jump to the next pair's position n times, then go on after it;
+; - $7f with d: a rest of 2*d ticks;
+; - else a note number with d: plays the note (note_freq_hi/lo) for 2*d ticks, and releases the
+;   gate one tick early unless d has bit 7 set.
+; A tick is voice_speeds+1 IRQs. The game plays one tune at position 0 on voices 1 and 3, with
+; triangle waves on the title (play_title_music) and pulse waves in the game (play_game_music).
 ; a copy of the music player, and the loader at $7800
 $7000-$9000 byte
-; copied to $e000 by copy_music_data
-$9000-$9252 byte music_data_1
+; copied to $e000/$e800 by copy_music_data
+$9000-$9252 byte voice_1_notes_copy
 $9252-$9800 virtual byte unused_9252
-$9800-$9a52 byte music_data_2
-$9a52-$b000 virtual byte unused_9a52
-$b000-$b217 byte
-; written by the player
-$b217-$b800 virtual byte music_buffer_1
-$b800-$ba17 byte
-$ba17-$c000 virtual byte music_buffer_2
-$c000-$c100 byte frequencies
+$9800-$9a52 byte voice_1_parameters_copy
+$9a52-$a000 virtual byte unused_9a52
+$a000-$a7e0 virtual byte voice_2_notes
+$a7e0 virtual byte voice_2_in_call
+$a7e1 virtual byte voice_2_return_page
+$a7e2 virtual byte voice_2_return_position
+$a7e3-$a800 virtual byte
+$a800 virtual byte[$800] voice_2_parameters
+$b000-$b217 byte voice_3_notes
+$b217-$b7e0 virtual byte unused_b217
+$b7e0 virtual byte voice_3_in_call
+$b7e1 virtual byte voice_3_return_page
+$b7e2 virtual byte voice_3_return_position
+$b7e3-$b800 virtual byte
+$b800-$ba17 byte voice_3_parameters
+$ba17-$bfe9 virtual byte unused_ba17
+; unpack_music's parameters, copied from unpack_parameters
+$bfe9 virtual byte[4] unpack_block
+$bfed-$c000 virtual byte
+; the note frequencies, high and low bytes, by note number
+$c000 byte[80] note_freq_hi
+$c050 byte[80] note_freq_lo
+; copied to the SID ($d401-$d418) by init_sid
+$c0a0 byte[25] sid_registers
+$c0b9-$c0bc byte
+; IRQs per tick, minus one, per voice
+$c0bc byte[3] voice_speeds
+$c0bf byte
+$c0c0 byte voice_1_duration
+$c0c1 byte voice_1_speed_countdown
+$c0c2 byte voice_1_repeat_count
+$c0c3 byte voice_1_position
+; added to the streams' first page
+$c0c4 byte voice_1_page
+$c0c5 byte voice_2_duration
+$c0c6 byte voice_2_speed_countdown
+$c0c7 byte voice_2_repeat_count
+$c0c8 byte voice_2_position
+$c0c9 byte voice_2_page
+$c0ca byte voice_3_duration
+$c0cb byte voice_3_speed_countdown
+$c0cc byte voice_3_repeat_count
+$c0cd byte voice_3_position
+$c0ce byte voice_3_page
+; bit 0-2: voice 1-3 plays
+$c0cf byte voices_playing
+$c0d0-$c100 byte
+; per IRQ: counts the speed down, then the duration, then reads the next note
+$c100 voice_1_play
+$c109 voice_1_tick
 $c1ba byte
+$c1bb voice_1_set_page
+$c1ca voice_1_next
+$c1d8 voice_1_read_note
+$c1df voice_1_read_parameter
+; also how a voice stops when its stream ends
+$c1e6 voice_1_silence
+; voice 2's copy of the code; it stores its page in voice_1_page after a call, a bug that
+; doesn't show because voice 2 is never played
+$c200 voice_2_play
+$c209 voice_2_tick
 $c2ba byte
+$c2bb voice_2_set_page
+$c2ca voice_2_next
+$c2d8 voice_2_read_note
+$c2df voice_2_read_parameter
+$c2e6 voice_2_silence
+$c300 voice_3_play
+$c309 voice_3_tick
 $c3ba byte
+$c3bb voice_3_set_page
+$c3ca voice_3_next
+$c3d8 voice_3_read_note
+$c3df voice_3_read_parameter
+$c3e6 voice_3_silence
 ; the music player's API; only $c4d0 and $c4fb are called from the game
 $c400 code copy_music_data
+$c423 init_sid
+$c42f install_irq
+; starts a voice at its position: patches voice_n_next to not advance, ticks once, unpatches
+$c43c start_voice_1
+$c457 start_voice_2
+$c472 start_voice_3
+; switch the KERNAL ROM out and in again (the game runs with $01 = $37)
 $c48d code music_bank_out
 $c494 code music_bank_in
+; puts the KERNAL's IRQ back
 $c49b code music_stop
+; start voices, and mark them in voices_playing
 $c4a8 code music_play_1
 $c4bc code music_play_2
 $c4d0 code music_play_3
@@ -132,6 +489,7 @@ $c4e4 code music_play_1_2
 $c4fb code music_play_1_3
 $c512 code music_play_2_3
 $c529 code music_play_all
+; plays the voices in voices_playing, then goes on to the KERNAL's IRQ
 $c543 code irq
 ; where the CPU was when the snapshot was taken
 $c54d code snapshot_pc
@@ -145,15 +503,26 @@ $c59f code music_silence_1_2
 $c5a8 code music_silence_1_3
 $c5b1 code music_silence_2_3
 $c5ba code music_silence_all
-$c5c6 code
-$c5d0 code
+; the set-up, run once by the loader: unpacks the music, then the SID and the IRQ
+$c5c6 code music_init
+; RAM everywhere
+$c5d0 code bank_all_ram
 $c5d7 code
-$c5fc-$c600 byte
-$c658 code
-$c662 code
-$c669 code
-$c673 code
-$c67f-$c690 byte
+; spreads six blocks of the loaded music over the stream pages, clears the rest of each page,
+; and copies voice 1's to $e000
+$c5e0 unpack_music
+; the size ($0502: 2 bytes, 5 pages) and source ($2000) of each block
+$c5fc-$c600 byte[4] unpack_parameters
+$c600 move_blocks
+$c62b next_block_source
+$c63f move_block
+$c658 code copy_page_down
+$c662 code copy_byte
+$c669 code copy_page
+$c673 code copy_bytes
+; the pages blocks go to: $9000-$b800, and $4000-$7000 for the variant at $c750
+$c67f-$c690 byte block_pages
+$c690 clear_block_tails
 $c6d6 code
 $c6e0 code
 $c6eb code
@@ -165,10 +534,15 @@ $c770-$c7eb byte
 $c7eb code
 ; more of the loader, then a copy of the KERNAL's $fd00 page, repeated
 $c7f2-$d000 byte
-$e000-$e252 byte music_patterns_1
-$e252-$e800 virtual byte unused_e252
+; voice 1's streams, copied from $9000/$9800
+$e000-$e252 byte voice_1_notes
+$e252-$e7e0 virtual byte unused_e252
+$e7e0 virtual byte voice_1_in_call
+$e7e1 virtual byte voice_1_return_page
+$e7e2 virtual byte voice_1_return_position
+$e7e3-$e800 virtual byte
 ; the IRQ handler jumps to the KERNAL's $ea31 in the ROM over this
-$e800-$ea52 byte music_patterns_2
+$e800-$ea52 byte voice_1_parameters
 $ea52-$f000 virtual byte unused_ea52
 $f000-$fd30 virtual byte untouched_f000
 $fd30-$fd50 byte
@@ -178,3 +552,4 @@ $fffa word[3] vectors
 include c64_zeropage.flo
 include c64_system.flo
 include c64_io.flo
+include c64_kernal.flo
