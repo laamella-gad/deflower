@@ -1,0 +1,7 @@
+>>> 1nvader.prg is crunched, so it holds no text: what passes at a minimum of 8 is noise. <<<
+1nvader/1nvader.prg min 8
+^^^
+$086c-$0874 screencode  "bhyd1jog"
+$0f4b-$0f55 screencode  "$xl/P←?oik"
+$1a5f-$1a68 ascii  "L]*M&0TNC"
+vvv

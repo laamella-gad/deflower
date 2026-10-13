@@ -1,0 +1,5 @@
+>>> A byte sequence in a .prg: the SYS token and "20" of the BASIC stub. <<<
+1nvader/1nvader.prg $9e $32 $30
+^^^
+$0805 bytes  9e 32 30 36 31 00 00 00
+vvv

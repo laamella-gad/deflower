@@ -1,0 +1,5 @@
+>>> Not a number. <<<
+1nvader/1nvader.prg $zz
+^^^
+Not a number: $zz, expected e.g. $c540 or $a9 $00
+vvv

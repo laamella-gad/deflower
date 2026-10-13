@@ -1,0 +1,5 @@
+>>> A stretch preceded by its length prints as [lengthbyte]. <<<
+squirm/squirm.vsf $0330-$0350
+^^^
+$033e ascii[lengthbyte]  "i?squirm"
+vvv

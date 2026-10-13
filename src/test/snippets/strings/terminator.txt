@@ -1,0 +1,17 @@
+>>> Strings ended by $ff print as [until $ff], pastable into a .flo file. <<<
+3dgolf_snap/3dgolf_snap.vsf $2d00-$3200
+^^^
+$2d5f-$2d66 screencode  "?H jhj("
+$2da5 ascii[until $ff]  "2 U,swing club"
+$2da8 screencode[until $ff]  ",SWING CLUB"
+$2ec6 ascii[until $ff]  "2 U,down !!"
+$2ec9 screencode[until $ff]  ",DOWN !!"
+$30d9 ascii[until $ff]  "2 U,in the water"
+$30dc screencode[until $ff]  ",IN THE WATER"
+$30eb-$30f3 ascii  "kc nc ec"
+$30eb-$30f3 screencode  "KC NC EC"
+$313a ascii[until $ff]  "2 U,out of bounds"
+$313d screencode[until $ff]  ",OUT OF BOUNDS"
+$3163 ascii[until $ff]  "2 U,select club"
+$3166 screencode[until $ff]  ",SELECT CLUB"
+vvv

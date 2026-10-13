@@ -1,0 +1,6 @@
+>>> A decimal number above 255 is an address. <<<
+3dgolf/3dgolf.prg 2049 in $3000-$4000
+^^^
+$37fd addr   01 08 06 07 06 45 04 04
+$3c31 addr   01 08 7f fa 47 f0 14 a0
+vvv

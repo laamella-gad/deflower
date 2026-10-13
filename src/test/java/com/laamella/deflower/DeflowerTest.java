@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,7 +52,10 @@ import static org.assertj.core.api.Assertions.fail;
  * {@code --init} writes for it (issue 0072).
  * <p>
  * A dump snippet ({@code dump/}) names such a file and a range, and expects
- * what {@code --dump} prints for it, or its error (issue 0097).
+ * what {@code --dump} prints for it, or its error (issue 0097). Find and
+ * strings snippets ({@code find/}, {@code strings/}) name such a file and
+ * the arguments of {@code --find} (issue 0099) or {@code --strings} (issue
+ * 0100), and expect what it prints, or its error.
  */
 class DeflowerTest {
     private static final SnippetFileFormat FORMAT = new SnippetFileFormat(
@@ -79,6 +83,16 @@ class DeflowerTest {
     @TestFactory
     Stream<DynamicTest> dumpSnippets() throws IOException {
         return new SnippetTestFactory(FORMAT, snippets("dump"), filesWithExtension("txt"), DeflowerTest::runDump).stream();
+    }
+
+    @TestFactory
+    Stream<DynamicTest> findSnippets() throws IOException {
+        return new SnippetTestFactory(FORMAT, snippets("find"), filesWithExtension("txt"), DeflowerTest::runFind).stream();
+    }
+
+    @TestFactory
+    Stream<DynamicTest> stringsSnippets() throws IOException {
+        return new SnippetTestFactory(FORMAT, snippets("strings"), filesWithExtension("txt"), DeflowerTest::runStrings).stream();
     }
 
     /**
@@ -136,11 +150,27 @@ class DeflowerTest {
     }
 
     private static List<String> runDump(List<String> parts) throws IOException, URISyntaxException {
-        assertThat(parts).as("input: a .vsf or .prg path on the test classpath, then a range").hasSize(1);
-        String[] input = parts.get(0).trim().split(" ");
-        Path file = Paths.get(DeflowerTest.class.getResource("/" + input[0]).toURI());
+        return look("--dump", parts);
+    }
+
+    private static List<String> runFind(List<String> parts) throws IOException, URISyntaxException {
+        return look("--find", parts);
+    }
+
+    private static List<String> runStrings(List<String> parts) throws IOException, URISyntaxException {
+        return look("--strings", parts);
+    }
+
+    /**
+     * Runs a tool that looks at an input file, on the file the snippet names
+     * on the test classpath and the arguments after it.
+     */
+    private static List<String> look(String flag, List<String> parts) throws IOException, URISyntaxException {
+        assertThat(parts).as("input: a .vsf or .prg path on the test classpath, then the arguments").hasSize(1);
+        List<String> input = Arrays.asList(parts.get(0).trim().split(" +"));
+        Path file = Paths.get(DeflowerTest.class.getResource("/" + input.get(0)).toURI());
         try {
-            return List.of(String.join("\n", new Dumper().dump(file, input[1])) + "\n");
+            return List.of(String.join("\n", Deflower.look(flag, file, input.subList(1, input.size()))) + "\n");
         } catch (IllegalArgumentException e) {
             return List.of(e.getMessage() + "\n");
         }

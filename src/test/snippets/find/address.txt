@@ -1,0 +1,6 @@
+>>> An address: found as a word (addr) and in split tables (lo/hi), here 2krace's pattern_lo/pattern_hi at index 2, 11 apart. The high byte table repeats $14, so a range of high bytes matches. <<<
+2krace_snap/2krace_snap.vsf $14bf
+^^^
+$00d0 addr   bf 14 06 00 00 27 10 0d
+$1379 lo/hi  high byte at $1382-$1388
+vvv

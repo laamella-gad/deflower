@@ -1,0 +1,5 @@
+>>> An address minus one, as an rts dispatch table holds it: 1nvader's BASIC link at $0801 holds $080b. <<<
+1nvader/1nvader.prg $080c in $0801-$0810
+^^^
+$0801 rta    0b 08 14 00 9e 32 30 36
+vvv

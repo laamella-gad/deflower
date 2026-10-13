@@ -1,0 +1,5 @@
+>>> A lower minimum, and a range that cuts the title short. <<<
+1nvader_snap/1nvader_snap.vsf $c0f0-$c130 min 3
+^^^
+$c0f6-$c130 screencode  "P 1nvader +1               by faayd/excessalien can't kill"
+vvv

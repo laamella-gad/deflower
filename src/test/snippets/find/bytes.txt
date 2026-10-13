@@ -1,0 +1,5 @@
+>>> A byte sequence, in a range. <<<
+3dgolf_snap/3dgolf_snap.vsf $a9 $00 $8d in $0800-$1000
+^^^
+$0878 bytes  a9 00 8d 21 d0 85 fb a9
+vvv

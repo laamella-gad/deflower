@@ -1,0 +1,5 @@
+>>> An address can't be part of a byte sequence. <<<
+1nvader/1nvader.prg $a9 $1234
+^^^
+Not a byte: $1234, an address is searched for on its own
+vvv

@@ -1,0 +1,5 @@
+>>> A range but no pattern. <<<
+1nvader/1nvader.prg in $0801-$0810
+^^^
+Wrong arguments for --find: in $0801-$0810
+vvv

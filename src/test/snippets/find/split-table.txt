@@ -1,0 +1,11 @@
+>>> 3dgolf's bitmap_row_lo at $1371 and bitmap_row_hi at $1439, 200 apart. The low byte $07 recurs in the low byte table, each with the run of $7e in the high byte table. <<<
+3dgolf_snap/3dgolf_snap.vsf $7e07 in $1300-$1500
+^^^
+$1371 lo/hi  high byte at $1439-$1441
+$1391 lo/hi  high byte at $1439-$1441
+$13b1 lo/hi  high byte at $1439-$1441
+$13d1 lo/hi  high byte at $1439-$1441
+$13f1 lo/hi  high byte at $1439-$1441
+$1411 lo/hi  high byte at $1439-$1441
+$1431 lo/hi  high byte at $1439-$1441
+vvv

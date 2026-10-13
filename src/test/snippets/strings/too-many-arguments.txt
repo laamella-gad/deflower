@@ -1,0 +1,5 @@
+>>> Two ranges. <<<
+1nvader/1nvader.prg $0801-$0900 $0900-$0a00
+^^^
+Wrong arguments for --strings: $0801-$0900 $0900-$0a00
+vvv

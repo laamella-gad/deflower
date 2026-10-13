@@ -21,15 +21,9 @@ class Dumper {
     private static final int BYTES_PER_LINE = 16;
 
     List<String> dump(Path file, String range) throws IOException {
-        Matcher matcher = RANGE.matcher(range);
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException("Not a range: " + range + ", expected e.g. $c540-$c560");
-        }
-        int start = number(matcher.group(1));
-        int end = number(matcher.group(2));
-        if (start >= end || end > 0x10000) {
-            throw new IllegalArgumentException("Not a range inside $0000-$10000: " + range);
-        }
+        int[] bounds = range(range);
+        int start = bounds[0];
+        int end = bounds[1];
         int[] memory = MemoryImage.read(file);
         List<String> lines = new ArrayList<>();
         for (int line = start; line < end; line += BYTES_PER_LINE) {
@@ -69,6 +63,15 @@ class Dumper {
      * for a control code or a graphic.
      */
     static char petscii(int value) {
+        char character = petsciiCharacter(value);
+        return character == 0 ? '.' : character;
+    }
+
+    /**
+     * A PETSCII byte as the lower/upper character set shows it, or 0 for
+     * a control code or a graphic.
+     */
+    static char petsciiCharacter(int value) {
         if (value >= 0x20 && value <= 0x3f) {
             return SCREEN_CODES.charAt(value);
         }
@@ -78,7 +81,7 @@ class Dumper {
         if (value >= 0x61 && value <= 0x7a || value >= 0xc1 && value <= 0xda) {
             return (char) ((value & 0x1f) - 1 + 'A');
         }
-        return value == 0xa0 || value == 0xe0 ? ' ' : '.';
+        return value == 0xa0 || value == 0xe0 ? ' ' : 0;
     }
 
     /**
@@ -86,17 +89,44 @@ class Dumper {
      * or not, or a dot for a graphic.
      */
     static char screenCode(int value) {
-        int character = value & 0x7f;
-        if (character < 0x40) {
-            return SCREEN_CODES.charAt(character);
-        }
-        if (character >= 0x41 && character <= 0x5a) {
-            return (char) (character - 0x41 + 'A');
-        }
-        return character == 0x60 ? ' ' : '.';
+        char character = screenCodeCharacter(value & 0x7f);
+        return character == 0 ? '.' : character;
     }
 
-    private static int number(String text) {
+    /**
+     * A screen code as the lower/upper character set shows it, or 0 for
+     * a graphic or a reversed character.
+     */
+    static char screenCodeCharacter(int value) {
+        if (value >= 0x80) {
+            return 0;
+        }
+        if (value < 0x40) {
+            return SCREEN_CODES.charAt(value);
+        }
+        if (value >= 0x41 && value <= 0x5a) {
+            return (char) (value - 0x41 + 'A');
+        }
+        return value == 0x60 ? ' ' : 0;
+    }
+
+    /**
+     * A range as in a .flo file, end exclusive, as {start, end}.
+     */
+    static int[] range(String range) {
+        Matcher matcher = RANGE.matcher(range);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("Not a range: " + range + ", expected e.g. $c540-$c560");
+        }
+        int start = number(matcher.group(1));
+        int end = number(matcher.group(2));
+        if (start >= end || end > 0x10000) {
+            throw new IllegalArgumentException("Not a range inside $0000-$10000: " + range);
+        }
+        return new int[]{start, end};
+    }
+
+    static int number(String text) {
         return text.startsWith("$") ? Integer.parseInt(text.substring(1), 16) : Integer.parseInt(text);
     }
 }

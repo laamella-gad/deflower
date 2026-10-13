@@ -10,6 +10,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -42,6 +44,10 @@ public class Deflower {
      * file to start its disassembly (issue 0072), and exits with 1 when
      * that .flo file exists already. Or: --dump &lt;.vsf or .prg file&gt;
      * &lt;range&gt;, which hex-dumps that memory of the file (issue 0097).
+     * Or: --find &lt;.vsf or .prg file&gt; &lt;address or bytes&gt; [in
+     * &lt;range&gt;], which searches its memory (issue 0099). Or: --strings
+     * &lt;.vsf or .prg file&gt; [&lt;range&gt;] [min &lt;n&gt;], which lists the text in
+     * its memory (issue 0100).
      */
     public static void main(String[] args) throws IOException {
         if (args.length == 2 && args[0].equals("--init")) {
@@ -50,13 +56,9 @@ public class Deflower {
             }
             return;
         }
-        if (args.length == 3 && args[0].equals("--dump")) {
-            try {
-                new Dumper().dump(Paths.get(args[1]), args[2]).forEach(System.out::println);
-            } catch (IllegalArgumentException e) {
-                System.err.println(e.getMessage());
-                System.exit(2);
-            }
+        if (args.length >= 2 && LOOK_FLAGS.contains(args[0])) {
+            List<String> arguments = Arrays.asList(args).subList(2, args.length);
+            printOrExit(() -> look(args[0], Paths.get(args[1]), arguments));
             return;
         }
         boolean verify = false;
@@ -75,6 +77,8 @@ public class Deflower {
             System.err.println("Usage: deflower [--verify] <file.flo>");
             System.err.println("       deflower --init <file.vsf or file.prg>");
             System.err.println("       deflower --dump <file.vsf or file.prg> <start>-<end>");
+            System.err.println("       deflower --find <file.vsf or file.prg> <address or bytes> [in <start>-<end>]");
+            System.err.println("       deflower --strings <file.vsf or file.prg> [<start>-<end>] [min <n>]");
             System.exit(2);
         }
         Path flowerPath = Paths.get(flowerFile);
@@ -84,6 +88,82 @@ public class Deflower {
         }
         if (!new Deflower(verify).deflower(flowerPath)) {
             System.exit(1);
+        }
+    }
+
+    private static final List<String> LOOK_FLAGS = List.of("--dump", "--find", "--strings");
+
+    /**
+     * Runs a tool that looks at an input file without a .flo file:
+     * {@code --dump}, {@code --find} or {@code --strings}, with the
+     * arguments after the file. Bad arguments throw an
+     * IllegalArgumentException.
+     */
+    static List<String> look(String flag, Path file, List<String> arguments) throws IOException {
+        List<String> rest = new ArrayList<>(arguments);
+        switch (flag) {
+            case "--dump":
+                if (rest.size() == 1) {
+                    return new Dumper().dump(file, rest.get(0));
+                }
+                break;
+            case "--find": {
+                String range = takeOption(rest, "in");
+                if (!rest.isEmpty()) {
+                    return new Finder().find(file, rest, range);
+                }
+                break;
+            }
+            case "--strings": {
+                String minimum = takeOption(rest, "min");
+                if (rest.size() <= 1) {
+                    return new TextFinder().find(file, rest.isEmpty() ? null : rest.get(0),
+                            minimum == null ? TextFinder.MIN_CHARACTERS : minimumLength(minimum));
+                }
+                break;
+            }
+            default:
+                break;
+        }
+        throw new IllegalArgumentException("Wrong arguments for " + flag + ": " + String.join(" ", arguments));
+    }
+
+    /**
+     * Removes "{@code <keyword> <value>}" from the end of the arguments, and
+     * returns the value, or null when they don't end that way.
+     */
+    private static String takeOption(List<String> arguments, String keyword) {
+        int size = arguments.size();
+        if (size < 2 || !arguments.get(size - 2).equals(keyword)) {
+            return null;
+        }
+        String value = arguments.get(size - 1);
+        arguments.subList(size - 2, size).clear();
+        return value;
+    }
+
+    private static int minimumLength(String text) {
+        try {
+            return Dumper.number(text);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Not a minimum length: " + text);
+        }
+    }
+
+    private interface Lines {
+        List<String> get() throws IOException;
+    }
+
+    /**
+     * Prints the lines of a tool that looks at an input file, or its error
+     * about the arguments with exit code 2.
+     */
+    private static void printOrExit(Lines lines) throws IOException {
+        try {
+            lines.get().forEach(System.out::println);
+        } catch (IllegalArgumentException e) {
+            System.err.println(e.getMessage());
+            System.exit(2);
         }
     }
 

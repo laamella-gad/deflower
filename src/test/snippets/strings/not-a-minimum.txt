@@ -1,0 +1,5 @@
+>>> A bad minimum. <<<
+1nvader/1nvader.prg min x
+^^^
+Not a minimum length: x
+vvv

@@ -1,0 +1,7 @@
+>>> Text in a range of a snapshot: 1nvader's title screen and the high score label, which reads in both encodings. <<<
+1nvader_snap/1nvader_snap.vsf $c000-$d000
+^^^
+$c0f6-$c146 screencode  "P 1nvader +1               by faayd/excessalien can't kill you?            (y/n)"
+$c1b8-$c1c3 ascii  "s:highscore"
+$c1b8-$c1c3 screencode  "S:HIGHSCORE"
+vvv
