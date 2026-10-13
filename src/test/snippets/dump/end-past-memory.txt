@@ -1,0 +1,5 @@
+>>> The end is past $10000. <<<
+1nvader/1nvader.prg $fff0-$10001
+^^^
+Not a range inside $0000-$10000: $fff0-$10001
+vvv

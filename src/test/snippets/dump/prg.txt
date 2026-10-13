@@ -1,0 +1,6 @@
+>>> A .prg: memory before its load address shows as "..", and the last line is short. <<<
+1nvader/1nvader.prg $07f8-$0815
+^^^
+07f8: .. .. .. .. .. .. .. .. .. 0b 08 14 00 9e 32 30           .....20           kht@↑20
+0808: 36 31 00 00 00 a0 1e ba bd 8d 24 9d fc           61... ....$..     61@@@ ↑:=m$].
+vvv

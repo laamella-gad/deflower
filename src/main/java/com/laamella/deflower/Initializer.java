@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,17 +106,10 @@ class Initializer {
     }
 
     private void readProgram(Path file, String name) throws IOException {
+        memory = MemoryImage.fromPrg(file);
         byte[] prg = Files.readAllBytes(file);
-        if (prg.length < 2) {
-            throw new IllegalArgumentException(name + " has no load address.");
-        }
-        int load = (prg[0] & 0xff) | (prg[1] & 0xff) << 8;
+        int load = MemoryImage.loadAddress(prg);
         int end = load + prg.length - 2;
-        memory = new int[0x10000];
-        Arrays.fill(memory, -1);
-        for (int i = 2; i < prg.length && load + i - 2 < memory.length; i++) {
-            memory[load + i - 2] = prg[i] & 0xff;
-        }
         lines.add(format("; %s: loads at $%04x-$%04x", name, load, end));
         if (end > 0x10000) {
             lines.add("; the load runs past $ffff");
@@ -133,10 +125,7 @@ class Initializer {
     private void readSnapshot(Path file, String name) {
         ViceVcfFile vcfFile = ViceSnapshotReader.readFile(file);
         C64MemModule c64Memory = ViceSnapshotReader.memory(vcfFile);
-        memory = new int[0x10000];
-        for (int i = 0; i < memory.length; i++) {
-            memory[i] = c64Memory.ram[i] & 0xff;
-        }
+        memory = MemoryImage.fromRam(c64Memory.ram);
         lines.add(format("; %s: VICE snapshot of a %s", name, vcfFile.header.machineName));
 
         Optional<MainCpuModule> cpu = vcfFile.module("MAINCPU", MainCpuModule.class);

@@ -41,12 +41,22 @@ public class Deflower {
      * a run has errors or, with --verify, doesn't verify. Or: --init
      * &lt;.vsf or .prg file&gt;, which writes a .flo skeleton next to the
      * file to start its disassembly (issue 0072), and exits with 1 when
-     * that .flo file exists already.
+     * that .flo file exists already. Or: --dump &lt;.vsf or .prg file&gt;
+     * &lt;range&gt;, which hex-dumps that memory of the file (issue 0097).
      */
     public static void main(String[] args) throws IOException, URISyntaxException {
         if (args.length == 2 && args[0].equals("--init")) {
             if (!new Initializer().write(Paths.get(args[1]))) {
                 System.exit(1);
+            }
+            return;
+        }
+        if (args.length == 3 && args[0].equals("--dump")) {
+            try {
+                new Dumper().dump(Paths.get(args[1]), args[2]).forEach(System.out::println);
+            } catch (IllegalArgumentException e) {
+                System.err.println(e.getMessage());
+                System.exit(2);
             }
             return;
         }
@@ -65,6 +75,7 @@ public class Deflower {
         if (flowerFile == null) {
             System.err.println("Usage: deflower [--verify] <file.flo>");
             System.err.println("       deflower --init <file.vsf or file.prg>");
+            System.err.println("       deflower --dump <file.vsf or file.prg> <start>-<end>");
             System.exit(2);
         }
         if (!new Deflower(verify).deflower(flowerFile)) {

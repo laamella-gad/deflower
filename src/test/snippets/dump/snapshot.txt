@@ -1,0 +1,7 @@
+>>> A snapshot: the RAM is all loaded. Here the title texts of 1nvader. <<<
+1nvader_snap/1nvader_snap.vsf $c0f8-$c120
+^^^
+c0f8: 31 0e 16 01 04 05 12 20 2b 31 20 20 20 20 20 20  1...... +1        1nvader +1
+c108: 20 20 20 20 20 20 20 20 20 02 19 20 06 01 01 19           .. ....           by faay
+c118: 04 2f 05 18 03 05 13 13                          ./......          d/excess
+vvv

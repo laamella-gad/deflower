@@ -1,7 +1,6 @@
 ---
 title: A command line flag that hex-dumps a memory range of an input file
-status: open
-priority: medium
+status: done
 labels: enhancement
 ---
 
@@ -22,3 +21,9 @@ Related:
 Maybe later, not part of this: marking the bytes that still hold VICE's power-on pattern (which needs the tolerant match 0072 describes), and a disassembly view of the range.
 
 Done when: the flag dumps a range of a `.vsf` and of a `.prg` fixture, unloaded memory shows as `..`, and the flag is described in `CLAUDE.md`.
+
+## Closing note
+
+`deflower --dump <file> <start>-<end>` prints the range (`Dumper`), from the start of the range, 16 bytes a line. Instead of one ASCII column there are two text columns, PETSCII and screen codes, both read with the lower/upper character set. They show every character with a printable counterpart (letters, digits, punctuation, `£↑←` and the shifted space; screen codes reversed or not), graphics and control codes as `.`, so text stands out in either encoding: 1nvader's title reads `1nvader +1 by faay d/excess` in the screen code column. A short last line is padded so the columns line up. The path is a file system path, like `--init`'s. Unloaded memory is `..` in the hex and a space in the text columns. Numbers are `$`-hex or decimal, as in a `.flo` file. A bad range prints an error and exits with 2.
+
+`MemoryImage` now reads the input for both `--dump` and `--init`, with -1 for unloaded memory. `dump/` snippets cover a snapshot, a `.prg` with memory before its load address, a decimal range and three bad ranges.

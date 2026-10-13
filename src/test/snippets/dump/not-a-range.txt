@@ -1,0 +1,5 @@
+>>> Not a range. <<<
+1nvader/1nvader.prg $0801
+^^^
+Not a range: $0801, expected e.g. $c540-$c560
+vvv

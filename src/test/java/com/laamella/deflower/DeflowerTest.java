@@ -49,6 +49,9 @@ import static org.assertj.core.api.Assertions.fail;
  * An init snippet ({@code init/}) names a {@code .vsf} or {@code .prg}
  * file on the test classpath, and expects the {@code .flo} skeleton that
  * {@code --init} writes for it (issue 0072).
+ * <p>
+ * A dump snippet ({@code dump/}) names such a file and a range, and expects
+ * what {@code --dump} prints for it, or its error (issue 0097).
  */
 class DeflowerTest {
     private static final SnippetFileFormat FORMAT = new SnippetFileFormat(
@@ -71,6 +74,11 @@ class DeflowerTest {
     @TestFactory
     Stream<DynamicTest> initSnippets() throws IOException {
         return new SnippetTestFactory(FORMAT, snippets("init"), filesWithExtension("txt"), DeflowerTest::runInit).stream();
+    }
+
+    @TestFactory
+    Stream<DynamicTest> dumpSnippets() throws IOException {
+        return new SnippetTestFactory(FORMAT, snippets("dump"), filesWithExtension("txt"), DeflowerTest::runDump).stream();
     }
 
     /**
@@ -125,6 +133,17 @@ class DeflowerTest {
         assertThat(parts).as("input: one .vsf or .prg path on the test classpath").hasSize(1);
         Path file = Paths.get(DeflowerTest.class.getResource("/" + parts.get(0).trim()).toURI());
         return List.of(String.join("\n", new Initializer().skeleton(file)) + "\n");
+    }
+
+    private static List<String> runDump(List<String> parts) throws IOException, URISyntaxException {
+        assertThat(parts).as("input: a .vsf or .prg path on the test classpath, then a range").hasSize(1);
+        String[] input = parts.get(0).trim().split(" ");
+        Path file = Paths.get(DeflowerTest.class.getResource("/" + input[0]).toURI());
+        try {
+            return List.of(String.join("\n", new Dumper().dump(file, input[1])) + "\n");
+        } catch (IllegalArgumentException e) {
+            return List.of(e.getMessage() + "\n");
+        }
     }
 
     /**
