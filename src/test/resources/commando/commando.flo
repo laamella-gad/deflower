@@ -1,0 +1,12 @@
+deflower commando.vsf
+; where the CPU was when the snapshot was taken
+$400f code snapshot_pc
+; the IRQ and NMI handlers the vectors point to
+$4116 code irq
+$0a4d code nmi
+
+; $01 = $36: KERNAL and I/O banked in, BASIC banked out
+include c64_zeropage.flo
+include c64_system.flo
+include c64_io.flo
+include c64_kernal.flo

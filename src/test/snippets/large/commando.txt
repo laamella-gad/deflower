@@ -1,0 +1,118 @@
+>>> Commando, from a VICE snapshot. <<<
+commando/commando.flo
+^^^
+Writing out/commando.asm
+Writing out/commando.map
+Verify out/commando.asm: 91 bytes emitted, 0 differ, 14336 virtual, 4 gaps
+gap $0800-$0a4d
+gap $0a4e-$400f
+gap $4015-$4116
+gap $416a-$d000
+~~~
+
+.virtual $0400
+; read by: snapshot_pc
+; written by: irq
+; modified by: irq
+screen_ram:
+		.fill	6
+; read by: irq
+; written by: irq
+a0406:
+		.fill	994
+.endv
+
+*=$0a4d
+
+nmi:
+		rti 
+*=$400f
+
+; where the CPU was when the snapshot was taken
+snapshot_pc:
+		cmp screen_ram + $b
+		beq snapshot_pc
+		rts 
+*=$4116
+
+; the IRQ and NMI handlers the vectors point to
+irq:
+		jmp (a0406)
+
+l4119:
+		nop 
+		lda vic_control_1
+		ora #$60
+		sta vic_control_1
+		ldx #$03
+; jumped to by: irq
+l4124:
+		lda #$ff
+		sta $e3f8, x
+		dex 
+		bpl l4124
+		lda vic_control_1
+		and #$f8
+		ora #$07
+		sta vic_control_1
+		lda #$00
+		sta background_color
+		lda vic_memory_setup
+		and #$f0
+		ora #$04
+		sta vic_memory_setup
+		inc screen_ram + $b
+		lda #$de
+		sta vic_raster
+		lda vic_control_1
+		and #$7f
+		sta vic_control_1
+		lda #$6a
+		sta a0406
+		lda #$41
+		sta screen_ram + $7
+		lda #$01
+		sta vic_irq_status
+		pla 
+		tay 
+		pla 
+		tax 
+		pla 
+		rti 
+
+.virtual $d011
+; read by: irq
+; written by: irq
+vic_control_1:		.byte	?
+; written by: irq
+vic_raster:		.byte	?
+.endv
+
+.virtual $d018
+; read by: irq
+; written by: irq
+vic_memory_setup:		.byte	?
+; written by: irq
+vic_irq_status:		.byte	?
+.endv
+
+.virtual $d021
+; written by: irq
+background_color:		.byte	?
+.endv
+~~~
+--- commando.map
+$0400-$07e8 virtual byte[1000] screen_ram
+$0800-$0a4d gap
+$0a4d-$0a4e code nmi
+$0a4e-$400f gap
+$400f-$4015 code snapshot_pc
+$4015-$4116 gap
+$4116-$416a code irq
+$416a-$d000 gap
+$d011-$d012 virtual byte vic_control_1
+$d012-$d013 virtual byte vic_raster
+$d018-$d019 virtual byte vic_memory_setup
+$d019-$d01a virtual byte vic_irq_status
+$d021-$d022 virtual byte background_color
+vvv
