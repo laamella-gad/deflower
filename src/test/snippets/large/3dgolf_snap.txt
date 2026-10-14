@@ -4,11 +4,12 @@
 warning: $00c6: unused_c6 is used by $0825
 warning: $0881: bne $088b (l088B) goes into the middle of the instruction at $0889
 warning: $08d3: jsr $033c (tape_header) goes into data
-warning: $a587: jmp $ea31 (kernal_irq) goes into data
 Writing out/3dgolf_snap.asm
 Writing out/3dgolf_snap.map
 Verify out/3dgolf_snap.asm: 45859 bytes emitted, 0 differ, 19677 virtual, 0 gaps
 ~~~
+; jumped to by: irq
+kernal_irq = $ea31
 
 .virtual $0000
 ; ---- zero page ----
@@ -14795,9 +14796,6 @@ shape_e9a0:
 		.byte	$fc, $01, $fd, $03, $80, $0c, $00, $00, $02, $05, $04, $04, $06, $02, $06, $00
 		.byte	$03, $fd, $01, $fc, $ff, $fc, $fd, $fd, $fa, $00, $fa, $02, $fc, $04, $fe, $05
 		.byte	$80, $00, $80
-; jumped to by: irq
-kernal_irq = $ea31
-
 shape_ea63:
 		.byte	$00, $18, $00, $54, $06, $4f, $08, $f0, $f8, $f0, $fa, $4f, $80, $07, $00, $ec
 		.byte	$10, $04, $10, $00, $18, $00, $18, $fc, $e8, $fc, $e8, $00, $f0, $00, $f0, $04

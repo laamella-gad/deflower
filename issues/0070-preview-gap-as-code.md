@@ -14,7 +14,7 @@ Seen while disassembling fixture `3dgolf_snap`. Its gaps hold a mix of things:
 - `$a00c-$a02b`: a table of addresses that only *looks* like code at first (`sbc $ab, x`, `lsr $48ac`, ...).
 - `$a02b-$a09d`: ASCII digits.
 
-Telling these apart meant disassembling each gap by hand, outside Deflower.
+Telling these apart meant disassembling each gap by hand, outside Deflower. `3dgolf_snap.flo` declares them all by now, so a test of this needs the file without those lines.
 
 Want: a way to look at a range as code (a linear sweep from its start) that changes nothing else about the run. It must not register areas or labels, follow branches out of the range, or conflict with what is declared there.
 

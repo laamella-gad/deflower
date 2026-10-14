@@ -22,7 +22,7 @@ The groups, with the opcode mpu6502's `SourceParser` assembles them to (the lega
 
 64tass should be checked for the same choice. If it picks differently, the table above is what decides, since the round-trip tests ([0062](0062-snippet-test-factories.md)) and verify ([0075](0075-verify-flag.md)) use mpu6502.
 
-None of the fixtures has one of these today; every fixture's `expected.asm` reassembles to its input with `SourceParser`. They do turn up in real programs: `$eb` as `sbc #` in some packers and demos, the other `nop`s as padding or to skip bytes, and code traced into data easily decodes them.
+None of the fixtures has one of these today; every snippet passes the round trip with `SourceParser`. They do turn up in real programs: `$eb` as `sbc #` in some packers and demos, the other `nop`s as padding or to skip bytes, and code traced into data easily decodes them.
 
 Want: an instruction whose opcode isn't the one its mnemonic and mode assemble to prints as bytes, with the instruction in a comment, e.g.
 

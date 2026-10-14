@@ -25,7 +25,7 @@ Behaviour:
 Open questions:
 - **Server or watcher.** A plain watch loop that rewrites `out/*.asm` covers the workflow above. "Server" could also mean serving the output, e.g. over HTTP to a browser page that reloads by itself, or to an editor plugin. Decide whether that is part of this issue or a follow-up.
 - **Old output on error.** Today `Deflower` clears `out/` at the start of each run, so a failed run leaves no `.asm` at all. In watch mode, keeping the last good output may be better while the user fixes the error.
-- `main` resolves the `.flo` path on the classpath; a watcher needs a real file-system path. That overlaps with [0059](0059-convert-to-nim.md) (which supersedes [0019](0019-ship-as-single-executable.md)) and [0056](0056-help-flag.md), which `--watch` should be listed in.
+- `--watch` should be listed in [0056](0056-help-flag.md)'s usage. (Paths are file-system paths since [0101](0101-run-from-the-command-line.md), so the watcher can use them as they are.)
 
 Implementation hint: file-system watchers often watch directories, not files (Java's `java.nio.file.WatchService` and Linux inotify-based ones do), so register the directories that hold the watched files and filter events by file name.
 

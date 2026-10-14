@@ -24,10 +24,10 @@ The parts then form one image: the trace follows calls between them, data gets l
 ## To decide
 
 - **Syntax.** A new `load` line, or more files on the `deflower` line. Where each file goes: a `.prg` has its load address in its first two bytes; a raw binary needs an address on the line, and a `.prg` might need an override.
-- **File types.** `.prg`, raw binaries, and maybe a `.vsf` as the base with `.prg` files on top.
+- **File types.** `.prg`, raw binaries ([0117](0117-load-raw-binaries.md) loads one as the main file), and maybe a `.vsf` as the base with `.prg` files on top.
 - **Overlap.** Two files loading into the same addresses: the later one wins, or it's an error. Overlays and banked parts loaded at different times are the hard case; see [0069](0069-one-label-per-address-ignores-banking.md).
 - **Output.** One `.asm` for all parts, named after the `deflower` file, or one per loaded file that includes the others' labels, as in [0058](0058-disassemble-region-to-separate-asm-file.md).
 - **Reassembly.** The output no longer reassembles to one `.prg`. Decide what 64tass should produce, and what verify ([0075](0075-verify-flag.md)) compares each part with.
 - **Relation to 0065.** Memory no file loads is still zeros the trace shouldn't decode ([0065](0065-trace-stops-at-memory-the-image-does-not-load.md)); with several files, the loaded ranges are the union.
 
-Done when: a small fixture with a `.prg` that calls into a second loaded file traces into it and labels the target, its `expected.asm` assembles with 64tass, and `CLAUDE.md` and the format comment in `Flo.g4` describe the new line.
+Done when: a small fixture with a `.prg` that calls into a second loaded file traces into it and labels the target, its output assembles with 64tass, and `CLAUDE.md` and the format comment in `Flo.g4` describe the new line.

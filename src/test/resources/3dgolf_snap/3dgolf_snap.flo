@@ -111,7 +111,7 @@ $fff6-$fffa virtual byte unused_fff6
 $fffa virtual addr nmi_hw_vector
 $fffc virtual addr reset_hw_vector
 $fffe virtual addr irq_hw_vector
-$ea31 kernal_irq
+$ea31 banked kernal_irq
 $ea87 kernal_scnkey
 ; log-domain constants: +0 is 1/sqrt(2), +4 and +6 the projection scales, +$a the
 ; current shape scale, +$c the log of the depth being projected

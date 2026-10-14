@@ -10,7 +10,7 @@ Deflower disassembles 6502 code, and nothing in the tracing or the output needs 
 ## Where things stand
 
 Generic, and should stay so:
-- `FlowAnalyser`, `AddressSetupFinder`, `Subject`, the areas, `ResultWriter`/`AssemblyFileFormat`, `Verifier`, `MemoryMap`, `CrossReferences`. These only mention the KERNAL as an example in comments.
+- `FlowAnalyser`, `AddressSetupFinder`, `SelfModificationFinder`, `Subject`, the areas, `ResultWriter`/`AssemblyFileFormat`, `Verifier`, `MemoryMap`, `CrossReferences`. These only mention the KERNAL as an example in comments.
 - The `.flo` grammar, apart from the points below.
 
 Machine-specific:
@@ -29,7 +29,7 @@ Machine-specific:
 ## To decide
 
 - **Package layout**: e.g. `com.laamella.deflower.c64` for `ViceSnapshotReader`, `PrgReader`, `Initializer`, and the `vicevcf` package, with interfaces for loader and initializer in the core.
-- **Raw binaries**: a `deflower <file> at $8000` form (or similar) for a file with no header. That is the first non-C64 need, e.g. for a cartridge or ROM image.
+- **Raw binaries**: a `deflower <file> at $8000` form (or similar) for a file with no header, now [0117](0117-load-raw-binaries.md). That is the first non-C64 need, e.g. for a cartridge or ROM image.
 - **Text encodings**: keep `screencode`/`ascii` as they are and add encodings per machine later, or name them after the machine (`c64screen`) now. Changing the names breaks existing `.flo` files.
 - **Machine selection**: from the input file (a `.vsf` names its machine), from an include (`include c64.flo`), or an explicit `machine` line.
 
