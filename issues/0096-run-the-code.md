@@ -23,7 +23,7 @@ mpu6502 already has a CPU core: `Mpu6502` with a `step()` and a `Bus` interface 
   - Or only record what happened and feed it to the analysis: which addresses executed (code for sure), which were read or written as data, the targets of indirect jumps and `rts` dispatch, where each `jsr` returned to, which instructions were changed by the program.
   - Or both, as separate steps.
 - **The machine around the CPU.** Most code touches I/O, the KERNAL and interrupts. A bare `Bus` over RAM is enough for a decruncher, which usually only banks `$01`. More than that means ROM images (licensing), I/O registers that return something plausible (raster line, CIA timers, the keyboard), and interrupts. Where to stop, and whether to use VICE (its monitor or remote protocol) instead of emulating in Deflower.
-- **Snapshots.** A `.vsf` snapshot also holds the CPU registers and the I/O state, not only RAM, so it could resume where it was taken. Deflower only reads the `C64MEM` module now.
+- **Snapshots.** A `.vsf` snapshot also holds the CPU registers and the I/O state, not only RAM, so it could resume where it was taken. Deflower reads `C64MEM`, `MAINCPU`, `VIC-II` and the CIAs (for `--init`), but not the SID or the drive.
 - **How the `.flo` file says it.** A `run` line, or a `deflower` variant that runs first and disassembles the result; how the result's memory then relates to the original file's addresses and to `Verifier`'s comparison.
 - **Determinism.** The output should stay the same from run to run in the watcher loop, so no wall-clock time or random input.
 - **mpu6502.** Whether its core is complete and correct enough (undocumented opcodes, decimal mode, cycle counts). It also needs a way to record executed addresses and memory accesses.

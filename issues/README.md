@@ -15,4 +15,5 @@ Local issue tracker. The git remote is a local bare repo, so issues live in this
   ```
 
 - Body: what happens, where (file and line), and what done looks like.
+- `issues/open` lists the open and in-progress issues, high priority first.
 - Update `status` in the file when work changes state. Close by setting `status: done`; don't delete files.

@@ -11,13 +11,14 @@ Want: a mode, e.g. `--mcp <file.flo>`, in which Deflower runs as an MCP server. 
 - **what_is_at(address)**: the area, its type, label and value;
 - **references(label or address)**: the cross-references of [0076](0076-cross-reference-comments.md);
 - **verify()**: the differences and gaps of [0075](0075-verify-flag.md);
-- **inspect()**: the facts of [0072](0072-inspect-input-file.md);
+- **inspect()**: the facts `--init` writes ([0072](0072-inspect-input-file.md));
+- **dump/find/strings(...)**: what `--dump`, `--find` and `--strings` print;
 - **show(range, shape)**: screen text, glyphs or sprites, as in [0080](0080-show-memory-as-screen-text-and-glyphs.md);
 - **preview(range, type)**: the output a declaration would give, without editing the `.flo` file, as in [0070](0070-preview-gap-as-code.md).
 
 The files stay the main interface: the `.flo` file is still edited as a file, and `out/*.asm` is still written, so the user and the tests see the same result. The server is only a faster way to ask questions.
 
-**Blocked by** 0072, 0075, 0076 and 0080: the server should be a thin layer over those features, not a second implementation of them. It also comes after [0059](0059-convert-to-nim.md), the port to Nim, like the other command line modes.
+**Blocked by** 0080 (0072, 0075 and 0076 are done): the server should be a thin layer over those features, not a second implementation of them. It also comes after [0059](0059-convert-to-nim.md), the port to Nim, like the other command line modes.
 
 ## To decide
 

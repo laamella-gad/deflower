@@ -1,0 +1,18 @@
+#!/bin/sh
+# Lists the open and in-progress issues, high priority first, then by number.
+cd "$(dirname "$0")" || exit 1
+for file in [0-9]*.md; do
+    awk -v file="$file" '
+        NR == 1 && $0 != "---" { exit }
+        NR > 1 && $0 == "---" { done = 1 }
+        !done && /^status:/ { status = $2 }
+        !done && /^priority:/ { priority = $2 }
+        !done && /^title:/ { sub(/^title: */, ""); title = $0 }
+        END {
+            if (status != "open" && status != "in-progress") exit
+            rank = priority == "high" ? 1 : priority == "medium" ? 2 : priority == "low" ? 3 : 4
+            if (priority == "") priority = "-"
+            mark = status == "in-progress" ? " (in progress)" : ""
+            printf "%d\t%-6s %s %s%s\n", rank, priority, substr(file, 1, 4), title, mark
+        }' "$file"
+done | sort -t "$(printf '\t')" -k1,1n -k2,2 | cut -f2-

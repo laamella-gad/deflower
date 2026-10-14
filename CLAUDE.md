@@ -94,7 +94,7 @@ Test-driven workflow:
 - To accept a new snippet or a deliberate output change, delete everything from the `^^^` line on and rerun the tests. Running with `-DREGENERATE_EXPECTATIONS` rewrites all of them. Either way, the test writes the actual output into the file and fails once, so you can review it before committing.
 - The `.asm` of a short snippet can also be checked with 64tass: `64tass -q -b -o x.bin test.asm` must equal `test.prg` minus its 2-byte header.
 
-Issues are tracked as `issues/NNNN-slug.md` (frontmatter `title`/`status`/`priority`/`labels`, priority `low`/`medium`/`high`); `issues/README.md` describes the format. To close one, set `status: done`, remove its `priority` and add a "## Closing note".
+Issues are tracked as `issues/NNNN-slug.md` (frontmatter `title`/`status`/`priority`/`labels`, priority `low`/`medium`/`high`); `issues/README.md` describes the format. `issues/open` lists the open ones by priority. To close one, set `status: done`, remove its `priority` and add a "## Closing note".
 
 ## Notes
 

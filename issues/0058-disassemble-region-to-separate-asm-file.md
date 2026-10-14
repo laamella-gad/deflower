@@ -12,12 +12,7 @@ Want: mark a region in the `.flo` file so its disassembly (code and data, with t
 Why `.include` works for this: 64tass includes a file as text at that point, so the two files share one symbol table. Labels defined in the included file resolve in the main file and the other way round, and `*=` origins keep working. Reassembling the main file still has to produce the same bytes as one big file.
 
 Open questions:
-- **Syntax.** Options:
-  - reuse `export <id>`, which already parses. But [0022](0022-export-region-to-binary.md) plans it for writing a region as a binary file (`.binary`);
-  - add a second keyword, e.g. `include <id>`;
-  - one keyword where the type decides: `code`/typed data gives source, untyped gives binary.
-
-  Choose together with 0022.
+- **Syntax.** [0022](0022-export-region-to-binary.md) is done: `export <file>.bin` and `export <file>.prg` on a data line write the region as a binary. The natural extension is to let the extension decide here too, `export <file>.asm` giving source. But `export` today makes the region fixed data, and a source region holds traced code, so it would need a range line that isn't a data line (see [0085](0085-export-code-region.md), which asks the same for code exported as a binary). `include` is taken by `.flo` includes.
 - **What a region is.** A range line (`$c000-$c800 ... include music`) is the obvious unit. A region may hold traced code, which the `.flo` file doesn't declare as an area. So the region is an address range for the writer, not an `Area`, and must not cause area conflicts with what is inside it.
 - **Boundaries.** An instruction or a multi-byte element that straddles the region's edge: report an error, or move the edge?
 - **Nesting.** A region inside a region (a file that includes another). Probably not needed at first.
