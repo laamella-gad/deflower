@@ -87,6 +87,8 @@ type
     exportLines: TableRef[string, int]
       ## The line each export file name was first given on, across all
       ## runs: they share one output directory.
+    readFiles: ref seq[string]
+      ## The included files read from disk so far, shared by all collectors.
     pendingComments: seq[string]
     errors: seq[string]
       ## Mistakes the grammar can't catch, like a misplaced block.
@@ -355,9 +357,9 @@ proc parseStatements(text: string, errors: var seq[string]): seq[tuple[line: int
 # Collecting the annotations.
 
 proc newCollector(run: DeflowerRun, included: bool, path: string, includeChain: seq[string],
-    exportLines: TableRef[string, int]): AnnotationCollector =
+    exportLines: TableRef[string, int], readFiles: ref seq[string]): AnnotationCollector =
   AnnotationCollector(run: run, included: included, path: path, includeChain: includeChain,
-      exportLines: exportLines, blockBase: -1)
+      exportLines: exportLines, readFiles: readFiles, blockBase: -1)
 
 proc collect(text, sourceName: string, collector: AnnotationCollector)
 
@@ -396,15 +398,18 @@ proc includeFile(collector: AnnotationCollector, line: int, name: string) =
   let chain = collector.includeChain & name
   let local = if collector.path.len > 0: collector.path.parentDir / name else: ""
   if local.len > 0 and fileExists(local):
+    if local notin collector.readFiles[]:
+      collector.readFiles[].add local
     var text: string
     try:
       text = readFile(local)
     except IOError as e:
       collector.lineError(line, "can't read " & name & ": " & e.msg)
       return
-    collect(text, name, newCollector(collector.run, true, local, chain, collector.exportLines))
+    collect(text, name, newCollector(collector.run, true, local, chain, collector.exportLines, collector.readFiles))
   elif name in builtIns:
-    collect(builtIns[name], name, newCollector(collector.run, true, "", chain, collector.exportLines))
+    collect(builtIns[name], name, newCollector(collector.run, true, "", chain, collector.exportLines,
+        collector.readFiles))
   else:
     collector.lineError(line, "no file " & name & " to include")
 
@@ -574,8 +579,21 @@ proc collect(text, sourceName: string, collector: AnnotationCollector) =
   collector.closeRun()
   assertState(collector.errors.len == 0, "Failed to parse " & sourceName & ":\n" & collector.errors.join("\n"))
 
+proc readFlo*(path, sourceName: string, includedFiles: var seq[string]): seq[DeflowerRun] =
+  ## The runs of the .flo file at `path`, which messages call `sourceName`.
+  ## Adds the paths of the files it includes from disk to `includedFiles`,
+  ## even when it fails.
+  let readFiles = new seq[string]
+  let collector = newCollector(nil, false, path, @[sourceName], newTable[string, int](), readFiles)
+  try:
+    collect(readFile(path), sourceName, collector)
+  finally:
+    for file in readFiles[]:
+      if file notin includedFiles:
+        includedFiles.add file
+  collector.runs
+
 proc readFlo*(path, sourceName: string): seq[DeflowerRun] =
   ## The runs of the .flo file at `path`, which messages call `sourceName`.
-  let collector = newCollector(nil, false, path, @[sourceName], newTable[string, int]())
-  collect(readFile(path), sourceName, collector)
-  collector.runs
+  var includedFiles: seq[string]
+  readFlo(path, sourceName, includedFiles)

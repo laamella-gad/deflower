@@ -3,7 +3,7 @@
 ## each run load its memory image (loaders) and apply its annotations in
 ## order (Subject.annotate) - and `deflower` analyses and writes each one.
 
-import std/[algorithm, os, strutils, sugar]
+import std/[algorithm, os, sequtils, strutils, sugar]
 import printing, subject, flo_reader, loaders, flow_analyser, finders, result_writer, memory_map, verifier
 
 proc loadMemoryImage(filename: string, subject: Subject) =
@@ -19,14 +19,20 @@ proc outputFileNameFor(targetFileName: string): string =
   let dot = baseName.rfind('.')
   (if dot > 0: baseName[0 ..< dot] else: baseName) & ".asm"
 
-proc configure*(flowerFile: string): seq[Subject] =
+proc configure*(flowerFile: string, files: var seq[string]): seq[Subject] =
+  ## The Subjects of the .flo file. Adds the paths of the files they are made
+  ## from, besides the .flo file itself, to `files`, as far as it gets when
+  ## it fails: the .flo files it includes from disk and the binaries.
   let path = absolutePath(flowerFile)
   let basePath = parentDir(path)
-  for run in readFlo(path, extractFilename(path)):
+  for run in readFlo(path, extractFilename(path), files):
     let subject = newSubject(basePath)
     subject.outputFileName = outputFileNameFor(run.targetName)
     result.add subject
-    loadMemoryImage(basePath / run.targetName, subject)
+    let binary = basePath / run.targetName
+    if binary notin files:
+      files.add binary
+    loadMemoryImage(binary, subject)
     # The banked names first, so an rta line can't trace into the RAM under
     # one (issue 0102). Then the including file's own lines: included ones
     # are weak and only fill in what those leave open (issue 0078).
@@ -36,6 +42,10 @@ proc configure*(flowerFile: string): seq[Subject] =
     for annotation in annotations:
       subject.annotate(annotation)
     subject.checkBankedCodeEntries()
+
+proc configure*(flowerFile: string): seq[Subject] =
+  var files: seq[string]
+  configure(flowerFile, files)
 
 proc write(subject: Subject): string =
   ## Writes the .asm, the exported binaries and the .map of the subject, and
@@ -55,28 +65,45 @@ proc write(subject: Subject): string =
   writeFile(mapFile, map)
   asmFile
 
-proc deflower*(flowerFile: string, verify = false): bool =
-  ## Runs the .flo file at this path. Messages name files relative to its
-  ## directory. Returns false when a run has errors or, when verifying,
-  ## doesn't verify.
-  result = true
+type
+  Outcome* = enum
+    ## How a run of a .flo file went.
+    oFine
+      ## Written, and verified when asked.
+    oNotVerified
+      ## Written, but it doesn't verify.
+    oFailed
+      ## A run has errors: its output isn't written.
+
+proc analyse(subject: Subject) =
+  analyseCodeFlows(subject)
+  findAddressSetups(subject)
+  findSelfModifications(subject)
+  subject.warnUsedSkeletonRanges()
+  subject.dropUnusedIncludes()
+  subject.reportDuplicateLabels()
+
+proc run*(flowerFile: string, verify: bool, keepOnError: bool, files: var seq[string]): Outcome =
+  ## Runs the .flo file at this path and adds the paths of the files it is
+  ## made from to `files` (`configure`). With `keepOnError`, an error in any
+  ## of its runs leaves `out/` as it was, rather than only skipping that
+  ## run's output (issue 0057).
+  result = oFine
   try:
-    let subjects = configure(flowerFile)
+    let subjects = configure(flowerFile, files)
     if subjects.len == 0:
-      return true
+      return
+    for subject in subjects:
+      analyse(subject)
+    let writing = not keepOnError or subjects.allIt(it.errors.len == 0)
     # Cleared and recreated once per .flo file, before any of its (possibly
     # several) Subjects are written, so that one deflower line's run doesn't
     # delete another's output.
-    let outputDirectory = subjects[0].basePath / "out"
-    removeDir(outputDirectory)
-    createDir(outputDirectory)
+    if writing:
+      let outputDirectory = subjects[0].basePath / "out"
+      removeDir(outputDirectory)
+      createDir(outputDirectory)
     for subject in subjects:
-      analyseCodeFlows(subject)
-      findAddressSetups(subject)
-      findSelfModifications(subject)
-      subject.warnUsedSkeletonRanges()
-      subject.dropUnusedIncludes()
-      subject.reportDuplicateLabels()
       let warnings = subject.warnings.sorted(proc (a, b: Warning): int = cmp(a.address, b.address))
       var printed: seq[string]
       for warning in warnings:
@@ -88,11 +115,20 @@ proc deflower*(flowerFile: string, verify = false): bool =
         for error in subject.errors:
           printErr(error)
         printErr("Errors detected for " & subject.outputFileName & ", not writing output.")
-        result = false
+        result = oFailed
+        continue
+      if not writing:
         continue
       let asmFile = write(subject)
-      if verify and not verifier.verify(subject, asmFile):
-        result = false
+      if verify and not verifier.verify(subject, asmFile) and result == oFine:
+        result = oNotVerified
   except StateError as e:
     printErr(e.msg)
-    result = false
+    result = oFailed
+
+proc deflower*(flowerFile: string, verify = false): bool =
+  ## Runs the .flo file at this path. Messages name files relative to its
+  ## directory. Returns false when a run has errors or, when verifying,
+  ## doesn't verify.
+  var files: seq[string]
+  run(flowerFile, verify, false, files) == oFine

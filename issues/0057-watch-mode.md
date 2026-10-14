@@ -1,7 +1,6 @@
 ---
 title: Add a flag to run deflower as a live server that re-runs on file changes
-status: open
-priority: high
+status: done
 labels: enhancement
 ---
 
@@ -35,3 +34,11 @@ Done when: `--watch <file.flo>` runs once, then re-runs after a change to the `.
 
 - **A watching server, terminal only.** `--watch` keeps deflower running, watches the files, re-runs on a change and prints each run's stdout and/or stderr to the terminal. No browser page, HTTP or editor plugin.
 - **Keep the last good output on error.** A failed run prints its errors and leaves `out/*.asm` as it was; only a successful run replaces it.
+- **All or nothing.** With several `deflower` lines, an error in any run leaves all of `out/` as it was. Only a run without errors clears `out/` and writes everything, so `out/` always holds one consistent run.
+- **Poll the modification times**, every 200 ms: portable, no platform code, and only a handful of files to look at.
+- **Watched files**: the `.flo` file, every `.flo` file it includes from disk (not the built-in ones), and every binary its `deflower` lines load. The set is recomputed after each run; after a failed one, the files that run got to are added to the previous set.
+- **A status line after each run**: the time, the outcome (`ok`, `doesn't verify` or `failed, out/ unchanged`) and `watching <file>`, with a blank line before the next run's output.
+
+## Closing note
+
+`./deflower --watch [--verify] <file.flo>` runs once, then again whenever the `.flo` file, a `.flo` file it includes from disk or a binary it loads changes (`src/deflower/watcher.nim`). It polls the modification times every 200 ms, waits until they settle before a run, and takes them before the run, so a change during it brings one more. `runner.run` with `keepOnError` analyses all subjects before touching `out/`, and leaves it as it was when any has errors. A run that throws (a missing binary) is reported and waited out as well. Each run ends with `HH:MM:SS ok|doesn't verify|failed, out/ unchanged, watching <file>`, and stdout is flushed after it. Ctrl-C ends it with exit code 0. `tests/test_watch.nim` covers a re-run after a change to the `.flo` file, to an included file and to the binary, a failed run leaving `out/` as it was, and a missing binary appearing. The single run's output is unchanged: every snippet passes as it was.
