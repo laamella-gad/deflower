@@ -28,7 +28,7 @@ Maven project, Java 14 source/target (JDK 23 installed locally works). Depends o
 - Find text: `./deflower --strings <file> [<start>-<end>] [min <n>]` (`TextFinder`) lists the stretches that read as PETSCII (`ascii`) or screen codes (`screencode`), with `--dump`'s characters. A stretch has at least 6 characters besides spaces (or `min <n>`), at least half of them letters and half of them different, letters in one case apart from a capital at the start of a word; `@` and reversed screen codes don't count. Followed by `$00`/`$ff` it prints as `<start> <type>[until $xx]`, preceded by its length as `<start> <type>[lengthbyte]`, else as `<start>-<end> <type>`, then the text: pastable into a `.flo` file. These are only candidates.
 - `Deflower.look` runs `--dump`, `--find` and `--strings` for `main` and the snippet tests.
 - No linter or formatter is configured.
-- The Nim port (issue 0059) lives in `nim/`. So far that is `nim/mpu6502/`, mpu6502's opcode table and assembler as a nimble package of its own, which imports nothing of deflower's: run its tests with `nimble test` there (Nim 2.2.10).
+- The Nim port (issue 0059) lives in `nim/`. So far that is `nim/mpu6502/`, mpu6502's opcode table and assembler, and `nim/snippets_test/`, the snippet test runner on top of `std/unittest` (`runSnippetTests`), each a nimble package of its own that imports nothing of deflower's: run their tests with `nimble test` there (Nim 2.2.10).
 
 All `DeflowerTest` cases pass.
 

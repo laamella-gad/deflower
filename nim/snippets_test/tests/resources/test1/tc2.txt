@@ -1,0 +1,5 @@
+>>> a simple hello world <<<
+Hello world!
+^^^
+HELLO WORLD!
+vvv
