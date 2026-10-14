@@ -7,7 +7,7 @@ deflower t.prg
 $0800 byte first second
 ^^^
 Failed to parse test.flo:
-line 2:17 extraneous input 'second' expecting NEWLINE
+line 2: expected export, '{' or the end of the line, found 'second'
 ~~~
 ~~~
 vvv

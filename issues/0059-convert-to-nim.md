@@ -31,7 +31,7 @@ Checked on 2026-10-14:
 `Subject` and the memory model; the `Area` classes (a Nim object variant, or `ref object` with methods); `FlowAnalyser`; `AddressSetupFinder` and `SelfModificationFinder`; `CrossReferences`; `ResultWriter`/`AssemblyFileFormat`/`LineEmitter`; `MemoryMap`; `Verifier`; `PrgReader`, `MemoryImage` and the VICE snapshot reader (`vicevcf`, byte-level parsing); and the other modes (`Initializer`, `Dumper`, `Finder`, `TextFinder`).
 
 Spots where Java behaviour leaks into the output and the port has to match it on purpose:
-- iteration order of the maps and sets that feed the output (`HashMap` against `TreeMap`/`LinkedHashSet`): where the Java code relies on a sorted or insertion order, Nim needs the same, and where the order is a `HashMap`'s, the snippets fix it, so it is worth making explicit in Java first;
+- iteration order of the maps and sets that feed the output (`TreeMap`, `LinkedHashSet`, `EnumMap`): Nim needs the same sorted or insertion order. No `HashMap` or `HashSet` order reaches the output (checked in step 3): they are only looked up, or walked to add labels named by their address;
 - `String.format` and `Integer.toHexString` (case, padding);
 - sort stability (`Comparator` chains, `Stream.sorted`);
 - error and warning texts, word for word.
@@ -40,7 +40,7 @@ Spots where Java behaviour leaks into the output and the port has to match it on
 
 1. **mpu6502 in Nim**: the opcode table and `ByteManipulation`, with a test that decodes all 256 opcodes like the Java table; then `SourceParser`, with its own tests. Deflower's round trip then checks that it assembles every snippet's output to the same bytes as the Java one.
 2. **snippets-test core in Nim**, with its Java tests ported (`SplitTest`, `TestCaseFilenameFilterTest`, `SnippetTestFactoryTest` and their resource files), not deflower's snippets.
-3. **Prepare in Java**: everything that changes snippet output, done before the port so the snippets stay the measure: parse error messages in deflower's own words (see Decisions), and explicit orders where a `HashMap`'s order reaches the output.
+3. **Prepare in Java** (done): everything that changes snippet output, done before the port so the snippets stay the measure. Parse errors are now in deflower's own words: one `line N: expected <parts>, found <token>` per bad line, its first problem, with the parts named as in the format description (`FloReader.describe`; `short/invalid/syntax-errors.txt` shows them in most places), or `unexpected '~'` for a character no word holds. Where ANTLR only expects the end of an annotation line, having passed over optional parts that didn't fit, the parts that may still follow come from the line's fixed shape (`FloReader.remainingLineParts`); the npeg grammar has to give the same lists. No `HashMap` order reached the output, so nothing changed there.
 4. **Port deflower**, in pipeline order, each step turning more snippets green: `.flo` parsing; the loaders; `Subject`, the tracing and the finders; the writer, the map and `Verifier` (now all `short` and `large` snippets); then `--init`, `--dump`, `--find`, `--strings`.
 5. **Switch over**: the Nim executable passes all 123 snippets; delete the Java sources, `pom.xml`, the grammar and `./deflower`'s classpath handling; update `CLAUDE.md` and the open issues that name Java classes.
 

@@ -1,0 +1,27 @@
+>>> Each line with a syntax error gives one message, for its first problem:
+what was expected there, in the words of the format description, and what
+was found. Parameters and noreturn are only offered on a code line. <<<
+
+===
+deflower
+deflower test.prg
+$c000 code start ( byte count word
+$c010 code print noreturn noreturn
+$c020 byte[until] table
+$c030 byte[3 *] table2
+$c040 word table3 export
+$c050 virtual virtual
+include
+^^^
+Failed to parse test.flo:
+line 1: expected a file name, found the end of the line
+line 3: expected ',' or ')', found 'word'
+line 4: expected export, '{' or the end of the line, found 'noreturn'
+line 5: expected a number, found ']'
+line 6: expected a number, found ']'
+line 7: expected a file name, found the end of the line
+line 8: expected banked, selfmod, a type, a label, export, '{' or the end of the line, found 'virtual'
+line 9: expected a file name, found the end of the line
+~~~
+~~~
+vvv

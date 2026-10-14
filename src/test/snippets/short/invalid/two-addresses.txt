@@ -4,7 +4,7 @@ deflower t.prg
 $0800 $0900 byte label
 ^^^
 Failed to parse test.flo:
-line 2:6 missing NEWLINE at '$0900'
+line 2: expected virtual, banked, selfmod, a type, a label, export, '{' or the end of the line, found '$0900'
 ~~~
 ~~~
 vvv

@@ -4,7 +4,7 @@ deflower t.prg
 $0800 label byte
 ^^^
 Failed to parse test.flo:
-line 2:12 extraneous input 'byte' expecting NEWLINE
+line 2: expected export, '{' or the end of the line, found 'byte'
 ~~~
 ~~~
 vvv

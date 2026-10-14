@@ -4,6 +4,11 @@ import com.laamella.enflower.FloBaseListener;
 import com.laamella.enflower.FloLexer;
 import com.laamella.enflower.FloParser;
 import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.Vocabulary;
+import org.antlr.v4.runtime.misc.IntervalSet;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -20,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 import static com.laamella.Assert.assertState;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -48,20 +54,30 @@ class FloReader {
         // The grammar ends every line with a newline; the last one may
         // lack it (issue 0088).
         String lines = text.isEmpty() || text.endsWith("\n") || text.endsWith("\r") ? text : text + "\n";
-        List<String> parseErrors = new ArrayList<>();
-        FloParser parser = createParser(parseErrors, CharStreams.fromString(lines, sourceName));
+        // The first syntax error on each line, by column: after one, ANTLR's
+        // recovery only reports what follows from it.
+        Map<Integer, Map.Entry<Integer, String>> firstErrors = new TreeMap<>();
+        FloParser parser = createParser(firstErrors, CharStreams.fromString(lines, sourceName));
         FloParser.ProgContext tree = parser.prog();
+        List<String> parseErrors = new ArrayList<>();
+        firstErrors.forEach((line, error) -> parseErrors.add(String.format("line %d: %s", line, error.getValue())));
         assertState(parseErrors.isEmpty(), "Failed to parse %s:%n%s", sourceName, String.join("\n", parseErrors));
         new ParseTreeWalker().walk(collector, tree);
         collector.closeRun();
         assertState(collector.errors.isEmpty(), "Failed to parse %s:%n%s", sourceName, String.join("\n", collector.errors));
     }
 
-    private static FloParser createParser(List<String> parseErrors, CharStream input) {
+    private static FloParser createParser(Map<Integer, Map.Entry<Integer, String>> firstErrors, CharStream input) {
         BaseErrorListener errorCollector = new BaseErrorListener() {
             @Override
             public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-                parseErrors.add(String.format("line %d:%d %s", line, charPositionInLine, msg));
+                String message = recognizer instanceof Parser
+                        ? describe((Parser) recognizer, (Token) offendingSymbol)
+                        : "unexpected " + msg.substring(msg.indexOf("at: ") + 4);
+                Map.Entry<Integer, String> first = firstErrors.get(line);
+                if (first == null || charPositionInLine < first.getKey()) {
+                    firstErrors.put(line, Map.entry(charPositionInLine, message));
+                }
             }
         };
         FloLexer lexer = new FloLexer(input);
@@ -71,6 +87,145 @@ class FloReader {
         parser.removeErrorListeners();
         parser.addErrorListener(errorCollector);
         return parser;
+    }
+
+    private static final int DEFLOWER = literal("deflower");
+    private static final int INCLUDE = literal("include");
+    private static final int EXPORT = literal("export");
+    private static final int OPEN_PARAMETERS = literal("(");
+    private static final int NORETURN = literal("noreturn");
+    private static final int OPEN_SIZE = literal("[");
+
+    /** The token type of a word or sign in the grammar. */
+    private static int literal(String text) {
+        for (int type = 1; type <= FloParser.VOCABULARY.getMaxTokenType(); type++) {
+            if (("'" + text + "'").equals(FloParser.VOCABULARY.getLiteralName(type))) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException(text);
+    }
+
+    // What the parser can take next, in the order of a line's parts, with
+    // what each is called in an error message.
+    private static final List<Integer> EXPECTED_ORDER = List.of(
+            FloParser.INT, DEFLOWER, INCLUDE, literal("-"), literal("virtual"), literal("banked"), literal("selfmod"),
+            literal("until"), literal("lengthbyte"), FloParser.SCREENCODE, OPEN_SIZE, literal("*"), literal("+"),
+            literal("]"), FloParser.ID, OPEN_PARAMETERS, literal(","), literal(")"), NORETURN,
+            EXPORT, FloParser.OPEN_BLOCK, FloParser.CLOSE_BLOCK, FloParser.NEWLINE);
+
+    /**
+     * Says what the parser expected where `found` is, in the words of the
+     * format description rather than the grammar's token names: "expected
+     * a type, a label or the end of the line, found 'x'".
+     */
+    private static String describe(Parser parser, Token found) {
+        IntervalSet expected = parser.getExpectedTokens();
+        List<Token> line = tokensOfLineBefore(parser, found);
+        boolean codeLine = line.stream().anyMatch(t -> t.getType() == FloParser.CODE);
+        long openParentheses = line.stream().filter(t -> t.getText().equals("(")).count()
+                - line.stream().filter(t -> t.getText().equals(")")).count();
+        int previous = line.isEmpty() ? -1 : line.get(line.size() - 1).getType();
+        Vocabulary vocabulary = parser.getVocabulary();
+        List<String> words = new ArrayList<>();
+        boolean annotationLine = !line.isEmpty() && (line.get(0).getType() == FloParser.INT || line.get(0).getType() == FloParser.HEX);
+        if (annotationLine && expected.size() == 1 && expected.contains(FloParser.NEWLINE)) {
+            // ANTLR passes over the optional parts that don't fit and only
+            // expects the end of the line; what may still come follows from
+            // the last part on the line.
+            words.addAll(remainingLineParts(line, codeLine));
+        }
+        for (int type : words.isEmpty() ? EXPECTED_ORDER : List.<Integer>of()) {
+            boolean isType = type == FloParser.SCREENCODE;
+            if (!(isType ? expected.contains(FloParser.BYTE) : expected.contains(type) || type == FloParser.INT && expected.contains(FloParser.HEX))) {
+                continue;
+            }
+            String literal = vocabulary.getLiteralName(type);
+            if (isType) {
+                words.add("a type");
+            } else if (type == FloParser.INT) {
+                words.add(expected.contains(DEFLOWER) ? "an address" : "a number");
+            } else if (type == FloParser.ID) {
+                words.add(previous == DEFLOWER || previous == INCLUDE || previous == EXPORT
+                        ? "a file name" : openParentheses > 0 ? "a name" : "a label");
+            } else if (type == FloParser.NEWLINE) {
+                words.add("the end of the line");
+            } else if (type == OPEN_SIZE) {
+                words.add("a size");
+            } else if (type == OPEN_PARAMETERS || type == NORETURN) {
+                // Parameters and noreturn only make sense on a code line.
+                if (codeLine) {
+                    words.add(type == OPEN_PARAMETERS ? "parameters" : "noreturn");
+                }
+            } else if (literal.matches("'[a-z]+'")) {
+                words.add(literal.substring(1, literal.length() - 1));
+            } else {
+                words.add(literal);
+            }
+        }
+        String foundText = found.getType() == Token.EOF ? "the end of the file"
+                : found.getType() == FloParser.NEWLINE ? "the end of the line"
+                : "'" + found.getText() + "'";
+        if (words.isEmpty()) {
+            return "unexpected " + foundText;
+        }
+        String list = words.size() == 1 ? words.get(0)
+                : String.join(", ", words.subList(0, words.size() - 1)) + " or " + words.get(words.size() - 1);
+        return String.format("expected %s, found %s", list, foundText);
+    }
+
+    // The optional parts of an annotation line after its address, in order.
+    private static final List<String> LINE_PARTS = List.of(
+            "virtual", "banked", "selfmod", "a type", "a label", "parameters", "noreturn", "export", "'{'");
+
+    /**
+     * The parts that may follow the last part of an annotation line, which
+     * holds `line`, named as in the format description.
+     */
+    private static List<String> remainingLineParts(List<Token> line, boolean codeLine) {
+        int last = -1;
+        int depth = 0;
+        for (int i = 1; i < line.size(); i++) {
+            int type = line.get(i).getType();
+            String text = line.get(i).getText();
+            if (text.equals("(")) {
+                depth++;
+            } else if (text.equals(")")) {
+                depth--;
+                last = LINE_PARTS.indexOf("parameters");
+            } else if (depth > 0) {
+                continue;
+            } else if (type >= FloParser.SCREENCODE && type <= FloParser.CODE) {
+                last = LINE_PARTS.indexOf("a type");
+            } else if (type == FloParser.ID) {
+                last = line.get(i - 1).getType() == EXPORT ? LINE_PARTS.indexOf("export") : LINE_PARTS.indexOf("a label");
+            } else if (type == FloParser.OPEN_BLOCK || LINE_PARTS.contains(text)) {
+                last = LINE_PARTS.indexOf(type == FloParser.OPEN_BLOCK ? "'{'" : text);
+            }
+        }
+        List<String> parts = new ArrayList<>();
+        int lastType = line.get(line.size() - 1).getType();
+        for (String part : LINE_PARTS.subList(last + 1, LINE_PARTS.size())) {
+            if (!codeLine && (part.equals("parameters") || part.equals("noreturn"))) {
+                continue;
+            }
+            parts.add(part);
+        }
+        if (lastType >= FloParser.SCREENCODE && lastType <= FloParser.CODE) {
+            parts.add(0, "a size");
+        }
+        parts.add("the end of the line");
+        return parts;
+    }
+
+    /** The tokens on `found`'s line before it. */
+    private static List<Token> tokensOfLineBefore(Parser parser, Token found) {
+        TokenStream tokens = parser.getTokenStream();
+        List<Token> line = new ArrayList<>();
+        for (int i = found.getTokenIndex() - 1; i >= 0 && tokens.get(i).getType() != FloParser.NEWLINE; i--) {
+            line.add(0, tokens.get(i));
+        }
+        return line;
     }
 
     /**

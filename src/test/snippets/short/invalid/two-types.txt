@@ -4,7 +4,7 @@ deflower t.prg
 $0800 byte word label
 ^^^
 Failed to parse test.flo:
-line 2:11 mismatched input 'word' expecting {'export', '(', 'noreturn', '[', '{', NEWLINE, ID}
+line 2: expected a size, a label, export, '{' or the end of the line, found 'word'
 ~~~
 ~~~
 vvv
