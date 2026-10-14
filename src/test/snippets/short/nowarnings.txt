@@ -20,6 +20,8 @@ Writing out/test.asm
 Writing out/test.map
 Verify out/test.asm: 8 bytes emitted, 0 differ, 22528 virtual, 0 gaps
 ~~~
+; called by: entry
+chrout = $ffd2
 
 *=$c000
 
@@ -31,8 +33,6 @@ entry:
 ; read by: entry
 data:
 		.byte	$01
-; called by: entry
-chrout = $ffd2
 ~~~
 --- test.map
 $c000-$c007 code entry

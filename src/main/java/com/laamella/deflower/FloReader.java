@@ -90,6 +90,7 @@ class FloReader {
         Integer addressEnd = null;
         LineType type = UNKNOWN_LINE;
         boolean isVirtual = false;
+        boolean isBanked = false;
         int amount = 1;
         String name = null;
         String export = null;
@@ -120,6 +121,7 @@ class FloReader {
             addressEnd = null;
             type = UNKNOWN_LINE;
             isVirtual = false;
+            isBanked = false;
             amount = 1;
             name = null;
             export = null;
@@ -223,6 +225,11 @@ class FloReader {
         }
 
         @Override
+        public void enterSetBanked(FloParser.SetBankedContext ctx) {
+            isBanked = true;
+        }
+
+        @Override
         public void enterSetLabel(FloParser.SetLabelContext ctx) {
             name = ctx.ID().getText();
         }
@@ -262,13 +269,20 @@ class FloReader {
             if (lengthByte && !checkLengthByte(line, type)) {
                 return;
             }
+            if (isBanked && (addressEnd != null || ctx.setVirtual() != null || ctx.datatype() != null || name == null
+                    || ctx.parameters() != null || ctx.noReturn() != null || export != null)) {
+                errors.add(String.format("line %d: a banked line takes only an address and a label", line));
+                return;
+            }
+            // A virtual block's 'virtual' is about the memory, not a banked name.
+            isVirtual &= !isBanked;
             List<Parameter> parameters = ctx.parameters() != null ? parameters(ctx.parameters(), line) : null;
             boolean noReturn = ctx.noReturn() != null;
             if ((parameters != null || noReturn) && type != CODE_LINE) {
                 errors.add(String.format("line %d: only a code line takes parameters or noreturn", line));
                 return;
             }
-            run.annotations.add(new Annotation(address, addressEnd, type, isVirtual, amount, name, comment, included, export, terminator, lengthByte, parameters, noReturn));
+            run.annotations.add(new Annotation(address, addressEnd, type, isVirtual, amount, name, comment, included, export, terminator, lengthByte, parameters, noReturn, isBanked));
         }
 
         /**
@@ -364,7 +378,7 @@ class FloReader {
                 errors.add(String.format("line %d: blocks can't be nested (the open one starts at line %d)", line, blockLine));
                 return;
             }
-            if (addressEnd != null || ctx.datatype() != null || name != null || ctx.export() != null
+            if (addressEnd != null || ctx.setBanked() != null || ctx.datatype() != null || name != null || ctx.export() != null
                     || ctx.parameters() != null || ctx.noReturn() != null) {
                 errors.add(String.format("line %d: a block's opening line takes only an address and 'virtual'", line));
                 return;

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -27,10 +28,15 @@ class SubjectConfigurer {
             subject.outputFileName = outputFileNameFor(run.targetName);
             subjects.add(subject);
             loadMemoryImage(filename, subject);
-            // The including file's own lines first: included ones are weak
-            // and only fill in what those leave open (issue 0078).
-            run.annotations.stream().filter(a -> !a.included).forEach(subject::annotate);
-            run.annotations.stream().filter(a -> a.included).forEach(subject::annotate);
+            // The banked names first, so an rta line can't trace into the
+            // RAM under one (issue 0102). Then the including file's own lines:
+            // included ones are weak and only fill in what those leave open
+            // (issue 0078).
+            // The sort is stable, so the lines keep their order otherwise.
+            run.annotations.stream()
+                    .sorted(Comparator.comparing((Annotation a) -> !a.banked).thenComparing(a -> a.included))
+                    .forEach(subject::annotate);
+            subject.checkBankedCodeEntries();
         }
         return subjects;
     }

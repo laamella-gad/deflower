@@ -1,0 +1,14 @@
+>>> Issue 0102: a code line of the file itself can't be at the address of a
+banked line of its own: the flow there is either traced or not. <<<
+*=$c000
+		rts
+===
+deflower test.prg
+$c000 code start
+$c000 banked other
+^^^
+Banked other at $c000 is also a code entry
+Errors detected for test.asm, not writing output.
+~~~
+~~~
+vvv

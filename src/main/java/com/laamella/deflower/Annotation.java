@@ -35,13 +35,16 @@ final class Annotation {
     final List<Parameter> parameters;
     // True for a code line marked "noreturn" (issue 0068).
     final boolean noReturn;
+    // True for a "banked" line (issue 0102): a flow target in memory
+    // banked in over the RAM, named but not traced.
+    final boolean banked;
 
     Annotation(int address, Integer addressEnd, LineType type, boolean virtual, int amount, String name, List<String> comment, boolean included, String export) {
-        this(address, addressEnd, type, virtual, amount, name, comment, included, export, null, false, null, false);
+        this(address, addressEnd, type, virtual, amount, name, comment, included, export, null, false, null, false, false);
     }
 
     Annotation(int address, Integer addressEnd, LineType type, boolean virtual, int amount, String name, List<String> comment, boolean included, String export,
-               Integer terminator, boolean lengthByte, List<Parameter> parameters, boolean noReturn) {
+               Integer terminator, boolean lengthByte, List<Parameter> parameters, boolean noReturn, boolean banked) {
         this.address = address;
         this.addressEnd = addressEnd;
         this.type = type;
@@ -55,5 +58,6 @@ final class Annotation {
         this.lengthByte = lengthByte;
         this.parameters = parameters;
         this.noReturn = noReturn;
+        this.banked = banked;
     }
 }

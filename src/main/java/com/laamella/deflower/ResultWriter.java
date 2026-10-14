@@ -126,6 +126,32 @@ class AssemblyFileFormat {
     }
 
     /**
+     * Prints the banked names (issue 0102) as address defines, each after
+     * its comment lines and the jumps and calls to it, at the top of the
+     * file: the memory at their addresses is the RAM's.
+     */
+    void printBankedDefines(Subject subject) throws IOException {
+        boolean first = true;
+        for (int address = 0; address < subject.memory.length; address++) {
+            if (!subject.isPrintedBanked(address)) {
+                continue;
+            }
+            List<String> lines = new ArrayList<>(subject.memory[address].bankedComment);
+            lines.addAll(crossReferences.bankedLinesFor(address));
+            if (!first && !lines.isEmpty()) {
+                out.newLine();
+            }
+            for (String line : lines) {
+                out.print("; " + line);
+                out.newLine();
+            }
+            out.print(subject.memory[address].banked.name + " = " + asHexWord(address));
+            out.newLine();
+            first = false;
+        }
+    }
+
+    /**
      * Prints a stretch of consecutive virtual areas (issue 0046) as one
      * 64tass {@code .virtual} block: memory the code uses but whose
      * contents aren't part of the program. Nothing is emitted for it, but
@@ -269,11 +295,14 @@ class AssemblyFileFormat {
                 // 64tass's .addr is specifically "a 16-bit address constant"
                 // (issue 0036) - more precise than .WORD for a value that's
                 // always an address, not an arbitrary 16-bit number.
-                tabularPrint(".addr", nameForAddress(subject.wordAt(address), "$%04x", subject));
+                String bankedValue = subject.bankedValueName(subject.wordAt(address));
+                tabularPrint(".addr", bankedValue != null ? bankedValue : nameForAddress(subject.wordAt(address), "$%04x", subject));
                 break;
             case RTA:
                 // 64tass stores the label minus one (issue 0038).
-                tabularPrint(".rta", nameForAddress(subject.returnAddressAt(address), "$%04x", subject));
+                int returnAddress = subject.returnAddressAt(address);
+                Label banked = subject.memory[returnAddress].banked;
+                tabularPrint(".rta", banked != null ? banked.name : nameForAddress(returnAddress, "$%04x", subject));
                 break;
             case SBYTE:
                 tabularPrint(".char", Integer.toString((byte) subject.byteAt(address)));
@@ -463,9 +492,11 @@ class AssemblyFileFormat {
         String operand = switch (instruction.addressingMode) {
             case IND_X -> format("(%s, x)", nameForAddress(byte1, "$%02x", subject));
             case IND_Y -> format("(%s), y", nameForAddress(byte1, "$%02x", subject));
-            case RELATIVE -> format("%s", nameForAddress(area.address + toSignedByte(byte1) + 2, "$%04x", subject));
+            case RELATIVE -> format("%s", nameForFlow(area, area.address + toSignedByte(byte1) + 2, subject));
             case INDIRECT -> format("(%s)", nameForAddress(word, "$%04x", subject));
-            case ABSOLUTE -> format("%s", nameForAbsoluteAddress(word, subject));
+            case ABSOLUTE -> subject.bankedTarget(area) != -1
+                    ? nameForFlow(area, word, subject)
+                    : format("%s", nameForAbsoluteAddress(word, subject));
             case ABSOLUTE_X -> format("%s, x", nameForAbsoluteAddress(word, subject));
             case ABSOLUTE_Y -> format("%s, y", nameForAbsoluteAddress(word, subject));
             case IMMEDIATE -> format("#%s", nameForImmediate(area.address, byte1, subject));
@@ -490,6 +521,16 @@ class AssemblyFileFormat {
     }
 
     /**
+     * A jsr, jmp or branch target: the banked name there (issue 0102),
+     * else the RAM's.
+     */
+    private String nameForFlow(InstructionArea area, int target, Subject subject) {
+        return subject.bankedTarget(area) != -1
+                ? subject.memory[target].banked.name
+                : nameForAddress(target, "$%04x", subject);
+    }
+
+    /**
      * An immediate operand. The low or high byte of an address an address
      * setup builds (issue 0074) is named `<label` or `>label` (issue
      * 0034), but only for a label on that address itself: 64tass reads
@@ -501,21 +542,15 @@ class AssemblyFileFormat {
         Integer high = subject.highByteSetups.get(address);
         Integer built = low != null ? low : high;
         if (built != null) {
-            String label = exactLabel(built, subject);
+            String label = subject.exactLabel(built);
+            if (label == null) {
+                label = subject.bankedValueName(built);
+            }
             if (label != null) {
                 return (low != null ? "<" : ">") + label;
             }
         }
         return format("$%02x", value);
-    }
-
-    /**
-     * The label on `address` itself, or null, also for "label + offset".
-     */
-    private String exactLabel(int address, Subject subject) {
-        Area area = subject.memory[address].area;
-        String label = area == null ? subject.memory[address].labelName() : area.labelFor(address, subject);
-        return label == null || label.contains(" ") ? null : label;
     }
 
     /**
@@ -557,6 +592,7 @@ class ResultWriter {
      */
     void write(Subject subject, Writer w) throws IOException {
         AssemblyFileFormat assemblyFile = new AssemblyFileFormat(w, new CrossReferences(subject));
+        assemblyFile.printBankedDefines(subject);
         List<Integer> deferred = new ArrayList<>();
         for (int address = 0; address < 0x10000; address++) {
 

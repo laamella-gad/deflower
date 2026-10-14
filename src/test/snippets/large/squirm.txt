@@ -6,6 +6,9 @@ Writing out/squirm.asm
 Writing out/squirm.map
 Verify out/squirm.asm: 14153 bytes emitted, 0 differ, 51383 virtual, 0 gaps
 ~~~
+; the KERNAL interrupt handler: cursor, jiffy clock, keyboard
+; jumped to by: skip_irq, countdown_irq
+kernal_irq = $ea31
 
 .virtual $0057
 ; Squirm, taken while the game runs. The player walks a maze and eats the dots that
@@ -3386,9 +3389,6 @@ color_ram:
 ; read by: try_move, update_hi, game_over, check_space, pause
 cia1_port_b:		.byte	?
 .endv
-; the KERNAL interrupt handler: cursor, jiffy clock, keyboard
-; jumped to by: skip_irq, countdown_irq
-kernal_irq = $ea31
 ~~~
 --- squirm.map
 $0057-$0058 virtual byte player_direction

@@ -45,6 +45,9 @@ class CrossReferences {
     private static final Set<Opcode> MODIFIES = EnumSet.of(INC, DEC, ASL, LSR, ROL, ROR, SLO, RLA, SRE, RRA, DCP, ISC);
 
     private final Map<Integer, Map<Kind, Set<String>>> referrersByLabelAddress = new HashMap<>();
+    // The references to banked names (issue 0102), by their address: the
+    // RAM's own label there may have references of its own.
+    private final Map<Integer, Map<Kind, Set<String>>> referrersByBankedAddress = new HashMap<>();
 
     CrossReferences(Subject subject) {
         for (MemoryLocation location : subject.memory) {
@@ -59,8 +62,19 @@ class CrossReferences {
      * one per kind, or none.
      */
     List<String> linesFor(int address) {
+        return lines(referrersByLabelAddress.get(address));
+    }
+
+    /**
+     * The comment lines listing the jumps and calls to the banked name at
+     * `address` (issue 0102), one per kind, or none.
+     */
+    List<String> bankedLinesFor(int address) {
+        return lines(referrersByBankedAddress.get(address));
+    }
+
+    private static List<String> lines(Map<Kind, Set<String>> referrers) {
         List<String> lines = new ArrayList<>();
-        Map<Kind, Set<String>> referrers = referrersByLabelAddress.get(address);
         if (referrers != null) {
             referrers.forEach((kind, names) -> lines.add(kind.heading + ": " + String.join(", ", names)));
         }
@@ -72,11 +86,18 @@ class CrossReferences {
         if (target == -1) {
             return;
         }
+        int referrerAddress = referrerAddress(area, subject);
+        if (subject.bankedTarget(area) != -1) {
+            referrersByBankedAddress
+                    .computeIfAbsent(target, a -> new EnumMap<>(Kind.class))
+                    .computeIfAbsent(kind(area.instruction), k -> new LinkedHashSet<>())
+                    .add(referrerAddress != -1 ? subject.memory[referrerAddress].labelName() : asHexWord(area.address));
+            return;
+        }
         Area targetArea = subject.peek(target);
         int labelAddress = targetArea != null
                 ? targetArea.labelAddressFor(target, subject)
                 : subject.memory[target].label != null ? target : -1;
-        int referrerAddress = referrerAddress(area, subject);
         if (labelAddress == -1 || labelAddress == referrerAddress) {
             return;
         }

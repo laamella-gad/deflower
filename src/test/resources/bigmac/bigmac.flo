@@ -541,8 +541,9 @@ $e7e0 virtual byte voice_1_in_call
 $e7e1 virtual byte voice_1_return_page
 $e7e2 virtual byte voice_1_return_position
 $e7e3-$e800 virtual byte
-; the IRQ handler jumps to the KERNAL's $ea31 in the ROM over this
 $e800-$ea52 byte voice_1_parameters
+; the KERNAL's IRQ handler in the ROM over voice_1_parameters
+$ea31 banked kernal_irq
 $ea52-$f000 virtual byte unused_ea52
 $f000-$fd30 virtual byte untouched_f000
 $fd30-$fd50 byte

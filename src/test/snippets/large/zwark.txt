@@ -9,6 +9,14 @@ Writing out/zwark.asm
 Writing out/zwark.map
 Verify out/zwark.asm: 6991 bytes emitted, 0 differ, 58545 virtual, 0 gaps
 ~~~
+; called by: reset_screen, init_game, start
+kernal_clear_screen = $e544
+
+; called by: main_loop, demo, show_top_score_row_14
+stop = $ffe1
+
+; called by: title_screen, demo, show_top_score_row_14, start
+getin = $ffe4
 
 .virtual $0001
 ; which ROMs and I/O are banked in
@@ -2435,12 +2443,6 @@ cia1_port_b:		.byte	?
 ; read by: update_directions, play_sound
 cia1_timer_a:		.word	?
 .endv
-; called by: reset_screen, init_game, start
-kernal_clear_screen = $e544
-; called by: main_loop, demo, show_top_score_row_14
-stop = $ffe1
-; called by: title_screen, demo, show_top_score_row_14, start
-getin = $ffe4
 ~~~
 --- zwark.map
 $0001-$0002 virtual byte cpu_port

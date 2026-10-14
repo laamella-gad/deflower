@@ -1,0 +1,104 @@
+>>> Issue 0102: a banked line names a jsr, jmp or branch target in memory
+banked in over the RAM, like a KERNAL routine over the program's data. The
+flow prints the banked name and isn't traced; a read of the address prints the
+RAM's name. The names print as defines at the top, an included one only when
+used, with the line's comment and the calls and jumps to it. An rta to a banked
+address uses its name too, and so do an address setup and an .addr value
+when the RAM has no label on the address itself. A code line of the file itself wins over an
+included banked line at its address. <<<
+*=$c000
+		jsr $e000
+		lda $e000
+		sta $ea31
+		jmp $ea31
+		.word	$e000 - 1
+		lda #<$ea31
+		sta $0314
+		lda #>$ea31
+		sta $0315
+		rts
+		.word	$ea31, $e000
+*=$e000
+		.fill	16, $42
+*=$ea30
+		.fill	16, $55
+===
+deflower test.prg
+$c000 code start
+$c00c rta[1] handlers
+$c00e code own_routine
+$0314 virtual addr irq_vector
+$c019 addr[2] vectors
+$e000-$e010 byte music
+; the KERNAL's clear screen, not this RAM
+$e000 banked clear_screen
+$ea30-$ea40 byte patterns
+include kernal.flo
+===
+; file: kernal.flo
+; the KERNAL interrupt handler
+$ea31 banked kernal_irq
+$ff00 banked unused_entry
+$c00e banked kernal_routine
+^^^
+Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 61 bytes emitted, 0 differ, 2 virtual, 2 gaps
+gap $c01d-$e000
+gap $e010-$ea30
+~~~
+; the KERNAL's clear screen, not this RAM
+; called by: start
+clear_screen = $e000
+
+; the KERNAL interrupt handler
+; jumped to by: start
+kernal_irq = $ea31
+
+.virtual $0314
+; written by: own_routine
+irq_vector:		.addr	?
+.endv
+
+*=$c000
+
+start:
+		jsr clear_screen
+		lda music
+		sta patterns + $1
+		jmp kernal_irq
+
+handlers:
+		.rta	clear_screen
+
+own_routine:
+		lda #<kernal_irq
+		sta irq_vector
+		lda #>kernal_irq
+		sta irq_vector + $1
+		rts 
+
+vectors:
+		.addr	kernal_irq, music
+*=$e000
+
+; read by: start
+music:
+		.byte	$42, $42, $42, $42, $42, $42, $42, $42, $42, $42, $42, $42, $42, $42, $42, $42
+*=$ea30
+
+; written by: start
+patterns:
+		.byte	$55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55, $55
+~~~
+--- test.map
+$0314-$0316 virtual addr irq_vector
+$c000-$c00c code start
+$c00c-$c00e rta handlers
+$c00e-$c019 code own_routine
+$c019-$c01d addr[2] vectors
+$c01d-$e000 gap
+$e000-$e010 byte[16] music
+$e010-$ea30 gap
+$ea30-$ea40 byte[16] patterns
+vvv

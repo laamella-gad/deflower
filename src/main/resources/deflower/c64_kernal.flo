@@ -1,52 +1,52 @@
 $e000-$fffa virtual byte
-$e544 kernal_clear_screen
+$e544 banked kernal_clear_screen
 ; the KERNAL interrupt handler: cursor, jiffy clock, keyboard
-$ea31 kernal_irq
+$ea31 banked kernal_irq
 ; restores A, X and Y and returns from the interrupt
-$ea81 kernal_irq_exit
-$fce2 kernal_reset
-$fe47 kernal_nmi
-$fe66 kernal_brk
-$ff48 kernal_irq_entry
-$ff81 cint
-$ff84 ioinit
-$ff87 ramtas
-$ff8a restor
-$ff8d vector
-$ff90 setmsg
-$ff93 second
-$ff96 tksa
-$ff99 memtop
-$ff9c membot
-$ff9f scnkey
-$ffa2 settmo
-$ffa5 acptr
-$ffa8 ciout
-$ffab untlk
-$ffae unlsn
-$ffb1 listen
-$ffb4 talk
-$ffb7 readst
-$ffba setlfs
-$ffbd setnam
-$ffc0 open
-$ffc3 close
-$ffc6 chkin
-$ffc9 chkout
-$ffcc clrchn
-$ffcf chrin
-$ffd2 chrout
-$ffd5 load
-$ffd8 save
-$ffdb settim
-$ffde rdtim
-$ffe1 stop
-$ffe4 getin
-$ffe7 clall
-$ffea udtim
-$ffed screen
-$fff0 plot
-$fff3 iobase
+$ea81 banked kernal_irq_exit
+$fce2 banked kernal_reset
+$fe47 banked kernal_nmi
+$fe66 banked kernal_brk
+$ff48 banked kernal_irq_entry
+$ff81 banked cint
+$ff84 banked ioinit
+$ff87 banked ramtas
+$ff8a banked restor
+$ff8d banked vector
+$ff90 banked setmsg
+$ff93 banked second
+$ff96 banked tksa
+$ff99 banked memtop
+$ff9c banked membot
+$ff9f banked scnkey
+$ffa2 banked settmo
+$ffa5 banked acptr
+$ffa8 banked ciout
+$ffab banked untlk
+$ffae banked unlsn
+$ffb1 banked listen
+$ffb4 banked talk
+$ffb7 banked readst
+$ffba banked setlfs
+$ffbd banked setnam
+$ffc0 banked open
+$ffc3 banked close
+$ffc6 banked chkin
+$ffc9 banked chkout
+$ffcc banked clrchn
+$ffcf banked chrin
+$ffd2 banked chrout
+$ffd5 banked load
+$ffd8 banked save
+$ffdb banked settim
+$ffde banked rdtim
+$ffe1 banked stop
+$ffe4 banked getin
+$ffe7 banked clall
+$ffea banked udtim
+$ffed banked screen
+$fff0 banked plot
+$fff3 banked iobase
 $fffa virtual addr nmi_hardware_vector
 $fffc virtual addr reset_hardware_vector
 $fffe virtual addr irq_hardware_vector

@@ -1,5 +1,8 @@
 package com.laamella.deflower;
 
+import com.laamella.mpu6502.specification.AddressingMode;
+import com.laamella.mpu6502.specification.Opcode;
+
 import java.nio.file.Path;
 import java.util.*;
 
@@ -21,6 +24,10 @@ class MemoryLocation {
     // True when an included virtual area covered this byte but was dropped
     // as unused: still covered, not a gap (issue 0075).
     boolean droppedVirtual = false;
+    // The name of what is banked in over the RAM here when a jsr, jmp or
+    // branch goes here, and its comment lines (issue 0102), or null.
+    Label banked = null;
+    List<String> bankedComment = List.of();
 
     MemoryLocation(int address, int data, boolean loaded) {
         this.address = address;
@@ -60,6 +67,8 @@ class Subject {
     // the immediate load of its low byte, and of its high byte.
     final Map<Integer, Integer> lowByteSetups = new HashMap<>();
     final Map<Integer, Integer> highByteSetups = new HashMap<>();
+    // The banked targets (issue 0102) a jsr, jmp, branch or rta goes to.
+    final Set<Integer> usedBanked = new TreeSet<>();
 
     Subject(Path basePath) {
         this.basePath = basePath;
@@ -115,10 +124,16 @@ class Subject {
     void annotate(Annotation annotation) {
         int address = annotation.address;
         MemoryLocation location = memory[address];
+        if (annotation.banked) {
+            annotateBanked(annotation, location);
+            return;
+        }
         // An included comment describes the included label, so it only goes
-        // where that label does.
+        // where that label does. An included label with the banked name of
+        // its address names the same routine in the ROM (issue 0102).
         boolean weakLosesLabel = annotation.included && (location.label != null && !location.label.included
-                || insideOwnArea(address));
+                || insideOwnArea(address)
+                || location.banked != null && location.banked.name.equals(annotation.name));
         if (annotation.name != null && (!annotation.included || location.label == null && !weakLosesLabel)) {
             location.label = new Label(annotation.name, false, annotation.included);
         }
@@ -211,6 +226,62 @@ class Subject {
             }
             default -> throw new RuntimeException("No data type");
         }
+    }
+
+    /**
+     * Names what is banked in at the address for the flow that goes there
+     * (issue 0102). An included one is weak: it loses to a banked line or
+     * a code line of the including file at the same address.
+     */
+    private void annotateBanked(Annotation annotation, MemoryLocation location) {
+        if (annotation.included && location.banked != null) {
+            return;
+        }
+        location.banked = new Label(annotation.name, false, annotation.included);
+        location.bankedComment = annotation.comment;
+    }
+
+    /**
+     * Settles the banked names (issue 0102) after all lines are applied.
+     * A label of the including file with the same name at the same
+     * address, like a virtual KERNAL jump table of its own, already names
+     * the routine, so an included banked name gives way. So does one at a
+     * code line of the including file, which is an error next to a banked
+     * line of its own.
+     */
+    void checkBankedCodeEntries() {
+        for (MemoryLocation location : memory) {
+            if (location.banked != null && location.banked.included && location.label != null
+                    && !location.label.included && location.label.name.equals(location.banked.name)) {
+                location.banked = null;
+                location.bankedComment = List.of();
+            }
+        }
+        for (CodeEntry entry : potentialCodeLocations) {
+            MemoryLocation location = memory[entry.address];
+            if (entry.from != -1 || location.banked == null) {
+                continue;
+            }
+            if (location.banked.included) {
+                location.banked = null;
+                location.bankedComment = List.of();
+            } else {
+                errors.add(String.format("Banked %s at %s is also a code entry", location.banked.name, asHexWord(entry.address)));
+            }
+        }
+    }
+
+    /**
+     * The target of the jsr, jmp or branch in `area` when a banked line
+     * names it (issue 0102), or -1: the flow goes to what is banked in
+     * there, not to the RAM.
+     */
+    int bankedTarget(InstructionArea area) {
+        boolean flow = area.instruction.addressingMode == AddressingMode.RELATIVE
+                || area.instruction.addressingMode == AddressingMode.ABSOLUTE
+                && (area.instruction.opcode == Opcode.JSR || area.instruction.opcode == Opcode.JMP);
+        int target = flow ? CrossReferences.target(area, this) : -1;
+        return target != -1 && memory[target].banked != null ? target : -1;
     }
 
     /**
@@ -392,14 +463,25 @@ class Subject {
     void reportDuplicateLabels() {
         Map<String, Integer> firstAddressByLabel = new HashMap<>();
         for (MemoryLocation location : memory) {
-            if (location.label == null) {
-                continue;
-            }
-            Integer first = firstAddressByLabel.putIfAbsent(location.label.name, location.address);
-            if (first != null) {
-                errors.add(String.format("Duplicate label %s at %s, already defined at %s", location.label.name, asHexWord(location.address), asHexWord(first)));
+            for (Label label : new Label[]{location.label, isPrintedBanked(location.address) ? location.banked : null}) {
+                if (label == null) {
+                    continue;
+                }
+                Integer first = firstAddressByLabel.putIfAbsent(label.name, location.address);
+                if (first != null) {
+                    errors.add(String.format("Duplicate label %s at %s, already defined at %s", label.name, asHexWord(location.address), asHexWord(first)));
+                }
             }
         }
+    }
+
+    /**
+     * True when the banked name at `address` (issue 0102) is printed: one
+     * of the .flo file's own, or an included one the flow goes to.
+     */
+    boolean isPrintedBanked(int address) {
+        Label banked = memory[address].banked;
+        return banked != null && (!banked.included || usedBanked.contains(address));
     }
 
     /**
@@ -465,6 +547,38 @@ class Subject {
                 location.commentIncluded = false;
             }
         }
+        for (int built : lowByteSetups.values()) {
+            if (bankedValueName(built) != null) {
+                usedBanked.add(built);
+            }
+        }
+        for (MemoryLocation location : memory) {
+            Area area = location.area;
+            if (area instanceof DataArea && ((DataArea) area).type == DataType.ADDR && area.address == location.address
+                    && !area.isVirtual() && bankedValueName(wordAt(area.address)) != null) {
+                usedBanked.add(wordAt(area.address));
+            }
+        }
+    }
+
+    /**
+     * The label on `address` itself, or null, also for "label + offset".
+     */
+    String exactLabel(int address) {
+        Area area = memory[address].area;
+        String label = area == null ? memory[address].labelName() : area.labelFor(address, this);
+        return label == null || label.contains(" ") ? null : label;
+    }
+
+    /**
+     * The banked name for an address as a value (issue 0102): an .addr
+     * value or what an address setup builds, like the KERNAL's IRQ handler
+     * put in the IRQ vector. Null when there is none, or when the RAM has
+     * a label on the address itself, which wins.
+     */
+    String bankedValueName(int address) {
+        Label banked = memory[address].banked;
+        return banked == null || exactLabel(address) != null ? null : banked.name;
     }
 
     /**
@@ -480,7 +594,7 @@ class Subject {
                 continue;
             }
             int target = CrossReferences.target((InstructionArea) area, this);
-            if (target == -1) {
+            if (target == -1 || bankedTarget((InstructionArea) area) != -1) {
                 continue;
             }
             // An included label names what is really there, like a KERNAL
@@ -521,7 +635,7 @@ class Subject {
             }
             if (area instanceof InstructionArea) {
                 int target = CrossReferences.target((InstructionArea) area, this);
-                if (target != -1) {
+                if (target != -1 && bankedTarget((InstructionArea) area) == -1) {
                     targets.add(target);
                 }
             } else if (area instanceof DataArea && ((DataArea) area).type == DataType.ADDR && !area.isVirtual()) {
@@ -559,6 +673,11 @@ class Subject {
      * placeholders (issue 0055).
      */
     public void addPotentialCodeLocation(int address, boolean labelIt, int referencingAddress) {
+        if (labelIt && memory[address].banked != null) {
+            // Something else is banked in there (issue 0102).
+            usedBanked.add(address);
+            return;
+        }
         if (labelIt) {
             ensureLabelled(address, "l", true, referencingAddress);
         }
@@ -576,7 +695,7 @@ class Subject {
     public void addCallTarget(int address, int referencingAddress) {
         addPotentialCodeLocation(address, true, referencingAddress);
         MemoryLocation location = memory[address];
-        if (location.label.local) {
+        if (location.banked == null && location.label.local) {
             location.label = new Label(location.label.name, false);
         }
     }

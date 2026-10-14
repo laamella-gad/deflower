@@ -5,6 +5,9 @@ Writing out/tcmine.asm
 Writing out/tcmine.map
 Verify out/tcmine.asm: 1984 bytes emitted, 0 differ, 22651 virtual, 0 gaps
 ~~~
+; the KERNAL interrupt handler: cursor, jiffy clock, keyboard
+; jumped to by: animate_enemies
+kernal_irq = $ea31
 
 .virtual $008e
 ; written by: fall
@@ -1553,9 +1556,6 @@ cia1_port_b:		.byte	?
 ; written by: install_irq, remove_irq
 cia1_timer_a_control:		.byte	?
 .endv
-; the KERNAL interrupt handler: cursor, jiffy clock, keyboard
-; jumped to by: animate_enemies
-kernal_irq = $ea31
 ~~~
 --- tcmine.map
 $008e-$008f virtual byte stray_8e

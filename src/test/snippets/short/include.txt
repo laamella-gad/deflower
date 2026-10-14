@@ -84,6 +84,11 @@ Writing out/test.asm
 Writing out/test.map
 Verify out/test.asm: 36 bytes emitted, 0 differ, 22529 virtual, 0 gaps
 ~~~
+; the KERNAL interrupt handler: cursor, jiffy clock, keyboard
+kernal_irq = $ea31
+
+; called by: start
+chrout = $ffd2
 
 .virtual $00c5
 ; read by: start
@@ -151,10 +156,6 @@ screen_color:		.byte	?
 ; read by: start
 cia1_port_b:		.byte	?
 .endv
-; the KERNAL interrupt handler: cursor, jiffy clock, keyboard
-kernal_irq = $ea31
-; called by: start
-chrout = $ffd2
 ~~~
 --- test.map
 $00c5-$00c6 virtual byte last_key

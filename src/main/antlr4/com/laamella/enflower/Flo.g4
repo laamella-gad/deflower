@@ -76,7 +76,7 @@
  *       types: a byte holding the number of elements after it, then those
  *       elements, e.g. ascii[lengthbyte] for a .ptext string.
  *     - label: a name for the address, from [A-Za-z0-9._?]. It can't be
- *       a reserved word: deflower, include, virtual, export,
+ *       a reserved word: deflower, include, virtual, banked, export,
  *       screencode, ascii, byte, word, long, dword, addr, rta, sbyte, sword,
  *       slong, sdword, code, until, lengthbyte, noreturn.
  *     - (parameters), only on a code line: the data that follows every
@@ -102,6 +102,25 @@
  *     Two lines may only cover the same memory if the earlier one is a
  *     placeholder (or both say exactly the same); otherwise it's an area
  *     conflict, and that run's output isn't written.
+ *
+ * <address> banked <label>
+ *     A jsr, jmp or branch target in memory banked in over the image's
+ *     RAM when the program goes there, like a KERNAL routine while the
+ *     RAM under the KERNAL holds the program's data. A jump or call to
+ *     the address prints the label, and the tracing doesn't follow it;
+ *     so does an rta value. An .addr value and an address setup's #<, #>
+ *     print it when the RAM has no label on the address itself. The RAM
+ *     at the address keeps its own lines: a read or write of it prints
+ *     the RAM's name. A label with the same name at the same address
+ *     names the same routine: an included one gives way to the other.
+ *     The KERNAL and BASIC entry points of c64.flo are banked lines.
+ *     The label is printed as "label = $addr" at the top of the output,
+ *     with the line's comment and who calls or jumps to it; an included
+ *     one only when something does. Takes nothing else: no range, type
+ *     or 'virtual'.
+ *     A code line of the file itself at the same address wins over an
+ *     included banked line, and is an error next to one of its own.
+ *         $ea31 banked kernal_irq
  *
  * <address> [virtual] {
  *     ...
@@ -130,13 +149,14 @@ prog:	(statement NEWLINE)* EOF;
 statement: COMMENT # comment
     | 'deflower' ID         # setFileName
     | 'include' ID          # include
-    | (address | memoryRange) setVirtual? datatype? setLabel? parameters? noReturn? export? OPEN_BLOCK? # line
+    | (address | memoryRange) setVirtual? setBanked? datatype? setLabel? parameters? noReturn? export? OPEN_BLOCK? # line
     | CLOSE_BLOCK                   # endBlock
     ;
 
 address: number;
 memoryRange: number '-' number;
 setVirtual: 'virtual';
+setBanked: 'banked';
 setLabel: ID;
 export: 'export' ID;
 parameters: '(' parameter (',' parameter)* ')';

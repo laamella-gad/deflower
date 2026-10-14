@@ -2,12 +2,38 @@
 bigmac/bigmac.flo
 ^^^
 warning: $6fbe: unused_6fbe is used by $c752
-warning: $c569: jmp $ea31 (kernal_irq) goes into data
 warning: $f000: untouched_f000 is used by $c40f
 Writing out/bigmac.asm
 Writing out/bigmac.map
 Verify out/bigmac.asm: 41373 bytes emitted, 0 differ, 24163 virtual, 0 gaps
 ~~~
+; the KERNAL's IRQ handler in the ROM over voice_1_parameters
+; jumped to by: snapshot_pc
+kernal_irq = $ea31
+
+; called by: save_highscores, lC746
+setlfs = $ffba
+
+; called by: save_highscores, lC746
+setnam = $ffbd
+
+; called by: save_highscores
+open = $ffc0
+
+; called by: save_highscores
+close = $ffc3
+
+; called by: name_entry, name_entry_keys
+chrout = $ffd2
+
+; called by: save_highscores
+save = $ffd8
+
+; called by: name_entry_keys
+getin = $ffe4
+
+; called by: name_entry, name_entry_keys
+plot = $fff0
 
 .virtual $0001
 ; which ROMs and I/O are banked in
@@ -9035,7 +9061,6 @@ voice_1_return_position:
 
 *=$e800
 
-; the IRQ handler jumps to the KERNAL's $ea31 in the ROM over this
 ; read by: voice_1_read_parameter
 voice_1_parameters:
 		.byte	$02, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01
@@ -9076,9 +9101,6 @@ voice_1_parameters:
 		.byte	$01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01
 		.byte	$01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01, $01
 		.byte	$0c, $ff
-; the KERNAL interrupt handler: cursor, jiffy clock, keyboard
-; jumped to by: snapshot_pc
-kernal_irq = $ea31
 
 .virtual $ea52
 unused_ea52:
@@ -9094,31 +9116,7 @@ untouched_f000:
 
 .virtual $fd50
 untouched_fd50:
-		.fill	618
-; called by: save_highscores, lC746
-setlfs:
-		.fill	3
-; called by: save_highscores, lC746
-setnam:
-		.fill	3
-; called by: save_highscores
-open:
-		.fill	3
-; called by: save_highscores
-close:
-		.fill	15
-; called by: name_entry, name_entry_keys
-chrout:
-		.fill	6
-; called by: save_highscores
-save:
-		.fill	12
-; called by: name_entry_keys
-getin:
-		.fill	12
-; called by: name_entry, name_entry_keys
-plot:
-		.fill	10
+		.fill	682
 .endv
 
 *=$fffa
