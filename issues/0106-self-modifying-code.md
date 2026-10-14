@@ -1,7 +1,6 @@
 ---
 title: Point out self-modifying code and stop naming the operands it rewrites
-status: open
-priority: medium
+status: done
 labels: enhancement
 ---
 
@@ -35,3 +34,14 @@ Want:
 To decide: whether the operand's value at snapshot time should still be followed as a reference at all (it is right for code that only ever has one value, like a patched `jmp`), and how a `.flo` line gives the real range (`$c40c operand $9000-$a000`?).
 
 Done when: `bigmac`'s `copy_music_data` prints its `lda`/`sta` operands as numbers with a comment saying who sets them, and `untouched_f000`/`unused_9a52` aren't referenced from there.
+
+## Closing note
+
+`SelfModificationFinder` runs after the tracing and finds every instruction whose operand bytes another instruction writes or modifies (branch offsets aside: the target is code either way).
+- Such an operand prints as a number, with `; operand set by <routine>` after the instruction. It makes no cross-reference and no skeleton warning, and keeps no included name in use; the auto labels only it made are dropped. Decided: the value the image holds isn't a reference, not even for a patched `jmp`.
+- `<address> selfmod <label>` (documented in `Flo.g4`) names such an operand anyway: the label, plus or minus the distance to the value the image holds, e.g. `lda voice_1_notes_copy + $1000, y`. The label gets the cross-reference. A line on an instruction without an address operand, or naming no label, is an error; one on an instruction no traced code writes is a warning, since the writer may not be found yet. This covers the "how a `.flo` line gives the real range" question with a base label rather than a range.
+- `bigmac`: `copy_music_data` prints `lda voice_1_notes_copy + $1000, y` and `sta voice_1_notes + $1000, y` with the comment, and the `untouched_f000` warning is gone. Selfmod lines keep the player's `voice_N_notes`/`voice_N_parameters` and `block_pages`.
+- `1nvader_snap`, `2krace_snap` and `3dgolf_snap` got selfmod lines where the image's value is the meaningful one (`save_highscore`, `invader_row`, `left_road`/`right_road`, `kernal_irq`, `draw_char`). `3dgolf`'s `rotate_N` dispatch jumps stay numbers: `set_direction` picks one of eight. The decruncher pointers in several fixtures lost made-up names like `unused_ed07 + $c` and `untouched_7f92`.
+- Snippets: `short/selfmodifying.txt`, `short/invalid/selfmodwithtype.txt`, `short/invalid/selfmodtarget.txt`.
+
+Not done: the stores into an operand still print as before (`sta lC40C + 2`, or a number when the instruction has no label), and no summary of the self-modified instructions in `--verify` or the map. Writes to an opcode byte, and code copied over code, are [0115](0115-code-that-overwrites-instructions.md).

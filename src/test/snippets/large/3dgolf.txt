@@ -38,10 +38,10 @@ l0822:
 ; jumped to by: start
 l082D:
 		dex 
-		lda $707b, x
+		lda $707b, x	; operand set by start
 ; modified by: start
 d0830 = $0830
-		sta $ec13, x
+		sta $ec13, x	; operand set by start
 ; modified by: start
 d0833 = $0833
 		txa 

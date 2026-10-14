@@ -5,7 +5,6 @@ warning: $00c6: unused_c6 is used by $0825
 warning: $0881: bne $088b (l088B) goes into the middle of the instruction at $0889
 warning: $08d3: jsr $033c (tape_header) goes into data
 warning: $a587: jmp $ea31 (kernal_irq) goes into data
-warning: $ed07: unused_ed07 is used by $0201
 Writing out/3dgolf_snap.asm
 Writing out/3dgolf_snap.map
 Verify out/3dgolf_snap.asm: 45859 bytes emitted, 0 differ, 19677 virtual, 0 gaps
@@ -286,7 +285,7 @@ stack:
 ; called by: l0211, l0226
 decrunch_get_byte:
 		pha 
-		lda unused_ed07 + $c
+		lda $ed13	; operand set by decrunch_get_byte
 ; modified by: decrunch_get_byte
 d0202 = $0202
 ; modified by: decrunch_get_byte
@@ -689,7 +688,6 @@ v047c:		.byte	?
 ; written by: music_push
 v047d:		.byte	?
 ; what the KERNAL printed while loading, under the game variables
-; read by: decrunch
 old_screen:
 		.fill	837
 ; called by: tamper_crash2
@@ -732,10 +730,10 @@ l0822:
 ; jumped to by: decrunch
 l082D:
 		dex 
-		lda old_screen + $2fd, x
+		lda $077b, x	; operand set by decrunch
 ; modified by: decrunch
 d0830 = $0830
-		sta terrain_82bc + $57, x
+		sta $8313, x	; operand set by decrunch
 ; modified by: decrunch
 d0833 = $0833
 		txa 
@@ -1121,7 +1119,7 @@ l0BE0:
 ; jumped to by: to_view
 ; written by: set_direction
 l0BF9:
-		jmp rotate_1
+		jmp $0c2a	; operand set by set_direction
 
 ; jumped to by: to_view
 l0BFC:
@@ -1154,7 +1152,6 @@ rotate_0:
 		lda #$00
 		sbc point_y + $1
 		sta point_y + $1
-; jumped to by: to_view
 rotate_1:
 		lda point_x
 		sta view_x
@@ -1284,7 +1281,7 @@ l0CDE:
 l0CFB:
 		sta view_x + $1
 		stx view_x
-		jmp rotate_7
+		jmp $0d4d	; operand set by set_direction
 ; written by: set_direction
 rotate_45_next = $0d02
 
@@ -1324,7 +1321,6 @@ rotate_6:
 		sta view_x + $1
 		rts 
 
-; jumped to by: rotate_45
 rotate_7:
 		lda view_x
 		sta point_y
@@ -1628,7 +1624,7 @@ l0FF3:
 ; jumped to by: print_nibble, print_club_name
 ; written by: bitmap_mode, text_mode
 print_char:
-		jmp draw_char
+		jmp draw_char	; operand set by bitmap_mode, text_mode
 
 screen_off:
 		lda #$ef
@@ -2266,7 +2262,7 @@ l16CA:
 l16E2:
 		pla 
 		clc 
-		adc #$c0
+		adc #$c0	; operand set by draw_line
 		pha 
 		bcs l16EC
 		jmp l179D
@@ -2279,7 +2275,7 @@ l16EC:
 		bcs l1760
 		lda log_value + $1
 		clc 
-		adc #$a0
+		adc #$a0	; operand set by draw_line
 		sta log_value + $1
 		bcc l1703
 ; jumped to by: draw_line
@@ -2387,7 +2383,7 @@ l1785:
 l179D:
 		lda log_value + $1
 		clc 
-		adc #$a0
+		adc #$a0	; operand set by draw_line
 		sta log_value + $1
 		bcs l17A9
 		jmp l16E2
@@ -7636,7 +7632,7 @@ l3CF1:
 		lsr 
 		lsr 
 		tax 
-		lda irq_hw_vector + $1, x
+		lda $ffff, x	; operand set by l3CB7
 ; jumped to by: l3CB7
 l3CF7:
 		rts 
@@ -9077,7 +9073,6 @@ terrain_pointers:
 		.word	$88ba, $8904, $896c, $89d6, $8a01, $8a68, $8af0, $c9d1, $863b, $86b6, $8731, $876e, $87a1, $87ff, $8860, $54cc
 		.word	$82bc, $8379, $8413, $8460, $84cd, $852a, $8562
 
-; written by: decrunch
 terrain_82bc:
 		.byte	$00, $06, $38, $24, $06, $80, $03, $16, $0b, $03, $1c, $0b, $03, $22, $0b, $03
 		.byte	$28, $05, $03, $30, $05, $03, $37, $0b, $08, $20, $01, $0e, $01, $09, $0d, $0f
@@ -9690,7 +9685,7 @@ lA003:
 		sta cpu_port
 		jsr lB5E8
 
-; read by: l4345, random
+; read by: l4345
 vectors:
 		.addr	add_stroke, update_scores, read_aim_cursor, read_joystick, lB49B, lB496, aim, lB5FC, lB08B, lB6F8
 ; read by: l4348
@@ -10366,7 +10361,7 @@ lA57B:
 		rti 
 
 ; after irq's rti, unreached: a leftover exit to the KERNAL's handler
-		jmp kernal_irq
+		jmp kernal_irq	; operand set by install_interrupts
 
 ; jumped to by: irq
 lA58A:
@@ -12258,7 +12253,7 @@ green_tilt:
 ; returns the next byte of $a000-$b0ff
 ; called by: change_wind, random_wind
 random:
-		lda vectors
+		lda $a00c	; operand set by random
 		pha 
 		inc random + 1
 		bne lB122
@@ -14898,7 +14893,6 @@ shape_ecf2:
 
 .virtual $ed07
 ; never written: still the RAM's power-on pattern
-; read by: decrunch_get_byte
 unused_ed07:
 		.fill	4345
 ; read by: install_interrupts
@@ -14994,7 +14988,6 @@ unused_fff6:
 		.fill	4
 nmi_hw_vector:		.addr	?
 reset_hw_vector:		.addr	?
-; read by: l3CB7
 irq_hw_vector:		.addr	?
 .endv
 ~~~

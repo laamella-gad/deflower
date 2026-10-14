@@ -69,6 +69,13 @@ class Subject {
     final Map<Integer, Integer> highByteSetups = new HashMap<>();
     // The banked targets (issue 0102) a jsr, jmp, branch or rta goes to.
     final Set<Integer> usedBanked = new TreeSet<>();
+    // The instructions that write or modify an instruction's operand
+    // (issue 0106), by the address of the instruction they change.
+    final Map<Integer, Set<Integer>> operandWriters = new HashMap<>();
+    // The label a selfmod line (issue 0106) names, by the address of the
+    // instruction, and the address of that label once it is found.
+    final Map<Integer, String> selfModNames = new TreeMap<>();
+    final Map<Integer, Integer> selfModLabels = new HashMap<>();
 
     Subject(Path basePath) {
         this.basePath = basePath;
@@ -126,6 +133,15 @@ class Subject {
         MemoryLocation location = memory[address];
         if (annotation.banked) {
             annotateBanked(annotation, location);
+            return;
+        }
+        if (annotation.selfMod) {
+            // The including file's own lines come first.
+            selfModNames.putIfAbsent(address, annotation.name);
+            if (location.comment.isEmpty()) {
+                location.comment = annotation.comment;
+                location.commentIncluded = annotation.included;
+            }
             return;
         }
         // An included comment describes the included label, so it only goes
@@ -594,7 +610,8 @@ class Subject {
                 continue;
             }
             int target = CrossReferences.target((InstructionArea) area, this);
-            if (target == -1 || bankedTarget((InstructionArea) area) != -1) {
+            if (target == -1 || bankedTarget((InstructionArea) area) != -1 || operandModified(area.address)
+                    || selfModLabels.containsKey(area.address)) {
                 continue;
             }
             // An included label names what is really there, like a KERNAL
@@ -609,6 +626,14 @@ class Subject {
         }
         users.forEach((start, addresses) -> warn(start, String.format("%s is used by %s",
                 ((DataArea) memory[start].area).arrayLabel, String.join(", ", addresses))));
+    }
+
+    /**
+     * True when another instruction writes the operand of the instruction
+     * at `address` (issue 0106), so it names nothing.
+     */
+    boolean operandModified(int address) {
+        return operandWriters.containsKey(address);
     }
 
     private static boolean isSkeletonRange(DataArea area) {
@@ -626,7 +651,7 @@ class Subject {
      * .addr value holds, an .rta value returns to, and the address an address setup builds when its
      * label would be on that address itself.
      */
-    private Set<Integer> referencedAddresses() {
+    Set<Integer> referencedAddresses() {
         Set<Integer> targets = new HashSet<>();
         for (MemoryLocation location : memory) {
             Area area = location.area;
@@ -635,7 +660,10 @@ class Subject {
             }
             if (area instanceof InstructionArea) {
                 int target = CrossReferences.target((InstructionArea) area, this);
-                if (target != -1 && bankedTarget((InstructionArea) area) == -1) {
+                Integer named = selfModLabels.get(area.address);
+                if (named != null) {
+                    targets.add(named);
+                } else if (target != -1 && bankedTarget((InstructionArea) area) == -1 && !operandModified(area.address)) {
                     targets.add(target);
                 }
             } else if (area instanceof DataArea && ((DataArea) area).type == DataType.ADDR && !area.isVirtual()) {

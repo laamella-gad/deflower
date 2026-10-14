@@ -189,6 +189,7 @@ $ff00 virtual {
 $4000 code start
 ; shows the title screen; also where the game returns to after game over
 $404b code title_screen
+$404b selfmod save_highscore
 $40a8 code title_loop
 $4102 code start_game
 $4111 code draw_title
@@ -221,8 +222,10 @@ $4698 code move_invader
 ; apply_trainer patches these two "adc #1 / sta invader_row" pairs
 $46fe row_add_right
 $4700 row_store_right
+$4700 selfmod invader_row
 $4722 row_add_left
 $4724 row_store_left
+$4724 selfmod invader_row
 $46af code step_invader
 $473e code bounce_cannons
 $477e code check_cannon_edges

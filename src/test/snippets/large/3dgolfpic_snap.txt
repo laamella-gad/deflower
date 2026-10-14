@@ -1,7 +1,6 @@
 >>> Deflower 3dgolf pic snapshot. <<<
 3dgolfpic_snap/3dgolfpic_snap.flo
 ^^^
-warning: $7f92: untouched_7f92 is used by $0201
 warning: $fce2: untouched_fce2 is used by $7f86
 Writing out/3dgolfpic_snap.asm
 Writing out/3dgolfpic_snap.map
@@ -52,7 +51,7 @@ escape_code:		.byte	$02
 ; called by: store_literal, decrunch_loop
 ; read by: decrunch_loop, decrunch_done
 store_byte:
-		sta packed_data_end
+		sta $7f89	; operand set by store_byte
 ; read by: decrunch_loop, decrunch_done
 ; modified by: store_byte
 output_pointer = $00fa
@@ -186,7 +185,7 @@ stack:
 ; called by: get_gamma, get_bits
 decrunch_get_byte:
 		pha 
-		lda untouched_7f92
+		lda $7f92	; operand set by decrunch_get_byte
 ; modified by: decrunch_get_byte
 input_pointer = $0202
 ; modified by: decrunch_get_byte
@@ -275,8 +274,6 @@ decrunch:
 		sei 
 		inc c128_clock
 		lda #$38
-; read by: decrunch
-d0812 = $0812
 		sta cpu_port
 		ldx #$34
 ; jumped to by: decrunch
@@ -296,10 +293,10 @@ l0822:
 ; jumped to by: decrunch
 l082D:
 		dex 
-		lda d0812, x
+		lda $0812, x	; operand set by decrunch
 ; modified by: decrunch
 d0830 = $0830
-		sta picture_bitmap + $d92, x
+		sta $6d92, x	; operand set by decrunch
 ; modified by: decrunch
 d0833 = $0833
 		txa 
@@ -746,7 +743,6 @@ picture_screen:
 unused_5fe8:
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00
-; written by: decrunch
 picture_bitmap:
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 		.byte	$00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $ff, $ef, $fb, $fd, $fd, $fd
@@ -1289,12 +1285,10 @@ snapshot_pc:
 		jmp kernal_reset
 
 ; the end of the packed data, not overwritten by the unpacked data
-; written by: store_byte
 packed_data_end:
 		.byte	$27, $9a, $1f, $49, $9c, $5f, $95, $ff, $fc
 
 .virtual $7f92
-; read by: decrunch_get_byte
 untouched_7f92:
 		.fill	20590
 ; ---- VIC-II ----

@@ -1,0 +1,64 @@
+>>> Issue 0106: an instruction whose operand other code writes prints its
+operand as a number, with a comment naming who sets it, and the operand
+names nothing: no label, no cross-reference. A selfmod line names the
+operand anyway, plus or minus the distance to what the image holds. On an
+instruction nothing writes it still works, with a warning. <<<
+*=$c000
+		ldx #$00
+		lda #$c1
+		sta $c00c
+		inc $c00f
+		lda $c100, x
+		sta $c400, x
+		inx
+		bne $c00a
+		lda $c100
+		rts
+*=$c100
+		.byte	1, 2, 3, 4
+===
+deflower test.prg
+$c000 code start
+; the table the copy starts at
+$c00a selfmod table
+$c013 selfmod table_end
+$c100-$c104 byte table
+$c104 table_end
+^^^
+warning: $c013: selfmod line, but no traced instruction writes the operand
+Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 27 bytes emitted, 0 differ, 0 virtual, 1 gap
+gap $c017-$c100
+~~~
+
+*=$c000
+
+start:
+		ldx #$00
+		lda #$c1
+		sta lC00A + 2
+		inc $c00f
+; the table the copy starts at
+; jumped to by: start
+; written by: start
+lC00A:
+		lda table, x	; operand set by start
+		sta $c400, x	; operand set by start
+		inx 
+		bne lC00A
+		lda table_end - $4
+		rts 
+*=$c100
+
+; read by: start
+table:
+		.byte	$01, $02, $03, $04
+; read by: start
+table_end = $c104
+~~~
+--- test.map
+$c000-$c017 code start
+$c017-$c100 gap
+$c100-$c104 byte[4] table
+vvv

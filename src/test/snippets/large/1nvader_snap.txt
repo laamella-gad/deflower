@@ -94,7 +94,7 @@ l010D:
 ; jumped to by: read_more_bits
 l011C:
 		dec decrunch_input
-		lda packed_data
+		lda $081f	; operand set by read_more_bits
 ; the operand of read_more_bits's lda: where the next packed byte is read, counting down
 ; read by: read_more_bits
 ; modified by: read_more_bits
@@ -286,7 +286,6 @@ l0813:
 		jmp build_decrunch_tables
 
 ; the remains of the packed data, behind what the decruncher overwrote
-; read by: read_more_bits
 packed_data:
 		.byte	$80, $00, $0a, $93, $d2, $d5, $ff, $90, $20, $9c, $00, $db, $f8, $ff, $1b, $86
 		.byte	$02, $33, $aa, $a2, $f6, $24, $84, $fe, $82, $90, $d9, $5a, $58, $da, $9d, $5c
@@ -617,7 +616,7 @@ l4018:
 ; jumped to by: show_game_over
 ; written by: apply_trainer
 title_screen:
-		jsr save_highscore
+		jsr save_highscore	; operand set by apply_trainer
 		lda #$94
 		sta p1_x
 		lda #$c4
@@ -1559,10 +1558,10 @@ l46DF:
 ; apply_trainer patches these two "adc #1 / sta invader_row" pairs
 ; written by: apply_trainer
 row_add_right:
-		adc #$01
+		adc #$01	; operand set by apply_trainer
 ; written by: apply_trainer
 row_store_right:
-		sta invader_row
+		sta invader_row	; operand set by apply_trainer
 		cld 
 		jsr set_hit_points
 		jmp l472E
@@ -1582,10 +1581,10 @@ l470A:
 		lda invader_row
 ; written by: apply_trainer
 row_add_left:
-		adc #$01
+		adc #$01	; operand set by apply_trainer
 ; written by: apply_trainer
 row_store_left:
-		sta invader_row
+		sta invader_row	; operand set by apply_trainer
 		cld 
 		jsr set_hit_points
 		jmp l472E
@@ -3325,7 +3324,7 @@ lC026:
 
 ; called by: crack_intro
 ask_trainer:
-		lda #$00
+		lda #$00	; operand set by ask_trainer
 		bne lC09D
 ; jumped to by: ask_trainer
 lC052:

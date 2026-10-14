@@ -76,7 +76,7 @@
  *       types: a byte holding the number of elements after it, then those
  *       elements, e.g. ascii[lengthbyte] for a .ptext string.
  *     - label: a name for the address, from [A-Za-z0-9._?]. It can't be
- *       a reserved word: deflower, include, virtual, banked, export,
+ *       a reserved word: deflower, include, virtual, banked, selfmod, export,
  *       screencode, ascii, byte, word, long, dword, addr, rta, sbyte, sword,
  *       slong, sdword, code, until, lengthbyte, noreturn.
  *     - (parameters), only on a code line: the data that follows every
@@ -122,6 +122,21 @@
  *     included banked line, and is an error next to one of its own.
  *         $ea31 banked kernal_irq
  *
+ * <address> selfmod <label>
+ *     Names the operand of self-modifying code: the instruction at the
+ *     address, whose operand bytes another instruction writes or modifies
+ *     (a branch aside). Such an operand otherwise prints as a number,
+ *     since it is only what the image holds, with a comment saying who
+ *     sets it, and names nothing. With the line it prints the label, plus
+ *     or minus the distance to the value the image holds there:
+ *     "lda voice_1_notes + $1000, y". The label is one of the .flo file's,
+ *     or a banked name, and gets the cross-reference. A line that isn't
+ *     on an instruction with an address operand, or names no label, is an
+ *     error; one on an instruction that no traced code writes is a
+ *     warning, as that code may not be found yet. Takes nothing else: no
+ *     range, type or 'virtual'.
+ *         $c1db selfmod voice_1_notes
+ *
  * <address> [virtual] {
  *     ...
  * }
@@ -149,7 +164,7 @@ prog:	(statement NEWLINE)* EOF;
 statement: COMMENT # comment
     | 'deflower' ID         # setFileName
     | 'include' ID          # include
-    | (address | memoryRange) setVirtual? setBanked? datatype? setLabel? parameters? noReturn? export? OPEN_BLOCK? # line
+    | (address | memoryRange) setVirtual? setBanked? setSelfMod? datatype? setLabel? parameters? noReturn? export? OPEN_BLOCK? # line
     | CLOSE_BLOCK                   # endBlock
     ;
 
@@ -157,6 +172,7 @@ address: number;
 memoryRange: number '-' number;
 setVirtual: 'virtual';
 setBanked: 'banked';
+setSelfMod: 'selfmod';
 setLabel: ID;
 export: 'export' ID;
 parameters: '(' parameter (',' parameter)* ')';

@@ -447,7 +447,9 @@ $c1ba byte
 $c1bb voice_1_set_page
 $c1ca voice_1_next
 $c1d8 voice_1_read_note
+$c1db selfmod voice_1_notes
 $c1df voice_1_read_parameter
+$c1e2 selfmod voice_1_parameters
 ; also how a voice stops when its stream ends
 $c1e6 voice_1_silence
 ; voice 2's copy of the code; it stores its page in voice_1_page after a call, a bug that
@@ -458,7 +460,9 @@ $c2ba byte
 $c2bb voice_2_set_page
 $c2ca voice_2_next
 $c2d8 voice_2_read_note
+$c2db selfmod voice_2_notes
 $c2df voice_2_read_parameter
+$c2e2 selfmod voice_2_parameters
 $c2e6 voice_2_silence
 $c300 voice_3_play
 $c309 voice_3_tick
@@ -466,10 +470,15 @@ $c3ba byte
 $c3bb voice_3_set_page
 $c3ca voice_3_next
 $c3d8 voice_3_read_note
+$c3db selfmod voice_3_notes
 $c3df voice_3_read_parameter
+$c3e2 selfmod voice_3_parameters
 $c3e6 voice_3_silence
 ; the music player's API; only $c4d0 and $c4fb are called from the game
 $c400 code copy_music_data
+; the page counts up from the copy to the place the player reads it
+$c40c selfmod voice_1_notes_copy
+$c40f selfmod voice_1_notes
 $c423 init_sid
 $c42f install_irq
 ; starts a voice at its position: patches voice_n_next to not advance, ticks once, unpatches
@@ -514,6 +523,8 @@ $c5e0 unpack_music
 ; the size ($0502: 2 bytes, 5 pages) and source ($2000) of each block
 $c5fc-$c600 byte[4] unpack_parameters
 $c600 move_blocks
+; block_pages + 1 for move_blocks, + 8 for the variant at $c750
+$c613 selfmod block_pages
 $c62b next_block_source
 $c63f move_block
 $c658 code copy_page_down
@@ -523,9 +534,11 @@ $c673 code copy_bytes
 ; the pages blocks go to: $9000-$b800, and $4000-$7000 for the variant at $c750
 $c67f-$c690 byte block_pages
 $c690 clear_block_tails
+$c6ad selfmod block_pages
 $c6d6 code
 $c6e0 code
 $c6eb code
+$c702 selfmod block_pages
 $c746 code
 $c750 code
 $c75f code

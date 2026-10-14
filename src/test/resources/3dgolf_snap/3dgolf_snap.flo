@@ -5,6 +5,7 @@ $0318 addr nmi_vector
 $a56b code irq
 ; after irq's rti, unreached: a leftover exit to the KERNAL's handler
 $a587 code
+$a587 selfmod kernal_irq
 $a5e9 code nmi
 ; $ff while nmi runs, so a nested NMI returns at once
 $a687 byte nmi_active
@@ -859,6 +860,7 @@ $9ff1-$a000 byte leftover_9ff1
 ; converts the 16-bit A:X to a log: A the fraction (in 32nds of an octave), X the exponent
 $0900 to_log
 $0ffb print_char
+$0ffb selfmod draw_char
 ; prints the $ff-terminated text after the jsr
 $2c75 code print_inline (ascii[until $ff] text)
 ; never returns: ends in a jmp to start

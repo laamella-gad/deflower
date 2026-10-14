@@ -5,8 +5,10 @@ import com.laamella.mpu6502.specification.Instruction;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import static com.laamella.Printing.*;
 import static com.laamella.mpu6502.ByteManipulation.toSignedByte;
@@ -489,7 +491,8 @@ class AssemblyFileFormat {
         int byte1 = subject.memory[area.address + 1].data;
         int byte2 = subject.memory[area.address + 2].data;
         int word = word(byte1, byte2);
-        String operand = switch (instruction.addressingMode) {
+        String operand = subject.selfModLabels.containsKey(area.address) ? namedOperand(area, byte1, word, subject)
+                : subject.operandModified(area.address) ? numericOperand(instruction, byte1, word) : switch (instruction.addressingMode) {
             case IND_X -> format("(%s, x)", nameForAddress(byte1, "$%02x", subject));
             case IND_Y -> format("(%s), y", nameForAddress(byte1, "$%02x", subject));
             case RELATIVE -> format("%s", nameForFlow(area, area.address + toSignedByte(byte1) + 2, subject));
@@ -511,13 +514,72 @@ class AssemblyFileFormat {
         out.print(instruction.opcode.name().toLowerCase());
         out.print(" ");
         out.print(operand);
+        List<String> comments = new ArrayList<>();
+        // The names of the inline data after this jsr (issue 0068).
         String callComment = subject.callComments.get(area.address);
         if (callComment != null) {
-            // The names of the inline data after this jsr (issue 0068).
-            out.print("\t; " + callComment);
+            comments.add(callComment);
+        }
+        Set<Integer> writers = subject.operandWriters.get(area.address);
+        if (writers != null) {
+            // Issue 0106: the operand is only what the image holds.
+            Set<String> names = new LinkedHashSet<>();
+            writers.forEach(writer -> names.add(CrossReferences.referrerName((InstructionArea) subject.memory[writer].area, subject)));
+            comments.add("operand set by " + String.join(", ", names));
+        }
+        if (!comments.isEmpty()) {
+            out.print("\t; " + String.join("; ", comments));
         }
 
         lastArea = area;
+    }
+
+    /**
+     * The operand of an instruction whose operand other code writes
+     * (issue 0106), as numbers: what the image holds names nothing.
+     */
+    private static String numericOperand(Instruction instruction, int byte1, int word) {
+        return operand(instruction, format("$%02x", byte1), format(word < 0x100 ? "@w $%04x" : "$%04x", word));
+    }
+
+    /**
+     * The operand a selfmod line names (issue 0106): the label, plus or
+     * minus the distance to the value the image holds.
+     */
+    private static String namedOperand(InstructionArea area, int byte1, int word, Subject subject) {
+        int labelAddress = subject.selfModLabels.get(area.address);
+        int value = CrossReferences.target(area, subject);
+        String name = subject.selfModNames.get(area.address);
+        if (value > labelAddress) {
+            name += format(" + $%x", value - labelAddress);
+        } else if (value < labelAddress) {
+            name += format(" - $%x", labelAddress - value);
+        }
+        boolean zeroPageForm = switch (area.instruction.addressingMode) {
+            case ZERO_PAGE, ZERO_PAGE_X, ZERO_PAGE_Y, IND_X, IND_Y -> true;
+            default -> false;
+        };
+        return operand(area.instruction, name, zeroPageForm || value >= 0x100 ? name : "@w " + name);
+    }
+
+    /**
+     * The operand of the instruction, with `zeroPage` for a zero-page or
+     * immediate value and `absolute` for an absolute one.
+     */
+    private static String operand(Instruction instruction, String zeroPage, String absolute) {
+        return switch (instruction.addressingMode) {
+            case IND_X -> format("(%s, x)", zeroPage);
+            case IND_Y -> format("(%s), y", zeroPage);
+            case INDIRECT -> format("(%s)", absolute);
+            case ABSOLUTE -> absolute;
+            case ABSOLUTE_X -> absolute + ", x";
+            case ABSOLUTE_Y -> absolute + ", y";
+            case IMMEDIATE -> "#" + zeroPage;
+            case ZERO_PAGE -> zeroPage;
+            case ZERO_PAGE_X -> zeroPage + ", x";
+            case ZERO_PAGE_Y -> zeroPage + ", y";
+            case RELATIVE, JAM, ACCUMULATOR, NONE -> throw new IllegalStateException("no operand to modify");
+        };
     }
 
     /**

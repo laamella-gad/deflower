@@ -2,7 +2,6 @@
 bigmac/bigmac.flo
 ^^^
 warning: $6fbe: unused_6fbe is used by $c752
-warning: $f000: untouched_f000 is used by $c40f
 Writing out/bigmac.asm
 Writing out/bigmac.map
 Verify out/bigmac.asm: 41373 bytes emitted, 0 differ, 24163 virtual, 0 gaps
@@ -4272,7 +4271,7 @@ l438C:
 ; jumped to by: update_player
 ; written by: apply_options
 deadly_check:
-		cmp #$25
+		cmp #$25	; operand set by apply_options
 ; written by: apply_options
 d43A5:
 		beq l43AB
@@ -7303,6 +7302,7 @@ unused_6fbe:
 		.byte	$0e, $dc, $8d, $0e, $dd, $8d, $0f, $dc, $8d, $0f, $dd, $a2, $00, $8e, $03, $dc
 		.byte	$8e, $03, $dd, $8e, $18, $d4, $ca, $8e, $02, $dc, $a9, $07, $8d, $00, $dd, $a9
 ; copied to $e000/$e800 by copy_music_data
+; read by: copy_music_data
 voice_1_notes_copy:
 		.byte	$3d, $3a, $36, $34, $31, $2e, $2b, $28, $2e, $2b, $28, $36, $31, $28, $31, $36
 		.byte	$31, $28, $31, $36, $31, $28, $31, $34, $31, $28, $31, $34, $2e, $28, $2e, $34
@@ -7393,7 +7393,7 @@ voice_1_parameters_copy:
 .virtual $9a52
 unused_9a52:
 		.fill	1454
-; read by: voice_2_read_note, copy_music_data
+; read by: voice_2_read_note
 voice_2_notes:
 		.fill	2016
 ; read by: voice_2_tick
@@ -7750,13 +7750,13 @@ lC1D7:
 ; called by: voice_1_tick
 voice_1_read_note:
 		ldy voice_1_position
-		lda voice_1_notes, y
+		lda voice_1_notes, y	; operand set by voice_1_set_page
 		rts 
 
 ; called by: voice_1_tick
 voice_1_read_parameter:
 		ldy voice_1_position
-		lda voice_1_parameters, y
+		lda voice_1_parameters, y	; operand set by voice_1_set_page
 ; written by: voice_1_set_page
 dC1E4 = $c1e4
 		rts 
@@ -7914,13 +7914,13 @@ lC2D7:
 ; called by: voice_2_tick
 voice_2_read_note:
 		ldy voice_2_position
-		lda voice_2_notes, y
+		lda voice_2_notes, y	; operand set by voice_2_set_page
 		rts 
 
 ; called by: voice_2_tick
 voice_2_read_parameter:
 		ldy voice_2_position
-		lda voice_2_parameters, y
+		lda voice_2_parameters, y	; operand set by voice_2_set_page
 ; written by: voice_2_set_page
 dC2E4 = $c2e4
 		rts 
@@ -8075,13 +8075,13 @@ lC3D7:
 ; called by: voice_3_tick
 voice_3_read_note:
 		ldy voice_3_position
-		lda voice_3_notes, y
+		lda voice_3_notes, y	; operand set by voice_3_set_page
 		rts 
 
 ; called by: voice_3_tick
 voice_3_read_parameter:
 		ldy voice_3_position
-		lda voice_3_parameters, y
+		lda voice_3_parameters, y	; operand set by voice_3_set_page
 ; written by: voice_3_set_page
 dC3E4 = $c3e4
 		rts 
@@ -8109,12 +8109,13 @@ copy_music_data:
 ; jumped to by: copy_music_data
 lC40A:
 		ldy #$00
+; the page counts up from the copy to the place the player reads it
 ; jumped to by: copy_music_data
 ; written by: copy_music_data
 ; modified by: copy_music_data
 lC40C:
-		lda voice_2_notes, y
-		sta untouched_f000, y
+		lda voice_1_notes_copy + $1000, y	; operand set by copy_music_data
+		sta voice_1_notes + $1000, y	; operand set by copy_music_data
 ; read by: copy_music_data
 ; written by: copy_music_data
 ; modified by: copy_music_data
@@ -8462,10 +8463,11 @@ lC60C:
 		sta lC613 + 1
 		ldx #$00
 		stx $6d
+; block_pages + 1 for move_blocks, + 8 for the variant at $c750
 ; jumped to by: move_blocks
 ; written by: move_blocks
 lC613:
-		lda block_pages + $1, x
+		lda block_pages + $1, x	; operand set by move_blocks
 		sta $65
 		lda #$00
 		sta $64
@@ -8589,7 +8591,7 @@ lC69F:
 lC6A9:
 		inc $63
 		lda $63
-		cmp block_pages + $1, x
+		cmp block_pages + $1, x	; operand set by clear_block_tails, lC6CE
 ; written by: clear_block_tails, lC6CE
 dC6AE = $c6ae
 		beq lC6B8
@@ -8657,7 +8659,7 @@ lC6F4:
 ; jumped to by: lC6CE
 lC700:
 		ldx $6d
-		lda block_pages + $8, x
+		lda block_pages + $8, x	; operand set by lC6CE
 ; written by: lC6CE
 dC703 = $c703
 		sta $63
@@ -9004,6 +9006,7 @@ cia1_port_b:		.byte	?
 
 ; voice 1's streams, copied from $9000/$9800
 ; read by: voice_1_read_note
+; written by: copy_music_data
 voice_1_notes:
 		.byte	$3d, $3a, $36, $34, $31, $2e, $2b, $28, $2e, $2b, $28, $36, $31, $28, $31, $36
 		.byte	$31, $28, $31, $36, $31, $28, $31, $34, $31, $28, $31, $34, $2e, $28, $2e, $34
@@ -9105,7 +9108,6 @@ voice_1_parameters:
 .virtual $ea52
 unused_ea52:
 		.fill	1454
-; written by: copy_music_data
 untouched_f000:
 		.fill	3376
 .endv

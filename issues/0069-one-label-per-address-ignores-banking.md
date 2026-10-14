@@ -30,4 +30,6 @@ Options to decide between:
 2. **Per-range banking.** Declare that a code range runs with a given memory configuration (e.g. `$4fd4-$5020` sees the character ROM), and give labels to a bank (e.g. a `charrom` label set). Operands in that range resolve against that bank's labels.
 3. **Leave it.** Document it as a limit and accept the wrong names.
 
+Option 1 exists in part since [0106](0106-self-modifying-code.md): `<address> selfmod <label>` gives one instruction's operand a label (with an offset when needed), meant for self-modifying code; on other code it warns. A raw number for one operand isn't possible yet.
+
 Done when: `1nvader_snap`'s `build_charset` no longer prints VIC/SID register names for its character ROM reads, and the chosen way is documented in `Flo.g4`'s format comment if it involves the `.flo` file.

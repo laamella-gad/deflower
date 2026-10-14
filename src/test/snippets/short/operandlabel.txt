@@ -28,11 +28,11 @@ Verify out/test.asm: 16 bytes emitted, 0 differ, 0 virtual, 0 gaps
 *=$c000
 
 entry:
-		lda #$05
-		lda #$00
+		lda #$05	; operand set by entry
+		lda #$00	; operand set by entry
 ; modified by: entry
 dC003 = $c003
-		ldx #$03
+		ldx #$03	; operand set by entry
 ; modified by: entry
 count = $c005
 		dec dC003

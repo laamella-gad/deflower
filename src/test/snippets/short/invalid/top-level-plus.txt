@@ -5,7 +5,7 @@ $c000 3+4 byte removed_plus
 ^^^
 Failed to parse test.flo:
 line 2:6 missing NEWLINE at '3'
-line 2:7 mismatched input '+' expecting {'virtual', 'banked', 'export', '(', 'noreturn', 'screencode', 'ascii', 'byte', 'word', 'long', 'dword', 'addr', 'rta', 'sbyte', 'sword', 'slong', 'sdword', 'code', '{', NEWLINE, ID}
+line 2:7 mismatched input '+' expecting {'virtual', 'banked', 'selfmod', 'export', '(', 'noreturn', 'screencode', 'ascii', 'byte', 'word', 'long', 'dword', 'addr', 'rta', 'sbyte', 'sword', 'slong', 'sdword', 'code', '{', NEWLINE, ID}
 ~~~
 ~~~
 vvv

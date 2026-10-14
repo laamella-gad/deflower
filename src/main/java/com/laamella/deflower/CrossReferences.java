@@ -83,11 +83,17 @@ class CrossReferences {
 
     private void add(InstructionArea area, Subject subject) {
         int target = target(area, subject);
-        if (target == -1) {
+        Integer named = subject.selfModLabels.get(area.address);
+        if (named != null) {
+            // A selfmod line (issue 0106) names the label itself.
+            target = named;
+        } else if (target == -1 || subject.operandModified(area.address)) {
             return;
         }
         int referrerAddress = referrerAddress(area, subject);
-        if (subject.bankedTarget(area) != -1) {
+        Label banked = subject.memory[target].banked;
+        if (named != null ? banked != null && banked.name.equals(subject.selfModNames.get(area.address))
+                : subject.bankedTarget(area) != -1) {
             referrersByBankedAddress
                     .computeIfAbsent(target, a -> new EnumMap<>(Kind.class))
                     .computeIfAbsent(kind(area.instruction), k -> new LinkedHashSet<>())
@@ -121,6 +127,26 @@ class CrossReferences {
             case RELATIVE -> area.address + toSignedByte(byte1) + 2;
             case IMMEDIATE, JAM, ACCUMULATOR, NONE -> -1;
         };
+    }
+
+    /**
+     * True when the instruction writes or modifies the memory its operand
+     * names, not only a pointer there.
+     */
+    static boolean changesTarget(Instruction instruction) {
+        return switch (kind(instruction)) {
+            case WRITE, MODIFY -> true;
+            default -> false;
+        };
+    }
+
+    /**
+     * The routine label of the code the instruction in `area` is in
+     * (`referrerAddress`), or its address.
+     */
+    static String referrerName(InstructionArea area, Subject subject) {
+        int referrerAddress = referrerAddress(area, subject);
+        return referrerAddress != -1 ? subject.memory[referrerAddress].labelName() : asHexWord(area.address);
     }
 
     /**

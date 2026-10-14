@@ -1,0 +1,23 @@
+>>> Issue 0106: a selfmod line must be on an instruction with an address
+operand, and name a label. <<<
+*=$c000
+		lda $c100
+		inx
+		rts
+*=$c100
+		.byte	1
+===
+deflower test.prg
+$c000 code start
+$c000 selfmod missing
+$c003 selfmod start
+$c100 selfmod start
+$c100 byte table
+^^^
+Selfmod line at $c000 names missing, which is no label
+Selfmod line at $c003: no instruction with an address operand there
+Selfmod line at $c100: no instruction with an address operand there
+Errors detected for test.asm, not writing output.
+~~~
+~~~
+vvv

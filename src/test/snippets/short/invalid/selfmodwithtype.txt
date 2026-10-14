@@ -1,0 +1,15 @@
+>>> Issue 0106: a selfmod line takes only an address and a label. <<<
+
+===
+deflower test.prg
+$c000 selfmod byte table
+$c000-$c004 selfmod table
+$c000 virtual selfmod table
+^^^
+Failed to parse test.flo:
+line 2: a selfmod line takes only an address and a label
+line 3: a selfmod line takes only an address and a label
+line 4: a selfmod line takes only an address and a label
+~~~
+~~~
+vvv

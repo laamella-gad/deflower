@@ -38,7 +38,10 @@ $087b code game_loop
 $091a code snapshot_pc
 ; operands the game loop changes to step down the road map
 $0927 left_road_source
+$0926 selfmod left_road
 $092c right_road_source
+$092b selfmod right_road
+$0b93 selfmod right_road
 $099f code steer
 $09c4 code position_car
 $09db code irq_bottom

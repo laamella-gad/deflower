@@ -125,7 +125,7 @@ new_game:
 ; jumped to by: position_car
 ; written by: new_game, position_car, irq_bottom
 game_loop:
-		lda #$01
+		lda #$01	; operand set by new_game, position_car, irq_bottom
 		beq game_loop
 		lda speed
 		clc 
@@ -169,7 +169,7 @@ l08B5:
 ; jumped to by: game_loop
 ; modified by: game_loop
 l08BE:
-		lda #$82
+		lda #$82	; operand set by game_loop
 		inc l08BE + 1
 		and #$3f
 		bne l08CF
@@ -223,13 +223,13 @@ snapshot_pc:
 		ldy #$00
 ; jumped to by: snapshot_pc
 l0926:
-		lda left_road + $fd
+		lda left_road + $fd	; operand set by game_loop, snapshot_pc
 ; operands the game loop changes to step down the road map
 ; written by: game_loop
 ; modified by: snapshot_pc
 left_road_source = $0927
 		sta (draw_pointer), y
-		lda right_road + $fd
+		lda right_road + $fd	; operand set by game_loop, snapshot_pc
 ; written by: game_loop
 ; modified by: snapshot_pc
 right_road_source = $092c
@@ -351,7 +351,7 @@ irq:
 		ora fine_scroll
 		ora #$08
 		sta vic_control1
-		lda #$07
+		lda #$07	; operand set by game_loop
 ; the road sprites' y in each half of the screen, set from fine_scroll
 ; written by: game_loop
 upper_road_y = $0a0b
@@ -373,7 +373,7 @@ upper_road_y = $0a0b
 
 irq_lower:
 		pha 
-		lda #$f8
+		lda #$f8	; operand set by game_loop
 ; written by: game_loop
 lower_road_y = $0a32
 		sta sprite1_y
@@ -589,7 +589,7 @@ draw_road_sprite:
 ; jumped to by: draw_road_sprite
 ; written by: game_loop, snapshot_pc
 l0B93:
-		lda right_road + $fd
+		lda right_road + $fd	; operand set by game_loop, snapshot_pc, draw_road_sprite
 ; written by: game_loop, snapshot_pc
 ; modified by: draw_road_sprite
 d0B94 = $0b94
@@ -939,7 +939,7 @@ l1010:
 ; jumped to by: music_play
 l1014:
 		ldx #$00
-		ldy #$ff
+		ldy #$ff	; operand set by music_set_volume
 ; operands the player changes
 ; written by: music_set_volume
 init_flag = $1017
@@ -972,9 +972,9 @@ l103A:
 ; jumped to by: music_set_volume
 ; written by: music_set_volume, l103A, l10AE
 l104A:
-		ldy #$01
+		ldy #$01	; operand set by music_set_volume, l103A, l10AE
 		beq l1093
-		lda #$00
+		lda #$00	; operand set by l103A, l10AE
 ; written by: l103A, l10AE
 ; modified by: l103A
 filter_steps = $104f
@@ -1023,18 +1023,18 @@ l1090:
 ; read by: l103A
 ; written by: l103A
 l1093:
-		lda #$05
+		lda #$05	; operand set by l103A
 ; jumped to by: l103A
 l1095:
 		sta filter_cutoff + $1
-		lda #$f1
+		lda #$f1	; operand set by music_set_volume, l103A
 ; written by: music_set_volume, l103A
 filter_resonance = $1099
 		sta filter_control
-		lda #$10
+		lda #$10	; operand set by l103A
 ; written by: l103A
 filter_type = $109e
-		ora #$0f
+		ora #$0f	; operand set by music_set_volume
 ; written by: music_set_volume
 master_volume = $10a0
 		sta volume_filter_mode

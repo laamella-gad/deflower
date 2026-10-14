@@ -38,13 +38,16 @@ final class Annotation {
     // True for a "banked" line (issue 0102): a flow target in memory
     // banked in over the RAM, named but not traced.
     final boolean banked;
+    // True for a "selfmod" line (issue 0106): the label the operand of the
+    // self-modified instruction at the address names.
+    final boolean selfMod;
 
     Annotation(int address, Integer addressEnd, LineType type, boolean virtual, int amount, String name, List<String> comment, boolean included, String export) {
-        this(address, addressEnd, type, virtual, amount, name, comment, included, export, null, false, null, false, false);
+        this(address, addressEnd, type, virtual, amount, name, comment, included, export, null, false, null, false, false, false);
     }
 
     Annotation(int address, Integer addressEnd, LineType type, boolean virtual, int amount, String name, List<String> comment, boolean included, String export,
-               Integer terminator, boolean lengthByte, List<Parameter> parameters, boolean noReturn, boolean banked) {
+               Integer terminator, boolean lengthByte, List<Parameter> parameters, boolean noReturn, boolean banked, boolean selfMod) {
         this.address = address;
         this.addressEnd = addressEnd;
         this.type = type;
@@ -59,5 +62,6 @@ final class Annotation {
         this.parameters = parameters;
         this.noReturn = noReturn;
         this.banked = banked;
+        this.selfMod = selfMod;
     }
 }

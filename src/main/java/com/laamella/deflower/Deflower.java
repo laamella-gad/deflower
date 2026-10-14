@@ -24,6 +24,7 @@ public class Deflower {
     private final SubjectConfigurer subjectConfigurer = new SubjectConfigurer();
     private final FlowAnalyser flowAnalyser = new FlowAnalyser();
     private final AddressSetupFinder addressSetupFinder = new AddressSetupFinder();
+    private final SelfModificationFinder selfModificationFinder = new SelfModificationFinder();
     private final ResultWriter resultWriter = new ResultWriter();
     private final Verifier verifier = new Verifier();
     // Reassemble each written .asm and check it against its image (issue 0075).
@@ -183,6 +184,7 @@ public class Deflower {
             for (Subject subject : subjects) {
                 flowAnalyser.analyseCodeFlows(subject);
                 addressSetupFinder.find(subject);
+                selfModificationFinder.find(subject);
                 subject.warnUsedSkeletonRanges();
                 subject.dropUnusedIncludes();
                 subject.reportDuplicateLabels();
