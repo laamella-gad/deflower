@@ -4,7 +4,8 @@
 ##
 ## The format is described in `docs/flo-format.md`.
 ## Two npeg grammars read it: one turns the characters into tokens, the
-## other reads one statement (a line) of tokens at a time.
+## other checks one statement (a line) of tokens at a time. That one holds
+## no code: `build` makes the statement from the tokens of a line it accepts.
 
 import std/[algorithm, os, strutils, tables]
 import npeg
@@ -67,12 +68,6 @@ type
     noReturn: bool
     exportFile: string
     openBlock: bool
-
-  StatementParser = object
-    tokens: seq[Token]
-    statement: Statement
-    parameter: RawParameter
-    inParameter: bool
 
   AnnotationCollector = ref object
     ## Turns the statements into annotations, one line at a time.
@@ -166,83 +161,112 @@ let lexerGrammar = peg("tokens", lexer: Lexer):
 
 # Parsing.
 
-proc tokenAt(parser: StatementParser, index: int): Token =
-  parser.tokens[index]
-
 proc number(text: string): int =
   if text.startsWith("$"): parseHexInt(text[1 .. ^1]) else: parseInt(text)
 
 proc lineTypeOf(kind: TokenKind): LineType =
   LineType(ord(kind) - ord(tkScreencode))
 
-let statementGrammar = peg("statement", TokenKind, p: StatementParser):
+# What a statement looks like. The grammar only checks a line's tokens; the
+# statement is built from them afterwards (`build`).
+let statementGrammar = peg("statement", TokenKind, unused: bool):
   statement <- (comment | deflowerLine | includeLine | line | endBlock) * [tkNewline] * !1
-  comment <- >[tkComment]:
-    let text = p.tokenAt(@1).text[1 .. ^1]
-    p.statement = Statement(kind: skComment, text: if text.startsWith(" "): text[1 .. ^1] else: text)
-  deflowerLine <- [tkDeflower] * >[tkId]:
-    p.statement = Statement(kind: skDeflower, text: p.tokenAt(@1).text)
-  includeLine <- [tkInclude] * >[tkId]:
-    p.statement = Statement(kind: skInclude, text: p.tokenAt(@1).text)
-  endBlock <- [tkCloseBlock]:
-    p.statement = Statement(kind: skEndBlock)
+  comment <- [tkComment]
+  deflowerLine <- [tkDeflower] * [tkId]
+  includeLine <- [tkInclude] * [tkId]
+  endBlock <- [tkCloseBlock]
+  line <- (memoryRange | number) * ?[tkVirtual] * ?[tkBanked] * ?[tkSelfMod] * ?dataType * ?[tkId] *
+      ?parameters * ?[tkNoReturn] * ?([tkExport] * [tkId]) * ?[tkOpenBlock]
+  memoryRange <- number * [tkMinus] * number
   number <- [tkInt] | [tkHex]
-  line <- (memoryRange | address) * ?setVirtual * ?setBanked * ?setSelfMod * ?lineType * ?setLabel *
-      ?parameters * ?noReturn * ?exportPart * ?openBlock
-  address <- >number:
-    p.statement = Statement(kind: skLine, address: number(p.tokenAt(@1).text), addressEnd: -1, terminator: -1,
-        lineType: ltUnknown)
-  memoryRange <- >number * [tkMinus] * >number:
-    p.statement = Statement(kind: skLine, address: number(p.tokenAt(@1).text),
-        addressEnd: number(p.tokenAt(@2).text), terminator: -1, lineType: ltUnknown)
-  setVirtual <- [tkVirtual]:
-    p.statement.virtual = true
-  setBanked <- [tkBanked]:
-    p.statement.banked = true
-  setSelfMod <- [tkSelfMod]:
-    p.statement.selfMod = true
-  setLabel <- >[tkId]:
-    p.statement.name = p.tokenAt(@1).text
-  noReturn <- [tkNoReturn]:
-    p.statement.noReturn = true
-  exportPart <- [tkExport] * >[tkId]:
-    p.statement.exportFile = p.tokenAt(@1).text
-  openBlock <- [tkOpenBlock]:
-    p.statement.openBlock = true
   # A data type with its size, on the line or on a parameter.
-  lineType <- typeName * ?([tkOpenSize] * ?(untilSize | lengthByte | arraySize) * [tkCloseSize])
-  typeName <- >([tkScreencode] | [tkAscii] | [tkByte] | [tkWord] | [tkLong] | [tkDword] | [tkAddr] | [tkRta] |
-      [tkSbyte] | [tkSword] | [tkSlong] | [tkSdword] | [tkCode]):
-    let lineType = lineTypeOf(p.tokenAt(@1).kind)
-    if p.inParameter:
-      p.parameter.lineType = lineType
-    else:
-      p.statement.hasType = true
-      p.statement.lineType = lineType
-  untilSize <- [tkUntil] * >number:
-    let terminator = number(p.tokenAt(@1).text)
-    if p.inParameter: p.parameter.terminator = terminator else: p.statement.terminator = terminator
-  lengthByte <- [tkLengthByte]:
-    if p.inParameter: p.parameter.lengthByte = true else: p.statement.lengthByte = true
+  dataType <- typeName * ?([tkOpenSize] * ?size * [tkCloseSize])
+  typeName <- [tkScreencode] | [tkAscii] | [tkByte] | [tkWord] | [tkLong] | [tkDword] | [tkAddr] | [tkRta] |
+      [tkSbyte] | [tkSword] | [tkSlong] | [tkSdword] | [tkCode]
+  size <- [tkUntil] * number | [tkLengthByte] | arraySize
   # "*" binds tighter than "+".
-  arraySize <- sizeNumber * *(sizeOperator * sizeNumber)
-  sizeNumber <- >number:
-    let token = p.tokenAt(@1)
-    if p.inParameter: p.parameter.size.add token else: p.statement.size.add token
-  sizeOperator <- >([tkStar] | [tkPlus]):
-    let token = p.tokenAt(@1)
-    if p.inParameter: p.parameter.size.add token else: p.statement.size.add token
-  parameters <- parametersStart * parameter * *([tkComma] * parameter) * [tkCloseParameters]
-  parametersStart <- [tkOpenParameters]:
-    p.statement.hasParameters = true
-  parameter <- parameterStart * lineType * ?parameterName:
-    p.statement.parameters.add p.parameter
-    p.inParameter = false
-  parameterStart <- 0:
-    p.inParameter = true
-    p.parameter = RawParameter(terminator: -1)
-  parameterName <- >[tkId]:
-    p.parameter.name = p.tokenAt(@1).text
+  arraySize <- number * *(([tkStar] | [tkPlus]) * number)
+  parameters <- [tkOpenParameters] * parameter * *([tkComma] * parameter) * [tkCloseParameters]
+  parameter <- dataType * ?[tkId]
+
+# Building a statement from the tokens of a line the grammar accepted. The
+# token kinds say what each part is.
+
+proc readSize(tokens: openArray[Token], i: var int, size: var seq[Token], terminator: var int,
+    lengthByte: var bool) =
+  ## The size after a type, from its '[' (at `i`) to its ']', if there is one.
+  if i >= tokens.len or tokens[i].kind != tkOpenSize:
+    return
+  inc i
+  while tokens[i].kind != tkCloseSize:
+    case tokens[i].kind
+    of tkUntil:
+      inc i
+      terminator = number(tokens[i].text)
+    of tkLengthByte:
+      lengthByte = true
+    else:
+      size.add tokens[i]
+    inc i
+  inc i
+
+proc readParameter(tokens: openArray[Token], i: var int): RawParameter =
+  result = RawParameter(lineType: lineTypeOf(tokens[i].kind), terminator: -1)
+  inc i
+  readSize(tokens, i, result.size, result.terminator, result.lengthByte)
+  if tokens[i].kind == tkId:
+    result.name = tokens[i].text
+    inc i
+
+proc buildLine(tokens: openArray[Token]): Statement =
+  result = Statement(kind: skLine, address: number(tokens[0].text), addressEnd: -1, terminator: -1,
+      lineType: ltUnknown)
+  var i = 1
+  if i < tokens.len and tokens[i].kind == tkMinus:
+    result.addressEnd = number(tokens[i + 1].text)
+    i += 2
+  while i < tokens.len:
+    let token = tokens[i]
+    inc i
+    case token.kind
+    of tkVirtual: result.virtual = true
+    of tkBanked: result.banked = true
+    of tkSelfMod: result.selfMod = true
+    of tkNoReturn: result.noReturn = true
+    of tkOpenBlock: result.openBlock = true
+    of typeTokens:
+      result.hasType = true
+      result.lineType = lineTypeOf(token.kind)
+      readSize(tokens, i, result.size, result.terminator, result.lengthByte)
+    of tkId:
+      result.name = token.text
+    of tkExport:
+      result.exportFile = tokens[i].text
+      inc i
+    of tkOpenParameters:
+      result.hasParameters = true
+      result.parameters.add readParameter(tokens, i)
+      while tokens[i].kind == tkComma:
+        inc i
+        result.parameters.add readParameter(tokens, i)
+      inc i
+    else:
+      discard
+
+proc build(tokens: openArray[Token]): Statement =
+  ## The statement on a line, without its newline.
+  case tokens[0].kind
+  of tkComment:
+    let text = tokens[0].text[1 .. ^1]
+    Statement(kind: skComment, text: if text.startsWith(" "): text[1 .. ^1] else: text)
+  of tkDeflower:
+    Statement(kind: skDeflower, text: tokens[1].text)
+  of tkInclude:
+    Statement(kind: skInclude, text: tokens[1].text)
+  of tkCloseBlock:
+    Statement(kind: skEndBlock)
+  else:
+    buildLine(tokens)
 
 # Error messages.
 
@@ -337,15 +361,16 @@ proc parseStatements(text: string, errors: var seq[string]): seq[tuple[line: int
     var kinds: seq[TokenKind]
     for token in lexer.tokens[start .. finish]:
       kinds.add token.kind
-    var parser = StatementParser(tokens: lexer.tokens[start .. finish])
-    let match = statementGrammar.match(kinds, parser)
+    let tokens = lexer.tokens[start .. finish]
+    var unused: bool
+    let match = statementGrammar.match(kinds, unused)
     if match.ok:
-      result.add (lexer.tokens[start].line, parser.statement)
+      result.add (tokens[0].line, build(tokens[0 ..< ^1]))
     else:
       let index = min(match.matchMax, finish - start)
-      let found = parser.tokens[index]
+      let found = tokens[index]
       if found.line notin firstErrors or found.column < firstErrors[found.line].column:
-        firstErrors[found.line] = (found.column, describe(parser.tokens[0 ..< index], found))
+        firstErrors[found.line] = (found.column, describe(tokens[0 ..< index], found))
     start = finish + 1
   var lines: seq[int]
   for line in firstErrors.keys:
