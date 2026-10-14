@@ -20,12 +20,12 @@ Short enough to read in a terminal: a reference, not the full description.
 
 ## To decide
 
-- **One source for the format.** The full `.flo` description is the comment at the top of `Flo.g4`. A second copy in the manual will drift from it. Options:
-  - the manual is a resource file (e.g. `src/main/resources/deflower/manual.txt`) and the grammar comment points to it, or the other way round;
-  - the manual is a summary that points to `Flo.g4` for the details;
-  - a test checks that every keyword in the grammar appears in the manual.
+- **One source for the format.** The full `.flo` description is `docs/flo-format.md`. A second copy in the manual will drift from it. Options:
+  - the executable prints `docs/flo-format.md` itself, compiled in with `staticRead` like the built-in includes;
+  - the manual is a summary that points to `docs/flo-format.md` for the details;
+  - a test checks that every keyword `flo_reader` knows appears in the manual.
 
-Related: [0059](0059-convert-to-nim.md) (which supersedes [0019](0019-ship-as-single-executable.md)) would replace the `./deflower` script with a native executable.
+Related: [0059](0059-convert-to-nim.md) made deflower a native executable, `bin/deflower`, which the `./deflower` script builds and runs.
 
 Done when: `--help`/`-h` print the manual, including how to write a `.flo` file, and exit 0, no arguments prints usage and exits non-zero, and a test covers both.
 

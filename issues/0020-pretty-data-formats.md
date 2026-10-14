@@ -36,7 +36,7 @@ Unlike `.bin` and `.prg` exports, 64tass can't `.binary` a PNG back into the rig
 
 It is mostly for the user, to locate graphics: open the PNG, see whether the range really holds the font or the sprites, whether it starts at the right address, and where one set ends and the next begins. That matters more than a faithful rendering, so simple choices for colors and layout are fine.
 
-Java's `javax.imageio` writes PNG files, so no new dependency is needed.
+Nim's standard library has no PNG writer: use a nimble package, or write one, which is small with uncompressed (stored) deflate blocks.
 
 ### To decide
 

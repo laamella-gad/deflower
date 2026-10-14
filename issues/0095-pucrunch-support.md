@@ -16,7 +16,7 @@ Many of the programs Deflower works on were crunched like this to begin with. `3
 Options, from loosest to tightest:
 1. **Produce input for pucrunch.** Write what pucrunch needs next to the `.asm`: the assembled `.prg` (Verifier already assembles it with mpu6502), and the command line with the start address and `$01` value, e.g. a `out/<binary>.crunch.sh`.
 2. **Call it.** With a switch like `--crunch`, run a `pucrunch` executable found on the `PATH` after a clean verify, and write `out/<binary>.crunched.prg`.
-3. **Integrate it.** Port the compressor to Java, or call it as a library, and ship the 6502 decompressor, so no external tool is needed.
+3. **Integrate it.** Port the compressor to Nim, or call it as a library, and ship the 6502 decompressor, so no external tool is needed.
 
 ## To decide
 

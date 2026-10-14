@@ -11,4 +11,4 @@ da65 takes the start address and the part of the file to read as options (`START
 
 This matters most for other machines and bare 6502 ROMs ([0098](0098-keep-the-disassembler-generic.md)), and is a piece of [0083](0083-load-more-binaries.md): a ROM image loaded over a snapshot needs this form too. `--dump`, `--find`, `--strings` and `--init` read their input through `MemoryImage` and should take the same raw files.
 
-Done when a raw binary loads at a given address, optionally from an offset and for a size, documented in `Flo.g4`'s format comment.
+Done when a raw binary loads at a given address, optionally from an offset and for a size, documented in `docs/flo-format.md`.

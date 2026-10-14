@@ -32,4 +32,4 @@ Options to decide between:
 
 Option 1 exists in part since [0106](0106-self-modifying-code.md): `<address> selfmod <label>` gives one instruction's operand a label (with an offset when needed), meant for self-modifying code; on other code it warns. A raw number for one operand isn't possible yet.
 
-Done when: `1nvader_snap`'s `build_charset` no longer prints VIC/SID register names for its character ROM reads, and the chosen way is documented in `Flo.g4`'s format comment if it involves the `.flo` file.
+Done when: `1nvader_snap`'s `build_charset` no longer prints VIC/SID register names for its character ROM reads, and the chosen way is documented in `docs/flo-format.md` if it involves the `.flo` file.

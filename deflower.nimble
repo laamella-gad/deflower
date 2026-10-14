@@ -6,6 +6,7 @@ description   = "Semi-automatic 6502 disassembler"
 license       = "BSD-3-Clause"
 srcDir        = "src"
 bin           = @["deflower"]
+binDir        = "bin"
 
 # Dependencies
 

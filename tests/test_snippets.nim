@@ -1,5 +1,4 @@
-## Runs the snippet files in `src/test/snippets` of the Java project, the
-## same files DeflowerTest runs (issue 0059). Every snippet has three
+## Runs the snippet files in `tests/snippets`. Every snippet has three
 ## expectations: what Deflower printed (stdout and stderr together), the
 ## generated `.asm` files, and the other files in `out/`: the memory maps as
 ## text and the exported binaries as hex dumps. Deflower runs with verify
@@ -12,11 +11,11 @@
 ## to the bytes of the `.prg` with its name, unless the assembly has a
 ## `; no round trip` line.
 ##
-## A large snippet (`large/`) names a `.flo` file in `src/test/resources`,
+## A large snippet (`large/`) names a `.flo` file in `tests/resources`,
 ## for programs too big to keep as source in a snippet.
 ##
 ## An init snippet (`init/`) names a `.vsf` or `.prg` file in
-## `src/test/resources`, and expects the `.flo` skeleton that `--init`
+## `tests/resources`, and expects the `.flo` skeleton that `--init`
 ## writes for it (issue 0072).
 ##
 ## A dump snippet (`dump/`) names such a file and a range, and expects what
@@ -30,9 +29,9 @@ import mpu6502, snippets_test
 import deflower/[initializer, look, printing, runner]
 
 const
-  projectRoot = currentSourcePath().parentDir / ".." / ".."
-  snippets = projectRoot / "src" / "test" / "snippets"
-  resources = projectRoot / "src" / "test" / "resources"
+  testsDir = currentSourcePath().parentDir
+  snippets = testsDir / "snippets"
+  resources = testsDir / "resources"
   fileHeader = "; file: "
   noRoundTrip = "; no round trip"
     ## In a snippet's assembly, skips the round trip, for a snippet that
@@ -169,12 +168,12 @@ proc runShort(parts: seq[string]): seq[string] =
     removeDir(dir)
 
 var largeResources = ""
-  ## A copy of src/test/resources, made once, since a run writes into the
+  ## A copy of tests/resources, made once, since a run writes into the
   ## directory of its .flo file.
 
 proc runLarge(parts: seq[string]): seq[string] =
   if parts.len != 1:
-    raise newException(SnippetTestFailure, "input: one .flo path in src/test/resources")
+    raise newException(SnippetTestFailure, "input: one .flo path in tests/resources")
   if largeResources.len == 0:
     largeResources = createTempDir("deflower", "")
     copyDir(resources, largeResources)
@@ -196,15 +195,15 @@ suite "large snippets":
 
 proc runInit(parts: seq[string]): seq[string] =
   if parts.len != 1:
-    raise newException(SnippetTestFailure, "input: one .vsf or .prg path in src/test/resources")
+    raise newException(SnippetTestFailure, "input: one .vsf or .prg path in tests/resources")
   @[skeleton(resources / parts[0].strip).join("\n") & "\n"]
 
 proc runLook(flag: string): TestCase =
   ## Runs a tool that looks at an input file, on the file the snippet names
-  ## in src/test/resources and the arguments after it.
+  ## in tests/resources and the arguments after it.
   result = proc (parts: seq[string]): seq[string] =
     if parts.len != 1:
-      raise newException(SnippetTestFailure, "input: a .vsf or .prg path in src/test/resources, then the arguments")
+      raise newException(SnippetTestFailure, "input: a .vsf or .prg path in tests/resources, then the arguments")
     let input = parts[0].strip.splitWhitespace
     try:
       @[look(flag, resources / input[0], input[1 .. ^1]).join("\n") & "\n"]

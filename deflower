@@ -1,15 +1,9 @@
 #!/bin/sh
-# Runs deflower from the classes `mvn -o compile` built, e.g.
-# ./deflower --verify src/test/resources/squirm/squirm.flo
-# The dependency classpath is cached in target/ and rebuilt when pom.xml changes.
+# Runs deflower, e.g. ./deflower --verify tests/resources/squirm/squirm.flo
+# Builds bin/deflower first when it is missing or a source is newer.
 dir=$(cd "$(dirname "$0")" && pwd)
-if [ ! -d "$dir/target/classes" ]; then
-    echo "No classes in $dir/target/classes, run mvn -o compile first" >&2
-    exit 2
+bin="$dir/bin/deflower"
+if [ ! -x "$bin" ] || [ -n "$(find "$dir/src" "$dir/mpu6502/src" "$dir/deflower.nimble" "$dir/config.nims" -newer "$bin" -type f | head -n 1)" ]; then
+    nim c -d:release --hints:off --warnings:off -o:"$bin" "$dir/src/deflower.nim" >&2 || exit 2
 fi
-classpath="$dir/target/classpath.txt"
-if [ ! -f "$classpath" ] || [ "$dir/pom.xml" -nt "$classpath" ]; then
-    mvn -o -q -f "$dir/pom.xml" dependency:build-classpath \
-        -Dmdep.outputFile="$classpath" -Dmdep.includeScope=runtime || exit 2
-fi
-exec java -cp "$dir/target/classes:$(cat "$classpath")" com.laamella.deflower.Deflower "$@"
+exec "$bin" "$@"

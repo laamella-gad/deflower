@@ -2,7 +2,7 @@
 ## the annotations that follow it. Reads nothing but the `.flo` files, and
 ## changes no memory.
 ##
-## The format is described in `src/main/antlr4/com/laamella/enflower/Flo.g4`.
+## The format is described in `docs/flo-format.md`.
 ## Two npeg grammars read it: one turns the characters into tokens, the
 ## other reads one statement (a line) of tokens at a time.
 
@@ -97,12 +97,12 @@ type
     blockLine: int
 
 const builtIns = {
-  "c64.flo": staticRead("../../../src/main/resources/deflower/c64.flo"),
-  "c64_basic.flo": staticRead("../../../src/main/resources/deflower/c64_basic.flo"),
-  "c64_io.flo": staticRead("../../../src/main/resources/deflower/c64_io.flo"),
-  "c64_kernal.flo": staticRead("../../../src/main/resources/deflower/c64_kernal.flo"),
-  "c64_system.flo": staticRead("../../../src/main/resources/deflower/c64_system.flo"),
-  "c64_zeropage.flo": staticRead("../../../src/main/resources/deflower/c64_zeropage.flo"),
+  "c64.flo": staticRead("includes/c64.flo"),
+  "c64_basic.flo": staticRead("includes/c64_basic.flo"),
+  "c64_io.flo": staticRead("includes/c64_io.flo"),
+  "c64_kernal.flo": staticRead("includes/c64_kernal.flo"),
+  "c64_system.flo": staticRead("includes/c64_system.flo"),
+  "c64_zeropage.flo": staticRead("includes/c64_zeropage.flo"),
 }.toTable
   ## The .flo files built into Deflower (issue 0078).
 
