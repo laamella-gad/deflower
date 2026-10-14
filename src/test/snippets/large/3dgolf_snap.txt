@@ -1,9 +1,11 @@
 >>> Deflower 3dgolf snapshot. <<<
 3dgolf_snap/3dgolf_snap.flo
 ^^^
+warning: $00c6: unused_c6 is used by $0825
 warning: $0881: bne $088b (l088B) goes into the middle of the instruction at $0889
 warning: $08d3: jsr $033c (tape_header) goes into data
 warning: $a587: jmp $ea31 (kernal_irq) goes into data
+warning: $ed07: unused_ed07 is used by $0201
 Writing out/3dgolf_snap.asm
 Writing out/3dgolf_snap.map
 Verify out/3dgolf_snap.asm: 45859 bytes emitted, 0 differ, 19677 virtual, 0 gaps

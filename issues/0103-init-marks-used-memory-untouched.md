@@ -1,7 +1,6 @@
 ---
 title: --init marks memory the program uses as untouched or unused
-status: open
-priority: high
+status: done
 labels: bug
 ---
 
@@ -19,3 +18,11 @@ Found while disassembling `bigmac` from scratch:
 - **Warn on use.** After the trace, a virtual range named `untouched_`/`unused_` (or any virtual range from the skeleton) that an instruction reads or writes gets a warning naming the instructions: `warning: $0974: untouched_0974 is used by $3c60, $3c0f, ...`. The cross-references are already collected (`CrossReferences`); in the bigmac `.asm` they show up as `read by:`/`written by:` above the virtual block, but nothing says that is suspect.
 
 Done when: a fresh `bigmac` skeleton has no untouched range inside `$2b00-$3880` or at `$0eff`, and a run on a `.flo` file with a skeleton range the code uses warns about it.
+
+## Closing note
+
+`Initializer.powerOnPattern` no longer lets a run continue over a byte with several bits set, except a lone byte between two exact `$00`/`$ff` once the run is 64 bytes long: VICE sets those at random, and they split long runs in `1nvader`, `3dgolf`, `bigmac` and `zwark` into pieces. A range is trimmed to exact `$00`/`$ff` at both ends, and a run that doesn't hold at least 1/8 of both `$00` and `$ff` (`MIN_SHARE`) only gives its zero stretches of 64 bytes or more as `unused`, which keeps sparse sprites out (also the invader shapes at `$3205-$32d4` in `1nvader`). A fresh `bigmac` skeleton has nothing inside `$2b00-$3880` or at `$0eff`.
+
+After the trace, `Subject.warnUsedSkeletonRanges` warns about each `untouched_`/`unused_` virtual range of the `.flo` file's own that an instruction's operand names, listing the instructions (`short/skeletonrangeused.txt`). Targets with an included label are skipped, so KERNAL calls into a range under the ROM don't warn. On a fresh `bigmac` skeleton it points at the music player's buffers (`unused_9a52`, `unused_b217`, `unused_e252`); the finished `bigmac.flo` still has two such ranges, which the warnings in `large/bigmac.txt` show.
+
+The arrays of zeroes (`$0974-$0a02`) can't be told apart from unused memory by the bytes alone; the warning is what catches them.

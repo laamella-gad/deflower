@@ -47,6 +47,8 @@ class Initializer {
     private static final int MIN_ZERO_RUN = 256;
     // What is left of a run beside the zeroes in it is a range from this long on.
     private static final int MIN_RANGE = 16;
+    // A power-on run holds at least this share (1/n) of both $00 and $ff.
+    private static final int MIN_SHARE = 8;
 
     private final List<String> lines = new ArrayList<>();
     private final Map<Integer, String> codeEntries = new LinkedHashMap<>();
@@ -406,20 +408,65 @@ class Initializer {
             }
             int start = address;
             int end = address;
-            while (end < to) {
-                if (inPattern(end)) {
-                    end++;
-                } else if (end + 1 < to && end - start >= 32 && inPattern(end + 1)) {
-                    // a byte with more than one bit flipped
-                    end++;
-                } else {
-                    break;
-                }
-            }
-            if (end - start >= MIN_POWER_ON_RUN) {
-                splitZeroes(start, end);
+            while (end < to && (inPattern(end) || noise(start, end))) {
+                end++;
             }
             address = end + 1;
+            // A byte one bit off at an edge may as well be the neighbour's
+            // data (issue 0103).
+            while (start < end && !exactPattern(start)) {
+                start++;
+            }
+            while (end > start && !exactPattern(end - 1)) {
+                end--;
+            }
+            if (end - start < MIN_POWER_ON_RUN) {
+                continue;
+            }
+            if (balanced(start, end)) {
+                splitZeroes(start, end);
+            } else {
+                zeroes(start, end);
+            }
+        }
+    }
+
+    /**
+     * Whether the run holds enough of both $00 and $ff to be the power-on
+     * pattern: mostly zeroes with a few other bytes is more likely sparse
+     * data, like a sprite (issue 0103).
+     */
+    private boolean balanced(int start, int end) {
+        int zeroes = 0;
+        int ones = 0;
+        for (int address = start; address < end; address++) {
+            if (memory[address] == 0) {
+                zeroes++;
+            } else if (memory[address] == 0xff) {
+                ones++;
+            }
+        }
+        int least = (end - start) / MIN_SHARE;
+        return zeroes >= least && ones >= least;
+    }
+
+    /**
+     * Adds the runs of only zeroes in the run as unused.
+     */
+    private void zeroes(int start, int end) {
+        int address = start;
+        while (address < end) {
+            if (memory[address] != 0) {
+                address++;
+                continue;
+            }
+            int zeroes = address;
+            while (address < end && memory[address] == 0) {
+                address++;
+            }
+            if (address - zeroes >= MIN_POWER_ON_RUN) {
+                addRange(zeroes, address, "unused");
+            }
         }
     }
 
@@ -467,6 +514,16 @@ class Initializer {
         int bits = Integer.bitCount(memory[address]);
         return (bits == 1 || bits == 7)
                 && (address > 0 && exactPattern(address - 1) || address < 0xffff && exactPattern(address + 1));
+    }
+
+    /**
+     * Any byte between two exact ones, in a run already long enough: VICE
+     * sets a byte at random now and then, which shouldn't split a long run
+     * of the pattern (issue 0103).
+     */
+    private boolean noise(int start, int address) {
+        return address - start >= MIN_POWER_ON_RUN && address < 0xffff
+                && exactPattern(address - 1) && exactPattern(address + 1);
     }
 
     private boolean exactPattern(int address) {

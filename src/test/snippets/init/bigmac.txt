@@ -20,15 +20,9 @@ bigmac/bigmac.vsf
 deflower bigmac.vsf
 $c54d code snapshot_pc
 $c543 code irq
-$092d-$0a02 virtual byte untouched_092d
-$0eff-$0f5e virtual byte untouched_0eff
-$0f9d-$0fff virtual byte untouched_0f9d
-$32ac-$32f9 virtual byte untouched_32ac
-$3400-$3521 virtual byte untouched_3400
-$36c0-$373f virtual byte untouched_36c0
-$3780-$387f virtual byte untouched_3780
+$092d-$0a00 virtual byte unused_092d
 $68a6-$6b4e virtual byte unused_68a6
-$6d65-$6da8 virtual byte untouched_6d65
+$6d65-$6da7 virtual byte unused_6d65
 $6fbe-$7000 virtual byte unused_6fbe
 $9252-$9800 virtual byte unused_9252
 $9a52-$b000 virtual byte unused_9a52

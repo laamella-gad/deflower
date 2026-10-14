@@ -17,10 +17,9 @@
 ; BASIC program $0801-$257c, SYS 2061 ($080d)
 deflower 1nvader_snap.vsf
 $4395 code snapshot_pc
-$1698-$2000 virtual byte untouched_1698
-$2800-$3208 virtual byte untouched_2800
-$3258-$4000 virtual byte untouched_3258
-$5650-$56f8 virtual byte untouched_5650
+$1699-$2000 virtual byte untouched_1699
+$2800-$3205 virtual byte untouched_2800
+$32d4-$4000 virtual byte untouched_32d4
 $56f8-$a000 virtual byte unused_56f8
 $a000-$c000 virtual byte unused_a000
 $c213-$d000 virtual byte untouched_c213

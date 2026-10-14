@@ -17,10 +17,8 @@ deflower squirm.vsf
 $3122 code snapshot_pc
 $3cb3 code irq
 $2595-$25fe virtual byte unused_2595
-$2605-$2648 virtual byte untouched_2605
-$26dd-$2724 virtual byte untouched_26dd
-$272b-$278a virtual byte untouched_272b
-$2791-$2808 virtual byte untouched_2791
+$26de-$2724 virtual byte unused_26de
+$2791-$27e6 virtual byte unused_2791
 $3f49-$a000 virtual byte untouched_3f49
 $a001-$c000 virtual byte untouched_a001
 $c000-$d000 virtual byte untouched_c000

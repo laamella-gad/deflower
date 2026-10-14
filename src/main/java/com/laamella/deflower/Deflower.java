@@ -183,6 +183,7 @@ public class Deflower {
             for (Subject subject : subjects) {
                 flowAnalyser.analyseCodeFlows(subject);
                 addressSetupFinder.find(subject);
+                subject.warnUsedSkeletonRanges();
                 subject.dropUnusedIncludes();
                 subject.reportDuplicateLabels();
                 subject.warnings.stream()

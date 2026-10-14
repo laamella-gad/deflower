@@ -18,14 +18,11 @@ deflower commando.vsf
 $400f code snapshot_pc
 $4116 code irq
 $0a4d code nmi
-$7faf-$8000 virtual byte untouched_7faf
+$7fb0-$8000 virtual byte unused_7fb0
 $9f40-$a000 virtual byte unused_9f40
 $bf40-$c008 virtual byte unused_bf40
-$e400-$e449 virtual byte untouched_e400
-$e45a-$e596 virtual byte untouched_e45a
-$f423-$f4cc virtual byte untouched_f423
-$fa6f-$fb21 virtual byte untouched_fa6f
-$ffbd-$10000 virtual byte untouched_ffbd
+$e4a0-$e4e2 virtual byte unused_e4a0
+$ffbe-$10000 virtual byte unused_ffbe
 include c64_zeropage.flo
 include c64_system.flo
 include c64_io.flo

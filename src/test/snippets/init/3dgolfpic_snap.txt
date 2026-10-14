@@ -16,11 +16,8 @@
 deflower 3dgolfpic_snap.vsf
 $7f84 code snapshot_pc
 $1a12-$5800 virtual byte untouched_1a12
-$6397-$63d9 virtual byte untouched_6397
+$6398-$63d8 virtual byte unused_6398
 $64d3-$651a virtual byte unused_64d3
-$67b2-$67f5 virtual byte untouched_67b2
-$6c00-$6c49 virtual byte untouched_6c00
-$6d40-$6d91 virtual byte untouched_6d40
 $7f92-$a000 virtual byte untouched_7f92
 $a001-$c000 virtual byte untouched_a001
 $c000-$d000 virtual byte untouched_c000

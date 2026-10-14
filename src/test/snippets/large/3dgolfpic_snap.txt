@@ -1,6 +1,8 @@
 >>> Deflower 3dgolf pic snapshot. <<<
 3dgolfpic_snap/3dgolfpic_snap.flo
 ^^^
+warning: $7f92: untouched_7f92 is used by $0201
+warning: $fce2: untouched_fce2 is used by $7f86
 Writing out/3dgolfpic_snap.asm
 Writing out/3dgolfpic_snap.map
 Verify out/3dgolfpic_snap.asm: 15072 bytes emitted, 0 differ, 50464 virtual, 0 gaps

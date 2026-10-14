@@ -20,12 +20,10 @@ $091a code snapshot_pc
 $09fd code hardware_irq
 $0da0-$1000 virtual byte unused_0da0
 $1591-$4043 virtual byte unused_1591
-$4043-$423c virtual byte untouched_4043
 $423c-$4408 virtual byte unused_423c
-$4408-$47f9 virtual byte untouched_4408
 $4a6c-$7808 virtual byte unused_4a6c
 $78af-$8000 virtual byte unused_78af
-$81ff-$d000 virtual byte untouched_81ff
+$8200-$d000 virtual byte untouched_8200
 $e000-$fd30 virtual byte untouched_e000
 $fd50-$fffa virtual byte untouched_fd50
 include c64_zeropage.flo

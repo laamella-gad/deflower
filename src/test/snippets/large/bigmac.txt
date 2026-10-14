@@ -1,7 +1,9 @@
 >>> Deflower big mac. <<<
 bigmac/bigmac.flo
 ^^^
+warning: $6fbe: unused_6fbe is used by $c752
 warning: $c569: jmp $ea31 (kernal_irq) goes into data
+warning: $f000: untouched_f000 is used by $c40f
 Writing out/bigmac.asm
 Writing out/bigmac.map
 Verify out/bigmac.asm: 41373 bytes emitted, 0 differ, 24163 virtual, 0 gaps

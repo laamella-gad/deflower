@@ -19,18 +19,18 @@ $2ef7 code snapshot_pc
 $a56b code irq
 $a5e9 code nmi
 $4357-$4400 virtual byte untouched_4357
-$4b7e-$4bd6 virtual byte untouched_4b7e
-$5476-$5901 virtual byte untouched_5476
-$5c55-$6001 virtual byte untouched_5c55
+$4b7f-$4bc1 virtual byte unused_4b7f
+$5615-$5656 virtual byte unused_5615
+$5c83-$6001 virtual byte untouched_5c83
 $6023-$6139 virtual byte untouched_6023
 $61c8-$6261 virtual byte unused_61c8
 $6310-$639b virtual byte unused_6310
 $6457-$64d8 virtual byte unused_6457
 $6598-$65e0 virtual byte unused_6598
-$6788-$67d0 virtual byte untouched_6788
+$6788-$67c8 virtual byte unused_6788
 $68c8-$6928 virtual byte unused_68c8
 $6a08-$6a68 virtual byte unused_6a08
-$6b48-$6bab virtual byte untouched_6b48
+$6b48-$6ba7 virtual byte unused_6b48
 $6c88-$6cdb virtual byte unused_6c88
 $6dc8-$6e0c virtual byte unused_6dc8
 $9cc4-$9ff1 virtual byte untouched_9cc4

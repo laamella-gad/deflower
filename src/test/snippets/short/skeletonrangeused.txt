@@ -1,0 +1,96 @@
+>>> Issue 0103: an untouched_ or unused_ range from an --init skeleton is
+virtual, so a wrong one hides data. A warning names the instructions whose
+operand points into one; another virtual range, or a label from an include on
+it, doesn't warn. <<<
+*=$c000
+		ldx #$09
+loop:
+		lda #$00
+		sta $c100, x
+		sta $c200, x
+		sta $c300, x
+		dex
+		bpl loop
+		jsr $ffd2
+		rts
+*=$c100
+		.fill	16, 0
+*=$c200
+		.fill	16, $ff
+*=$c300
+		.fill	16, 0
+*=$ffd0
+		.fill	16, $ff
+===
+deflower test.prg
+$c000 code
+$c100-$c110 virtual byte unused_c100
+$c200-$c210 virtual byte untouched_c200
+$c300-$c310 virtual byte buffer
+$ffd0-$ffe0 virtual byte untouched_ffd0
+include system.flo
+===
+; file: system.flo
+$ffd2 chrout
+^^^
+warning: $c100: unused_c100 is used by $c004
+warning: $c200: untouched_c200 is used by $c007
+Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 20 bytes emitted, 0 differ, 64 virtual, 4 gaps
+gap $c014-$c100
+gap $c110-$c200
+gap $c210-$c300
+gap $c310-$ffd0
+~~~
+
+*=$c000
+		ldx #$09
+; jumped to by: $c00e
+lC002:
+		lda #$00
+		sta unused_c100, x
+		sta untouched_c200, x
+		sta buffer, x
+		dex 
+		bpl lC002
+		jsr chrout
+		rts 
+
+.virtual $c100
+; written by: $c004
+unused_c100:
+		.fill	16
+.endv
+
+.virtual $c200
+; written by: $c007
+untouched_c200:
+		.fill	16
+.endv
+
+.virtual $c300
+; written by: $c00a
+buffer:
+		.fill	16
+.endv
+
+.virtual $ffd0
+untouched_ffd0:
+		.fill	2
+; called by: $c010
+chrout:
+		.fill	14
+.endv
+~~~
+--- test.map
+$c000-$c014 code
+$c014-$c100 gap
+$c100-$c110 virtual byte[16] unused_c100
+$c110-$c200 gap
+$c200-$c210 virtual byte[16] untouched_c200
+$c210-$c300 gap
+$c300-$c310 virtual byte[16] buffer
+$c310-$ffd0 gap
+$ffd0-$ffe0 virtual byte[16] untouched_ffd0
+vvv

@@ -467,6 +467,41 @@ class Subject {
         }
     }
 
+    /**
+     * Warns about the untouched_ and unused_ ranges of an --init skeleton
+     * that an instruction's operand names (issue 0103): they are virtual,
+     * so a wrong one hides what the program uses there.
+     */
+    void warnUsedSkeletonRanges() {
+        Map<Integer, Set<String>> users = new TreeMap<>();
+        for (MemoryLocation location : memory) {
+            Area area = location.area;
+            if (!(area instanceof InstructionArea) || area.address != location.address) {
+                continue;
+            }
+            int target = CrossReferences.target((InstructionArea) area, this);
+            if (target == -1) {
+                continue;
+            }
+            // An included label names what is really there, like a KERNAL
+            // routine in the ROM over the RAM.
+            Label label = memory[target].label;
+            Area targetArea = memory[target].area;
+            if (targetArea instanceof DataArea && isSkeletonRange((DataArea) targetArea)
+                    && (label == null || !label.included)) {
+                users.computeIfAbsent(((DataArea) targetArea).arrayStart(), a -> new LinkedHashSet<>())
+                        .add(asHexWord(area.address));
+            }
+        }
+        users.forEach((start, addresses) -> warn(start, String.format("%s is used by %s",
+                ((DataArea) memory[start].area).arrayLabel, String.join(", ", addresses))));
+    }
+
+    private static boolean isSkeletonRange(DataArea area) {
+        return area.isVirtual() && !area.included && area.arrayLabel != null
+                && (area.arrayLabel.startsWith("untouched_") || area.arrayLabel.startsWith("unused_"));
+    }
+
     private DataArea includedVirtualArea(int address) {
         Area area = memory[address].area;
         return area instanceof DataArea && ((DataArea) area).included && area.isVirtual() ? (DataArea) area : null;
