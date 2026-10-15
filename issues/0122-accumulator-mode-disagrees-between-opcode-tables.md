@@ -1,7 +1,6 @@
 ---
 title: mpu6502's two opcode tables disagree on the accumulator mode of asl, rol, lsr and ror
-status: open
-priority: low
+status: done
 labels: cleanup
 ---
 
@@ -24,3 +23,7 @@ Options:
 Fix it in both versions: the Java mpu6502 (`~/IdeaProjects/Mpu6502`, `Opcode.ADDRESSING_MODE`, the workaround in `SourceParser.parseInstruction` and the emulator's uses of the arrays) and the Nim one in `mpu6502/`, so they stay the same. Deflower itself uses the Nim one only, since [0059](0059-convert-to-nim.md). Its tests must still pass unchanged.
 
 Done when both mpu6502 versions have one source for each opcode's addressing mode, the accumulator ones say `Accumulator`, and `mpu6502/tests/opcodes.txt` is printed again from the fixed Java tables.
+
+## Closing note
+
+Done, with one table in each version. The per-opcode arrays are the source: in Nim, `instructions` is built from `opcodeRows` (the name too, e.g. `NOP_ZP_04`), and a comparison showed the built table equal to the old literal one, apart from the 4 fixed modes. In Java, each `Instruction` constant only gives its number and reads the rest from the `Opcode` arrays. $0a, $2a, $4a and $6a now have mode `Accumulator` in both, and the parser workaround is gone from both `SourceParser`s. `mpu6502/tests/opcodes.txt` is printed again from the Java tables; only those 4 lines changed. The Java tests pass (the emulator's included), and deflower's tests pass unchanged.

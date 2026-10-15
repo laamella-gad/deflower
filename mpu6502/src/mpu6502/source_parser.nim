@@ -363,10 +363,7 @@ proc parseInstruction(p: var SourceParser, mnemonic: string) =
     p.add instruction(p.opcode(mnemonic, mode), operand)
     return
   if p.line.startsWith("a", p.pos) and p.line.toOpenArray(p.pos + 1, p.line.len - 1).isBlank:
-    # The opcode table has asl, lsr, rol and ror on the accumulator as None.
-    var accumulator = opcodeFor(mnemonic, AddressingMode.Accumulator)
-    if accumulator.isNone:
-      accumulator = opcodeFor(mnemonic, AddressingMode.None)
+    let accumulator = opcodeFor(mnemonic, AddressingMode.Accumulator)
     if accumulator.isSome:
       p.add instruction(accumulator.get)
       return

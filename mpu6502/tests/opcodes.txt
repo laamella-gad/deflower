@@ -8,7 +8,7 @@
 07 SLO ZeroPage true 5 false SLO_ZP_07 SLO ZeroPage true 5 false
 08 PHP None false 3 false PHP PHP None false 3 false
 09 ORA Immediate false 2 false ORA_IMM ORA Immediate false 2 false
-0a ASL None false 2 false ASL ASL Accumulator false 2 false
+0a ASL Accumulator false 2 false ASL ASL Accumulator false 2 false
 0b ANC Immediate true 2 false ANC_IMM_0B ANC Immediate true 2 false
 0c NOP Absolute true 4 false NOP_ABS_0C NOP Absolute true 4 false
 0d ORA Absolute false 4 false ORA_ABS ORA Absolute false 4 false
@@ -40,7 +40,7 @@
 27 RLA ZeroPage true 5 false RLA_ZP_27 RLA ZeroPage true 5 false
 28 PLP None false 4 false PLP PLP None false 4 false
 29 AND Immediate false 2 false AND_IMM AND Immediate false 2 false
-2a ROL None false 2 false ROL ROL Accumulator false 2 false
+2a ROL Accumulator false 2 false ROL ROL Accumulator false 2 false
 2b ANC Immediate true 2 false ANC_IMM_2B ANC Immediate true 2 false
 2c BIT Absolute false 4 false BIT_ABS BIT Absolute false 4 false
 2d AND Absolute false 4 false AND_ABS AND Absolute false 4 false
@@ -72,7 +72,7 @@
 47 SRE ZeroPage true 5 false SRE_ZP_47 SRE ZeroPage true 5 false
 48 PHA None false 3 false PHA PHA None false 3 false
 49 EOR Immediate false 2 false EOR_IMM EOR Immediate false 2 false
-4a LSR None false 2 false LSR LSR Accumulator false 2 false
+4a LSR Accumulator false 2 false LSR LSR Accumulator false 2 false
 4b ALR Immediate true 2 false ALR_IMM_4B ALR Immediate true 2 false
 4c JMP Absolute false 3 false JMP_ABS JMP Absolute false 3 false
 4d EOR Absolute false 4 false EOR_ABS EOR Absolute false 4 false
@@ -104,7 +104,7 @@
 67 RRA ZeroPage true 5 false RRA_ZP_67 RRA ZeroPage true 5 false
 68 PLA None false 4 false PLA PLA None false 4 false
 69 ADC Immediate false 2 false ADC_IMM ADC Immediate false 2 false
-6a ROR None false 2 false ROR ROR Accumulator false 2 false
+6a ROR Accumulator false 2 false ROR ROR Accumulator false 2 false
 6b ARR Immediate true 2 false ARR_IMM_6B ARR Immediate true 2 false
 6c JMP Indirect false 5 false JMP_IND JMP Indirect false 5 false
 6d ADC Absolute false 4 false ADC_ABS ADC Absolute false 4 false
