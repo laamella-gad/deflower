@@ -4,11 +4,12 @@ Deflower semi-automatically disassembles 6502 binaries, made for the Commodore 6
 
 ## Building
 
-Deflower is written in [Nim](https://nim-lang.org/) 2.2 and needs [npeg](https://github.com/zevv/npeg) (`nimble install npeg`).
+Deflower is written in [Nim](https://nim-lang.org/) 2.2 and needs nothing else.
 
 - `nimble build` writes the executable `bin/deflower`.
 - The `./deflower` script runs it from anywhere, and rebuilds it first when it is missing or a source is newer.
 - `nimble test` runs the tests.
+- `nimble flo` regenerates the `.flo` parser from its grammar, `src/deflower/flo/flo.ldb`, with [lindeboom](../nim_parser_generator) (its sources in `LINDEBOOM_SRC`, else next to this project). The generated parser and lindeboom's runtime are committed in `src/deflower/flo/`, so building needs no lindeboom; a test fails when they are out of date with the grammar.
 
 ## Getting started
 
@@ -202,6 +203,51 @@ $d400 virtual {
     $00 word freq1
     $04 byte control1
 }
+```
+
+### The grammar
+
+The syntax in full, as `src/deflower/flo/flo.ldb` has it (ANTLR 4 notation: `?` optional, `*` any number, `|` or, `name=` names a part, `# name` names an alternative; the upper case rules are the words).
+
+```antlr
+grammar Flo;
+
+file        : statement* EOF ;
+
+// One statement per line. A comment attaches to the next annotation line.
+statement   : COMMENT? NL                                    # blank
+            | 'deflower' file=ID NL                          # deflower
+            | 'include' file=ID NL                           # include
+            | '}' NL                                         # endBlock
+            | annotation NL                                  # line
+            ;
+
+annotation  : at=place 'virtual'? 'banked'? 'selfmod'? type=dataType? label=ID?
+              parameters? 'noreturn'? ('export' exportFile=ID)? '{'? ;
+
+// A range's end is exclusive.
+place       : start=number ('-' end=number)? ;
+number      : INT | HEX ;
+
+dataType    : typeName ('[' size? ']')? ;
+typeName    : 'screencode' | 'ascii' | 'byte' | 'word' | 'long' | 'dword'
+            | 'addr' | 'rta' | 'sbyte' | 'sword' | 'slong' | 'sdword' | 'code' ;
+// '*' binds tighter than '+'.
+size        : 'until' terminator=number                      # until
+            | 'lengthbyte'                                   # lengthByte
+            | number (op=('*' | '+') number)*                # count
+            ;
+
+// The data after each jsr to a code line's address.
+parameters  : '(' parameter (',' parameter)* ')' ;
+parameter   : dataType label=ID? ;
+
+HEX     : '$' [0-9a-fA-F]+ ;
+INT     : [0-9]+ ;
+ID      : [A-Za-z0-9._?]+ ;
+COMMENT : [;#] ~[\r\n]* ;
+NL      : [\r\n]+ ;
+WS      : [ \t]+ -> skip ;
 ```
 
 ## The output

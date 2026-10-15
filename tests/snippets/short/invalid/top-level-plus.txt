@@ -4,7 +4,7 @@ deflower x.prg
 $c000 3+4 byte removed_plus
 ^^^
 Failed to parse test.flo:
-line 2: expected virtual, banked, selfmod, a type, a label, export, '{' or the end of the line, found '3'
+line 2: expected '-', virtual, banked, selfmod, a type, a label, export, '{' or the end of the line, found '3'
 ~~~
 ~~~
 vvv

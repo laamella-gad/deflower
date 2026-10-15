@@ -5,7 +5,7 @@ deflower x.prg
 $c000 40*21 byte removed_multiplier
 ^^^
 Failed to parse test.flo:
-line 2: expected virtual, banked, selfmod, a type, a label, export, '{' or the end of the line, found '40'
+line 2: expected '-', virtual, banked, selfmod, a type, a label, export, '{' or the end of the line, found '40'
 ~~~
 ~~~
 vvv
