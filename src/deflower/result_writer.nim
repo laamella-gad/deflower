@@ -375,10 +375,18 @@ proc printInstruction(f: var AssemblyFileFormat, area: Area, subject: Subject) =
   # A comment or label right above has already closed its line.
   f.output.finishLine()
   f.output.indent()
-  f.output.print(toLowerAscii($instruction.opcode))
-  f.output.print(" ")
-  f.output.print(operand)
   var comments: seq[string]
+  let text = toLowerAscii($instruction.opcode) & " " & operand
+  if assembledOpcode(instruction.nr) != instruction.nr:
+    # Issue 0086: another opcode has this mnemonic and mode and is the one
+    # an assembler picks, so this one prints as its bytes.
+    var bytes: seq[string]
+    for i in 0 ..< area.size:
+      bytes.add asHexByte(subject.memoryByte(area.address + i))
+    f.output.print(".byte\t" & bytes.join(", "))
+    comments.add text.strip
+  else:
+    f.output.print(text)
   # The names of the inline data after this jsr (issue 0068).
   if area.address in subject.callComments:
     comments.add subject.callComments[area.address]

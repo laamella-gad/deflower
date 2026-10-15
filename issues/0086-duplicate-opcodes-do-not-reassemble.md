@@ -1,7 +1,6 @@
 ---
 title: Instructions with a duplicate opcode don't reassemble to the same bytes
-status: open
-priority: low
+status: done
 labels: bug
 ---
 
@@ -37,3 +36,7 @@ Want: an instruction whose opcode isn't the one its mnemonic and mode assemble t
 - **Labels and cross-references.** The instruction still gets traced and its operand's target labelled; only the printing changes. A label on the operand prints as a define after the line, as for other multi-byte areas.
 
 Done when: a fixture with each kind of duplicate (at least `$eb` and a `nop`) prints them as bytes and reassembles to its input.
+
+## Closing note
+
+Done. An instruction whose opcode isn't the one its mnemonic and addressing mode assemble to prints as its bytes, with the instruction in a comment as it would print otherwise, labels and all (the user's choice): `.byte $3c, $15, $c0 ; nop table, x`. The instruction is still traced, labelled and cross-referenced; only the printing changes. mpu6502 now answers which opcode that is (`assembledOpcode`, public in `source_parser.nim`, built from the same table the assembler uses), so the two can't disagree. 64tass with `-i` picks the same opcodes as mpu6502 for every group (checked with 64tass 1.59). Jamming opcodes never decode as instructions, so `jam` needs nothing. Snippet: `short/duplicateopcodes.txt`. The Java mpu6502 is unchanged; deflower uses the Nim one only.

@@ -112,6 +112,15 @@ far:    rts
         nop #1
 """) == @[0xe9, 0x01, 0xe7, 0x10, 0xe7, 0x10, 0x4b, 0x0f, 0x02, 0x80, 0x01]
 
+  test "the opcode a duplicate assembles to":
+    check assembledOpcode(0xe9) == 0xe9
+    check assembledOpcode(0xeb) == 0xe9
+    check assembledOpcode(0x1a) == 0xea
+    check assembledOpcode(0x0a) == 0x0a
+    check assembledOpcode(0x12) == 0x02
+    for opcode in 0 ..< 0x100:
+      check assembledOpcode(opcode) == canonical(opcode)
+
   test "every opcode":
     ## Every opcode that is the one chosen for its mnemonic and addressing
     ## mode assembles back to itself.

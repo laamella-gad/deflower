@@ -79,6 +79,7 @@ The pipeline is: **flow file → parse → memory image + annotations → code-f
   - `.text` strings, with `.enc "screen"`/`"none"` switches by the text type, and `.null`/`.ptext` for arrays sized `[until $00]`/`[lengthbyte]`;
   - a blank line above a label only where the instruction before it ends the flow (`jmp`, `rts`, `rti`, `brk`), and after such an instruction even without a label;
   - `.virtual` blocks;
+  - an instruction whose opcode isn't the one its mnemonic and mode assemble to (`mpu6502.assembledOpcode`, e.g. `$eb` for `sbc #`) as `.byte`s with the instruction in a comment;
   - instructions with operands resolved to labels (`label + $offset` inside arrays), `@w` on absolute operands below `$100` so they don't reassemble as zero page, and `#<label`/`#>label` for an address setup's immediates when the address has a label of its own (no offset: 64tass and mpu6502 read `<label + 1` differently);
   - labels inside an array, a multi-byte element or an instruction printed as `label = $XXXX` defines after it, and labels on uncovered memory as defines in place;
   - cross-references above each label (`; called by:`, `jumped to by:`, `read by:`, `written by:`, `modified by:`), collected by `cross_references` from the decoded instructions and named by the nearest routine label before each one (auto labels of branch and `jmp` targets no `jsr` calls are local and skipped).
@@ -95,13 +96,13 @@ Test-driven workflow:
   - The second part is the `.flo` file, written as `test.flo`.
   - More parts are more files, each starting with a `; file: <name>` line. A `.prg` one is assembled, like the first part, and a `.bin` one too, without the load address.
   - All files go into a temporary directory, and Deflower runs on `test.flo` there.
-  - Round trip: every generated `.asm` must reassemble, with mpu6502's assembler, to the bytes its run loads: the test reads `test.flo`'s `deflower` and `load` lines itself (`loadedMemory`). Bytes it leaves out aren't checked. A failure fails the test outright, without writing an expectation. A `; no round trip` line in the assembly skips this, for a snippet that shows verify reporting a difference (`short/verify.txt`).
+  - Round trip: every generated `.asm` must reassemble, with mpu6502's assembler, to the bytes its run loads: the test reads `test.flo`'s `deflower` and `load` lines itself (`loadedMemory`). Bytes it leaves out aren't checked. A failure fails the test outright, without writing an expectation. Verify's report of bytes that differ, which no output is known to cause, is tested on a hand-written `.asm` (`tests/test_verifier.nim`).
 - Large snippets (`large/`) are the real programs, whose binaries are too big for a snippet. The only input is a `.flo` path in `tests/resources/`, e.g. `zwark/zwark.flo`, with the `.flo` file and its binary in `tests/resources/<program>/`. They run on a temporary copy of `tests/resources/`.
 - Init snippets (`init/`) name a `.vsf`, `.prg` or `.bin` in `tests/resources/`, with options, and expect the skeleton `--init` writes for it.
 - Dump, find and strings snippets (`dump/`, `find/`, `strings/`) name a `.vsf`, `.prg` or `.bin` in `tests/resources/` and the flag's arguments, and expect what `--dump`, `--find` or `--strings` prints, or its error.
 - A changed snippet file in a diff means the generated output changed; review it like any other test failure.
 - To accept a new snippet or a deliberate output change, delete everything from the `^^^` line on and rerun the tests. Running with the environment variable `REGENERATE_EXPECTATIONS` set rewrites all of them. Either way, the test writes the actual output into the file and fails once, so you can review it before committing.
-- The `.asm` of a short snippet can also be checked with 64tass: `64tass -q -b -o x.bin test.asm` must equal `test.prg` minus its 2-byte header.
+- The `.asm` of a short snippet can also be checked with 64tass: `64tass -q -b -o x.bin test.asm` must equal `test.prg` minus its 2-byte header (`-i` for illegal opcodes).
 
 Issues are tracked as `issues/NNNN-slug.md` (frontmatter `title`/`status`/`priority`/`labels`, priority `low`/`medium`/`high`); `issues/README.md` describes the format. `issues/open` lists the open ones by priority. To close one, set `status: done`, remove its `priority` and add a "## Closing note".
 

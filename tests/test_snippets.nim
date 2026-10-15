@@ -10,9 +10,6 @@ const
   snippets = testsDir / "snippets"
   resources = testsDir / "resources"
   fileHeader = "; file: "
-  noRoundTrip = "; no round trip"
-    ## In a snippet's assembly, skips the round trip, for a snippet that
-    ## shows what verify reports when the output doesn't reassemble.
 
 let format = snippetFileFormat(">>>", "<<<\n", "===\n", "^^^\n", "~~~\n", "vvv\n")
 
@@ -187,8 +184,7 @@ proc runShort(parts: seq[string]): seq[string] =
       let endOfHeader = part.find('\n')
       writeSnippetFile(dir, part[fileHeader.len ..< endOfHeader].strip, part[endOfHeader + 1 .. ^1])
     result = runDeflower(dir / "test.flo")
-    if noRoundTrip notin parts[0]:
-      assertReassembles(dir)
+    assertReassembles(dir)
   finally:
     removeDir(dir)
 

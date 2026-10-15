@@ -1,0 +1,50 @@
+>>> An illegal opcode that shares its mnemonic and addressing mode with the
+opcode an assembler picks prints as its bytes, with the instruction in a
+comment, so the output reassembles to the same bytes (issue 0086). <<<
+*=$c000
+start:
+		sbc #$01
+		.byte $eb, $01
+		nop
+		.byte $1a
+		.byte $82, $00
+		.byte $44, $10
+		.byte $34, $10
+		.byte $3c, $15, $c0
+		.byte $2b, $0f
+		lda $c015
+		rts
+		.byte 0
+===
+deflower test.prg
+$c000 code start
+$c015 byte table
+^^^
+Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 22 bytes emitted, 0 differ, 0 virtual, 0 gaps
+~~~
+
+*=$c000
+
+start:
+		sbc #$01
+		.byte	$eb, $01	; sbc #$01
+		nop 
+		.byte	$1a	; nop
+		.byte	$82, $00	; nop #$00
+		.byte	$44, $10	; nop $10
+		.byte	$34, $10	; nop $10, x
+		.byte	$3c, $15, $c0	; nop table, x
+		.byte	$2b, $0f	; anc #$0f
+		lda table
+		rts 
+
+; read by: start
+table:
+		.byte	$00
+~~~
+--- test.map
+$c000-$c015 code start
+$c015-$c016 byte table
+vvv

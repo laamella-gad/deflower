@@ -1,12 +1,10 @@
 >>> Issue 0075: verify reassembles the output and compares it with the
-image. $eb is an illegal duplicate of sbc # (issue 0086), so it comes back
-as $e9 and differs; the two bytes after the rts are covered by nothing, so
-they are a gap. <<<
-; no round trip
+image. The two bytes after the rts are covered by nothing, so they are a
+gap. tests/test_verifier.nim shows the bytes that differ. <<<
 *=$c000
 
 entry:
-		.byte	$eb, $01
+		lda #$01
 		rts 
 		.byte	$ff, $ff
 ===
@@ -15,15 +13,14 @@ $c000 code entry
 ^^^
 Writing out/test.asm
 Writing out/test.map
-Verify out/test.asm: 3 bytes emitted, 1 differ, 0 virtual, 1 gap
-differ $c000 expected $eb got $e9
+Verify out/test.asm: 3 bytes emitted, 0 differ, 0 virtual, 1 gap
 gap $c003-$c005
 ~~~
 
 *=$c000
 
 entry:
-		sbc #$01
+		lda #$01
 		rts 
 ~~~
 --- test.map

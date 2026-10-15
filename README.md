@@ -289,6 +289,9 @@ WS      : [ \t]+ -> skip ;
 - `*=` at every jump in the addresses;
 - labels on memory that isn't loaded, inside an array or inside an instruction as `label = $addr` defines;
 - above each label, the instructions that refer to it, named by the routine they are in: `; called by:`, `jumped to by:`, `read by:`, `written by:`, `modified by:`;
-- self-modified operands as numbers with `; operand set by <routine>`, unless a `selfmod` line names them.
+- self-modified operands as numbers with `; operand set by <routine>`, unless a `selfmod` line names them;
+- an illegal opcode that has the mnemonic and addressing mode of another one, which an assembler picks instead (the legal one, else the lowest), as its bytes with the instruction in a comment: `.byte $eb, $01 ; sbc #$01`. These are `$eb` (`sbc #`), `$2b` (`anc #`) and the extra `nop`s.
+
+Illegal opcodes need 64tass's `-i` (`--6502`) option: `64tass -i -o game.prg out/game.asm`.
 
 The warnings point at suspect spots without stopping the output, as `warning: $addr: text`: a flow into data, into the middle of an instruction or into memory the binary doesn't load, a `jsr` that returns into data, an instruction that runs into another area or past the end of the binary, a jam, a data line on memory the binary doesn't load, and an operand that refers into an `untouched_` or `unused_` range of the skeleton.

@@ -73,6 +73,13 @@ proc canonical(name: string): string =
 proc isMnemonic(name: string): bool =
   canonical(name) in opcodesByName
 
+proc assembledOpcode*(opcode: int): int =
+  ## The opcode that the mnemonic and addressing mode of `opcode` assemble
+  ## to: `opcode` itself, unless another opcode does the same and wins, as
+  ## $e9 does over $eb for `sbc #`.
+  let mode = if addressingMode[opcode] == AddressingMode.Jam: AddressingMode.None else: addressingMode[opcode]
+  opcodesByName[opcodeName[opcode].toLowerAscii][mode]
+
 proc opcodeFor(mnemonic: string, mode: AddressingMode): Option[int] =
   ## The opcode for a mnemonic in an addressing mode.
   let name = canonical(mnemonic)
