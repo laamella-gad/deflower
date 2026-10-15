@@ -71,7 +71,7 @@ The plan:
 
 Done when: `flo_reader` uses the parser generated from `flo.ldb`, all snippets pass with the error messages as clear as now (worded by deflower's formatter), npeg is gone from `deflower.nimble`, and `README.md` and `CLAUDE.md` describe the grammar file and how to regenerate the parser.
 
-Related: [0125](0125-command-line-parser-library.md) (the command line), [0124](0124-npeg-for-mpu6502-source-parser.md) (mpu6502's source parser as npeg, which this may change).
+Related: [0125](0125-command-line-parser-library.md) (the command line), [0124](0124-lindeboom-for-mpu6502-source-parser.md) (mpu6502's source parser, now as a lindeboom grammar too).
 
 ## Decisions
 
