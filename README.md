@@ -119,7 +119,7 @@ Starts a run: loads a file, relative to the `.flo` file's directory. The lines a
 - a `.prg`: a 2-byte load address, then the bytes. `at` loads them at another address;
 - a `.bin`: only the bytes, loaded at the `at` address, which it needs. `from` skips that many bytes of the file first and `size` takes only that many: `deflower kernal.bin at $e000`, `deflower cartridge.bin at $8000 from $50 size $2000`.
 
-Bytes past `$ffff` are dropped.
+A file that runs past `$ffff` is an error.
 
 ### `load <file> [at <address>] [from <offset>] [size <n>]`
 

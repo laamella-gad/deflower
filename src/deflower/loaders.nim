@@ -7,6 +7,8 @@ import std/[options, os, strutils]
 import printing, subject, vicevcf
 
 proc readBytes(path: string): seq[byte] =
+  if not fileExists(path):
+    raise newException(StateError, "No such file: " & extractFilename(path))
   cast[seq[byte]](readFile(path))
 
 proc kind(name: string): string =
@@ -87,19 +89,19 @@ proc loadImage*(path: string, image: ImageFile, subject: Subject) =
 proc readMemoryImage*(file: string, image: ImageFile): seq[int] =
   ## The 64K the file loads with the options of `image`, as values 0-255,
   ## with -1 for memory it doesn't load. Bytes past $ffff are dropped. Raises
-  ## an ArgumentError when the options don't fit the file.
+  ## an ArgumentError when the file is missing or the options don't fit it.
   let problem = imageProblem(image, false)
   if problem.len > 0:
     raise newException(ArgumentError, problem)
   result = newSeq[int](0x10000)
-  if image.name.isSnapshot:
-    let ram = readSnapshot(file).memory.ram
-    for i in 0 ..< result.len:
-      result[i] = int(ram[i])
-    return
-  for i in 0 ..< result.len:
-    result[i] = -1
   try:
+    if image.name.isSnapshot:
+      let ram = readSnapshot(file).memory.ram
+      for i in 0 ..< result.len:
+        result[i] = int(ram[i])
+      return
+    for i in 0 ..< result.len:
+      result[i] = -1
     let (address, bytes) = imageBytes(file, image)
     for i in 0 ..< min(bytes.len, 0x10000 - address):
       result[address + i] = int(bytes[i])

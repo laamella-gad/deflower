@@ -1,0 +1,11 @@
+>>> A file that isn't there is an error, not a crash (issue 0083). <<<
+*=$c000
+		rts
+===
+deflower test.prg
+load missing.prg
+^^^
+No such file: missing.prg
+~~~
+~~~
+vvv

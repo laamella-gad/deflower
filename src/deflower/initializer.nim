@@ -420,9 +420,7 @@ proc skeleton*(file: string, image: ImageFile): seq[string] =
   ## The skeleton for this file, loaded with the options of `image`, one
   ## line per element.
   var s = Initializer(basic: true, kernal: true, io: true)
-  let problem = imageProblem(image, false)
-  if problem.len > 0:
-    raise newException(ArgumentError, problem)
+  discard readMemoryImage(file, image)
   if image.name.isSnapshot:
     s.readSnapshot(file, image.name)
   else:
@@ -459,9 +457,9 @@ proc writeSkeleton*(file: string, image: ImageFile): bool =
   if fileExists(flowerFile):
     printErr(flowerFile & " already exists, not overwriting it.")
     return false
-  printOut("Writing " & flowerFile)
   var text = ""
   for line in skeleton(file, image):
     text.add line & "\n"
+  printOut("Writing " & flowerFile)
   writeFile(flowerFile, text)
   true

@@ -1,0 +1,5 @@
+>>> A file that isn't there (issue 0117). <<<
+bin/missing.bin at $1000 $1000-$1010
+^^^
+No such file: missing.bin
+vvv
