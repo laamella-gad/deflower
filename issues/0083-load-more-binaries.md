@@ -30,4 +30,4 @@ The parts then form one image: the trace follows calls between them, data gets l
 - **Reassembly.** The output no longer reassembles to one `.prg`. Decide what 64tass should produce, and what verify ([0075](0075-verify-flag.md)) compares each part with.
 - **Relation to 0065.** Memory no file loads is still zeros the trace shouldn't decode ([0065](0065-trace-stops-at-memory-the-image-does-not-load.md)); with several files, the loaded ranges are the union.
 
-Done when: a small fixture with a `.prg` that calls into a second loaded file traces into it and labels the target, its output assembles with 64tass, and `CLAUDE.md` and `docs/flo-format.md` describe the new line.
+Done when: a small fixture with a `.prg` that calls into a second loaded file traces into it and labels the target, its output assembles with 64tass, and `CLAUDE.md` and `README.md` describe the new line.

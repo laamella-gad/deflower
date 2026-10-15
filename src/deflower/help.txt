@@ -1,0 +1,56 @@
+Deflower disassembles 6502 binaries: it traces the code from the entry points
+in a .flo file, which also holds your labels, comments and data types.
+
+Usage:
+  deflower [--verify] [--watch] <file.flo>
+      Disassemble. Writes out/<binary>.asm and out/<binary>.map next to the
+      .flo file. --verify reassembles each .asm and reports the bytes that
+      differ and the gaps (memory nothing covers). --watch runs again on
+      every change, until Ctrl-C.
+  deflower --init <file.vsf or file.prg>
+      Write a .flo skeleton next to the file: what it knows, entry points,
+      includes.
+  deflower --dump <file.vsf or file.prg> <start>-<end>
+      Hex dump, with PETSCII and screen codes.
+  deflower --find <file.vsf or file.prg> <address or bytes> [in <start>-<end>]
+      Search for an address (as word, rta or lo/hi tables) or a byte sequence.
+  deflower --strings <file.vsf or file.prg> [<start>-<end>] [min <n>]
+      List text candidates as pastable .flo lines.
+  deflower --help
+      This text.
+
+  Ranges are start-end, end exclusive. Numbers are decimal or $hex.
+
+Suggested loop: --init, then --watch --verify, read out/*.asm, annotate the
+.flo file, save, repeat.
+
+The .flo file, one statement per line:
+  deflower <file>             start a run on a .prg or .vsf
+  include <file>              read another .flo file, or a built-in one:
+                              c64.flo (c64_zeropage, c64_system, c64_io,
+                              c64_basic, c64_kernal.flo); its lines are weak
+  ; text   or   # text        comment on the next line's address
+  <address or range> [virtual] [<type>[<size>]] [<label>] [(<parameters>)]
+      [noreturn] [export <file>.bin|.prg] [{]
+  <address> banked <label>    a routine in ROM banked over the RAM
+  <address> selfmod <label>   names a self-modified operand
+  <address> [virtual] {       block: addresses inside are offsets
+  }
+
+  types:  code byte word long dword sbyte sword slong sdword addr rta
+          ascii screencode
+  sizes:  [n] ([40*21+5])  [until $xx]  [lengthbyte]
+  A range without a type is a placeholder; an address without one only
+  labels it.
+
+Examples:
+  deflower game.prg
+  include c64.flo
+  $0810 code start
+  $d020 virtual byte border_color
+  $1000 screencode[20] title_text
+  $1014-$1020 addr level_table
+  $2c75 code print_inline (ascii[until $ff] text)
+  $3000-$3800 font export font.bin
+
+The full manual is README.md.

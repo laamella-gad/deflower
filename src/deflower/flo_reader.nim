@@ -1,8 +1,7 @@
 ## Parses a `.flo` file into its runs: one per 'deflower' line, each with
 ## the annotations that follow it. Reads nothing but the `.flo` files, and
-## changes no memory.
+## changes no memory. README.md describes the format.
 ##
-## The format is described in `docs/flo-format.md`.
 ## Two npeg grammars read it: one turns the characters into tokens, the
 ## other checks one statement (a line) of tokens at a time. That one holds
 ## no code: `build` makes the statement from the tokens of a line it accepts.

@@ -1,10 +1,5 @@
-## Keeps running a .flo file (issue 0057): one run at the start, then one
-## more whenever a file it is made from changes - the .flo file, the .flo
-## files it includes from disk, the binaries it loads. Changes are found by
-## polling the modification times, and a run starts once they have settled,
-## as an editor saves in several steps. A run with errors leaves `out/` as it
-## was. After each run comes a status line: the time, the outcome and the
-## file being watched.
+## Keeps running a .flo file (issue 0057): runs it again whenever the .flo
+## file, an included .flo file or a loaded binary changes.
 
 import std/[os, times]
 import printing, runner

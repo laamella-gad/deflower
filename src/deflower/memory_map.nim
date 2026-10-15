@@ -1,18 +1,5 @@
-## What covers each part of memory, one line per piece, written to
-## out/<binary>.map on every run (issue 0075). Ranges are $start-$end with
-## the end exclusive, as in a .flo file:
-##
-## ```
-## $c000-$c007 code entry
-## $c007-$c009 word table
-## $c009-$c00d virtual word[2] table + $2
-## $c00d-$c010 gap
-## ```
-##
-## Code runs split at every routine label (not at local ones), arrays are
-## one line, and a gap is loaded memory no area covers. Memory the image
-## doesn't load and no area covers isn't listed, and neither are the
-## included virtual areas the output leaves out as unused.
+## Writes out/<binary>.map: what covers each part of memory, one line per
+## code run, array and gap (issue 0075).
 
 import printing, subject
 

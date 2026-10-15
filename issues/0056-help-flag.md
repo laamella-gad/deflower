@@ -1,7 +1,6 @@
 ---
 title: Support a --help flag
-status: open
-priority: low
+status: done
 labels: enhancement
 ---
 
@@ -32,3 +31,8 @@ Done when: `--help`/`-h` print the manual, including how to write a `.flo` file,
 ## Decisions
 
 - **Blocked by [0059](0059-convert-to-nim.md).** The command line is rewritten in Nim, together with `--watch` ([0057](0057-watch-mode.md)) and `--verbose` (0059), so do this after the port.
+- **README.md is the manual** (decided 2026-10-15). It holds everything a user needs: building, the getting-started loop, every command line mode, the whole `.flo` format (moved from `docs/flo-format.md`, which is gone) and the output. `--help` prints a summary of it. No large chunks of documentation in the code, where nobody finds them.
+
+## Closing note
+
+Done on 2026-10-15. `README.md` is the full manual, and `docs/` is gone. `--help` and `-h` print `src/deflower/help.txt` (compiled in with `staticRead`): the modes and their arguments, where the output goes, the suggested loop, the `.flo` statements, types and sizes, and example lines. They print to stdout and exit 0; no or bad arguments print the usage lines to stderr and exit 2. The command line is `deflower.command(args)`, returning the exit code, which `tests/test_command.nim` covers. The long module doc comments that described user-visible behaviour (`deflower.nim`, `memory_map`, `verifier`, `watcher`, `cross_references`, `test_snippets`) are cut to a line or two; `CLAUDE.md` says to keep `README.md` and `help.txt` up to date.

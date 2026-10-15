@@ -20,4 +20,4 @@ Options for 2:
 - Detect an indexed store whose base is inside an `InstructionArea` and warn, so the user knows the code there isn't fixed.
 - Let the source of a copy be marked as code that runs at another address (a `.logical`-like line), which ties in with relocated code in general.
 
-Done when a disassembly says which instructions other code overwrites, and the chosen ways are documented in `docs/flo-format.md`.
+Done when a disassembly says which instructions other code overwrites, and the chosen ways are documented in `README.md`.

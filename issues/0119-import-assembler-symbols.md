@@ -11,4 +11,4 @@ da65's `ASMINC` reads `name = value` lines from an assembler include file and sk
 
 Open: which formats; whether a value below `$100` or a value that isn't an address (a constant like `screen_width = 40`) becomes a label at all; and how to name a symbol that isn't a valid deflower label.
 
-Done when at least the `name = $xxxx` form can be included, documented in `docs/flo-format.md`.
+Done when at least the `name = $xxxx` form can be included, documented in `README.md`.

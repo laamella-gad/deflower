@@ -1,14 +1,5 @@
-## Checks a written .asm against the image it came from (issue 0075): it
-## reassembles the file with mpu6502's assembler and compares every byte it
-## emits with the loaded memory, and lists the gaps, the loaded memory no
-## area covers. Prints one summary line, then one line per difference (the
-## first few) and per gap:
-##
-## ```
-## Verify out/test.asm: 13 bytes emitted, 1 differ, 48 virtual, 1 gap
-## differ $c001 expected $07 got $08
-## gap $c00d-$c010
-## ```
+## Checks a written .asm against the image it came from (issue 0075):
+## reassembles it with mpu6502 and reports the differing bytes and the gaps.
 
 import std/[options, os]
 import mpu6502

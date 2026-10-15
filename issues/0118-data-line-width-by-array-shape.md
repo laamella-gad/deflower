@@ -11,4 +11,4 @@ da65's `RANGE` has `UNIT` for this: a line break at every group of N bytes ([006
 
 Related: [0020](0020-pretty-data-formats.md) (dedicated formats for charsets, screens and sprites) and [0110](0110-parallel-arrays.md).
 
-Done when an array can be printed with a chosen number of elements per line, documented in `docs/flo-format.md`.
+Done when an array can be printed with a chosen number of elements per line, documented in `README.md`.

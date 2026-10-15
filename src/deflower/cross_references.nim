@@ -1,10 +1,5 @@
 ## Which instructions refer to each label (issue 0076), printed as comment
-## lines above it: "called by: game_loop, l336F". A reference is listed at
-## the label its operand prints, so one into an array is listed at the
-## array's label. The referrer is named by the nearest routine label at or
-## before its instruction, skipping local labels (issue 0084), each once
-## per kind, and a label referring to itself (a loop back to its own start)
-## is left out.
+## lines above it, each named by the nearest routine label before it.
 
 import std/tables
 import mpu6502

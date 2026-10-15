@@ -31,4 +31,4 @@ or a block where each line has only the names and the addresses follow from the 
 
 To decide: the syntax, and whether it is one feature ("lines without an address follow the line before") or only for equal-sized arrays.
 
-Done when: the `bigmac` sprite arrays can be declared without writing their addresses, the syntax is documented in `docs/flo-format.md`, and a short snippet covers it.
+Done when: the `bigmac` sprite arrays can be declared without writing their addresses, the syntax is documented in `README.md`, and a short snippet covers it.

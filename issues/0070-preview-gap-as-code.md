@@ -33,4 +33,4 @@ To decide:
 
 Related: [0057](0057-watch-mode.md) (the re-run loop this is meant to shorten).
 
-Done when: a range in `3dgolf_snap` can be previewed as code without changing the rest of its output, and the way to ask for it is documented in `docs/flo-format.md` if it involves the `.flo` file.
+Done when: a range in `3dgolf_snap` can be previewed as code without changing the rest of its output, and the way to ask for it is documented in `README.md` if it involves the `.flo` file.

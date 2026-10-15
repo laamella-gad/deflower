@@ -1,34 +1,35 @@
-## The deflower command.
-##
-## Usage: [--verify] [--watch] <.flo file>. Exits with 1 when a run has
-## errors or, with --verify, doesn't verify. With --watch it keeps running,
-## and runs again whenever a file the .flo file is made from changes (issue
-## 0057), until interrupted. Or: --init <.vsf or .prg file>, which
-## writes a .flo skeleton next to the file to start its disassembly (issue
-## 0072), and exits with 1 when that .flo file exists already. Or: --dump
-## <.vsf or .prg file> <range>, which hex-dumps that memory of the file
-## (issue 0097). Or: --find <.vsf or .prg file> <address or bytes> [in
-## <range>], which searches its memory (issue 0099). Or: --strings <.vsf or
-## .prg file> [<range>] [min <n>], which lists the text in its memory
-## (issue 0100).
+## The deflower command. `--help` and README.md describe its arguments.
 
 import std/[os, strutils]
 import deflower/[initializer, look, printing, runner, watcher]
 
-proc main() =
-  let args = commandLineParams()
+const help = staticRead("deflower/help.txt")
+
+proc printUsage() =
+  printErr("Usage: deflower [--verify] [--watch] <file.flo>")
+  printErr("       deflower --init <file.vsf or file.prg>")
+  printErr("       deflower --dump <file.vsf or file.prg> <start>-<end>")
+  printErr("       deflower --find <file.vsf or file.prg> <address or bytes> [in <start>-<end>]")
+  printErr("       deflower --strings <file.vsf or file.prg> [<start>-<end>] [min <n>]")
+  printErr("       deflower --help")
+
+proc command*(args: seq[string]): int =
+  ## Runs the command line and returns the exit code. `--watch` only
+  ## returns when interrupted.
+  if args.len == 1 and args[0] in ["--help", "-h"]:
+    for line in help.strip(leading = false).splitLines:
+      printOut(line)
+    return 0
   if args.len == 2 and args[0] == "--init":
-    if not writeSkeleton(args[1]):
-      quit(1)
-    return
+    return (if writeSkeleton(args[1]): 0 else: 1)
   if args.len >= 2 and args[0] in ["--dump", "--find", "--strings"]:
     try:
       for line in look(args[0], args[1], args[2 .. ^1]):
         printOut(line)
     except ArgumentError as e:
       printErr(e.msg)
-      quit(2)
-    return
+      return 2
+    return 0
   var verify = false
   var watching = false
   var flowerFile = ""
@@ -37,26 +38,21 @@ proc main() =
       verify = true
     elif arg == "--watch":
       watching = true
-    elif flowerFile.len == 0 and not arg.startsWith("--"):
+    elif flowerFile.len == 0 and not arg.startsWith("-"):
       flowerFile = arg
     else:
       flowerFile = ""
       break
   if flowerFile.len == 0:
-    printErr("Usage: deflower [--verify] [--watch] <file.flo>")
-    printErr("       deflower --init <file.vsf or file.prg>")
-    printErr("       deflower --dump <file.vsf or file.prg> <start>-<end>")
-    printErr("       deflower --find <file.vsf or file.prg> <address or bytes> [in <start>-<end>]")
-    printErr("       deflower --strings <file.vsf or file.prg> [<start>-<end>] [min <n>]")
-    quit(2)
+    printUsage()
+    return 2
   if not fileExists(flowerFile):
     printErr("No such file: " & flowerFile)
-    quit(2)
+    return 2
   if watching:
     setControlCHook(proc () {.noconv.} = quit(0))
     watch(flowerFile, verify)
-  if not deflower(flowerFile, verify):
-    quit(1)
+  if not deflower(flowerFile, verify): 1 else: 0
 
 when isMainModule:
-  main()
+  quit(command(commandLineParams()))

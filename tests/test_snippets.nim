@@ -1,28 +1,5 @@
-## Runs the snippet files in `tests/snippets`. Every snippet has three
-## expectations: what Deflower printed (stdout and stderr together), the
-## generated `.asm` files, and the other files in `out/`: the memory maps as
-## text and the exported binaries as hex dumps. Deflower runs with verify
-## on, so the printed part ends with each run's verify report.
-##
-## A short snippet (`short/`) holds its whole test: assembly source,
-## assembled into `test.prg`, then the `.flo` file, written as `test.flo`.
-## More input parts are more files, each starting with a `; file: <name>`
-## line; a `.prg` one is assembled. Every generated `.asm` must reassemble
-## to the bytes of the `.prg` with its name, unless the assembly has a
-## `; no round trip` line.
-##
-## A large snippet (`large/`) names a `.flo` file in `tests/resources`,
-## for programs too big to keep as source in a snippet.
-##
-## An init snippet (`init/`) names a `.vsf` or `.prg` file in
-## `tests/resources`, and expects the `.flo` skeleton that `--init`
-## writes for it (issue 0072).
-##
-## A dump snippet (`dump/`) names such a file and a range, and expects what
-## `--dump` prints for it, or its error (issue 0097). Find and strings
-## snippets (`find/`, `strings/`) name such a file and the arguments of
-## `--find` (issue 0099) or `--strings` (issue 0100), and expect what it
-## prints, or its error.
+## Runs the snippet files in `tests/snippets`. CLAUDE.md describes the
+## kinds of snippets and their format.
 
 import std/[algorithm, options, os, strutils, sugar, tempfiles, unittest]
 import mpu6502, snippets_test
