@@ -1,0 +1,5 @@
+>>> A .bin's bytes found at the address it loads at (issue 0117). <<<
+bin/stub.bin at $0801 from 3 $9e
+^^^
+$0805 bytes  9e 32 30 36 31 00 00 00
+vvv

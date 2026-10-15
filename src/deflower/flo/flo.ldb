@@ -7,14 +7,23 @@ file        : statement* EOF ;
 
 // One statement per line. A comment attaches to the next annotation line.
 statement   : COMMENT? NL                                    # blank
-            | 'deflower' file=ID NL                          # deflower
+            | 'deflower' image NL                            # deflower
+            | 'load' image NL                                # load
             | 'include' file=ID NL                           # include
             | '}' NL                                         # endBlock
             | annotation NL                                  # line
             ;
 
-annotation  : at=place 'virtual'? 'banked'? 'selfmod'? type=dataType? label=ID?
+// A file to load into memory: a .prg at its own address unless 'at' says
+// otherwise, a .bin at the 'at' address, a .vsf as a whole.
+image       : file=ID ('at' address=number)? ('from' offset=number)?
+              ('size' length=number)? ;
+
+annotation  : at=place 'virtual'? 'banked'? 'selfmod'? type=dataType? label=name?
               parameters? 'noreturn'? ('export' exportFile=ID)? '{'? ;
+
+// The words of the 'load' line are only keywords there.
+name        : ID | 'load' | 'at' | 'from' | 'size' ;
 
 // A range's end is exclusive.
 place       : start=number ('-' end=number)? ;
@@ -31,7 +40,7 @@ size        : 'until' terminator=number                      # until
 
 // The data after each jsr to a code line's address.
 parameters  : '(' parameter (',' parameter)* ')' ;
-parameter   : dataType label=ID? ;
+parameter   : dataType label=name? ;
 
 HEX     : '$' [0-9a-fA-F]+ ;
 INT     : [0-9]+ ;

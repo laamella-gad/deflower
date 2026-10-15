@@ -1,0 +1,5 @@
+>>> from and size are only for a .bin (issue 0117). <<<
+1nvader/1nvader.prg from 2 $0801-$0810
+^^^
+from and size are for a .bin, not a .prg
+vvv

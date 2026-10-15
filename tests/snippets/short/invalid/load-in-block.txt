@@ -1,0 +1,18 @@
+>>> A load line can't be inside a block (issue 0083). <<<
+*=$c000
+		rts
+===
+deflower test.prg
+$c000 {
+load part.prg
+}
+===
+; file: part.prg
+*=$d000
+		rts
+^^^
+Failed to parse test.flo:
+line 3: can't load inside a block
+~~~
+~~~
+vvv

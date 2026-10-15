@@ -1,0 +1,13 @@
+>>> A .bin too short for from and size is an error (issue 0117). <<<
+
+===
+deflower main.bin at $c000 from 1 size 4
+===
+; file: main.bin
+*=$0000
+		.byte 1, 2, 3
+^^^
+main.bin has $3 bytes, too few for from $1 size $4
+~~~
+~~~
+vvv

@@ -1,0 +1,10 @@
+>>> A .bin, loaded at an address from an offset (issue 0117). <<<
+bin/stub.bin at $0801 from 3
+^^^
+; stub.bin: loads at $0801-$0841
+; BASIC stub: SYS 2061
+deflower stub.bin at $0801 from $3
+$080d code start
+$0801-$080d byte basic_stub
+include c64.flo
+vvv

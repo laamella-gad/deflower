@@ -1,0 +1,5 @@
+>>> A .bin needs an address (issue 0117). <<<
+bin/stub.bin
+^^^
+stub.bin needs at <address>: a .bin has no load address
+vvv

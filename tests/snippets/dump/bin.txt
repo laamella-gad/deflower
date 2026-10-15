@@ -1,0 +1,5 @@
+>>> A .bin with the options of a deflower line: at, from and size (issue 0117). <<<
+bin/stub.bin at $0801 from 3 size 12 $0801-$080d
+^^^
+0801: 0b 08 14 00 9e 32 30 36 31 00 00 00              .....2061...      kht@↑2061@@@
+vvv

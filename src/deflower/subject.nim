@@ -144,12 +144,25 @@ type
       ## True for a "selfmod" line (issue 0106): the label the operand of the
       ## self-modified instruction at the address names.
 
+  ImageFile* = object
+    ## A file to load into memory, as a 'deflower' or 'load' line gives it
+    ## (issue 0083): a .vsf, a .prg or a .bin. -1 for an option not given.
+    name*: string
+      ## Relative to the .flo file's directory.
+    address*: int
+      ## 'at': where it loads; a .prg's own load address otherwise.
+    offset*: int
+      ## 'from': the first byte of a .bin to load.
+    size*: int
+      ## 'size': how many bytes of a .bin to load.
+
   DeflowerRun* = ref object
     ## One 'deflower <file>' line of a `.flo` file and the annotation lines
     ## that follow it, up to the next 'deflower' line (issue 0010).
-    targetName*: string
-      ## The memory image to load, as written in the .flo file: relative to
-      ## the .flo file's directory.
+    image*: ImageFile
+      ## The memory image to load.
+    loads*: seq[ImageFile]
+      ## The files its 'load' lines load on top of it, in order.
     annotations*: seq[Annotation]
 
   AreaKind* = enum

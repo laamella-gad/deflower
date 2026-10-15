@@ -1,0 +1,5 @@
+>>> A .prg loaded at another address (issue 0117). <<<
+1nvader/1nvader.prg at $1000 $1000-$1010
+^^^
+1000: 0b 08 14 00 9e 32 30 36 31 00 00 00 a0 1e ba bd  .....2061... ...  kht@↑2061@@@ ↑:=
+vvv

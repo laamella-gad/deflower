@@ -1,0 +1,14 @@
+>>> A .bin needs at: it has no load address (issue 0117). <<<
+
+===
+deflower main.bin
+===
+; file: main.bin
+*=$0000
+		rts
+^^^
+Failed to parse test.flo:
+line 1: main.bin needs at <address>: a .bin has no load address
+~~~
+~~~
+vvv

@@ -1,0 +1,11 @@
+>>> from and size are only for a .bin (issue 0117). <<<
+*=$c000
+		rts
+===
+deflower test.prg from 2
+^^^
+Failed to parse test.flo:
+line 1: from and size are for a .bin, not a .prg
+~~~
+~~~
+vvv

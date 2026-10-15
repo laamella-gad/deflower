@@ -1,0 +1,19 @@
+>>> An included file can't load a file (issue 0083). <<<
+*=$c000
+		rts
+===
+deflower test.prg
+include more.flo
+===
+; file: more.flo
+load part.prg
+===
+; file: part.prg
+*=$d000
+		rts
+^^^
+Failed to parse more.flo:
+line 1: an included file can't load a file
+~~~
+~~~
+vvv

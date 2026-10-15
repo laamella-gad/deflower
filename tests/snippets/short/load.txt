@@ -1,0 +1,56 @@
+>>> A load line loads one more file into the run's memory (issue 0083): a
+.prg at its own address, or at the at one. The flow runs into it and the
+output holds every loaded part under its own origin. <<<
+*=$c000
+start:
+		jsr $c100
+		jsr $e000
+		rts
+===
+deflower test.prg
+load part.prg
+load again.prg at $e000
+$c000 code start
+$c100 code print
+===
+; file: part.prg
+*=$c100
+		lda #$41
+		sta $0400
+		rts
+===
+; file: again.prg
+*=$4000
+		inx
+		rts
+^^^
+Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 15 bytes emitted, 0 differ, 0 virtual, 0 gaps
+~~~
+
+*=$c000
+
+start:
+		jsr print
+		jsr lE000
+		rts 
+*=$c100
+
+; called by: start
+print:
+		lda #$41
+		sta $0400
+		rts 
+*=$e000
+
+; called by: start
+lE000:
+		inx 
+		rts 
+~~~
+--- test.map
+$c000-$c007 code start
+$c100-$c106 code print
+$e000-$e002 code lE000
+vvv

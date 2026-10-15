@@ -1,0 +1,12 @@
+>>> Only the deflower line can load a snapshot (issue 0083). <<<
+*=$c000
+		rts
+===
+deflower test.prg
+load game.vsf
+^^^
+Failed to parse test.flo:
+line 2: can't load a snapshot on top, only on the deflower line
+~~~
+~~~
+vvv

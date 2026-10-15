@@ -1,11 +1,11 @@
-## Starts a disassembly: makes a .flo skeleton for a .vsf or .prg file
+## Starts a disassembly: makes a .flo skeleton for a .vsf, .prg or .bin file
 ## (issue 0072), with what is of interest for disassembling it. The facts
 ## come as comments, then a `deflower` line, the code entries found, the
 ## memory that still holds VICE's power-on pattern or only zeroes, and the
 ## includes that match the banking.
 
 import std/[bitops, options, os, strutils]
-import printing, loaders, vicevcf
+import printing, loaders, subject, vicevcf
 
 const
   vectorNames = ["irq", "brk", "nmi", "open", "close", "chkin", "chkout", "clrchn",
@@ -117,12 +117,11 @@ proc basicStub(s: Initializer, start: int): Option[(int, int)] =
     line = link
   none((int, int))
 
-proc readProgram(s: var Initializer, file, name: string) =
-  s.memory = readMemoryImage(file)
-  let prg = cast[seq[byte]](readFile(file))
-  let load = loadAddress(prg)
-  let finish = load + prg.len - 2
-  s.lines.add "; " & name & ": loads at $" & h(load, 4) & "-$" & h(finish, 4)
+proc readProgram(s: var Initializer, file: string, image: ImageFile) =
+  s.memory = readMemoryImage(file, image)
+  let (load, bytes) = imageBytes(file, image)
+  let finish = load + bytes.len
+  s.lines.add "; " & image.name & ": loads at $" & h(load, 4) & "-$" & h(finish, 4)
   if finish > 0x10000:
     s.lines.add "; the load runs past $ffff"
   let stub = s.basicStub(load)
@@ -407,15 +406,28 @@ proc readSnapshot(s: var Initializer, file, name: string) =
   s.basicProgram()
   s.chrgetPatch()
 
-proc skeleton*(file: string): seq[string] =
-  ## The skeleton for this file, one line per element.
+proc text(image: ImageFile): string =
+  ## The file with its options, as a deflower line takes them.
+  result = image.name
+  if image.address != -1:
+    result.add " at $" & h(image.address, 4)
+  if image.offset != -1:
+    result.add " from $" & hex(image.offset)
+  if image.size != -1:
+    result.add " size $" & hex(image.size)
+
+proc skeleton*(file: string, image: ImageFile): seq[string] =
+  ## The skeleton for this file, loaded with the options of `image`, one
+  ## line per element.
   var s = Initializer(basic: true, kernal: true, io: true)
-  let name = extractFilename(file)
-  if name.toLowerAscii.endsWith(".prg"):
-    s.readProgram(file, name)
+  let problem = imageProblem(image, false)
+  if problem.len > 0:
+    raise newException(ArgumentError, problem)
+  if image.name.isSnapshot:
+    s.readSnapshot(file, image.name)
   else:
-    s.readSnapshot(file, name)
-  s.lines.add "deflower " & name
+    s.readProgram(file, image)
+  s.lines.add "deflower " & image.text
   for (address, label) in s.codeEntries:
     s.lines.add "$" & h(address, 4) & " code " & label
   s.lines.add s.rangeLines
@@ -432,7 +444,11 @@ proc skeleton*(file: string): seq[string] =
       s.lines.add "include c64_kernal.flo"
   s.lines
 
-proc writeSkeleton*(file: string): bool =
+proc skeleton*(file: string): seq[string] =
+  ## The skeleton for this file without options.
+  skeleton(file, imageFile(extractFilename(file)))
+
+proc writeSkeleton*(file: string, image: ImageFile): bool =
   ## Writes the skeleton as `<name>.flo` next to the file, unless that
   ## exists. Returns false when it does.
   let name = extractFilename(file)
@@ -445,7 +461,7 @@ proc writeSkeleton*(file: string): bool =
     return false
   printOut("Writing " & flowerFile)
   var text = ""
-  for line in skeleton(file):
+  for line in skeleton(file, image):
     text.add line & "\n"
   writeFile(flowerFile, text)
   true

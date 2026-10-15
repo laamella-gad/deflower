@@ -12,10 +12,13 @@ type
     nkFile = "file"
     nkBlank = "blank"
     nkDeflower = "deflower"
+    nkLoad = "load"
     nkInclude = "include"
     nkEndBlock = "endBlock"
     nkLine = "line"
+    nkImage = "image"
     nkAnnotation = "annotation"
+    nkName = "name"
     nkPlace = "place"
     nkNumber = "number"
     nkDataType = "dataType"
@@ -29,6 +32,9 @@ type
   NodeLabel* = enum
     lbNone = ""
     lbFile = "file"
+    lbAddress = "address"
+    lbOffset = "offset"
+    lbLength = "length"
     lbAt = "at"
     lbType = "type"
     lbLabel = "label"
@@ -42,6 +48,9 @@ type
   Parser = ParserState[NodeKind, NodeLabel, TokenKind]
 
 func file*(n: Node): Node = n.son(lbFile)
+func address*(n: Node): Node = n.son(lbAddress)
+func offset*(n: Node): Node = n.son(lbOffset)
+func length*(n: Node): Node = n.son(lbLength)
 func at*(n: Node): Node = n.son(lbAt)
 func `type`*(n: Node): Node = n.son(lbType)
 func label*(n: Node): Node = n.son(lbLabel)
@@ -53,7 +62,9 @@ func op*(n: Node): seq[Node] = n.sonsWith(lbOp)
 
 proc ruleFile(p: var Parser): Node
 proc ruleStatement(p: var Parser): Node
+proc ruleImage(p: var Parser): Node
 proc ruleAnnotation(p: var Parser): Node
+proc ruleName(p: var Parser): Node
 proc rulePlace(p: var Parser): Node
 proc ruleNumber(p: var Parser): Node
 proc ruleDataType(p: var Parser): Node
@@ -67,7 +78,7 @@ proc ruleFile(p: var Parser): Node =
   result = p.newNode(nkFile)
   p.enter(0)
   try:
-    while p.more(result, {tkDeflower, tkInclude, tkRBrace, tkHEX, tkINT,
+    while p.more(result, {tkDeflower, tkLoad, tkInclude, tkRBrace, tkHEX, tkINT,
         tkCOMMENT, tkNL}, {tkEOF}):
       result.add(ruleStatement(p))
     p.match(result, tkEOF)
@@ -90,7 +101,12 @@ proc ruleStatement(p: var Parser): Node =
     of tkDeflower:
       result = p.newNode(nkDeflower)
       p.match(result, tkDeflower)
-      p.match(result, tkID, lbFile)
+      result.add(ruleImage(p))
+      p.match(result, tkNL)
+    of tkLoad:
+      result = p.newNode(nkLoad)
+      p.match(result, tkLoad)
+      result.add(ruleImage(p))
       p.match(result, tkNL)
     of tkInclude:
       result = p.newNode(nkInclude)
@@ -106,15 +122,41 @@ proc ruleStatement(p: var Parser): Node =
       result.add(ruleAnnotation(p))
       p.match(result, tkNL)
     else:
-      p.fail({tkDeflower, tkInclude, tkRBrace, tkHEX, tkINT, tkCOMMENT, tkNL})
+      p.fail({tkDeflower, tkLoad, tkInclude, tkRBrace, tkHEX, tkINT, tkCOMMENT,
+          tkNL})
+  except SyntaxError:
+    p.recover(result)
+  p.leave()
+
+proc ruleImage(p: var Parser): Node =
+  ## `image`, line 19
+  result = p.newNode(nkImage)
+  p.enter(2)
+  try:
+    p.match(result, tkID, lbFile)
+    if p.peek in {tkAt}:
+      p.match(result, tkAt)
+      result.add(ruleNumber(p), lbAddress)
+    else:
+      p.expect({tkAt})
+    if p.peek in {tkFrom}:
+      p.match(result, tkFrom)
+      result.add(ruleNumber(p), lbOffset)
+    else:
+      p.expect({tkFrom})
+    if p.peek in {tkSize}:
+      p.match(result, tkSize)
+      result.add(ruleNumber(p), lbLength)
+    else:
+      p.expect({tkSize})
   except SyntaxError:
     p.recover(result)
   p.leave()
 
 proc ruleAnnotation(p: var Parser): Node =
-  ## `annotation`, line 16
+  ## `annotation`, line 22
   result = p.newNode(nkAnnotation)
-  p.enter(2)
+  p.enter(3)
   try:
     result.add(rulePlace(p), lbAt)
     if p.peek in {tkVirtual}:
@@ -135,10 +177,10 @@ proc ruleAnnotation(p: var Parser): Node =
     else:
       p.expect({tkScreencode, tkAscii, tkByte, tkWord, tkLong, tkDword, tkAddr,
           tkRta, tkSbyte, tkSword, tkSlong, tkSdword, tkCode})
-    if p.peek in {tkID}:
-      p.match(result, tkID, lbLabel)
+    if p.peek in {tkLoad, tkAt, tkFrom, tkSize, tkID}:
+      result.add(ruleName(p), lbLabel)
     else:
-      p.expect({tkID})
+      p.expect({tkLoad, tkAt, tkFrom, tkSize, tkID})
     if p.peek in {tkLParen}:
       result.add(ruleParameters(p))
     else:
@@ -160,10 +202,32 @@ proc ruleAnnotation(p: var Parser): Node =
     p.recover(result)
   p.leave()
 
+proc ruleName(p: var Parser): Node =
+  ## `name`, line 26
+  result = p.newNode(nkName)
+  p.enter(4)
+  try:
+    case p.peek
+    of tkID:
+      p.match(result, tkID)
+    of tkLoad:
+      p.match(result, tkLoad)
+    of tkAt:
+      p.match(result, tkAt)
+    of tkFrom:
+      p.match(result, tkFrom)
+    of tkSize:
+      p.match(result, tkSize)
+    else:
+      p.fail({tkLoad, tkAt, tkFrom, tkSize, tkID})
+  except SyntaxError:
+    p.recover(result)
+  p.leave()
+
 proc rulePlace(p: var Parser): Node =
-  ## `place`, line 20
+  ## `place`, line 29
   result = p.newNode(nkPlace)
-  p.enter(3)
+  p.enter(5)
   try:
     result.add(ruleNumber(p), lbStart)
     if p.peek in {tkMinus}:
@@ -176,9 +240,9 @@ proc rulePlace(p: var Parser): Node =
   p.leave()
 
 proc ruleNumber(p: var Parser): Node =
-  ## `number`, line 21
+  ## `number`, line 30
   result = p.newNode(nkNumber)
-  p.enter(4)
+  p.enter(6)
   try:
     case p.peek
     of tkINT:
@@ -192,9 +256,9 @@ proc ruleNumber(p: var Parser): Node =
   p.leave()
 
 proc ruleDataType(p: var Parser): Node =
-  ## `dataType`, line 23
+  ## `dataType`, line 32
   result = p.newNode(nkDataType)
-  p.enter(5)
+  p.enter(7)
   try:
     result.add(ruleTypeName(p))
     if p.peek in {tkLBracket}:
@@ -211,9 +275,9 @@ proc ruleDataType(p: var Parser): Node =
   p.leave()
 
 proc ruleTypeName(p: var Parser): Node =
-  ## `typeName`, line 24
+  ## `typeName`, line 33
   result = p.newNode(nkTypeName)
-  p.enter(6)
+  p.enter(8)
   try:
     case p.peek
     of tkScreencode:
@@ -250,8 +314,8 @@ proc ruleTypeName(p: var Parser): Node =
   p.leave()
 
 proc ruleSize(p: var Parser): Node =
-  ## `size`, line 27
-  p.enter(7)
+  ## `size`, line 36
+  p.enter(9)
   try:
     case p.peek
     of tkUntil:
@@ -274,9 +338,9 @@ proc ruleSize(p: var Parser): Node =
   p.leave()
 
 proc ruleParameters(p: var Parser): Node =
-  ## `parameters`, line 33
+  ## `parameters`, line 42
   result = p.newNode(nkParameters)
-  p.enter(8)
+  p.enter(10)
   try:
     p.match(result, tkLParen)
     result.add(ruleParameter(p))
@@ -289,42 +353,45 @@ proc ruleParameters(p: var Parser): Node =
   p.leave()
 
 proc ruleParameter(p: var Parser): Node =
-  ## `parameter`, line 34
+  ## `parameter`, line 43
   result = p.newNode(nkParameter)
-  p.enter(9)
+  p.enter(11)
   try:
     result.add(ruleDataType(p))
-    if p.peek in {tkID}:
-      p.match(result, tkID, lbLabel)
+    if p.peek in {tkLoad, tkAt, tkFrom, tkSize, tkID}:
+      result.add(ruleName(p), lbLabel)
     else:
-      p.expect({tkID})
+      p.expect({tkLoad, tkAt, tkFrom, tkSize, tkID})
   except SyntaxError:
     p.recover(result)
   p.leave()
 
-const followSets: array[10, set[TokenKind]] = [
+const followSets: array[12, set[TokenKind]] = [
   {tkEOF}, # file
-  {tkEOF, tkDeflower, tkInclude, tkRBrace, tkHEX, tkINT, tkCOMMENT,
+  {tkEOF, tkDeflower, tkLoad, tkInclude, tkRBrace, tkHEX, tkINT, tkCOMMENT,
       tkNL}, # statement
+  {tkEOF, tkNL}, # image
   {tkEOF, tkNL}, # annotation
-  {tkEOF, tkVirtual, tkBanked, tkSelfmod, tkNoreturn, tkExport, tkLBrace,
-      tkScreencode, tkAscii, tkByte, tkWord, tkLong, tkDword, tkAddr, tkRta,
-      tkSbyte, tkSword, tkSlong, tkSdword, tkCode, tkLParen, tkID,
-      tkNL}, # place
-  {tkEOF, tkVirtual, tkBanked, tkSelfmod, tkNoreturn, tkExport, tkLBrace,
-      tkMinus, tkRBracket, tkScreencode, tkAscii, tkByte, tkWord, tkLong,
-      tkDword, tkAddr, tkRta, tkSbyte, tkSword, tkSlong, tkSdword, tkCode,
-      tkStar, tkPlus, tkLParen, tkID, tkNL}, # number
-  {tkEOF, tkNoreturn, tkExport, tkLBrace, tkLParen, tkComma, tkRParen, tkID,
-      tkNL}, # dataType
-  {tkEOF, tkNoreturn, tkExport, tkLBrace, tkLBracket, tkLParen, tkComma,
-      tkRParen, tkID, tkNL}, # typeName
+  {tkEOF, tkNoreturn, tkExport, tkLBrace, tkLParen, tkComma, tkRParen,
+      tkNL}, # name
+  {tkEOF, tkLoad, tkAt, tkFrom, tkSize, tkVirtual, tkBanked, tkSelfmod,
+      tkNoreturn, tkExport, tkLBrace, tkScreencode, tkAscii, tkByte, tkWord,
+      tkLong, tkDword, tkAddr, tkRta, tkSbyte, tkSword, tkSlong, tkSdword,
+      tkCode, tkLParen, tkID, tkNL}, # place
+  {tkEOF, tkLoad, tkAt, tkFrom, tkSize, tkVirtual, tkBanked, tkSelfmod,
+      tkNoreturn, tkExport, tkLBrace, tkMinus, tkRBracket, tkScreencode,
+      tkAscii, tkByte, tkWord, tkLong, tkDword, tkAddr, tkRta, tkSbyte, tkSword,
+      tkSlong, tkSdword, tkCode, tkStar, tkPlus, tkLParen, tkID, tkNL}, # number
+  {tkEOF, tkLoad, tkAt, tkFrom, tkSize, tkNoreturn, tkExport, tkLBrace,
+      tkLParen, tkComma, tkRParen, tkID, tkNL}, # dataType
+  {tkEOF, tkLoad, tkAt, tkFrom, tkSize, tkNoreturn, tkExport, tkLBrace,
+      tkLBracket, tkLParen, tkComma, tkRParen, tkID, tkNL}, # typeName
   {tkEOF, tkRBracket}, # size
   {tkEOF, tkNoreturn, tkExport, tkLBrace, tkNL}, # parameters
   {tkEOF, tkComma, tkRParen}] # parameter
 
-const ruleNames = ["file", "statement", "annotation", "place", "number",
-    "dataType", "typeName", "size", "parameters", "parameter"]
+const ruleNames = ["file", "statement", "image", "annotation", "name", "place",
+    "number", "dataType", "typeName", "size", "parameters", "parameter"]
 
 proc follows(rule, kind: int): bool = TokenKind(kind) in followSets[rule]
 
@@ -356,11 +423,23 @@ proc parseStatement*(src: string, filename = "input",
   ## syntax errors instead of the default messages.
   parseWith(src, filename, formatter, ruleStatement)
 
+proc parseImage*(src: string, filename = "input",
+    formatter: SyntaxErrorFormatter = nil): ParseResult[Node] =
+  ## Parses `src` with rule `image`. A `formatter` words the
+  ## syntax errors instead of the default messages.
+  parseWith(src, filename, formatter, ruleImage)
+
 proc parseAnnotation*(src: string, filename = "input",
     formatter: SyntaxErrorFormatter = nil): ParseResult[Node] =
   ## Parses `src` with rule `annotation`. A `formatter` words the
   ## syntax errors instead of the default messages.
   parseWith(src, filename, formatter, ruleAnnotation)
+
+proc parseName*(src: string, filename = "input",
+    formatter: SyntaxErrorFormatter = nil): ParseResult[Node] =
+  ## Parses `src` with rule `name`. A `formatter` words the
+  ## syntax errors instead of the default messages.
+  parseWith(src, filename, formatter, ruleName)
 
 proc parsePlace*(src: string, filename = "input",
     formatter: SyntaxErrorFormatter = nil): ParseResult[Node] =

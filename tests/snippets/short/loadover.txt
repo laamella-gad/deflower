@@ -1,0 +1,30 @@
+>>> A file loaded over an earlier one wins, without a warning (issue 0083). <<<
+*=$c000
+start:
+		lda #$01
+		rts
+===
+deflower test.prg
+load patch.prg
+$c000 code start
+===
+; file: patch.prg
+*=$c002
+		nop
+		rts
+^^^
+Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 4 bytes emitted, 0 differ, 0 virtual, 0 gaps
+~~~
+
+*=$c000
+
+start:
+		lda #$01
+		nop 
+		rts 
+~~~
+--- test.map
+$c000-$c004 code start
+vvv

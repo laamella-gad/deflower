@@ -9,11 +9,11 @@
 import std/[algorithm, os, strutils, tables]
 from std/unicode import runeSubStr
 import flo/flo_parser
-import printing, subject
+import loaders, printing, subject
 
 type
   StatementKind = enum
-    skComment, skDeflower, skInclude, skLine, skEndBlock
+    skComment, skDeflower, skLoad, skInclude, skLine, skEndBlock
 
   RawParameter = object
     ## A parameter as written: its type, size and name.
@@ -28,7 +28,9 @@ type
     ## What the parser read from one line, as token indexes and flags.
     kind: StatementKind
     text: string
-      ## The comment's text, or the file name of a deflower or include line.
+      ## The comment's text, or the file name of an include line.
+    image: ImageFile
+      ## The file of a deflower or load line.
     address: int
     addressEnd: int
     virtual: bool
@@ -114,6 +116,16 @@ proc readParameter(n: Node): RawParameter =
   if n.label != nil:
     result.name = n.label.text
 
+proc readImage(n: Node): ImageFile =
+  ## The file of an image node, with its options.
+  result = ImageFile(name: n.file.text, address: -1, offset: -1, size: -1)
+  if n.address != nil:
+    result.address = number(n.address)
+  if n.offset != nil:
+    result.offset = number(n.offset)
+  if n.length != nil:
+    result.size = number(n.length)
+
 proc buildLine(n: Node): Statement =
   ## The statement of an annotation node.
   let place = n.at
@@ -148,7 +160,9 @@ proc build(n: Node): Statement =
     let text = n[0].text[1 .. ^1]
     Statement(kind: skComment, text: if text.startsWith(" "): text[1 .. ^1] else: text)
   of nkDeflower:
-    Statement(kind: skDeflower, text: n.file.text)
+    Statement(kind: skDeflower, image: readImage(n[1]))
+  of nkLoad:
+    Statement(kind: skLoad, image: readImage(n[1]))
   of nkInclude:
     Statement(kind: skInclude, text: n.file.text)
   of nkEndBlock:
@@ -158,7 +172,7 @@ proc build(n: Node): Statement =
 
 # Error messages.
 
-const partOrder = ["an address", "deflower", "include", "'}'", "'-'", "virtual", "banked", "selfmod", "a type",
+const partOrder = ["an address", "deflower", "load", "include", "'}'", "at", "from", "size", "'-'", "virtual", "banked", "selfmod", "a type",
     "a size", "a label", "parameters", "noreturn", "export", "a file name", "'{'", "a number", "until",
     "lengthbyte", "'*'", "'+'", "']'", "','", "')'", "a comment", "the end of the line"]
   ## The parts an error message can expect, in the order of a line.
@@ -178,6 +192,8 @@ proc partName(kind: TokenKind, e: SyntaxErrorInfo, codeLine: bool): string =
   # A blank or comment line is no fix for a line that starts wrong.
   of tkCOMMENT: (if tkDeflower in expected: "" else: "a comment")
   of tkNL: (if tkDeflower in expected: "" else: "the end of the line")
+  # The words of the load line can be labels too.
+  of tkLoad, tkAt, tkFrom, tkSize: (if tkID in expected: "a label" else: ($kind)[1 .. ^2])
   of tkDeflower, tkInclude, tkVirtual, tkBanked, tkSelfmod, tkExport, tkUntil, tkLengthbyte:
     ($kind)[1 .. ^2]
   else: $kind
@@ -239,14 +255,33 @@ proc closeRun(collector: AnnotationCollector) =
 proc lineError(collector: AnnotationCollector, line: int, message: string) =
   collector.errors.add "line " & $line & ": " & message
 
-proc startRun(collector: AnnotationCollector, line: int, fileName: string) =
+proc checkImage(collector: AnnotationCollector, line: int, image: ImageFile, loaded: bool): bool =
+  let problem = imageProblem(image, loaded)
+  if problem.len > 0:
+    collector.lineError(line, problem)
+  problem.len == 0
+
+proc startRun(collector: AnnotationCollector, line: int, image: ImageFile) =
   if collector.included:
     collector.lineError(line, "an included file can't start a run")
     return
   collector.closeRun()
-  collector.run = DeflowerRun(targetName: fileName)
+  discard collector.checkImage(line, image, false)
+  collector.run = DeflowerRun(image: image)
   collector.pendingComments = @[]
   collector.runs.add collector.run
+
+proc loadFile(collector: AnnotationCollector, line: int, image: ImageFile) =
+  ## Loads another file into the run's memory (issue 0083).
+  assertState(collector.run != nil, "Start the file with a 'deflower <file>' line.")
+  if collector.included:
+    collector.lineError(line, "an included file can't load a file")
+  elif collector.blockBase != -1:
+    collector.lineError(line, "can't load inside a block")
+  elif collector.checkImage(line, image, true):
+    collector.run.loads.add image
+  # A comment above a load line is about the load.
+  collector.pendingComments = @[]
 
 proc includeFile(collector: AnnotationCollector, line: int, name: string) =
   ## Reads the included file's lines into the current run, marked as
@@ -433,7 +468,9 @@ proc collect(text, sourceName: string, collector: AnnotationCollector) =
     of skComment:
       collector.pendingComments.add statement.text
     of skDeflower:
-      collector.startRun(line, statement.text)
+      collector.startRun(line, statement.image)
+    of skLoad:
+      collector.loadFile(line, statement.image)
     of skInclude:
       collector.includeFile(line, statement.text)
     of skLine:

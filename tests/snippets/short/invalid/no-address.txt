@@ -4,7 +4,7 @@ deflower t.prg
 byte label
 ^^^
 Failed to parse test.flo:
-line 2: expected an address, deflower, include or '}', found 'byte'
+line 2: expected an address, deflower, load, include or '}', found 'byte'
 ~~~
 ~~~
 vvv

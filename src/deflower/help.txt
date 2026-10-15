@@ -7,25 +7,30 @@ Usage:
       .flo file. --verify reassembles each .asm and reports the bytes that
       differ and the gaps (memory nothing covers). --watch runs again on
       every change, until Ctrl-C.
-  deflower --init <file.vsf or file.prg>
+  deflower --init <file> [at <address>] [from <offset>] [size <n>]
       Write a .flo skeleton next to the file: what it knows, entry points,
       includes.
-  deflower --dump <file.vsf or file.prg> <start>-<end>
+  deflower --dump <file> [<options>] <start>-<end>
       Hex dump, with PETSCII and screen codes.
-  deflower --find <file.vsf or file.prg> <address or bytes> [in <start>-<end>]
+  deflower --find <file> [<options>] <address or bytes> [in <start>-<end>]
       Search for an address (as word, rta or lo/hi tables) or a byte sequence.
-  deflower --strings <file.vsf or file.prg> [<start>-<end>] [min <n>]
+  deflower --strings <file> [<options>] [<start>-<end>] [min <n>]
       List text candidates as pastable .flo lines.
   deflower --help
       This text.
 
-  Ranges are start-end, end exclusive. Numbers are decimal or $hex.
+  The file is a .vsf, .prg or .bin; the options are those of a deflower
+  line. Ranges are start-end, end exclusive. Numbers are decimal or $hex.
 
 Suggested loop: --init, then --watch --verify, read out/*.asm, annotate the
 .flo file, save, repeat.
 
 The .flo file, one statement per line:
-  deflower <file>             start a run on a .prg or .vsf
+  deflower <file> [at <address>] [from <offset>] [size <n>]
+                              start a run on a .vsf, .prg (at: elsewhere)
+                              or .bin (at needed; from skips bytes, size
+                              takes that many)
+  load <file> [<options>]     load one more .prg or .bin; a later file wins
   include <file>              read another .flo file, or a built-in one:
                               c64.flo (c64_zeropage, c64_system, c64_io,
                               c64_basic, c64_kernal.flo); its lines are weak

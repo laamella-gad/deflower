@@ -6,13 +6,14 @@
 import std/[algorithm, os, sequtils, strutils, sugar]
 import printing, subject, flo_reader, loaders, flow_analyser, finders, result_writer, memory_map, verifier
 
-proc loadMemoryImage(filename: string, subject: Subject) =
-  if filename.endsWith("vsf"):
-    readViceSnapshot(filename, subject)
-  elif filename.endsWith("prg"):
-    readPrg(filename, subject)
-  else:
-    raise newException(CatchableError, "Unsupported input format")
+proc loadFiles(subject: Subject, run: DeflowerRun, basePath: string, files: var seq[string]) =
+  ## Loads the run's file, then its 'load' lines' files on top, each winning
+  ## where it overlaps the earlier ones (issue 0083).
+  for image in @[run.image] & run.loads:
+    let path = basePath / image.name
+    if path notin files:
+      files.add path
+    loadImage(path, image, subject)
 
 proc outputFileNameFor(targetFileName: string): string =
   let baseName = extractFilename(targetFileName)
@@ -27,12 +28,9 @@ proc configure*(flowerFile: string, files: var seq[string]): seq[Subject] =
   let basePath = parentDir(path)
   for run in readFlo(path, extractFilename(path), files):
     let subject = newSubject(basePath)
-    subject.outputFileName = outputFileNameFor(run.targetName)
+    subject.outputFileName = outputFileNameFor(run.image.name)
     result.add subject
-    let binary = basePath / run.targetName
-    if binary notin files:
-      files.add binary
-    loadMemoryImage(binary, subject)
+    subject.loadFiles(run, basePath, files)
     # The banked names first, so an rta line can't trace into the RAM under
     # one (issue 0102). Then the including file's own lines: included ones
     # are weak and only fill in what those leave open (issue 0078).

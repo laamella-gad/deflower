@@ -23,12 +23,14 @@ A disassembly reassembles to the original bytes when it verifies with 0 differ, 
 
 ```
 deflower [--verify] [--watch] <file.flo>
-deflower --init <file.vsf or file.prg>
-deflower --dump <file.vsf or file.prg> <start>-<end>
-deflower --find <file.vsf or file.prg> <address or bytes> [in <start>-<end>]
-deflower --strings <file.vsf or file.prg> [<start>-<end>] [min <n>]
+deflower --init <file> [at <address>] [from <offset>] [size <n>]
+deflower --dump <file> [<options>] <start>-<end>
+deflower --find <file> [<options>] <address or bytes> [in <start>-<end>]
+deflower --strings <file> [<options>] [<start>-<end>] [min <n>]
 deflower --help
 ```
+
+The `<file>` of `--init`, `--dump`, `--find` and `--strings` is a `.vsf`, `.prg` or `.bin`, with the options of a [`deflower` line](#deflower-file-at-address-from-offset-size-n) after it: `at`, `from` and `size`. A `.bin` needs `at`.
 
 All paths are file system paths. Numbers are decimal, or hex with a `$` prefix (quote it in the shell: `'$c000-$c100'`). A range's end is exclusive, as in a `.flo` file.
 
@@ -36,7 +38,7 @@ The exit code is 0 on success, 1 when a run has errors or doesn't verify (or `--
 
 ### Disassembling: `deflower <file.flo>`
 
-Runs the `.flo` file: every `deflower` line in it is a run that loads a binary, applies the annotations and traces the code. Each run writes into `out/` next to the `.flo` file, which is cleared first:
+Runs the `.flo` file: every `deflower` line in it is a run that loads a binary (and the files of its `load` lines), applies the annotations and traces the code. Each run writes into `out/` next to the `.flo` file, which is cleared first:
 - `out/<binary>.asm`, the disassembly (see [The output](#the-output));
 - `out/<binary>.map`, the memory map: one line per code run (split at routine labels), per array and per gap, e.g. `$c007-$c009 word table`;
 - the exported binaries (`export` on a data line).
@@ -67,9 +69,9 @@ or `doesn't verify` (with `--verify`), or `failed, out/ unchanged`.
 
 ### Starting: `--init`
 
-Takes a `.vsf` VICE snapshot or a `.prg` and writes a `.flo` skeleton next to it, `<file without extension>.flo`. It won't overwrite an existing `.flo` file. The skeleton holds:
-- the facts, as `;` comments. For a snapshot: the banking, the CPU registers, the stack, the IRQ/BRK/NMI vectors (and the hardware vectors while the KERNAL is banked out), each marked ROM, RAM or untouched RAM, changed KERNAL vectors, the video setup (VIC bank, mode, screen, character set or bitmap, sprites), the interrupt sources, the BASIC program and its `SYS`, and a patched CHRGET. For a `.prg`: the load range and the `SYS` of a BASIC stub. The video and VIC interrupts are only read from x64sc snapshots of VICE 3.x;
-- the `deflower` line;
+Takes a `.vsf` VICE snapshot, a `.prg` or a `.bin` and writes a `.flo` skeleton next to it, `<file without extension>.flo`. It won't overwrite an existing `.flo` file. The skeleton holds:
+- the facts, as `;` comments. For a snapshot: the banking, the CPU registers, the stack, the IRQ/BRK/NMI vectors (and the hardware vectors while the KERNAL is banked out), each marked ROM, RAM or untouched RAM, changed KERNAL vectors, the video setup (VIC bank, mode, screen, character set or bitmap, sprites), the interrupt sources, the BASIC program and its `SYS`, and a patched CHRGET. For a `.prg` or `.bin`: the load range and the `SYS` of a BASIC stub. The video and VIC interrupts are only read from x64sc snapshots of VICE 3.x;
+- the `deflower` line, with the options given;
 - `code` lines for the entry points found (`snapshot_pc`, `irq`, `nmi`, ...), except those in ROM, the zero page or untouched memory;
 - `untouched_xxxx` ranges from `$0400` up that still hold VICE's power-on pattern, and `unused_xxxx` ranges that hold only zeroes. Deflower warns when an instruction refers into one of them, as that range is in use after all;
 - the includes that match the banking.
@@ -110,9 +112,28 @@ $1014-$1020 addr level_table
 $2c75 code print_inline (ascii[until $ff] text)
 ```
 
-### `deflower <file>`
+### `deflower <file> [at <address>] [from <offset>] [size <n>]`
 
-Starts a run: loads a `.vsf` VICE snapshot or a `.prg` (a 2-byte load address, then the bytes), relative to the `.flo` file's directory. The lines after it, up to the next `deflower` line, annotate that binary, and its output is `out/<file without extension>.asm`. It must come before any annotation line.
+Starts a run: loads a file, relative to the `.flo` file's directory. The lines after it, up to the next `deflower` line, annotate that binary, and its output is `out/<file without extension>.asm`. It must come before any annotation line. The file is one of:
+- a `.vsf` VICE snapshot: its 64K of RAM, without options;
+- a `.prg`: a 2-byte load address, then the bytes. `at` loads them at another address;
+- a `.bin`: only the bytes, loaded at the `at` address, which it needs. `from` skips that many bytes of the file first and `size` takes only that many: `deflower kernal.bin at $e000`, `deflower cartridge.bin at $8000 from $50 size $2000`.
+
+Bytes past `$ffff` are dropped.
+
+### `load <file> [at <address>] [from <offset>] [size <n>]`
+
+Loads one more `.prg` or `.bin` into the run, with the options of the `deflower` line, e.g. a program's second part or the overlay it loads at run time:
+
+```
+deflower game.prg
+load levels.prg
+load music.bin at $1000
+```
+
+The files load in order, the `deflower` line's first, and a later one wins where they overlap, without a warning: a part can patch another, or a snapshot. The run's output is still the one `.asm`, with each part under its own `*=` origin. A `load` line comes after a `deflower` line and only in the `.flo` file itself, not in an included one or in a block.
+
+The words `load`, `at`, `from` and `size` are only keywords on a `deflower` or `load` line: elsewhere they can be labels, like the KERNAL's `load`.
 
 ### `include <file>`
 
@@ -216,14 +237,23 @@ file        : statement* EOF ;
 
 // One statement per line. A comment attaches to the next annotation line.
 statement   : COMMENT? NL                                    # blank
-            | 'deflower' file=ID NL                          # deflower
+            | 'deflower' image NL                            # deflower
+            | 'load' image NL                                # load
             | 'include' file=ID NL                           # include
             | '}' NL                                         # endBlock
             | annotation NL                                  # line
             ;
 
-annotation  : at=place 'virtual'? 'banked'? 'selfmod'? type=dataType? label=ID?
+// A file to load into memory: a .prg at its own address unless 'at' says
+// otherwise, a .bin at the 'at' address, a .vsf as a whole.
+image       : file=ID ('at' address=number)? ('from' offset=number)?
+              ('size' length=number)? ;
+
+annotation  : at=place 'virtual'? 'banked'? 'selfmod'? type=dataType? label=name?
               parameters? 'noreturn'? ('export' exportFile=ID)? '{'? ;
+
+// The words of the 'load' line are only keywords there.
+name        : ID | 'load' | 'at' | 'from' | 'size' ;
 
 // A range's end is exclusive.
 place       : start=number ('-' end=number)? ;
@@ -240,7 +270,7 @@ size        : 'until' terminator=number                      # until
 
 // The data after each jsr to a code line's address.
 parameters  : '(' parameter (',' parameter)* ')' ;
-parameter   : dataType label=ID? ;
+parameter   : dataType label=name? ;
 
 HEX     : '$' [0-9a-fA-F]+ ;
 INT     : [0-9]+ ;

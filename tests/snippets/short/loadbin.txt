@@ -1,0 +1,39 @@
+>>> A .bin has no load address: the deflower or load line gives it with at.
+from skips that many bytes of the file, size takes that many (issue 0117). <<<
+===
+deflower main.bin at $c000 from 2
+load table.bin at $c010 from $01 size 3
+$c000 code start
+$c010 byte[3] table
+===
+; file: main.bin
+*=$0000
+		.byte $ff, $ff
+start:
+		lda $c010
+		rts
+===
+; file: table.bin
+*=$0000
+		.byte $ee, 1, 2, 3, $ee
+^^^
+Writing out/main.asm
+Writing out/main.map
+Verify out/main.asm: 7 bytes emitted, 0 differ, 0 virtual, 0 gaps
+~~~
+
+*=$c000
+
+start:
+		lda table
+		rts 
+*=$c010
+
+; read by: start
+table:
+		.byte	$01, $02, $03
+~~~
+--- main.map
+$c000-$c004 code start
+$c010-$c013 byte[3] table
+vvv

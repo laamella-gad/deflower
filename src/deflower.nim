@@ -7,10 +7,10 @@ const help = staticRead("deflower/help.txt")
 
 proc printUsage() =
   printErr("Usage: deflower [--verify] [--watch] <file.flo>")
-  printErr("       deflower --init <file.vsf or file.prg>")
-  printErr("       deflower --dump <file.vsf or file.prg> <start>-<end>")
-  printErr("       deflower --find <file.vsf or file.prg> <address or bytes> [in <start>-<end>]")
-  printErr("       deflower --strings <file.vsf or file.prg> [<start>-<end>] [min <n>]")
+  printErr("       deflower --init <file> [at <address>] [from <offset>] [size <n>]")
+  printErr("       deflower --dump <file> [<options>] <start>-<end>")
+  printErr("       deflower --find <file> [<options>] <address or bytes> [in <start>-<end>]")
+  printErr("       deflower --strings <file> [<options>] [<start>-<end>] [min <n>]")
   printErr("       deflower --help")
 
 proc command*(args: seq[string]): int =
@@ -20,8 +20,16 @@ proc command*(args: seq[string]): int =
     for line in help.strip(leading = false).splitLines:
       printOut(line)
     return 0
-  if args.len == 2 and args[0] == "--init":
-    return (if writeSkeleton(args[1]): 0 else: 1)
+  if args.len >= 2 and args[0] == "--init":
+    try:
+      var rest = args[2 .. ^1]
+      let image = takeImage(args[1], rest)
+      if rest.len > 0:
+        raise newException(ArgumentError, "Wrong arguments for --init: " & args[2 .. ^1].join(" "))
+      return (if writeSkeleton(args[1], image): 0 else: 1)
+    except ArgumentError as e:
+      printErr(e.msg)
+      return 2
   if args.len >= 2 and args[0] in ["--dump", "--find", "--strings"]:
     try:
       for line in look(args[0], args[1], args[2 .. ^1]):

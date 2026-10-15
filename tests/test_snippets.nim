@@ -1,7 +1,7 @@
 ## Runs the snippet files in `tests/snippets`. CLAUDE.md describes the
 ## kinds of snippets and their format.
 
-import std/[algorithm, options, os, strutils, sugar, tempfiles, unittest]
+import std/[algorithm, options, os, sequtils, strutils, sugar, tempfiles, unittest]
 import mpu6502, snippets_test
 import deflower/[initializer, look, printing, runner]
 
@@ -37,10 +37,13 @@ proc prg(segments: seq[Segment]): seq[byte] =
       result[2 + segment.loadAddress - start + i] = segment.data[i]
 
 proc writeSnippetFile(dir, name, text: string) =
-  ## Writes a file for a short snippet: a .prg is assembled from the text,
-  ## anything else is written as it is.
+  ## Writes a file for a short snippet: a .prg is assembled from the text, a
+  ## .bin too but without the load address, anything else is written as it
+  ## is.
   if name.endsWith(".prg"):
     writeFile(dir / name, cast[string](prg(assemble(text))))
+  elif name.endsWith(".bin"):
+    writeFile(dir / name, cast[string](prg(assemble(text))[2 .. ^1]))
   else:
     writeFile(dir / name, text)
 
@@ -91,18 +94,64 @@ proc runDeflower(flowerFile: string): seq[string] =
     binaries.add(if file.endsWith(".map"): readFile(file) else: hexDump(readBytes(file)))
   @[endLine(printed), endLine(asmText), binaries]
 
-proc assertReassembles(dir: string) =
-  ## Every byte an out/X.asm assembles to lies inside X.prg and equals the
-  ## byte there. Bytes the .asm leaves out, like memory the tracer never
-  ## reached, aren't checked.
-  let output = dir / "out"
-  for asmFile in outFiles(output, true):
-    let prgName = extractFilename(asmFile).dup(removeSuffix(".asm")) & ".prg"
-    let prgFile = dir / prgName
-    if not fileExists(prgFile):
+proc loadedMemory(dir: string, lines: seq[string]): seq[int] =
+  ## The 64K that a deflower line and its load lines load, as values 0-255
+  ## and -1 for memory they don't load: each .prg at its own address or the
+  ## at one, each .bin at the at one, from its from offset and size bytes.
+  ## Read here without Deflower's loader, to check that too.
+  result = newSeq[int](0x10000)
+  for i in 0 ..< result.len:
+    result[i] = -1
+  for line in lines:
+    let words = line.splitWhitespace
+    let bytes = readBytes(dir / words[1])
+    var options: seq[(string, int)]
+    for i in countup(2, words.len - 2, 2):
+      let value = words[i + 1]
+      options.add (words[i], if value.startsWith("$"): parseHexInt(value[1 .. ^1]) else: parseInt(value))
+    var address = -1
+    var offset = 0
+    var size = -1
+    for (name, value) in options:
+      case name
+      of "at": address = value
+      of "from": offset = value
+      of "size": size = value
+    var data: seq[byte]
+    if words[1].endsWith(".prg"):
+      if address == -1:
+        address = int(bytes[0]) or int(bytes[1]) shl 8
+      data = bytes[2 .. ^1]
+    else:
+      data = bytes[offset ..< (if size == -1: bytes.len else: offset + size)]
+    for i in 0 ..< min(data.len, 0x10000 - address):
+      result[address + i] = int(data[i])
+
+proc runImages(dir: string): seq[(string, seq[string])] =
+  ## For each deflower line of the snippet's test.flo whose file is a .prg
+  ## or .bin, the name of its .asm and its deflower and load lines.
+  for line in readFile(dir / "test.flo").splitLines:
+    let words = line.splitWhitespace
+    if words.len < 2:
       continue
-    let prg = readBytes(prgFile)
-    let load = int(prg[0]) or int(prg[1]) shl 8
+    if words[0] == "deflower":
+      result.add (words[1].splitFile.name & ".asm", @[line])
+    elif words[0] == "load" and result.len > 0:
+      result[^1][1].add line
+  result = result.filterIt(it[1][0].splitWhitespace[1].splitFile.ext in [".prg", ".bin"] and
+      fileExists(dir / it[1][0].splitWhitespace[1]))
+
+proc assertReassembles(dir: string) =
+  ## Every byte an out/X.asm assembles to is loaded by the run that wrote it
+  ## and equals the byte there. Bytes the .asm leaves out, like memory the
+  ## tracer never reached, aren't checked.
+  let output = dir / "out"
+  for (asmName, lines) in runImages(dir):
+    let asmFile = output / asmName
+    if not fileExists(asmFile):
+      continue
+    let memory = loadedMemory(dir, lines)
+    let prgName = lines[0].splitWhitespace[1]
     var segments: seq[Segment]
     try:
       segments = assemble(readFile(asmFile), proc (fileName: string): Option[seq[byte]] =
@@ -113,13 +162,12 @@ proc assertReassembles(dir: string) =
     for segment in segments:
       for i in 0 ..< segment.data.len:
         let address = segment.loadAddress + i
-        let offset = 2 + address - load
         let value = toLowerAscii(toHex(int(segment.data[i]), 2))
-        if offset < 2 or offset >= prg.len:
+        if address > 0xffff or memory[address] == -1:
           differences.add "$" & toLowerAscii(toHex(address, 4)) & ": " & value & ", outside " & prgName
-        elif prg[offset] != segment.data[i]:
+        elif memory[address] != int(segment.data[i]):
           differences.add "$" & toLowerAscii(toHex(address, 4)) & ": " & value & ", should be " &
-              toLowerAscii(toHex(int(prg[offset]), 2))
+              toLowerAscii(toHex(memory[address], 2))
     if differences.len > 0:
       raise newException(SnippetTestFailure, extractFilename(asmFile) & " doesn't reassemble to " & prgName & ":\n" &
           differences[0 ..< min(10, differences.len)].join("\n") &
@@ -172,15 +220,20 @@ suite "large snippets":
 
 proc runInit(parts: seq[string]): seq[string] =
   if parts.len != 1:
-    raise newException(SnippetTestFailure, "input: one .vsf or .prg path in tests/resources")
-  @[skeleton(resources / parts[0].strip).join("\n") & "\n"]
+    raise newException(SnippetTestFailure, "input: a .vsf, .prg or .bin path in tests/resources, then its options")
+  let input = parts[0].strip.splitWhitespace
+  var options = input[1 .. ^1]
+  try:
+    @[skeleton(resources / input[0], takeImage(input[0], options)).join("\n") & "\n"]
+  except ArgumentError as e:
+    @[e.msg & "\n"]
 
 proc runLook(flag: string): TestCase =
   ## Runs a tool that looks at an input file, on the file the snippet names
   ## in tests/resources and the arguments after it.
   result = proc (parts: seq[string]): seq[string] =
     if parts.len != 1:
-      raise newException(SnippetTestFailure, "input: a .vsf or .prg path in tests/resources, then the arguments")
+      raise newException(SnippetTestFailure, "input: a .vsf, .prg or .bin path in tests/resources, then the arguments")
     let input = parts[0].strip.splitWhitespace
     try:
       @[look(flag, resources / input[0], input[1 .. ^1]).join("\n") & "\n"]

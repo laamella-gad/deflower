@@ -1,0 +1,29 @@
+>>> load, at, from and size are only keywords on a deflower or load line:
+elsewhere they are labels (issue 0083). <<<
+*=$c000
+		jsr $ffd5
+		rts
+===
+deflower test.prg
+$c000 code at
+$c003 from
+$ffd5 banked load
+^^^
+Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 4 bytes emitted, 0 differ, 0 virtual, 0 gaps
+~~~
+; called by: at
+load = $ffd5
+
+*=$c000
+
+at:
+		jsr load
+from:
+		rts 
+~~~
+--- test.map
+$c000-$c003 code at
+$c003-$c004 code from
+vvv

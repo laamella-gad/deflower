@@ -1,8 +1,8 @@
 ## The tools that look at an input file without a .flo file: `--dump`
 ## (Dumper), `--find` (Finder) and `--strings` (TextFinder).
 
-import std/[algorithm, sets, strutils, unicode]
-import printing, loaders
+import std/[algorithm, os, sets, strutils, unicode]
+import printing, loaders, subject
 
 # Dumper: hex-dumps a memory range of a .vsf or .prg file (issue 0097): 16
 # bytes a line, from the start of the range, then the bytes as PETSCII and
@@ -96,9 +96,9 @@ proc screenCodeCharacter*(value: int): Rune =
 proc orDot(character: Rune): string =
   if character == noCharacter: "." else: $character
 
-proc dump*(file, rangeText: string): seq[string] =
+proc dump*(file: string, image: ImageFile, rangeText: string): seq[string] =
   let (start, finish) = range(rangeText)
-  let memory = readMemoryImage(file)
+  let memory = readMemoryImage(file, image)
   var line = start
   while line < finish:
     var hex = asHexWord(line)[1 .. ^1] & ":"
@@ -198,10 +198,10 @@ proc splitTables(memory: seq[int], bounds: (int, int), address: int): seq[string
     if highs.len > 0:
       result.add asHexWord(lo) & " lo/hi  high byte at " & highs.join(", ")
 
-proc find*(file: string, pattern: seq[string], rangeText: string): seq[string] =
+proc find*(file: string, image: ImageFile, pattern: seq[string], rangeText: string): seq[string] =
   ## `rangeText` is "" for all of memory.
   let bounds = if rangeText.len == 0: (0, 0x10000) else: range(rangeText)
-  let memory = readMemoryImage(file)
+  let memory = readMemoryImage(file, image)
   if pattern.len == 1 and isAddress(pattern[0]):
     let address = findNumber(pattern[0])
     if address > 0xffff:
@@ -302,12 +302,12 @@ proc findText(memory: seq[int], bounds: (int, int), minimum: int, kind: string, 
     else:
       inc at
 
-proc strings*(file, rangeText: string, minimum: int): seq[string] =
+proc strings*(file: string, image: ImageFile, rangeText: string, minimum: int): seq[string] =
   ## `rangeText` is "" for all of memory.
   if minimum < 1:
     raise newException(ArgumentError, "Not a minimum length: " & $minimum)
   let bounds = if rangeText.len == 0: (0, 0x10000) else: range(rangeText)
-  let memory = readMemoryImage(file)
+  let memory = readMemoryImage(file, image)
   findText(memory, bounds, minimum, "ascii", petsciiCharacter, result)
   findText(memory, bounds, minimum, "screencode", screenCodeCharacter, result)
   result.sort()
@@ -323,6 +323,23 @@ proc takeOption(arguments: var seq[string], keyword: string): string =
   result = arguments[size - 1]
   arguments.setLen(size - 2)
 
+proc takeImage*(file: string, arguments: var seq[string]): ImageFile =
+  ## The file with the "at", "from" and "size" options that come first in
+  ## the arguments, as on a .flo file's deflower line (issue 0117); removes
+  ## them from the arguments.
+  result = imageFile(extractFilename(file))
+  while arguments.len >= 2 and arguments[0] in ["at", "from", "size"]:
+    var value: int
+    try:
+      value = number(arguments[1])
+    except ValueError:
+      raise newException(ArgumentError, "Not a number for " & arguments[0] & ": " & arguments[1])
+    case arguments[0]
+    of "at": result.address = value
+    of "from": result.offset = value
+    else: result.size = value
+    arguments = arguments[2 .. ^1]
+
 proc minimumLength(text: string): int =
   try:
     number(text)
@@ -334,18 +351,19 @@ proc look*(flag, file: string, arguments: seq[string]): seq[string] =
   ## `--find` or `--strings`, with the arguments after the file. Bad
   ## arguments raise an ArgumentError.
   var rest = arguments
+  let image = takeImage(file, rest)
   case flag
   of "--dump":
     if rest.len == 1:
-      return dump(file, rest[0])
+      return dump(file, image, rest[0])
   of "--find":
     let range = takeOption(rest, "in")
     if rest.len > 0:
-      return find(file, rest, range)
+      return find(file, image, rest, range)
   of "--strings":
     let minimum = takeOption(rest, "min")
     if rest.len <= 1:
-      return strings(file, if rest.len == 0: "" else: rest[0],
+      return strings(file, image, if rest.len == 0: "" else: rest[0],
           if minimum.len == 0: minCharacters else: minimumLength(minimum))
   else:
     discard

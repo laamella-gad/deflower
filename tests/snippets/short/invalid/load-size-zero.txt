@@ -1,0 +1,14 @@
+>>> A size of 0 loads nothing (issue 0117). <<<
+
+===
+deflower main.bin at $c000 size 0
+===
+; file: main.bin
+*=$0000
+		rts
+^^^
+Failed to parse test.flo:
+line 1: size 0 loads nothing
+~~~
+~~~
+vvv

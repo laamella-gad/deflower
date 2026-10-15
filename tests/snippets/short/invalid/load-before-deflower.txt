@@ -1,0 +1,10 @@
+>>> A load line comes after a deflower line (issue 0083). <<<
+
+===
+load part.prg
+deflower test.prg
+^^^
+Start the file with a 'deflower <file>' line.
+~~~
+~~~
+vvv
