@@ -1,7 +1,6 @@
 ---
 title: mpu6502's assembler recurses forever on a define that refers to itself
-status: open
-priority: low
+status: rejected
 labels: bug
 ---
 
@@ -20,3 +19,7 @@ Deflower never writes a define like that: all its defines are numbers, `label = 
 Fix: track the defines being evaluated, and on a cycle give `line N: b is defined in terms of itself` (a `SourceException` in Java, a `SourceError` in Nim). Fix it in both versions, the Java mpu6502 (`~/IdeaProjects/Mpu6502`) and the Nim one in `mpu6502/`, with the same message, so they stay the same. Deflower itself uses the Nim one only, since [0059](0059-convert-to-nim.md).
 
 Done when assembling a self-referential define gives that error instead of running out of stack in both versions, with a test in Java's `SourceParserTest` and in `mpu6502/tests/test_source_parser.nim`.
+
+## Closing note
+
+Rejected: not worth the extra code. Deflower only writes defines that are numbers, so it can't hit this, and hand-written source that loops on itself is rare enough to live with the stack overflow.
