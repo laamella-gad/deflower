@@ -15,8 +15,8 @@ proc generatedFiles(dir: string): seq[string] =
 
 suite "flo parser":
   test "the committed parser matches the grammar":
-    let lindeboom = getEnv("LINDEBOOM_SRC", floDir / ".." / ".." / ".." / ".." / "nim_parser_generator")
-    if not fileExists(lindeboom / "src" / "nim_parser_generator.nim"):
+    let lindeboom = getEnv("LINDEBOOM_SRC", floDir / ".." / ".." / ".." / ".." / "lindeboom")
+    if not fileExists(lindeboom / "src" / "lindeboom.nim"):
       skip()
     else:
       let work = getTempDir() / "deflower_flo_parser_" & $getCurrentProcessId()
@@ -24,7 +24,7 @@ suite "flo parser":
       defer: removeDir(work)
       let exe = work / "lindeboom"
       let build = execCmdEx("nim c -d:release --hints:off --nimcache:" & quoteShell(work / "cache") &
-          " -o:" & quoteShell(exe) & " " & quoteShell(lindeboom / "src" / "nim_parser_generator.nim"))
+          " -o:" & quoteShell(exe) & " " & quoteShell(lindeboom / "src" / "lindeboom.nim"))
       check build.exitCode == 0
       let generate = execCmdEx(quoteShell(exe) & " gen --standalone -o " & quoteShell(work / "flo") & " " &
           quoteShell(floDir / "flo.ldb"))

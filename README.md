@@ -9,7 +9,7 @@ Deflower is written in [Nim](https://nim-lang.org/) 2.2 and needs nothing else.
 - `nimble build` writes the executable `bin/deflower`.
 - The `./deflower` script runs it from anywhere, and rebuilds it first when it is missing or a source is newer.
 - `nimble test` runs the tests.
-- `nimble flo` regenerates the `.flo` parser from its grammar, `src/deflower/flo/flo.ldb`, with [lindeboom](../nim_parser_generator) (its sources in `LINDEBOOM_SRC`, else next to this project). The generated parser and lindeboom's runtime are committed in `src/deflower/flo/`, so building needs no lindeboom; a test fails when they are out of date with the grammar.
+- `nimble flo` regenerates the `.flo` parser from its grammar, `src/deflower/flo/flo.ldb`, with [lindeboom](../lindeboom) (its sources in `LINDEBOOM_SRC`, else next to this project). The generated parser and lindeboom's runtime are committed in `src/deflower/flo/`, so building needs no lindeboom; a test fails when they are out of date with the grammar.
 
 ## Getting started
 

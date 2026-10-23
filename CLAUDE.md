@@ -2,7 +2,7 @@
 
 Never commit automatically.
 
-Always use snipsert to check generated output.
+Always check generated output with the snippet tests (`snippets_test`).
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -19,7 +19,7 @@ Suggested way to use it: `./deflower --watch <file.flo>` re-runs the disassemble
 Nim project (Nim 2.2), one nimble package at the root, `deflower.nimble`, with no dependencies. `mpu6502/` (the 6502 opcode table and the 64tass-style assembler the verifier and the tests use) and `snippets_test/` (the snippet test runner on top of `std/unittest`, `runSnippetTests`) are nimble packages of their own, used from source through the paths in `config.nims`; they import nothing of deflower's.
 
 - Build: `nimble build`, which writes `bin/deflower` (ignored by git).
-- Regenerate the `.flo` parser: `nimble flo` builds lindeboom (the user's parser generator, sources in `LINDEBOOM_SRC`, default `../nim_parser_generator`) into `bin/lindeboom` and generates `src/deflower/flo/flo_lexer.nim`, `flo_parser.nim` and `lindeboom_runtime/` from `src/deflower/flo/flo.ldb` (`gen --standalone`). Never edit the generated files. `tests/test_flo_parser.nim` fails when they differ from a fresh generation (skipped without lindeboom's sources) or when `README.md`'s copy of the grammar differs.
+- Regenerate the `.flo` parser: `nimble flo` builds lindeboom (the user's parser generator, sources in `LINDEBOOM_SRC`, default `../lindeboom`) into `bin/lindeboom` and generates `src/deflower/flo/flo_lexer.nim`, `flo_parser.nim` and `lindeboom_runtime/` from `src/deflower/flo/flo.ldb` (`gen --standalone`). Never edit the generated files. `tests/test_flo_parser.nim` fails when they differ from a fresh generation (skipped without lindeboom's sources) or when `README.md`'s copy of the grammar differs.
 - Run all tests: `nimble test`. The packages in `mpu6502/` and `snippets_test/` have their own: `nimble test` there.
 - Run one snippet: `nim c -r tests/test_snippets.nim <file name>`, e.g. `terminator.txt`.
 - Run the tool: `./deflower <file.flo>` from anywhere. The script rebuilds `bin/deflower` (`nim c -d:release`) when it is missing or a source is newer, then runs it. All paths are file system paths, and output goes to `out/` next to the `.flo` file (ignored by git). `runner.deflower(path, verify)` runs a `.flo` file from code, and `deflower.command(args)` the whole command line, returning the exit code.
