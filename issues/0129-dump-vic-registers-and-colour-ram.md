@@ -1,7 +1,6 @@
 ---
 title: Dump the VIC registers and the colour RAM from a snapshot
-status: open
-priority: low
+status: done
 labels: enhancement
 ---
 
@@ -20,3 +19,7 @@ Done when:
 - The command line can print the 64 registers (hex, with names such as `$d018 memory pointers`) and the colour RAM (16 a line, nibbles) of a snapshot; a file without the module, or with another version, gives an error.
 - `README.md` and `src/deflower/help.txt` describe it.
 - Dump snippets in `tests/snippets/dump/` cover the registers and the colour RAM, and an error one covers a `.prg`/`.bin` or a snapshot without the module.
+
+## Closing note
+
+Chose `--dump <file.vsf> vic` (the 64 registers, 16 a line) and `--dump <file.vsf> colour` (25 rows of 40 nibble digits). In the `VIC-II` module 1.3 the colour RAM is 1024 bytes at content offset 761 (checked on all snapshots in `tests/resources` and one more). Not done: register names, the registers or colours in `--init`'s comments, `.flo` use of the colour RAM and other chips; those can be new issues.

@@ -12,6 +12,8 @@ Usage:
       includes.
   deflower --dump <file> [<options>] <start>-<end>
       Hex dump, with PETSCII and screen codes.
+  deflower --dump <file.vsf> vic|colour
+      The VIC registers or the colour RAM of a snapshot.
   deflower --find <file> [<options>] <address or bytes> [in <start>-<end>]
       Search for an address (as word, rta or lo/hi tables) or a byte sequence.
   deflower --strings <file> [<options>] [<start>-<end>] [min <n>]

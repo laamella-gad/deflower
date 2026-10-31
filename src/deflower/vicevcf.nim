@@ -33,6 +33,8 @@ type
     of mkVicII:
       registers*: array[0x40, int]
         ## The registers $d000-$d03f, as last written.
+      colourRam*: seq[byte]
+        ## The 1024 bytes of colour RAM ($d800-$dbff), low nibbles.
     of mkCia:
       portA*, portB*, directionA*, directionB*: int
       interruptMask*: int
@@ -109,6 +111,9 @@ proc handle(name: string, version: Version, content: seq[byte]): Module =
     var reader = Reader(bytes: content, position: 1)
     for i in 0 ..< 0x40:
       result.registers[i] = reader.getByte()
+    const colourRamOffset = 761
+    if content.len >= colourRamOffset + 1024:
+      result.colourRam = content[colourRamOffset ..< colourRamOffset + 1024]
   elif name in ["CIA1", "CIA2"] and version.major == 2:
     # The ports, their data directions, the timers (4 bytes), the time of
     # day (4 bytes), the serial data register and then the interrupt mask.

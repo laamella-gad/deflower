@@ -2,7 +2,8 @@
 ## (Dumper), `--find` (Finder) and `--strings` (TextFinder).
 
 import std/[algorithm, os, sets, strutils, unicode]
-import printing, loaders, subject
+import std/options
+import printing, loaders, subject, vicevcf
 
 # Dumper: hex-dumps a memory range of a .vsf or .prg file (issue 0097): 16
 # bytes a line, from the start of the range, then the bytes as PETSCII and
@@ -119,6 +120,33 @@ proc dump*(file: string, image: ImageFile, rangeText: string): seq[string] =
         screenCode.add orDot(screenCodeCharacter(value and 0x7f))
     result.add (hex & "  " & petscii & "  " & screenCode).strip(leading = false)
     line += bytesPerLine
+
+proc vicModule(file: string): Module =
+  let module = readSnapshot(file).module("VIC-II", mkVicII)
+  if module.isNone:
+    raise newException(ArgumentError, file & " has no VIC-II module, or one of another version than 1.3")
+  module.get
+
+proc dumpRegisters*(file: string): seq[string] =
+  ## The 64 VIC registers of a snapshot, 16 a line.
+  let vic = vicModule(file)
+  for line in 0 ..< 4:
+    var text = asHexWord(0xd000 + line * 16)[1 .. ^1] & ":"
+    for i in 0 ..< 16:
+      text.add " " & hexDigits(vic.registers[line * 16 + i], 2)
+    result.add text
+
+proc dumpColourRam*(file: string): seq[string] =
+  ## The colour RAM of a snapshot: a line of 40 digits (the low nibbles) for
+  ## each screen row.
+  let vic = vicModule(file)
+  if vic.colourRam.len == 0:
+    raise newException(ArgumentError, file & " has no colour RAM in its VIC-II module")
+  for row in 0 ..< 25:
+    var text = asHexWord(0xd800 + row * 40)[1 .. ^1] & ": "
+    for i in 0 ..< 40:
+      text.add hexDigits(int(vic.colourRam[row * 40 + i]) and 0x0f, 1)
+    result.add text
 
 # Finder: searches the memory of a .vsf or .prg file (issue 0099). A pattern
 # of one number above $ff, or of one hex number with 3 or 4 digits, is an
@@ -355,6 +383,10 @@ proc look*(flag, file: string, arguments: seq[string]): seq[string] =
   case flag
   of "--dump":
     if rest.len == 1:
+      if rest[0] == "vic" and image.name.isSnapshot:
+        return dumpRegisters(file)
+      if rest[0] == "colour" and image.name.isSnapshot:
+        return dumpColourRam(file)
       return dump(file, image, rest[0])
   of "--find":
     let range = takeOption(rest, "in")

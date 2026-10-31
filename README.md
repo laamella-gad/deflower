@@ -25,6 +25,7 @@ A disassembly reassembles to the original bytes when it verifies with 0 differ, 
 deflower [--verify] [--watch] <file.flo>
 deflower --init <file> [at <address>] [from <offset>] [size <n>]
 deflower --dump <file> [<options>] <start>-<end>
+deflower --dump <file.vsf> vic|colour
 deflower --find <file> [<options>] <address or bytes> [in <start>-<end>]
 deflower --strings <file> [<options>] [<start>-<end>] [min <n>]
 deflower --help
@@ -79,6 +80,8 @@ Takes a `.vsf` VICE snapshot, a `.prg` or a `.bin` and writes a `.flo` skeleton 
 ### Looking at the bytes: `--dump`
 
 Prints the range as hex, 16 bytes a line from its start, then as PETSCII and as screen codes. Both text columns read the bytes with the lower/upper case character set and show every character that has a printable counterpart (letters, digits, punctuation, `£↑←`, reversed or not), graphics and control codes as `.`. Memory the file doesn't load shows as `..`. The range can be pasted from a verify `gap` line.
+
+For a snapshot, `--dump <file.vsf> vic` prints the 64 VIC registers (`$d000-$d03f`, as last written), 16 a line, and `--dump <file.vsf> colour` the colour RAM (`$d800-$dbe7`): a line of 40 hex digits, the colour of each character, for each of the 25 screen rows. Both read the snapshot's `VIC-II` module (x64sc, VICE 3.x, version 1.3) and fail for any other.
 
 ### Searching: `--find`
 
