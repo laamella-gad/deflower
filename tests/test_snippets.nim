@@ -1,7 +1,7 @@
 ## Runs the snippet files in `tests/snippets`. CLAUDE.md describes the
 ## kinds of snippets and their format.
 
-import std/[algorithm, options, os, sequtils, strutils, sugar, tempfiles, unittest]
+import std/[algorithm, options, os, sequtils, strutils, sugar, tables, tempfiles, unittest]
 import mpu6502, snippets_test
 import deflower/[initializer, look, printing, runner]
 
@@ -94,33 +94,47 @@ proc runDeflower(flowerFile: string): seq[string] =
 proc loadedMemory(dir: string, lines: seq[string]): seq[int] =
   ## The 64K that a deflower line and its load lines load, as values 0-255
   ## and -1 for memory they don't load: each .prg at its own address or the
-  ## at one, each .bin at the at one, from its from offset and size bytes.
-  ## Read here without Deflower's loader, to check that too.
+  ## at one, each .bin at the at one; the part a place picks, sized by an
+  ## end or a type (byte[3]), a .prg's addresses or a .bin's offsets. Read
+  ## here without Deflower's loader, to check that too.
+  const typeSizes = {"byte": 1, "sbyte": 1, "ascii": 1, "screencode": 1, "word": 2, "sword": 2, "addr": 2,
+      "rta": 2, "long": 3, "slong": 3, "dword": 4, "sdword": 4}.toTable
   result = newSeq[int](0x10000)
   for i in 0 ..< result.len:
     result[i] = -1
+  proc value(text: string): int =
+    if text.startsWith("$"): parseHexInt(text[1 .. ^1]) else: parseInt(text)
   for line in lines:
-    let words = line.splitWhitespace
+    var words = line.splitWhitespace
     let bytes = readBytes(dir / words[1])
-    var options: seq[(string, int)]
-    for i in countup(2, words.len - 2, 2):
-      let value = words[i + 1]
-      options.add (words[i], if value.startsWith("$"): parseHexInt(value[1 .. ^1]) else: parseInt(value))
-    var address = -1
-    var offset = 0
-    var size = -1
-    for (name, value) in options:
-      case name
-      of "at": address = value
-      of "from": offset = value
-      of "size": size = value
+    var first, last, address = -1
+    var i = 2
+    if i < words.len and words[i] != "at":
+      let parts = words[i].split('-')
+      first = value(parts[0])
+      if parts.len > 1:
+        last = value(parts[1])
+      inc i
+      if i < words.len and words[i] != "at":
+        let typed = words[i].split('[')
+        let count = if typed.len > 1: value(typed[1].strip(chars = {']'})) else: 1
+        last = first + count * typeSizes[typed[0]]
+        inc i
+    if i + 1 < words.len and words[i] == "at":
+      address = value(words[i + 1])
     var data: seq[byte]
     if words[1].endsWith(".prg"):
+      let load = int(bytes[0]) or int(bytes[1]) shl 8
+      let finish = load + bytes.len - 2
+      if first == -1:
+        (first, last) = (load, finish)
+      elif last == -1:
+        last = finish
+      data = bytes[2 + first - load ..< 2 + last - load]
       if address == -1:
-        address = int(bytes[0]) or int(bytes[1]) shl 8
-      data = bytes[2 .. ^1]
+        address = first
     else:
-      data = bytes[offset ..< (if size == -1: bytes.len else: offset + size)]
+      data = bytes[max(first, 0) ..< (if last == -1: bytes.len else: last)]
     for i in 0 ..< min(data.len, 0x10000 - address):
       result[address + i] = int(data[i])
 
@@ -219,8 +233,11 @@ proc runInit(parts: seq[string]): seq[string] =
     raise newException(SnippetTestFailure, "input: a .vsf, .prg or .bin path in tests/resources, then its options")
   let input = parts[0].strip.splitWhitespace
   var options = input[1 .. ^1]
+  let c128 = options.len > 0 and options[^1] == "c128"
+  if c128:
+    options.setLen(options.len - 1)
   try:
-    @[skeleton(resources / input[0], takeImage(input[0], options)).join("\n") & "\n"]
+    @[skeleton(resources / input[0], takeImage(input[0], options, alone = true), c128).join("\n") & "\n"]
   except ArgumentError as e:
     @[e.msg & "\n"]
 

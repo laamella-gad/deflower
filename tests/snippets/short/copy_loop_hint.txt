@@ -1,0 +1,101 @@
+>>> Issue 0137: a loop that copies a block of the image to memory the image
+doesn't load, where code is called, gives a hint with the load line that puts
+the block there: one counted down with dey/bpl, one up to a zero byte. A copy
+to memory nothing calls (the screen) gives none. <<<
+
+*=$c000
+
+entry:
+		ldy #$03
+down:
+		lda block_a, y
+		sta $0111, y
+		dey
+		bpl down
+		ldx #$00
+up:
+		lda block_b, x
+		beq done
+		sta $0270, x
+		inx
+		bne up
+done:
+		ldy #$01
+screen:
+		lda block_a, y
+		sta $0400, y
+		dey
+		bpl screen
+		jsr $0111
+		jsr $0270
+		rts
+block_a:
+		inc $d020
+		rts
+block_b:
+		inc $d021
+		rts
+		.byte	$00
+===
+deflower test.prg
+$c000 code entry
+$c02a-$c02e byte block_a
+$c02e-$c033 byte block_b
+^^^
+warning: $c023: jsr $0111 (l0111) goes into memory the image doesn't load
+warning: $c026: jsr $0270 (l0270) goes into memory the image doesn't load
+hint: $c002 copies $c02a-$c02e to $0111-$0115: load test.prg $c02a-$c02e at $0111
+hint: $c00d copies $c02e-$c032 to $0270-$0274: load test.prg $c02e-$c032 at $0270
+Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 51 bytes emitted, 0 differ, 0 virtual, 0 gaps
+~~~
+; called by: entry
+; written by: entry
+l0111 = $0111
+; called by: entry
+; written by: entry
+l0270 = $0270
+*=$c000
+
+entry:
+		ldy #$03
+; jumped to by: entry
+lC002:
+		lda block_a, y
+		sta l0111, y
+		dey 
+		bpl lC002
+		ldx #$00
+; jumped to by: entry
+lC00D:
+		lda block_b, x
+		beq lC018
+		sta l0270, x
+		inx 
+		bne lC00D
+; jumped to by: entry
+lC018:
+		ldy #$01
+; jumped to by: entry
+lC01A:
+		lda block_a, y
+		sta $0400, y
+		dey 
+		bpl lC01A
+		jsr l0111
+		jsr l0270
+		rts 
+
+; read by: entry
+block_a:
+		.byte	$ee, $20, $d0, $60
+; read by: entry
+block_b:
+		.byte	$ee, $21, $d0, $60, $00
+~~~
+--- test.map
+$c000-$c02a code entry
+$c02a-$c02e byte[4] block_a
+$c02e-$c033 byte[5] block_b
+vvv

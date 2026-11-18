@@ -1,0 +1,5 @@
+>>> A C64 snapshot has no RAM banks (issue 0132). <<<
+1nvader_snap/1nvader_snap.vsf $10000-$20000
+^^^
+bank 1: a C64 snapshot has one 64K bank
+vvv

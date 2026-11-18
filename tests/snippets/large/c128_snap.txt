@@ -1,0 +1,24 @@
+>>> An x128 snapshot in a run (issue 0132): bank 0, as --init sets it up. <<<
+c128_snap/c128_snap.flo
+^^^
+Writing out/c128_snap.asm
+Writing out/c128_snap.map
+Verify out/c128_snap.asm: 0 bytes emitted, 0 differ, 64893 virtual, 1 gap
+gap $1c05-$1e88
+~~~
+
+.virtual $1300
+untouched_1300:
+		.fill	2309
+.endv
+
+.virtual $1e88
+untouched_1e88:
+		.fill	8568
+.endv
+~~~
+--- c128_snap.map
+$1300-$1c05 virtual byte[2309] untouched_1300
+$1c05-$1e88 gap
+$1e88-$4000 virtual byte[8568] untouched_1e88
+vvv

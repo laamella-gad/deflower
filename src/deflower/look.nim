@@ -3,7 +3,7 @@
 
 import std/[algorithm, os, sets, strutils, unicode]
 import std/options
-import printing, loaders, subject, vicevcf
+import printing, loaders, subject, vicevcf, flo_reader
 
 # Dumper: hex-dumps a memory range of a .vsf or .prg file (issue 0097): 16
 # bytes a line, from the start of the range, then the bytes as PETSCII and
@@ -351,22 +351,42 @@ proc takeOption(arguments: var seq[string], keyword: string): string =
   result = arguments[size - 1]
   arguments.setLen(size - 2)
 
-proc takeImage*(file: string, arguments: var seq[string]): ImageFile =
-  ## The file with the "at", "from" and "size" options that come first in
-  ## the arguments, as on a .flo file's deflower line (issue 0117); removes
-  ## them from the arguments.
-  result = imageFile(extractFilename(file))
-  while arguments.len >= 2 and arguments[0] in ["at", "from", "size"]:
-    var value: int
-    try:
-      value = number(arguments[1])
-    except ValueError:
-      raise newException(ArgumentError, "Not a number for " & arguments[0] & ": " & arguments[1])
-    case arguments[0]
-    of "at": result.address = value
-    of "from": result.offset = value
-    else: result.size = value
-    arguments = arguments[2 .. ^1]
+const typeNames = ["screencode", "ascii", "byte", "word", "long", "dword", "addr", "rta", "sbyte", "sword", "slong",
+    "sdword", "code"]
+
+proc isType(word: string): bool =
+  word.split('[')[0] in typeNames
+
+proc isPlace(word: string): bool =
+  word.len > 0 and (word[0] == '$' or word[0] in Digits)
+
+proc inOtherBank(word: string): bool =
+  try:
+    number(word.split('-')[0]) > 0xffff
+  except ValueError:
+    false
+
+proc takeImage*(file: string, arguments: var seq[string], alone = false): ImageFile =
+  ## The file with the options that come first in the arguments, as on a
+  ## .flo file's deflower line (issues 0117, 0133): a part, a type sizing
+  ## it, "at". Removes them from the arguments. A place is the part when a
+  ## type or "at" follows it, when it is in another bank (above $ffff), or
+  ## with `alone` when nothing else may follow; else it is the tool's own
+  ## range.
+  var words = @[extractFilename(file)]
+  var rest = arguments
+  if rest.len >= 1 and rest[0].isPlace and ((rest.len == 1 and alone) or rest[0].inOtherBank or
+      (rest.len >= 2 and (rest[1] == "at" or rest[1].isType))):
+    words.add rest[0]
+    rest = rest[1 .. ^1]
+    if rest.len > 0 and rest[0].isType:
+      words.add rest[0]
+      rest = rest[1 .. ^1]
+  if rest.len >= 2 and rest[0] == "at":
+    words.add rest[0 .. 1]
+    rest = rest[2 .. ^1]
+  result = readImageText(words.join(" "))
+  arguments = rest
 
 proc minimumLength(text: string): int =
   try:

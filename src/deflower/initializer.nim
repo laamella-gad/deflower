@@ -13,6 +13,13 @@ const
     ## The KERNAL vectors at $0314-$0333, in order, and their defaults.
   vectorDefaults = [0xea31, 0xfe66, 0xfe47, 0xf34a, 0xf291, 0xf20e, 0xf250, 0xf333,
       0xf157, 0xf1ca, 0xf6ed, 0xf13e, 0xf32f, 0xfe66, 0xf4a5, 0xf5ed]
+  c128VectorDefaults = [0xfa65, 0xb003, 0xfa40, 0xefbd, 0xf188, 0xf106, 0xf14c, 0xf226,
+      0xef06, 0xef79, 0xf66e, 0xeeeb, 0xf222, 0xb006, 0xf26c, 0xf54e]
+    ## The same on the C128, as its KERNAL's table at $e073 has them.
+  c128Chrget = 0x380
+  c128ChrgetDefault = [0xe6, 0x3d, 0xd0, 0x02, 0xe6, 0x3e, 0x8d, 0x01, 0xff, 0xa0, 0x00, 0xb1, 0x3d,
+      0x8d, 0x03, 0xff, 0xc9, 0x3a, 0xb0, 0x0a, 0xc9, 0x20, 0xf0, 0xe8, 0x38, 0xe9, 0x30, 0x38, 0xe9, 0xd0, 0x60]
+    ## CHRGET as the C128's KERNAL copies it to $0380, reading bank 0.
   chrget = 0x73
     ## CHRGET as the KERNAL copies it to $73; the bytes at $7a/$7b are its
     ## text pointer.
@@ -40,6 +47,10 @@ type Initializer = object
     ## The ranges in rangeLines that hold the power-on pattern or zeroes.
   memory: seq[int]
   basic, kernal, io, characterRom: bool
+  c128: bool
+    ## A C128 program or snapshot (issue 0132): `basic` is then the low
+    ## BASIC ROM ($4000-$7fff) and `basicHigh` the high one ($8000-$bfff).
+  basicHigh: bool
 
 proc h(value, digits: int): string =
   ## `value` as Java's "%0<digits>x" prints it: a negative one as 32 bits.
@@ -53,6 +64,18 @@ proc word(s: Initializer, address: int): int =
   s.memory[address] or s.memory[address + 1] shl 8
 
 proc isRam(s: Initializer, address: int): bool =
+  if s.c128:
+    if address >= 0xff00 and address < 0xff05:
+      return false
+    if address >= 0x4000 and address < 0x8000:
+      return not s.basic
+    if address >= 0x8000 and address < 0xc000:
+      return not s.basicHigh
+    if address >= 0xd000 and address < 0xe000:
+      return not s.io and not s.kernal
+    if address >= 0xc000:
+      return not s.kernal
+    return true
   if address >= 0xa000 and address < 0xc000:
     return not s.basic
   if address >= 0xd000 and address < 0xe000:
@@ -124,6 +147,13 @@ proc readProgram(s: var Initializer, file: string, image: ImageFile) =
   s.lines.add "; " & image.name & ": loads at $" & h(load, 4) & "-$" & h(finish, 4)
   if finish > 0x10000:
     s.lines.add "; the load runs past $ffff"
+  if s.c128 and finish > 0x4000 and load < 0xc000:
+    # The program runs with BASIC banked out (MMU configuration $0e).
+    s.basic = false
+    s.basicHigh = false
+    s.lines.add "; loads over the BASIC ROM: BASIC banked out"
+  if load == 0x1c01 and not s.c128:
+    s.lines.add "; $1c01 is where C128 BASIC programs start: --init with c128 for a C128 program"
   let stub = s.basicStub(load)
   if stub.isSome:
     s.lines.add "; BASIC stub: SYS " & $stub.get[1]
@@ -143,17 +173,22 @@ proc stack(s: var Initializer, sp: int) =
   if sp <= 0xfc:
     s.lines.add "; top of stack as an interrupt's return address: $" & h(s.word(0x100 + sp + 2), 4)
 
-proc vectors(s: var Initializer) =
+proc vectorDefault(s: Initializer, i: int): int =
+  if s.c128: c128VectorDefaults[i] else: vectorDefaults[i]
+
+proc vectors(s: var Initializer, kernal = true) =
+  ## The KERNAL's RAM vectors, unless not `kernal`, and the hardware vectors
+  ## while the KERNAL is banked out.
   var changed: seq[string]
-  for i in 0 ..< vectorNames.len:
+  for i in 0 ..< (if kernal: vectorNames.len else: 0):
     let vector = 0x314 + 2 * i
     let target = s.word(vector)
     let line = vectorNames[i].toUpperAscii & " $" & h(vector, 4) & " -> $" & h(target, 4) & " (" & s.where(target) & ")"
     if i < 3:
       s.lines.add "; " & line
-    elif target != vectorDefaults[i]:
+    elif target != s.vectorDefault(i):
       changed.add line
-    if i < 3 or target != vectorDefaults[i]:
+    if i < 3 or target != s.vectorDefault(i):
       s.codeEntry(target, if i < 3: vectorNames[i] else: vectorNames[i] & "_handler")
   if changed.len > 0:
     s.lines.add "; changed KERNAL vectors: " & changed.join(", ")
@@ -228,8 +263,9 @@ proc interrupts(s: var Initializer, file: ViceVcfFile, cpu: Option[Module]) =
       (if unknown.len == 0: "" else: ", unknown for " & unknown)
 
 proc basicProgram(s: var Initializer) =
-  let start = s.word(0x2b)
-  let finish = s.word(0x2d)
+  # C128: the start at $2d, the end at $1210 (BASIC 7.0's text top).
+  let start = s.word(if s.c128: 0x2d else: 0x2b)
+  let finish = s.word(if s.c128: 0x1210 else: 0x2d)
   var line = "; BASIC program $" & h(start, 4) & "-$" & h(finish, 4)
   let stub = s.basicStub(start)
   if stub.isSome:
@@ -237,18 +273,20 @@ proc basicProgram(s: var Initializer) =
   s.lines.add line
 
 proc chrgetPatch(s: var Initializer) =
+  let address = if s.c128: c128Chrget else: chrget
+  let default = if s.c128: @c128ChrgetDefault else: @chrgetDefault
   var patched = false
-  for i in 0 ..< chrgetDefault.len:
-    if chrgetDefault[i] >= 0 and s.memory[chrget + i] != chrgetDefault[i]:
+  for i in 0 ..< default.len:
+    if default[i] >= 0 and s.memory[address + i] != default[i]:
       patched = true
   if not patched:
     return
-  if s.memory[chrget] == 0x4c:
-    let target = s.word(chrget + 1)
-    s.lines.add "; CHRGET at $" & h(chrget, 4) & " patched: jmp $" & h(target, 4)
+  if s.memory[address] == 0x4c:
+    let target = s.word(address + 1)
+    s.lines.add "; CHRGET at $" & h(address, 4) & " patched: jmp $" & h(target, 4)
     s.codeEntry(target, "chrget_patch")
   else:
-    s.lines.add "; CHRGET at $" & h(chrget, 4) & " differs from the KERNAL's"
+    s.lines.add "; CHRGET at $" & h(address, 4) & " differs from the KERNAL's"
 
 proc exactPattern(s: Initializer, address: int): bool =
   s.memory[address] == 0 or s.memory[address] == 0xff
@@ -351,6 +389,20 @@ proc powerOnPattern(s: var Initializer) =
   ## area while I/O is banked in and the hardware vectors while the KERNAL
   ## is banked out. Ranges end where a visible ROM starts, so they don't
   ## cover its labels.
+  if s.c128:
+    # Below $1300 is the system's, and $ff00-$ff04 the MMU's.
+    var start = -1
+    for (first, finish) in [(0x1300, 0x4000), (0x4000, 0x8000), (0x8000, 0xc000), (0xc000, 0xd000),
+        (0xd000, 0xe000), (0xe000, 0xff00), (0xff00, 0xff05), (0xff05, 0xfffa), (0xfffa, 0x10000)]:
+      let ram = s.isRam(first) and first != 0xfffa
+      if ram and start == -1:
+        start = first
+      elif not ram and start != -1:
+        s.powerOnPattern(start, first)
+        start = -1
+    if start != -1:
+      s.powerOnPattern(start, 0xfffa)
+    return
   var bounds = @[0x400]
   if s.basic:
     bounds.add [0xa000, 0xc000]
@@ -366,8 +418,74 @@ proc powerOnPattern(s: var Initializer) =
     if not (start == 0xd000 and (s.io or s.characterRom)) and start != 0xfffa:
       s.powerOnPattern(start, bounds[i + 1])
 
-proc readSnapshot(s: var Initializer, file, name: string) =
+proc cpuFacts(s: var Initializer, file: ViceVcfFile, cpu: Option[Module], pcSeen: bool) =
+  if cpu.isSome:
+    let c = cpu.get
+    s.lines.add "; CPU: PC $" & h(c.pc, 4) & " A $" & h(c.a, 2) & " X $" & h(c.x, 2) & " Y $" & h(c.y, 2) &
+        " SP $" & h(c.sp, 2) & " P $" & h(c.status, 2)
+    if not s.isRam(c.pc):
+      s.lines.add "; the PC is in ROM"
+    elif pcSeen:
+      s.codeEntry(c.pc, "snapshot_pc")
+    s.stack(c.sp)
+  else:
+    s.lines.add "; CPU state unknown: " & unread(file, "MAINCPU") & " isn't read"
+
+proc readC128Snapshot(s: var Initializer, file: ViceVcfFile, name: string, bank: int) =
+  ## An x128 snapshot (issue 0132): the bank as the CPU sees it, the MMU
+  ## configuration instead of the C64's $01.
+  s.c128 = true
+  let mmu = file.c128Memory
+  let ram = file.ram(bank)
+  s.memory = newSeq[int](0x10000)
+  for i in 0 ..< 0x10000:
+    s.memory[i] = int(ram[i])
+  let runBank = max(bank, 0)
+  s.lines.add "; " & name & ": VICE snapshot of a C128, RAM bank " & $runBank
+  let cr = mmu.mmu[0]
+  let cpuBank = (cr shr 6) and 1
+  var shared: seq[string]
+  for range in mmu.sharedRam:
+    shared.add "$" & h(range.a, 4) & "-$" & h(range.b + 1, 4)
+  let sharedText = if shared.len == 0: "none" else: shared.join(" and ")
+  if runBank == 0:
+    s.io = (cr and 1) == 0
+    s.basic = (cr and 2) == 0
+    s.basicHigh = (cr and 0xc) == 0
+    s.kernal = (cr and 0x30) == 0
+    s.lines.add "; MMU configuration $" & h(cr, 2) & ": RAM bank " & $cpuBank & ", BASIC low ROM " &
+        (if s.basic: "in" else: "out") & ", BASIC high ROM " & (if s.basicHigh: "in" else: "out") &
+        ", KERNAL " & (if s.kernal: "in" else: "out") & ", " & (if s.io: "I/O in" else: "I/O out")
+  else:
+    s.io = false
+    s.basic = false
+    s.basicHigh = false
+    s.kernal = false
+    s.lines.add "; MMU configuration $" & h(cr, 2) & ": the CPU is in RAM bank " & $cpuBank &
+        "; this bank is read as all RAM"
+  s.lines.add "; RAM shared by the banks (RAM configuration $" & h(mmu.mmu[6], 2) & "): " & sharedText &
+      ", from bank 0"
+  s.powerOnPattern()
+  let cpu = file.module("MAINCPU", mkMainCpu)
+  var pcShared = false
+  if cpu.isSome:
+    for range in mmu.sharedRam:
+      if cpu.get.pc in range:
+        pcShared = true
+  s.cpuFacts(file, cpu, cpuBank == runBank or pcShared)
+  # The RAM vectors are bank 0's, pointing into its ROMs.
+  s.vectors(kernal = runBank == 0)
+  s.video(file)
+  s.interrupts(file, cpu)
+  if runBank == 0:
+    s.basicProgram()
+    s.chrgetPatch()
+
+proc readSnapshot(s: var Initializer, file, name: string, bank: int) =
   let vcfFile = readSnapshot(file)
+  if vcfFile.isC128:
+    s.readC128Snapshot(vcfFile, name, bank)
+    return
   let c64Memory = vcfFile.memory
   s.memory = newSeq[int](0x10000)
   for i in 0 ..< 0x10000:
@@ -388,17 +506,7 @@ proc readSnapshot(s: var Initializer, file, name: string) =
       (if s.io: "I/O in" elif s.characterRom: "character ROM in" else: "I/O out")
   s.powerOnPattern()
 
-  if cpu.isSome:
-    let c = cpu.get
-    s.lines.add "; CPU: PC $" & h(c.pc, 4) & " A $" & h(c.a, 2) & " X $" & h(c.x, 2) & " Y $" & h(c.y, 2) &
-        " SP $" & h(c.sp, 2) & " P $" & h(c.status, 2)
-    if s.isRam(c.pc):
-      s.codeEntry(c.pc, "snapshot_pc")
-    else:
-      s.lines.add "; the PC is in ROM"
-    s.stack(c.sp)
-  else:
-    s.lines.add "; CPU state unknown: " & unread(vcfFile, "MAINCPU") & " isn't read"
+  s.cpuFacts(vcfFile, cpu, true)
 
   s.vectors()
   s.video(vcfFile)
@@ -409,27 +517,45 @@ proc readSnapshot(s: var Initializer, file, name: string) =
 proc text(image: ImageFile): string =
   ## The file with its options, as a deflower line takes them.
   result = image.name
+  if image.first != -1:
+    # A .bin's part is offsets, a .prg's and a .vsf's addresses.
+    let n = proc (value: int): string = (if image.name.endsWith(".bin"): hex(value) else: h(value, 4))
+    result.add " $" & n(image.first) & (if image.last == -1: "" else: "-$" & n(image.last))
   if image.address != -1:
     result.add " at $" & h(image.address, 4)
-  if image.offset != -1:
-    result.add " from $" & hex(image.offset)
-  if image.size != -1:
-    result.add " size $" & hex(image.size)
 
-proc skeleton*(file: string, image: ImageFile): seq[string] =
+proc c128Includes(s: Initializer): seq[string] =
+  if s.basic and s.basicHigh and s.kernal and s.io:
+    return @["include c128.flo"]
+  result.add "include c128_zeropage.flo"
+  if s.basic or s.basicHigh or s.kernal or s.io:
+    # Not for a bank 1 run: above the shared RAM, the system's memory is
+    # bank 0's.
+    result.add "include c128_system.flo"
+  if s.basic and s.basicHigh:
+    result.add "include c128_basic.flo"
+  if s.io:
+    result.add "include c128_io.flo"
+  if s.kernal:
+    result.add "include c128_kernal.flo"
+
+proc skeleton*(file: string, image: ImageFile, c128 = false): seq[string] =
   ## The skeleton for this file, loaded with the options of `image`, one
-  ## line per element.
-  var s = Initializer(basic: true, kernal: true, io: true)
+  ## line per element. `c128` for a C128 program (issue 0132); a snapshot
+  ## says which machine it is of.
+  var s = Initializer(basic: true, kernal: true, io: true, basicHigh: true, c128: c128)
   discard readMemoryImage(file, image)
   if image.name.isSnapshot:
-    s.readSnapshot(file, image.name)
+    s.readSnapshot(file, image.name, image.bank)
   else:
     s.readProgram(file, image)
   s.lines.add "deflower " & image.text
   for (address, label) in s.codeEntries:
     s.lines.add "$" & h(address, 4) & " code " & label
   s.lines.add s.rangeLines
-  if s.basic and s.kernal and s.io:
+  if s.c128:
+    s.lines.add s.c128Includes
+  elif s.basic and s.kernal and s.io:
     s.lines.add "include c64.flo"
   else:
     s.lines.add "include c64_zeropage.flo"
@@ -446,7 +572,7 @@ proc skeleton*(file: string): seq[string] =
   ## The skeleton for this file without options.
   skeleton(file, imageFile(extractFilename(file)))
 
-proc writeSkeleton*(file: string, image: ImageFile): bool =
+proc writeSkeleton*(file: string, image: ImageFile, c128 = false): bool =
   ## Writes the skeleton as `<name>.flo` next to the file, unless that
   ## exists. Returns false when it does.
   let name = extractFilename(file)
@@ -458,7 +584,7 @@ proc writeSkeleton*(file: string, image: ImageFile): bool =
     printErr(flowerFile & " already exists, not overwriting it.")
     return false
   var text = ""
-  for line in skeleton(file, image):
+  for line in skeleton(file, image, c128):
     text.add line & "\n"
   printOut("Writing " & flowerFile)
   writeFile(flowerFile, text)

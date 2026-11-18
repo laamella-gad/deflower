@@ -14,16 +14,17 @@ statement   : COMMENT? NL                                    # blank
             | annotation NL                                  # line
             ;
 
-// A file to load into memory: a .prg at its own address unless 'at' says
-// otherwise, a .bin at the 'at' address, a .vsf as a whole.
-image       : file=ID ('at' address=number)? ('from' offset=number)?
-              ('size' length=number)? ;
+// A file to load into memory: a .vsf as a whole, a .prg at its own address
+// unless 'at' says otherwise, a .bin at the 'at' address. A place picks a
+// part: a .prg's addresses, a .bin's offsets; a type sizes it like a data
+// line, and without an end or a type the part runs to the end of the file.
+image       : file=ID (part=place size=dataType?)? ('at' address=number)? ;
 
 annotation  : at=place 'virtual'? 'banked'? 'selfmod'? type=dataType? label=name?
               parameters? 'noreturn'? ('export' exportFile=ID)? '{'? ;
 
 // The words of the 'load' line are only keywords there.
-name        : ID | 'load' | 'at' | 'from' | 'size' ;
+name        : ID | 'load' | 'at' ;
 
 // A range's end is exclusive.
 place       : start=number ('-' end=number)? ;

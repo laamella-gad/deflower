@@ -1,0 +1,93 @@
+>>> Issue 0132: the built-in C128 includes. include c128.flo names the KERNAL
+jump table (jsrfar, chrout), the MMU registers, the RAM vectors and the
+zero page, and leaves out what the program doesn't use. <<<
+
+*=$1c0d
+
+start:
+		lda #$0e
+		sta $ff00
+		jsr $ff6e
+		lda $d506
+		sta $d030
+		lda #$0d
+		jsr $ffd2
+		lda $0314
+		ldx $2d
+		jsr $02a2
+		jmp $4003
+===
+deflower test.prg
+$1c0d code start
+include c128.flo
+^^^
+Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 30 bytes emitted, 0 differ, 54016 virtual, 0 gaps
+~~~
+; RAM routines the KERNAL installs: read, write and compare a byte in another bank, and
+; call or jump to an address in one
+; called by: start
+fetch = $02a2
+
+; jumped to by: start
+basic_warm_start = $4003
+
+; called by: start
+jsrfar = $ff6e
+
+; called by: start
+chrout = $ffd2
+
+.virtual $002d
+; read by: start
+basic_start:		.word	?
+.endv
+
+.virtual $0314
+; read by: start
+irq_vector:		.addr	?
+.endv
+
+*=$1c0d
+
+start:
+		lda #$0e
+		sta mmu_configuration_ff00
+		jsr jsrfar
+		lda mmu_ram_configuration
+		sta vic_clock
+		lda #$0d
+		jsr chrout
+		lda irq_vector
+		ldx basic_start
+		jsr fetch
+		jmp basic_warm_start
+
+.virtual $d030
+; bit 0: 2 MHz
+; written by: start
+vic_clock:		.byte	?
+.endv
+
+.virtual $d506
+; the RAM shared by all banks: its size and whether at the bottom or top
+; read by: start
+mmu_ram_configuration:		.byte	?
+.endv
+
+.virtual $ff00
+; the MMU's configuration register and the load configuration registers, at $ff00 in
+; every configuration: a write to $ff01-$ff04 sets $ff00 from $d501-$d504
+; written by: start
+mmu_configuration_ff00:		.byte	?
+.endv
+~~~
+--- test.map
+$002d-$002f virtual word basic_start
+$0314-$0316 virtual addr irq_vector
+$1c0d-$1c2b code start
+$d030-$d031 virtual byte vic_clock
+$d506-$d507 virtual byte mmu_ram_configuration
+$ff00-$ff01 virtual byte mmu_configuration_ff00
+vvv

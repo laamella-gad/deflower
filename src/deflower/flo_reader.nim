@@ -80,6 +80,12 @@ const builtIns = {
   "c64_kernal.flo": staticRead("includes/c64_kernal.flo"),
   "c64_system.flo": staticRead("includes/c64_system.flo"),
   "c64_zeropage.flo": staticRead("includes/c64_zeropage.flo"),
+  "c128.flo": staticRead("includes/c128.flo"),
+  "c128_basic.flo": staticRead("includes/c128_basic.flo"),
+  "c128_io.flo": staticRead("includes/c128_io.flo"),
+  "c128_kernal.flo": staticRead("includes/c128_kernal.flo"),
+  "c128_system.flo": staticRead("includes/c128_system.flo"),
+  "c128_zeropage.flo": staticRead("includes/c128_zeropage.flo"),
 }.toTable
   ## The .flo files built into Deflower (issue 0078).
 
@@ -116,15 +122,36 @@ proc readParameter(n: Node): RawParameter =
   if n.label != nil:
     result.name = n.label.text
 
+proc evaluate(size: seq[string]): int
+
 proc readImage(n: Node): ImageFile =
-  ## The file of an image node, with its options.
-  result = ImageFile(name: n.file.text, address: -1, offset: -1, size: -1)
+  ## The file of an image node, with the part it loads and where.
+  result = ImageFile(name: n.file.text, address: -1, first: -1, last: -1)
   if n.address != nil:
     result.address = number(n.address)
-  if n.offset != nil:
-    result.offset = number(n.offset)
-  if n.length != nil:
-    result.size = number(n.length)
+  let part = n.part
+  if part == nil:
+    return
+  result.first = number(part.start)
+  if part.`end` != nil:
+    result.last = number(part.`end`)
+  let dataType = n.size
+  if dataType == nil:
+    return
+  let lineType = lineTypeOf(dataType[0])
+  var size: seq[string]
+  var terminator = -1
+  var lengthByte = false
+  readSize(dataType, size, terminator, lengthByte)
+  if lineType == ltCode:
+    result.problem = "a part of a file is sized by a data type, not code"
+  elif terminator != -1 or lengthByte:
+    result.problem = "a part of a file is sized by a count, not until or lengthbyte"
+  elif result.last != -1 and size.len > 0:
+    result.problem = "a part of a file has an end or a size, not both"
+  elif result.last == -1:
+    let count = if size.len > 0: evaluate(size) else: 1
+    result.last = result.first + count * lineType.dataType.sizeInBytes
 
 proc buildLine(n: Node): Statement =
   ## The statement of an annotation node.
@@ -172,7 +199,7 @@ proc build(n: Node): Statement =
 
 # Error messages.
 
-const partOrder = ["an address", "deflower", "load", "include", "'}'", "at", "from", "size", "'-'", "virtual", "banked", "selfmod", "a type",
+const partOrder = ["an address", "deflower", "load", "include", "'}'", "a range", "at", "'-'", "virtual", "banked", "selfmod", "a type",
     "a size", "a label", "parameters", "noreturn", "export", "a file name", "'{'", "a number", "until",
     "lengthbyte", "'*'", "'+'", "']'", "','", "')'", "a comment", "the end of the line"]
   ## The parts an error message can expect, in the order of a line.
@@ -187,13 +214,13 @@ proc partName(kind: TokenKind, e: SyntaxErrorInfo, codeLine: bool): string =
   of tkLBracket: "a size"
   of tkLParen: (if codeLine: "parameters" else: "")
   of tkNoreturn: (if codeLine: "noreturn" else: "")
-  of tkHEX, tkINT: (if tkDeflower in expected: "an address" else: "a number")
+  of tkHEX, tkINT: (if tkDeflower in expected: "an address" elif tkAt in expected: "a range" else: "a number")
   of tkID: (if expected == @[tkID]: "a file name" else: "a label")
   # A blank or comment line is no fix for a line that starts wrong.
   of tkCOMMENT: (if tkDeflower in expected: "" else: "a comment")
   of tkNL: (if tkDeflower in expected: "" else: "the end of the line")
   # The words of the load line can be labels too.
-  of tkLoad, tkAt, tkFrom, tkSize: (if tkID in expected: "a label" else: ($kind)[1 .. ^2])
+  of tkLoad, tkAt: (if tkID in expected: "a label" else: ($kind)[1 .. ^2])
   of tkDeflower, tkInclude, tkVirtual, tkBanked, tkSelfmod, tkExport, tkUntil, tkLengthbyte:
     ($kind)[1 .. ^2]
   else: $kind
@@ -237,6 +264,16 @@ proc parseStatements(text, sourceName: string, errors: var seq[string]):
       result.add (statement.pos.line, build(statement))
 
 # Collecting the annotations.
+
+proc readImageText*(text: string): ImageFile =
+  ## The file and its options as a deflower line takes them, for the
+  ## command line (issue 0133). Raises an ArgumentError for bad ones.
+  var errors: seq[string]
+  let statements = parseStatements("deflower " & text & "\n", "", errors)
+  if errors.len > 0 or statements.len != 1:
+    raise newException(ArgumentError, "Bad options for " & text & ": " &
+        errors.join("; ").replace("line 1: ", ""))
+  statements[0].statement.image
 
 proc newCollector(run: DeflowerRun, included: bool, path: string, includeChain: seq[string],
     exportLines: TableRef[string, int], readFiles: ref seq[string]): AnnotationCollector =

@@ -1,0 +1,77 @@
+>>> Issue 0134: a run sees the labels the other runs of the same .flo file put
+on memory they load and it doesn't. The loader's jmp prints as start, without
+a warning; the main part's jsr to the loader's boot does too. A label nothing uses isn't
+printed, and where a run has its own label (own_fade), it keeps it. <<<
+===
+deflower loader.prg
+$0801 code boot
+$080c code fade
+
+deflower main.prg
+$1c52 code start
+$1c59 byte value
+$080c own_fade
+===
+; file: loader.prg
+
+*=$0801
+
+		lda #$00
+		sta $d020
+		jsr fade
+		jmp $1c52
+fade:
+		rts 
+===
+; file: main.prg
+
+*=$1c52
+
+		jsr $080c
+		jsr $0801
+		rts 
+		.byte	$01
+^^^
+Writing out/loader.asm
+Writing out/loader.map
+Verify out/loader.asm: 12 bytes emitted, 0 differ, 0 virtual, 0 gaps
+Writing out/main.asm
+Writing out/main.map
+Verify out/main.asm: 8 bytes emitted, 0 differ, 0 virtual, 0 gaps
+~~~
+--- loader.asm
+
+*=$0801
+
+boot:
+		lda #$00
+		sta $d020
+		jsr fade
+		jmp start
+
+; called by: boot
+fade:
+		rts 
+; jumped to by: boot
+start = $1c52--- main.asm
+; called by: start
+boot = $0801
+; called by: start
+own_fade = $080c
+*=$1c52
+
+start:
+		jsr own_fade
+		jsr boot
+		rts 
+
+value:
+		.byte	$01
+~~~
+--- loader.map
+$0801-$080c code boot
+$080c-$080d code fade
+--- main.map
+$1c52-$1c59 code start
+$1c59-$1c5a byte value
+vvv

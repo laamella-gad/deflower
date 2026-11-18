@@ -3,7 +3,7 @@
 ## each run load its memory image (loaders) and apply its annotations in
 ## order (Subject.annotate) - and `deflower` analyses and writes each one.
 
-import std/[algorithm, os, sequtils, strutils, sugar]
+import std/[algorithm, os, sequtils, sets, strutils, sugar]
 import printing, subject, flo_reader, loaders, flow_analyser, finders, result_writer, memory_map, verifier
 
 proc loadFiles(subject: Subject, run: DeflowerRun, basePath: string, files: var seq[string]) =
@@ -19,6 +19,36 @@ proc outputFileNameFor(targetFileName: string): string =
   let baseName = extractFilename(targetFileName)
   let dot = baseName.rfind('.')
   (if dot > 0: baseName[0 ..< dot] else: baseName) & ".asm"
+
+proc shareLabels(subjects: seq[Subject]) =
+  ## Gives each run the labels the other runs of the same .flo file put on
+  ## memory they load and it doesn't (issue 0134), as included labels: only
+  ## printed when used, and a flow into them doesn't warn. Where it has a
+  ## label, or the other runs disagree, or it uses the name elsewhere, it
+  ## gets none.
+  if subjects.len < 2:
+    return
+  for subject in subjects:
+    var names: HashSet[string]
+    for location in subject.memory:
+      if location.label != nil:
+        names.incl location.label.name
+    for address in 0 ..< memorySize:
+      let location = subject.memory[address]
+      if location.loaded or location.label != nil:
+        continue
+      var name = ""
+      var agreed = true
+      for other in subjects:
+        let source = other.memory[address]
+        if other == subject or not source.loaded or source.label == nil or source.label.included or
+            source.label.auto:
+          continue
+        if name.len > 0 and source.label.name != name:
+          agreed = false
+        name = source.label.name
+      if name.len > 0 and agreed and name notin names:
+        location.label = newLabel(name, false, true)
 
 proc configure*(flowerFile: string, files: var seq[string]): seq[Subject] =
   ## The Subjects of the .flo file. Adds the paths of the files they are made
@@ -40,6 +70,7 @@ proc configure*(flowerFile: string, files: var seq[string]): seq[Subject] =
     for annotation in annotations:
       subject.annotate(annotation)
     subject.checkBankedCodeEntries()
+  shareLabels(result)
 
 proc configure*(flowerFile: string): seq[Subject] =
   var files: seq[string]
@@ -77,6 +108,7 @@ proc analyse(subject: Subject) =
   analyseCodeFlows(subject)
   findAddressSetups(subject)
   findSelfModifications(subject)
+  findCopyLoops(subject)
   subject.warnUsedSkeletonRanges()
   subject.dropUnusedIncludes()
   subject.reportDuplicateLabels()
@@ -102,13 +134,10 @@ proc run*(flowerFile: string, verify: bool, keepOnError: bool, files: var seq[st
       removeDir(outputDirectory)
       createDir(outputDirectory)
     for subject in subjects:
-      let warnings = subject.warnings.sorted(proc (a, b: Warning): int = cmp(a.address, b.address))
-      var printed: seq[string]
-      for warning in warnings:
-        let line = $warning
-        if line notin printed:
-          printed.add line
-          printOut(line)
+      for line in subject.warningLines():
+        printOut(line)
+      for hint in subject.hints:
+        printOut(hint[1])
       if subject.errors.len > 0:
         for error in subject.errors:
           printErr(error)

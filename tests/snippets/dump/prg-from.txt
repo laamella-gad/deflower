@@ -1,5 +1,5 @@
->>> from and size are only for a .bin (issue 0117). <<<
-1nvader/1nvader.prg from 2 $0801-$0810
+>>> A part of a .prg is a range of its addresses, at its own address without at (issue 0133). <<<
+1nvader/1nvader.prg $0801-$0810 at $c000 $c000-$c00f
 ^^^
-from and size are for a .bin, not a .prg
+c000: 0b 08 14 00 9e 32 30 36 31 00 00 00 a0 1e ba     .....2061... ..   kht@↑2061@@@ ↑:
 vvv

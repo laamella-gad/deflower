@@ -103,6 +103,16 @@ type
     ## as "warning: $addr: text".
     address*: int
     text*: string
+    target*: int
+      ## For a flow into something it shouldn't go into: the target, else -1.
+      ## Two or more of these about the same target and `into` print as one
+      ## line (issue 0136).
+    targetText*: string
+      ## The target as the warning names it: "$0250 (l0250)".
+    into*: string
+    flow*: string
+      ## How the flow gets there: the mnemonic, "fall through", "return" or
+      ## "rta".
 
   Annotation* = object
     ## One annotation line of a `.flo` file, as parsed: what to mark at
@@ -151,10 +161,19 @@ type
       ## Relative to the .flo file's directory.
     address*: int
       ## 'at': where it loads; a .prg's own load address otherwise.
-    offset*: int
-      ## 'from': the first byte of a .bin to load.
-    size*: int
-      ## 'size': how many bytes of a .bin to load.
+    first*, last*: int
+      ## The part to load (issue 0133): a .prg's addresses, a .bin's
+      ## offsets, a snapshot's 24-bit addresses, the bank above the low 16
+      ## bits (issue 0132); the end exclusive, -1 for its start or end.
+    problem*: string
+      ## What is wrong with the part as written, or "".
+
+  LoadedFile* = object
+    ## Where a file of the run loaded (issue 0137): `plainPrg` for a .prg
+    ## at its own address, whose address ranges a load line can take.
+    name*: string
+    start*, finish*: int
+    plainPrg*: bool
 
   DeflowerRun* = ref object
     ## One 'deflower <file>' line of a `.flo` file and the annotation lines
@@ -224,6 +243,10 @@ type
     outputFileName*: string
     errors*: seq[string]
     warnings*: seq[Warning]
+    hints*: seq[(int, string)]
+      ## Lines to paste, by the address they are about (issue 0137).
+    loadedFiles*: seq[LoadedFile]
+      ## The files the run loaded, in order.
       ## Suspect spots, by address; they don't stop the output (issue 0077).
     exports*: seq[ExportRegion]
       ## The regions exported to binary files of their own (issue 0022).
@@ -446,7 +469,43 @@ proc dwordAt*(subject: Subject, address: int): int =
   int(cast[int32](uint32(subject.wordAt(address) + 256 * 256 * subject.wordAt(address + 2))))
 
 proc warn*(subject: Subject, address: int, text: string) =
-  subject.warnings.add Warning(address: address, text: text)
+  subject.warnings.add Warning(address: address, text: text, target: -1)
+
+proc warnFlowInto*(subject: Subject, address: int, text: string, target: int, targetText, into, flow: string) =
+  subject.warnings.add Warning(address: address, text: text, target: target, targetText: targetText, into: into,
+      flow: flow)
+
+proc warningLines*(subject: Subject): seq[string] =
+  ## The warnings to print, sorted by address. Flows from two or more places
+  ## into the same target and kind of memory print as one line at the
+  ## target (issue 0136), the places grouped by how they get there.
+  var groups: Table[(int, string), seq[Warning]]
+  for warning in subject.warnings:
+    if warning.target != -1:
+      groups.mgetOrPut((warning.target, warning.into), @[]).add warning
+  var lines: seq[(int, string)]
+  for warning in subject.warnings:
+    if warning.target != -1 and groups[(warning.target, warning.into)].len > 1:
+      continue
+    lines.add (warning.address, $warning)
+  for key, members in groups:
+    if members.len < 2:
+      continue
+    var flows: seq[string]
+    var sites: Table[string, seq[int]]
+    for member in members.sortedByIt(it.address):
+      if member.flow notin flows:
+        flows.add member.flow
+      if member.address notin sites.mgetOrPut(member.flow, @[]):
+        sites[member.flow].add member.address
+    let count = sites.values.toSeq.mapIt(it.len).foldl(a + b)
+    let parts = flows.mapIt(it & " " & sites[it].mapIt(asHexWord(it)).join(", "))
+    lines.add (key[0], "warning: " & members[0].targetText & ": " & $count & " flows go into " & key[1] & ": " &
+        parts.join("; "))
+  lines.sort(proc (a, b: (int, string)): int = cmp(a[0], b[0]))
+  for line in lines:
+    if line[1] notin result:
+      result.add line[1]
 
 proc isLoaded(subject: Subject, address, size: int): bool =
   ## True when the image loaded all `size` bytes from `address` on.

@@ -2,6 +2,7 @@
 3dgolfpic/3dgolfpic.flo
 ^^^
 warning: $0840: jmp $0116 (l0116) goes into memory the image doesn't load
+hint: $0822 copies $0876-$0945 to $00f7-$01c6: load 3dgolfpic.prg $0876-$0945 at $00f7
 Writing out/3dgolfpic.asm
 Writing out/3dgolfpic.map
 Verify out/3dgolfpic.asm: 66 bytes emitted, 0 differ, 0 virtual, 1 gap

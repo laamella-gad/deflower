@@ -1,0 +1,11 @@
+; The C128 in bank 0 as a program sees it with the MMU configuration $00 (BASIC's): zero
+; page, system memory and the 40 column screen, BASIC 7.0 ROM, I/O and the KERNAL and
+; screen editor ROM. A program that banks something out (configuration $0e: I/O and
+; KERNAL only) includes only the pieces it sees instead.
+; Built into Deflower; include it with 'include c128.flo'.
+
+include c128_zeropage.flo
+include c128_system.flo
+include c128_basic.flo
+include c128_io.flo
+include c128_kernal.flo

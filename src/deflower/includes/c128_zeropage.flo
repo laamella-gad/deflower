@@ -1,0 +1,59 @@
+$0000 virtual byte cpu_port_direction
+; the 8502's port: cassette and the caps lock key
+$0001 virtual byte cpu_port
+$0002-$002d virtual byte
+$002d virtual word basic_start
+$002f virtual word basic_variables
+$0031 virtual word basic_arrays
+$0033 virtual word basic_arrays_end
+$0035 virtual word basic_strings
+$0037-$003b virtual byte
+$003b virtual word basic_line_number
+; where CHRGET reads the BASIC program
+$003d virtual word basic_text_pointer
+$003f-$0090 virtual byte
+$0090 virtual byte io_status
+$0091 virtual byte stop_key
+$0092-$00a0 virtual byte
+; counts 1/60 seconds, high byte first
+$00a0 virtual byte[3] jiffy_clock
+$00a3-$00b7 virtual byte
+$00b7 virtual byte file_name_length
+$00b8 virtual byte logical_file
+$00b9 virtual byte secondary_address
+$00ba virtual byte device_number
+$00bb virtual addr file_name
+$00bd-$00c6 virtual byte
+; the banks setbnk sets: for load and save, and of the file name
+$00c6 virtual byte load_save_bank
+$00c7 virtual byte file_name_bank
+$00c8-$00d0 virtual byte
+$00d0 virtual byte keyboard_buffer_length
+$00d1 virtual byte function_key_length
+$00d2 virtual byte
+$00d3 virtual byte shift_flags
+$00d4 virtual byte current_key
+$00d5 virtual byte last_key
+$00d6 virtual byte
+; bit 7 set: the screen editor uses the 80 column screen
+$00d7 virtual byte screen_mode
+$00d8-$00e0 virtual byte
+$00e0 virtual word screen_line
+$00e2 virtual word color_line
+$00e4 virtual byte window_bottom
+$00e5 virtual byte window_top
+$00e6 virtual byte window_left
+$00e7 virtual byte window_right
+$00e8-$00eb virtual byte
+$00eb virtual byte cursor_row
+$00ec virtual byte cursor_column
+$00ed-$00f1 virtual byte
+$00f1 virtual byte text_color
+$00f2 virtual byte
+$00f3 virtual byte reverse_flag
+$00f4 virtual byte quote_flag
+$00f5 virtual byte insert_count
+$00f6 virtual byte
+$00f7 virtual byte locks
+$00f8 virtual byte scroll_flags
+$00f9-$0100 virtual byte

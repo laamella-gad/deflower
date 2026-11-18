@@ -1,0 +1,64 @@
+$0100 virtual byte[256] stack
+$0200 virtual byte[161] basic_input_buffer
+$02a1 virtual byte
+; RAM routines the KERNAL installs: read, write and compare a byte in another bank, and
+; call or jump to an address in one
+$02a2 banked fetch
+$02af banked stash
+$02be banked cmpare
+$02cd banked jsrfar_ram
+$02e3 banked jmpfar_ram
+$02a2-$0300 virtual byte
+$0300 virtual addr basic_error_vector
+$0302 virtual addr basic_main_vector
+$0304 virtual addr basic_crunch_vector
+$0306 virtual addr basic_list_vector
+$0308 virtual addr basic_execute_vector
+$030a virtual addr basic_eval_vector
+$030c virtual addr basic_escape_token_vector
+$030e virtual addr basic_escape_list_vector
+$0310 virtual addr basic_escape_execute_vector
+$0312 virtual addr basic_time_vector
+$0314 virtual addr irq_vector
+$0316 virtual addr brk_vector
+$0318 virtual addr nmi_vector
+$031a virtual addr open_vector
+$031c virtual addr close_vector
+$031e virtual addr chkin_vector
+$0320 virtual addr chkout_vector
+$0322 virtual addr clrchn_vector
+$0324 virtual addr chrin_vector
+$0326 virtual addr chrout_vector
+$0328 virtual addr stop_vector
+$032a virtual addr getin_vector
+$032c virtual addr clall_vector
+$032e virtual addr user_vector
+$0330 virtual addr load_vector
+$0332 virtual addr save_vector
+; the screen editor's: control characters, shifted keys, escape sequences, key decoding
+$0334 virtual addr editor_control_vector
+$0336 virtual addr editor_shift_vector
+$0338 virtual addr editor_escape_vector
+$033a virtual addr editor_key_vector
+$033c-$034a virtual byte
+$034a virtual byte[10] keyboard_buffer
+$0354-$0380 virtual byte
+; reads the next character of the BASIC program
+$0380 virtual byte[31] chrget
+$039f-$0400 virtual byte
+$0400 virtual byte[1000] screen_ram
+$07e8-$07f8 virtual byte
+$07f8 virtual byte[8] sprite_pointers
+; BASIC's stack for FOR, GOSUB and DO
+$0800-$0a00 virtual byte
+; where a reset goes once the KERNAL is set up: BASIC's warm start
+$0a00 virtual addr system_vector
+$0a02-$0b00 virtual byte
+$0b00 virtual byte[192] tape_buffer
+$0bc0-$1000 virtual byte
+$1000 virtual byte[10] function_key_lengths
+$100a virtual byte[246] function_key_texts
+$1100-$1210 virtual byte
+; the end of the BASIC program
+$1210 virtual word basic_end
+$1212-$1300 virtual byte

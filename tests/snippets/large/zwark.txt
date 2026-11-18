@@ -2,8 +2,7 @@
 zwark/zwark.flo
 ^^^
 warning: $0140: beq $0147 (l0147) goes into the middle of the instruction at $0146
-warning: $01c9: bne $01cd (decrunch_table) goes into data
-warning: $01cb: falls through into data at $01cd (decrunch_table)
+warning: $01cd (decrunch_table): 2 flows go into data: bne $01c9; fall through $01cb
 Writing out/zwark.asm
 Writing out/zwark.map
 Verify out/zwark.asm: 6991 bytes emitted, 0 differ, 58545 virtual, 0 gaps

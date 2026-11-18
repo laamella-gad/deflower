@@ -1,8 +1,8 @@
 >>> A .bin has no load address: the deflower or load line gives it with at.
 from skips that many bytes of the file, size takes that many (issue 0117). <<<
 ===
-deflower main.bin at $c000 from 2
-load table.bin at $c010 from $01 size 3
+deflower main.bin $2 at $c000
+load table.bin $1 byte[3] at $c010
 $c000 code start
 $c010 byte[3] table
 ===

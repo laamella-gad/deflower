@@ -1,7 +1,6 @@
 ---
-title: Load part of a .prg by its address range, to put a moved block where it runs
-status: open
-priority: medium
+title: Load part of a file by a place and a type, to put a moved block where it runs
+status: done
 labels: enhancement
 ---
 
@@ -28,3 +27,7 @@ Consider at the same time replacing `size` (and maybe `from`) with the `[n]` cou
 Done when a `load` (and `deflower`) line takes a range of a `.prg`, with a short snippet, and `README.md` describes this use of `load` for code that runs at another address (the C64 skill notes too).
 
 Out of scope, a possible follow-up: the copy at its load address still shows as data or a gap, and the output reassembles to the merged memory, not to the original `.prg` byte for byte. A `.logical`-like line ([0115](0115-code-that-overwrites-instructions.md), point 2) would cover that. [0137](0137-detect-copy-loops.md) could suggest the `load` line.
+
+## Closing note
+
+The image line reuses the annotation's place and type instead of `from`/`size` (removed): `<file> [<place> [<type>[<size>]]] [at <address>]`. A `.prg`'s part is a range of its addresses, a `.bin`'s of its offsets; a type sizes it like a data line (`$50 byte[$2000]`), and a place alone runs to the end of the file. `load game.prg $378b-$3801 at $0111` traces the moved code where it runs. The command line tools take the same options, parsed by the `.flo` parser (`flo_reader.readImageText`). Snippets `short/load_range.txt`, `short/loadbin.txt`, `short/invalid/load-*`; README under `deflower` and `load`. `.logical` output is left out of scope.

@@ -1,0 +1,6 @@
+>>> An x128 snapshot's bank 1 (issue 0132): the KERNAL's interrupt code at $ff05, in RAM. <<<
+c128_snap/c128_snap.vsf $10000-$20000 $ff00-$ff20
+^^^
+ff00: ff ff 00 00 00 78 48 8a 48 98 48 ad 00 ff 48 a9  .....Xh.h.h...h.  ..@@@.HjHxH-@.H)
+ff10: 00 8d 00 ff 6c 18 03 48 8a 48 98 48 ad 00 ff 48  ....L..h.h.h...h  @m@..xcHjHxH-@.H
+vvv

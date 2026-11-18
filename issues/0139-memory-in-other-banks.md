@@ -13,3 +13,5 @@ Found in The Write Stuff 128 (`~/dev/c64-productivity/tws128`):
 - `bb macros` and the help screens load into bank 1.
 
 Want to find out: whether a label can carry a bank (`bank1:$0400 text_start`, or a `bank` block), how the configuration is known at a given instruction (stores of constants to `$ff00` and `$ff01-$ff04` in the same routine, or a `config $0e` annotation on a routine), and how an x128 snapshot's two banks become runs ([0132](0132-c128-support.md)). A design note is enough to start; implementing it can wait until 0069 has a form.
+
+Decided (2026-11-18): memory in another bank is written as a 24-bit address, the bank above the low 16 bits, as the C128's monitor does: `$10400` is bank 1 `$0400`. A run already picks an x128 snapshot's bank that way (`deflower tws.vsf $10000-$20000`, [0132](0132-c128-support.md)). What a bank number means is up to the machine; no `bank` keyword.

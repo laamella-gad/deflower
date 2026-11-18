@@ -76,16 +76,19 @@ proc warnFlow(subject: Subject, entry: CodeEntry, into, entryProblem: string) =
     return
   let origin = subject.memory[entry.source].area
   if origin.isData:
-    subject.warn(entry.source, "rta " & target & " goes into " & into)
+    subject.warnFlowInto(entry.source, "rta " & target & " goes into " & into, entry.address, target, into, "rta")
     return
   let mnemonic = toLowerAscii($origin.instruction.opcode)
   if entry.fallsThrough and origin.instruction.opcode == Opcode.JSR:
     # Often a routine that reads inline data after its jsr (0068).
-    subject.warn(entry.source, mnemonic & " returns into " & into & " at " & target)
+    subject.warnFlowInto(entry.source, mnemonic & " returns into " & into & " at " & target, entry.address, target,
+        into, "return")
   elif entry.fallsThrough:
-    subject.warn(entry.source, "falls through into " & into & " at " & target)
+    subject.warnFlowInto(entry.source, "falls through into " & into & " at " & target, entry.address, target, into,
+        "fall through")
   else:
-    subject.warn(entry.source, mnemonic & " " & target & " goes into " & into)
+    subject.warnFlowInto(entry.source, mnemonic & " " & target & " goes into " & into, entry.address, target, into,
+        mnemonic)
 
 proc runsIntoExistingArea(subject: Subject, address: int, instruction: Instruction): bool =
   ## Decoding started cleanly at a free address, but a 2- or 3-byte

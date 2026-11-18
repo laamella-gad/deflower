@@ -23,7 +23,7 @@ A disassembly reassembles to the original bytes when it verifies with 0 differ, 
 
 ```
 deflower [--verify] [--watch] <file.flo>
-deflower --init <file> [at <address>] [from <offset>] [size <n>]
+deflower --init <file> [<part>] [at <address>] [c128]
 deflower --dump <file> [<options>] <start>-<end>
 deflower --dump <file.vsf> vic|colour
 deflower --find <file> [<options>] <address or bytes> [in <start>-<end>]
@@ -31,7 +31,7 @@ deflower --strings <file> [<options>] [<start>-<end>] [min <n>]
 deflower --help
 ```
 
-The `<file>` of `--init`, `--dump`, `--find` and `--strings` is a `.vsf`, `.prg` or `.bin`, with the options of a [`deflower` line](#deflower-file-at-address-from-offset-size-n) after it: `at`, `from` and `size`. A `.bin` needs `at`.
+The `<file>` of `--init`, `--dump`, `--find` and `--strings` is a `.vsf`, `.prg` or `.bin`, with the options of a [`deflower` line](#deflower-file-part-at-address) after it: a part and `at`. A `.bin` needs `at`. A place is the part when a type or `at` follows it or it is in another bank (`$10000-$20000`), and for `--init` always; else it is the tool's own range.
 
 All paths are file system paths. Numbers are decimal, or hex with a `$` prefix (quote it in the shell: `'$c000-$c100'`). A range's end is exclusive, as in a `.flo` file.
 
@@ -72,6 +72,7 @@ or `doesn't verify` (with `--verify`), or `failed, out/ unchanged`.
 
 Takes a `.vsf` VICE snapshot, a `.prg` or a `.bin` and writes a `.flo` skeleton next to it, `<file without extension>.flo`. It won't overwrite an existing `.flo` file. The skeleton holds:
 - the facts, as `;` comments. For a snapshot: the banking, the CPU registers, the stack, the IRQ/BRK/NMI vectors (and the hardware vectors while the KERNAL is banked out), each marked ROM, RAM or untouched RAM, changed KERNAL vectors, the video setup (VIC bank, mode, screen, character set or bitmap, sprites), the interrupt sources, the BASIC program and its `SYS`, and a patched CHRGET. For a `.prg` or `.bin`: the load range and the `SYS` of a BASIC stub. The video and VIC interrupts are only read from x64sc snapshots of VICE 3.x;
+- for the C128: an x128 snapshot gives the MMU configuration instead of `$01`, the shared RAM, the C128's vectors and its BASIC program (from `$2d` and `$1210`), and the C128 includes. For bank 1 (`$10000-$20000`), the RAM vectors and the BASIC program are left out, as they are bank 0's, and the bank is read as all RAM. A `.prg` or `.bin` is a C128 program with `c128` last: its BASIC stub at `$1c01` and `include c128.flo`, without the BASIC ROM when the program loads over it. A `.prg` at `$1c01` without `c128` gets a comment saying so;
 - the `deflower` line, with the options given;
 - `code` lines for the entry points found (`snapshot_pc`, `irq`, `nmi`, ...), except those in ROM, the zero page or untouched memory;
 - `untouched_xxxx` ranges from `$0400` up that still hold VICE's power-on pattern, and `unused_xxxx` ranges that hold only zeroes. Deflower warns when an instruction refers into one of them, as that range is in use after all;
@@ -115,16 +116,30 @@ $1014-$1020 addr level_table
 $2c75 code print_inline (ascii[until $ff] text)
 ```
 
-### `deflower <file> [at <address>] [from <offset>] [size <n>]`
+### `deflower <file> [<part>] [at <address>]`
 
 Starts a run: loads a file, relative to the `.flo` file's directory. The lines after it, up to the next `deflower` line, annotate that binary, and its output is `out/<file without extension>.asm`. It must come before any annotation line. The file is one of:
-- a `.vsf` VICE snapshot: its 64K of RAM, without options;
+- a `.vsf` VICE snapshot: its 64K of RAM; of an x128 snapshot, RAM bank 0;
 - a `.prg`: a 2-byte load address, then the bytes. `at` loads them at another address;
-- a `.bin`: only the bytes, loaded at the `at` address, which it needs. `from` skips that many bytes of the file first and `size` takes only that many: `deflower kernal.bin at $e000`, `deflower cartridge.bin at $8000 from $50 size $2000`.
+- a `.bin`: only the bytes, loaded at the `at` address, which it needs: `deflower kernal.bin at $e000`.
+
+The part picks some of a `.prg` or `.bin`: the start of an annotation line, a place and a type, here for a `.prg`'s addresses or a `.bin`'s offsets. A range takes those bytes, a type with a size that many elements, and a place without either runs to the end of the file. The part loads where it is, or at `at`:
+
+```
+deflower cartridge.bin $50 byte[$2000] at $8000
+deflower game.prg $378b-$3801 at $0111
+deflower stub.bin $3 at $0801
+```
+
+A snapshot's part is in 24-bit addresses, the bank above the low 16 bits, as the C128's monitor writes them: `$10400` is `$0400` in bank 1. `deflower tws.vsf $10000-$20000` loads an x128 snapshot's RAM bank 1 as the CPU sees it, with the RAM the banks share (as the MMU's RAM configuration register, `$d506`, sets it) from bank 0; a smaller range loads that piece of the bank. A C64 snapshot has bank 0 only. The run's annotations still use 16-bit addresses.
+
+A part sized by `code`, `until` or `lengthbyte`, or by both an end and a size, or a snapshot's part across banks, is an error.
 
 A file that runs past `$ffff` is an error.
 
-### `load <file> [at <address>] [from <offset>] [size <n>]`
+Runs in the same `.flo` file are independent, but they share labels: a run gets the labels the others give (with their own lines, not from an include) to memory they load and it doesn't. A loader's `jmp $1c52` then prints the main part's `start`, without a warning. They are weak, like included labels: printed as a define only when used, and none where the run has a label of its own there, where the other runs disagree, or where the run uses the name elsewhere.
+
+### `load <file> [<part>] [at <address>]`
 
 Loads one more `.prg` or `.bin` into the run, with the options of the `deflower` line, e.g. a program's second part or the overlay it loads at run time:
 
@@ -134,9 +149,19 @@ load levels.prg
 load music.bin at $1000
 ```
 
+It also puts code where it runs, when the program copies it there first: the stack page, the tape buffer, under a ROM. Load that part of the `.prg` again at the address the code runs at, and the code is traced there, in the same output, with the calls to it resolved:
+
+```
+deflower game.prg
+load game.prg $378b-$3801 at $0111
+$0111 code move_up
+```
+
+The bytes at their load address stay as they are, data or a gap.
+
 The files load in order, the `deflower` line's first, and a later one wins where they overlap, without a warning: a part can patch another, or a snapshot. The run's output is still the one `.asm`, with each part under its own `*=` origin. A `load` line comes after a `deflower` line and only in the `.flo` file itself, not in an included one or in a block.
 
-The words `load`, `at`, `from` and `size` are only keywords on a `deflower` or `load` line: elsewhere they can be labels, like the KERNAL's `load`.
+The words `load` and `at` are only keywords on a `deflower` or `load` line: elsewhere they can be labels, like the KERNAL's `load`.
 
 ### `include <file>`
 
@@ -146,7 +171,15 @@ Reads the lines of another `.flo` file into the current run, e.g. a machine's I/
 - `c64_system.flo`: `$0100-$0800`, the stack, KERNAL workspace and vectors, the screen;
 - `c64_io.flo`;
 - `c64_basic.flo`;
-- `c64_kernal.flo`.
+- `c64_kernal.flo`;
+- `c128.flo`: all of the C128 pieces below, bank 0 with the MMU configuration `$00`;
+- `c128_zeropage.flo`;
+- `c128_system.flo`: `$0100-$1300`, the stack, the KERNAL's RAM routines (`fetch`, `stash`, `cmpare`, `jsrfar_ram`, `jmpfar_ram`), vectors, the 40 column screen, BASIC's stack, the function keys;
+- `c128_io.flo`: the VIC-IIe, SID, MMU (`$d500` and `$ff00-$ff04`), VDC and CIAs;
+- `c128_basic.flo`: BASIC 7.0 at `$4000-$bfff`, its math jump table at `$af00` and the monitor;
+- `c128_kernal.flo`: the screen editor's jump table at `$c000`, the KERNAL's at `$ff47-$fff5`, the interrupt entries at `$ff05`/`$ff17`.
+
+The routines called with data after the `jsr`, like `primm`, are `banked` lines without a parameter list: give the program's calls a `code` line with one where the data matters.
 
 Included files may include others, but can't contain `deflower` lines.
 
@@ -249,16 +282,17 @@ statement   : COMMENT? NL                                    # blank
             | annotation NL                                  # line
             ;
 
-// A file to load into memory: a .prg at its own address unless 'at' says
-// otherwise, a .bin at the 'at' address, a .vsf as a whole.
-image       : file=ID ('at' address=number)? ('from' offset=number)?
-              ('size' length=number)? ;
+// A file to load into memory: a .vsf as a whole, a .prg at its own address
+// unless 'at' says otherwise, a .bin at the 'at' address. A place picks a
+// part: a .prg's addresses, a .bin's offsets; a type sizes it like a data
+// line, and without an end or a type the part runs to the end of the file.
+image       : file=ID (part=place size=dataType?)? ('at' address=number)? ;
 
 annotation  : at=place 'virtual'? 'banked'? 'selfmod'? type=dataType? label=name?
               parameters? 'noreturn'? ('export' exportFile=ID)? '{'? ;
 
 // The words of the 'load' line are only keywords there.
-name        : ID | 'load' | 'at' | 'from' | 'size' ;
+name        : ID | 'load' | 'at' ;
 
 // A range's end is exclusive.
 place       : start=number ('-' end=number)? ;
@@ -300,6 +334,20 @@ WS      : [ \t]+ -> skip ;
 Illegal opcodes need 64tass's `-i` (`--6502`) option: `64tass -i -o game.prg out/game.asm`.
 
 The warnings point at suspect spots without stopping the output, as `warning: $addr: text`: a flow into data, into the middle of an instruction or into memory the binary doesn't load, a `jsr` that returns into data, an instruction that runs into another area or past the end of the binary, a jam, a data line on memory the binary doesn't load, and an operand that refers into an `untouched_` or `unused_` range of the skeleton.
+
+Flows from two or more places into the same target and the same kind of memory print as one line at the target, the places grouped by how they get there (the mnemonic, `fall through`, `return` for a `jsr` returning, `rta`):
+
+```
+warning: $0250 (l0250): 4 flows go into memory the image doesn't load: jsr $c000, $c003, $c008; jmp $c00b
+```
+
+After the warnings come the hints, lines to paste. A loop that copies a block of the binary to memory it doesn't load, where code is called or jumped to, gives the `load` line that puts the block where it runs (see `load`):
+
+```
+hint: $0822 copies $0876-$0945 to $00f7-$01c6: load 3dgolf.prg $0876-$0945 at $00f7
+```
+
+The loop is an `lda` and `sta` indexed by the same register, stepped by `inx`/`dex`/`iny`/`dey` (maybe after a `cpx`/`cpy #`), and a branch or `jmp` back to after an immediate load of that register. A `beq` between the `lda` and the `sta` makes it copy up to a zero byte. The `load` part is only there when a `.prg` loaded at its own address holds the block.
 
 Two flows into data are not suspect and don't warn:
 - the BIT skip trick: an instruction falls through into a one-byte data line holding `$2c` (`bit abs`) or `$24` (`bit zp`), whose operand is an instruction other code jumps to. Type the `$2c` as `byte` and give the hidden instruction a `code` line (or let a `jsr` reach it); the flow goes on after the `bit`'s operand, as the CPU does;

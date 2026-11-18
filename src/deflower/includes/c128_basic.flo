@@ -1,0 +1,23 @@
+; BASIC 7.0: low ROM $4000-$7fff, high ROM $8000-$bfff with the monitor at $b000.
+$4000-$c000 virtual byte
+$4000 banked basic_cold_start
+$4003 banked basic_warm_start
+$4006 banked basic_irq
+; the math routines' jump table
+$af00 banked ayint
+$af03 banked givayf
+$af06 banked fout
+$af09 banked val_1
+$af0c banked getadr
+$af0f banked floatc
+$af12 banked fsub
+$af15 banked fsubt
+$af18 banked fadd
+$af1b banked faddt
+$af1e banked fmult
+$af21 banked fmultt
+$af24 banked fdiv
+$af27 banked fdivt
+$b000 banked monitor
+; the monitor's entry for a brk, where brk_vector points
+$b003 banked monitor_break

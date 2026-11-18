@@ -1,0 +1,93 @@
+$c000-$d000 virtual byte
+$e000-$ff00 virtual byte
+$ff05-$fffa virtual byte
+; the screen editor's jump table
+$c000 banked editor_cint
+$c003 banked editor_display
+$c006 banked editor_lp2
+$c009 banked editor_loop5
+$c00c banked editor_print
+$c00f banked editor_screen_origin
+$c012 banked editor_scnkey
+$c015 banked editor_repeat
+$c018 banked editor_plot
+$c01b banked editor_cursor
+$c01e banked editor_escape
+$c021 banked editor_keyset
+$c024 banked editor_irq
+$c027 banked editor_init80
+$c02a banked editor_swapper
+$c02d banked editor_window
+$e000 banked kernal_reset
+; the KERNAL interrupt handler: screen editor, jiffy clock, keyboard
+$fa65 banked kernal_irq
+$fa40 banked kernal_nmi
+; where the hardware vectors go: save the MMU configuration, switch to $00, then
+; jmp (nmi_vector) or (irq_vector)/(brk_vector)
+$ff05 banked kernal_nmi_entry
+$ff17 banked kernal_irq_entry
+; restores the MMU, A, Y and X and returns from the interrupt
+$ff33 banked kernal_irq_exit
+$ff3d banked kernal_reset_entry
+$ff47 banked spin_spout
+$ff4a banked close_all
+$ff4d banked c64mode
+$ff50 banked dma_call
+$ff53 banked boot_call
+$ff56 banked phoenix
+$ff59 banked lkupla
+$ff5c banked lkupsa
+$ff5f banked swapper
+$ff62 banked dlchr
+$ff65 banked pfkey
+$ff68 banked setbnk
+$ff6b banked getcfg
+$ff6e banked jsrfar
+$ff71 banked jmpfar
+$ff74 banked indfet
+$ff77 banked indsta
+$ff7a banked indcmp
+; prints the zero-terminated text after the jsr
+$ff7d banked primm
+$ff81 banked cint
+$ff84 banked ioinit
+$ff87 banked ramtas
+$ff8a banked restor
+$ff8d banked vector
+$ff90 banked setmsg
+$ff93 banked second
+$ff96 banked tksa
+$ff99 banked memtop
+$ff9c banked membot
+$ff9f banked scnkey
+$ffa2 banked settmo
+$ffa5 banked acptr
+$ffa8 banked ciout
+$ffab banked untlk
+$ffae banked unlsn
+$ffb1 banked listen
+$ffb4 banked talk
+$ffb7 banked readst
+$ffba banked setlfs
+$ffbd banked setnam
+$ffc0 banked open
+$ffc3 banked close
+$ffc6 banked chkin
+$ffc9 banked chkout
+$ffcc banked clrchn
+$ffcf banked chrin
+$ffd2 banked chrout
+$ffd5 banked load
+$ffd8 banked save
+$ffdb banked settim
+$ffde banked rdtim
+$ffe1 banked stop
+$ffe4 banked getin
+$ffe7 banked clall
+$ffea banked udtim
+$ffed banked screen
+$fff0 banked plot
+$fff3 banked iobase
+$fffa virtual addr nmi_hardware_vector
+$fffc virtual addr reset_hardware_vector
+$fffe virtual addr irq_hardware_vector

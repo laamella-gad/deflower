@@ -1,6 +1,7 @@
 ## Reads VICE snapshot files (`.vsf`): a header, then modules, of which
 ## the ones Deflower knows are read into objects of their own: memory, CPU,
-## VIC-II and CIAs. Other modules and versions are kept unhandled.
+## VIC-II and CIAs, and x128's memory. Other modules and versions are kept
+## unhandled.
 
 import std/options
 
@@ -14,7 +15,7 @@ type
     version*: Version
 
   ModuleKind* = enum
-    mkUnhandled, mkC64Mem, mkMainCpu, mkVicII, mkCia
+    mkUnhandled, mkC64Mem, mkC128Mem, mkMainCpu, mkVicII, mkCia
 
   Module* = ref object
     moduleType*: string
@@ -28,6 +29,12 @@ type
       exrom*: int
       game*: int
       ram*: seq[byte]
+    of mkC128Mem:
+      mmu*: array[11, int]
+        ## The MMU registers $d500-$d50a.
+      banks*: seq[seq[byte]]
+        ## The RAM banks, 64K each (VICE keeps four; 2 and 3 mirror 0 and 1
+        ## on a stock C128).
     of mkMainCpu:
       a*, x*, y*, sp*, pc*, status*: int
     of mkVicII:
@@ -85,7 +92,7 @@ proc readVersion(reader: var Reader): Version =
   # Java read them as signed bytes.
   Version(major: int(cast[int8](reader.getByte())), minor: int(cast[int8](reader.getByte())))
 
-proc handle(name: string, version: Version, content: seq[byte]): Module =
+proc handle(machine, name: string, version: Version, content: seq[byte]): Module =
   ## The module as one of the kinds Deflower knows, or nil.
   if name == "C64MEM":
     var reader = Reader(bytes: content)
@@ -95,8 +102,17 @@ proc handle(name: string, version: Version, content: seq[byte]): Module =
     result.exrom = reader.getByte()
     result.game = reader.getByte()
     result.ram = reader.getBytes(0x10000)
-  elif name == "MAINCPU" and version.major == 1 and version.minor in [1, 4]:
-    # The clock: 4 bytes in version 1.1 (VICE 1.x), 8 in 1.4 (VICE 3.x).
+  elif name == "C128MEM" and version.major == 0:
+    # x128: the MMU registers, then the RAM banks.
+    var reader = Reader(bytes: content)
+    result = Module(kind: mkC128Mem, moduleType: name, version: version)
+    for i in 0 ..< result.mmu.len:
+      result.mmu[i] = reader.getByte()
+    while reader.position + 0x10000 <= content.len:
+      result.banks.add reader.getBytes(0x10000)
+  elif name == "MAINCPU" and version.major == 1 and version.minor in [1, 3, 4]:
+    # The clock: 4 bytes in version 1.1 (VICE 1.x), 8 in 1.3 (x128) and 1.4
+    # (VICE 3.x).
     var reader = Reader(bytes: content, position: if version.minor == 1: 4 else: 8)
     result = Module(kind: mkMainCpu, moduleType: name, version: version)
     result.a = reader.getByte()
@@ -105,8 +121,9 @@ proc handle(name: string, version: Version, content: seq[byte]): Module =
     result.sp = reader.getByte()
     result.pc = reader.readWord()
     result.status = reader.getByte()
-  elif name == "VIC-II" and version.major == 1 and version.minor == 3:
-    # x64sc's layout in VICE 3.x: one byte, then the 64 registers.
+  elif name == "VIC-II" and version.major == 1 and version.minor == 3 and machine != "C128":
+    # x64sc's layout in VICE 3.x: one byte, then the 64 registers. x128's
+    # module has the same version and another layout.
     result = Module(kind: mkVicII, moduleType: name, version: version)
     var reader = Reader(bytes: content, position: 1)
     for i in 0 ..< 0x40:
@@ -126,12 +143,12 @@ proc handle(name: string, version: Version, content: seq[byte]): Module =
     reader.position = 13
     result.interruptMask = reader.getByte()
 
-proc readModule(reader: var Reader): Module =
+proc readModule(reader: var Reader, machine: string): Module =
   let moduleType = paddedString(reader.getBytes(16), 0)
   let version = reader.readVersion()
   let size = reader.readDword() - 22
   let content = reader.getBytes(size)
-  result = handle(moduleType, version, content)
+  result = handle(machine, moduleType, version, content)
   if result == nil:
     result = Module(kind: mkUnhandled, moduleType: moduleType, version: version, data: content)
 
@@ -156,7 +173,7 @@ proc readVcf*(bytes: seq[byte]): ViceVcfFile =
   var reader = Reader(bytes: bytes)
   result.header = reader.readHeader()
   while reader.position < reader.bytes.len:
-    result.modules.add reader.readModule()
+    result.modules.add reader.readModule(result.header.machineName)
 
 proc module*(file: ViceVcfFile, moduleType: string, kind: ModuleKind): Option[Module] =
   ## The module with this name, if it was read as this kind.

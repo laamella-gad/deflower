@@ -1,0 +1,11 @@
+>>> A program at $1c01 without the c128 option stays a C64 one, with a hint (issue 0132). <<<
+c128_prg/hello128.prg
+^^^
+; hello128.prg: loads at $1c01-$1c1c
+; $1c01 is where C128 BASIC programs start: --init with c128 for a C128 program
+; BASIC stub: SYS 7181
+deflower hello128.prg
+$1c0d code start
+$1c01-$1c0d byte basic_stub
+include c64.flo
+vvv

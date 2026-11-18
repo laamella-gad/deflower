@@ -1,0 +1,5 @@
+>>> A .prg's part is in the 64K it loads, not in another bank (issues 0132, 0133). <<<
+c128_prg/hello128.prg $11c01-$11c10
+^^^
+hello128.prg loads at $1c01-$1c1c, not all of $11c01-$11c10
+vvv

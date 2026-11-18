@@ -1,0 +1,35 @@
+>>> Issue 0136: flows from several places into the same target and the same
+kind of memory print as one warning at the target, the places grouped by how
+they get there. A single flow keeps its own line. <<<
+
+*=$c000
+
+		jsr $0250
+		jsr $0250
+		lda #$01
+		jsr $0250
+		jmp $0250
+===
+deflower test.prg
+$c000 code entry
+^^^
+warning: $0250 (l0250): 4 flows go into memory the image doesn't load: jsr $c000, $c003, $c008; jmp $c00b
+Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 14 bytes emitted, 0 differ, 0 virtual, 0 gaps
+~~~
+; called by: entry
+; jumped to by: entry
+l0250 = $0250
+*=$c000
+
+entry:
+		jsr l0250
+		jsr l0250
+		lda #$01
+		jsr l0250
+		jmp l0250
+~~~
+--- test.map
+$c000-$c00e code entry
+vvv

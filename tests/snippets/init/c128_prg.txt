@@ -1,0 +1,10 @@
+>>> A C128 program, with the c128 option (issue 0132): its BASIC stub at $1c01 and include c128.flo. <<<
+c128_prg/hello128.prg c128
+^^^
+; hello128.prg: loads at $1c01-$1c1c
+; BASIC stub: SYS 7181
+deflower hello128.prg
+$1c0d code start
+$1c01-$1c0d byte basic_stub
+include c128.flo
+vvv

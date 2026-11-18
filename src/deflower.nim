@@ -7,7 +7,7 @@ const help = staticRead("deflower/help.txt")
 
 proc printUsage() =
   printErr("Usage: deflower [--verify] [--watch] <file.flo>")
-  printErr("       deflower --init <file> [at <address>] [from <offset>] [size <n>]")
+  printErr("       deflower --init <file> [<part>] [at <address>] [c128]")
   printErr("       deflower --dump <file> [<options>] <start>-<end>")
   printErr("       deflower --find <file> [<options>] <address or bytes> [in <start>-<end>]")
   printErr("       deflower --strings <file> [<options>] [<start>-<end>] [min <n>]")
@@ -23,10 +23,13 @@ proc command*(args: seq[string]): int =
   if args.len >= 2 and args[0] == "--init":
     try:
       var rest = args[2 .. ^1]
-      let image = takeImage(args[1], rest)
+      let c128 = rest.len > 0 and rest[^1] == "c128"
+      if c128:
+        rest.setLen(rest.len - 1)
+      let image = takeImage(args[1], rest, alone = true)
       if rest.len > 0:
         raise newException(ArgumentError, "Wrong arguments for --init: " & args[2 .. ^1].join(" "))
-      return (if writeSkeleton(args[1], image): 0 else: 1)
+      return (if writeSkeleton(args[1], image, c128): 0 else: 1)
     except ArgumentError as e:
       printErr(e.msg)
       return 2

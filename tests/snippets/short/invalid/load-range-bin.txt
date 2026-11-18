@@ -1,0 +1,14 @@
+>>> A part has an end or a size, not both (issue 0133). <<<
+
+===
+deflower main.bin $0-$2 byte[2] at $c000
+===
+; file: main.bin
+*=$0000
+		.byte 1, 2, 3
+^^^
+Failed to parse test.flo:
+line 1: a part of a file has an end or a size, not both
+~~~
+~~~
+vvv

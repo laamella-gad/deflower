@@ -1,14 +1,14 @@
->>> A size of 0 loads nothing (issue 0117). <<<
+>>> A part of size 0 loads nothing (issues 0117, 0133). <<<
 
 ===
-deflower main.bin at $c000 size 0
+deflower main.bin $0 byte[0] at $c000
 ===
 ; file: main.bin
 *=$0000
 		rts
 ^^^
 Failed to parse test.flo:
-line 1: size 0 loads nothing
+line 1: the part $0-$0 is empty
 ~~~
 ~~~
 vvv

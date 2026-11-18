@@ -1,0 +1,63 @@
+>>> Issue 0133: a load line takes part of a .prg by a range of its addresses
+and loads it where it runs. The copy at $0111 is traced and the jsr to it
+resolves, in the same output; the source at $c010 stays data. <<<
+
+*=$c000
+
+entry:
+		ldy #$03
+copy:
+		lda block, y
+		sta $0111, y
+		dey
+		bpl copy
+		jsr $0111
+		rts
+		.byte	$00
+block:
+		inc $d020
+		rts
+===
+deflower test.prg
+$c000 code entry
+$c010-$c014 byte moved_source
+load test.prg $c010-$c014 at $0111
+$0111 code flash
+^^^
+Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 23 bytes emitted, 0 differ, 0 virtual, 1 gap
+gap $c00f-$c010
+~~~
+
+*=$0111
+
+; called by: entry
+; written by: entry
+flash:
+		inc $d020
+		rts 
+*=$c000
+
+entry:
+		ldy #$03
+; jumped to by: entry
+lC002:
+		lda moved_source, y
+		sta flash, y
+		dey 
+		bpl lC002
+		jsr flash
+		rts 
+*=$c010
+
+; read by: entry
+moved_source:
+		.byte	$ee, $20, $d0, $60
+~~~
+--- test.map
+$0111-$0115 code flash
+$c000-$c00f code entry
+$c00f-$c010 gap
+$c010-$c014 byte[4] moved_source
+vvv

@@ -1,11 +1,11 @@
->>> from and size are only for a .bin (issue 0117). <<<
+>>> A part of a file is sized by a data type, not code (issue 0133). <<<
 *=$c000
 		rts
 ===
-deflower test.prg from 2
+deflower test.prg $c000 code
 ^^^
 Failed to parse test.flo:
-line 1: from and size are for a .bin, not a .prg
+line 1: a part of a file is sized by a data type, not code
 ~~~
 ~~~
 vvv

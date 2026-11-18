@@ -1,5 +1,6 @@
 ## Look through the decoded code, after the flow analysis, for address
-## setups (issue 0074) and for self-modifying code (issue 0106).
+## setups (issue 0074), self-modifying code (issue 0106) and copy loops
+## (issue 0137).
 
 import std/[algorithm, sets, tables]
 import mpu6502
@@ -141,3 +142,121 @@ proc findSelfModifications*(subject: Subject) =
     let label = if target == -1: nil else: subject.memory[target].label
     if label != nil and label.auto and target notin referenced:
       subject.memory[target].label = nil
+
+proc instructionAt(subject: Subject, address: int): Area =
+  if address < 0 or address >= memorySize:
+    return nil
+  let area = subject.peek(address)
+  if area.isInstruction and area.address == address: area else: nil
+
+proc copyRange(subject: Subject, loadAt: int): tuple[source, target, first, finish: int] =
+  ## The copy loop whose load is the instruction at `loadAt` (issue 0137):
+  ## `lda source, x|y`, maybe a `beq` out on a zero byte, `sta target` on the
+  ## same index, the index stepped and a branch back. Returns the offsets
+  ## from `first` to `finish` (exclusive) the loop copies, or `source` -1.
+  result.source = -1
+  let load = subject.instructionAt(loadAt)
+  if load == nil or load.instruction.opcode != Opcode.LDA or
+      load.instruction.addressingMode notin {AddressingMode.AbsoluteX, AddressingMode.AbsoluteY}:
+    return
+  let mode = load.instruction.addressingMode
+  let byX = mode == AddressingMode.AbsoluteX
+  var address = loadAt + 3
+  var untilZero = false
+  var target = -1
+  var step = 0
+  var compare = -1
+  for count in 0 ..< 6:
+    let area = subject.instructionAt(address)
+    if area == nil:
+      return
+    let instruction = area.instruction
+    case instruction.opcode
+    of Opcode.BEQ:
+      if target == -1:
+        untilZero = true
+    of Opcode.STA:
+      if instruction.addressingMode != mode:
+        return
+      target = subject.wordAt(address + 1)
+    of Opcode.DEX, Opcode.DEY, Opcode.INX, Opcode.INY:
+      if (instruction.opcode in {Opcode.DEX, Opcode.INX}) != byX:
+        return
+      step = if instruction.opcode in {Opcode.DEX, Opcode.DEY}: -1 else: 1
+    of Opcode.CPX, Opcode.CPY:
+      if instruction.addressingMode != AddressingMode.Immediate or (instruction.opcode == Opcode.CPX) != byX:
+        return
+      compare = subject.byteAt(address + 1)
+    of Opcode.BNE, Opcode.BPL, Opcode.JMP:
+      let back = if instruction.opcode == Opcode.JMP: subject.wordAt(address + 1)
+                 else: address + 2 + toSignedByte(subject.byteAt(address + 1))
+      if back > loadAt or target == -1 or step == 0:
+        return
+      # The index's start: an immediate load right before the loop.
+      let before = subject.instructionAt(back - 2)
+      if before == nil or before.instruction.addressingMode != AddressingMode.Immediate or
+          before.instruction.opcode != (if byX: Opcode.LDX else: Opcode.LDY):
+        return
+      let start = subject.byteAt(back - 1)
+      let source = subject.wordAt(loadAt + 1)
+      var first, finish: int
+      if untilZero:
+        if step != 1:
+          return
+        first = start
+        finish = start
+        while source + finish < memorySize and subject.memory[source + finish].loaded and
+            subject.byteAt(source + finish) != 0:
+          inc finish
+      elif step == -1 and instruction.opcode == Opcode.BPL and start < 0x80:
+        (first, finish) = (0, start + 1)
+      elif step == -1 and instruction.opcode == Opcode.BNE:
+        (first, finish) = if start == 0: (0, 256) else: (1, start + 1)
+      elif step == 1 and instruction.opcode == Opcode.BNE:
+        (first, finish) = (start, if compare == -1: 256 else: compare)
+      else:
+        return
+      if finish <= first:
+        return
+      return (source, target, first, finish)
+    else:
+      return
+    address += instruction.addressingMode.totalBytes
+
+proc findCopyLoops*(subject: Subject) =
+  ## Hints at the loops that copy a block of the image to memory the image
+  ## doesn't load and that code calls or jumps into (issue 0137), with the
+  ## load line that puts the block there, so its code is traced where it
+  ## runs.
+  var called: HashSet[int]
+  for location in subject.memory:
+    let area = location.area
+    if area.isInstruction and area.address == location.address and
+        area.instruction.opcode in {Opcode.JSR, Opcode.JMP} and
+        area.instruction.addressingMode == AddressingMode.Absolute:
+      called.incl subject.wordAt(location.address + 1)
+  for location in subject.memory:
+    let (source, target, first, finish) = subject.copyRange(location.address)
+    if source == -1:
+      continue
+    let (start, to) = (source + first, source + finish)
+    let (at, atEnd) = (target + first, target + finish)
+    if to > memorySize or atEnd > memorySize:
+      continue
+    var sourceLoaded, targetLoaded = true
+    for a in start ..< to:
+      sourceLoaded = sourceLoaded and subject.memory[a].loaded
+    for a in at ..< atEnd:
+      targetLoaded = targetLoaded and subject.memory[a].loaded
+    var calledThere = false
+    for a in at ..< atEnd:
+      calledThere = calledThere or a in called
+    if not sourceLoaded or targetLoaded or not calledThere:
+      continue
+    let range = asHexWord(start) & "-" & asHexWord(to)
+    var line = "hint: " & asHexWord(location.address) & " copies " & range & " to " & asHexWord(at) & "-" &
+        asHexWord(atEnd)
+    for file in subject.loadedFiles:
+      if file.plainPrg and start >= file.start and to <= file.finish:
+        line = line & ": load " & file.name & " " & range & " at " & asHexWord(at)
+    subject.hints.add (location.address, line)

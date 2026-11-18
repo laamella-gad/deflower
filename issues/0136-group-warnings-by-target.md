@@ -1,7 +1,6 @@
 ---
 title: Group repeated warnings about the same target
-status: open
-priority: medium
+status: done
 labels: enhancement
 ---
 
@@ -23,3 +22,7 @@ warning: $0250 (l0250): 14 jsr/jmp go into memory the image doesn't load: $2bd9,
 ```
 
 Warnings about a site (the middle of an instruction, a jam) stay one per line. Accepting a whole group with one line would fit [0089](0089-silence-accepted-warnings.md).
+
+## Closing note
+
+`Subject.warningLines` groups the flow warnings (`warnFlowInto`, which records the target, what it goes into and how) when two or more share a target and kind: `warning: $0250 (l0250): 4 flows go into memory the image doesn't load: jsr $c000, $c003, $c008; jmp $c00b`. One flow keeps its own line. Warnings about a site (a code entry, a jam, an instruction running into an area) are unchanged; the skeleton range warning was already one per range. Snippet `short/grouped_warnings.txt`; zwark's two `decrunch_table` warnings became one.

@@ -1,0 +1,99 @@
+>>> An x128 snapshot's bank 1 in a run (issue 0132), as --init sets it up with $10000-$20000: the KERNAL's interrupt code in its RAM at $ff05. <<<
+c128_snap/c128_snap_bank1.flo
+^^^
+warning: $1300: untouched_1300 is used by $ff42
+Writing out/c128_snap.asm
+Writing out/c128_snap.map
+Verify out/c128_snap.asm: 60 bytes emitted, 0 differ, 60821 virtual, 5 gaps
+gap $0100-$0314
+gap $031a-$1300
+gap $fee5-$ff05
+gap $ff33-$ff3d
+gap $fff5-$10000
+~~~
+
+*=$0314
+
+; read by: hardware_irq
+a0314:
+		.addr	lFA65
+; read by: hardware_irq
+a0316:		.addr	lB003
+; read by: hardware_nmi
+a0318:		.addr	lFA40
+
+.virtual $1300
+untouched_1300:
+		.fill	40195
+lB003:
+		.fill	12285
+; jumped to by: reset
+lE000:
+		.fill	6720
+lFA40:
+		.fill	37
+lFA65:
+		.fill	1152
+.endv
+
+*=$ff05
+
+hardware_nmi:
+		sei 
+		pha 
+		txa 
+		pha 
+		tya 
+		pha 
+		lda $ff00
+		pha 
+		lda #$00
+		sta $ff00
+		jmp (a0318)
+
+hardware_irq:
+		pha 
+		txa 
+		pha 
+		tya 
+		pha 
+		lda $ff00
+		pha 
+		lda #$00
+		sta $ff00
+		tsx 
+		lda $0105, x
+		and #$10
+		beq lFF30
+		jmp (a0316)
+
+; jumped to by: hardware_irq
+lFF30:
+		jmp (a0314)
+*=$ff3d
+
+reset:
+		lda #$00
+		sta $ff00
+		jmp lE000
+
+.virtual $ff45
+untouched_ff45:
+		.fill	176
+.endv
+~~~
+--- c128_snap.map
+$0100-$0314 gap
+$0314-$0316 addr a0314
+$0316-$0318 addr a0316
+$0318-$031a addr a0318
+$031a-$1300 gap
+$1300-$fee5 virtual byte[60389] untouched_1300
+$fee5-$ff05 gap
+$ff05-$ff17 code hardware_nmi
+$ff17-$ff33 code hardware_irq
+$ff33-$ff3d gap
+$ff3d-$ff45 code reset
+$ff45-$fff5 virtual byte[176] untouched_ff45
+$fff5-$10000 gap
+vvv

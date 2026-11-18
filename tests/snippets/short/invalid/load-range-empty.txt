@@ -1,0 +1,13 @@
+>>> A .prg range must hold at least one byte (issue 0133). <<<
+
+*=$c000
+		rts
+===
+deflower test.prg
+load test.prg $c001-$c001 at $0111
+^^^
+Failed to parse test.flo:
+line 2: the part $c001-$c001 is empty
+~~~
+~~~
+vvv

@@ -7,9 +7,10 @@ Usage:
       .flo file. --verify reassembles each .asm and reports the bytes that
       differ and the gaps (memory nothing covers). --watch runs again on
       every change, until Ctrl-C.
-  deflower --init <file> [at <address>] [from <offset>] [size <n>]
+  deflower --init <file> [<part>] [at <address>] [c128]
       Write a .flo skeleton next to the file: what it knows, entry points,
-      includes.
+      includes. c128: a C128 program; $10000-$20000: an x128 snapshot's
+      RAM bank 1.
   deflower --dump <file> [<options>] <start>-<end>
       Hex dump, with PETSCII and screen codes.
   deflower --dump <file.vsf> vic|colour
@@ -28,18 +29,24 @@ Suggested loop: --init, then --watch --verify, read out/*.asm, annotate the
 .flo file, save, repeat.
 
 The .flo file, one statement per line:
-  deflower <file> [at <address>] [from <offset>] [size <n>]
+  deflower <file> [<part>] [at <address>]
                               start a run on a .vsf, .prg (at: elsewhere)
-                              or .bin (at needed; from skips bytes, size
-                              takes that many)
-  load <file> [<options>]     load one more .prg or .bin; a later file wins
+                              or .bin (at needed); the part is a place and
+                              a type, a .prg's addresses or a .bin's
+                              offsets: $378b-$3801, $50 byte[$2000], $3;
+                              a snapshot's bank: $10000-$20000
+  load <file> [<options>]     load one more .prg or .bin; a later file wins;
+                              load game.prg $378b-$3801 at $0111 traces code
+                              copied to where it runs
   include <file>              read another .flo file, or a built-in one:
                               c64.flo (c64_zeropage, c64_system, c64_io,
-                              c64_basic, c64_kernal.flo); its lines are weak
+                              c64_basic, c64_kernal.flo), c128.flo (the
+                              same with c128_); its lines are weak
   ; text   or   # text        comment on the next line's address
   <address or range> [virtual] [<type>[<size>]] [<label>] [(<parameters>)]
       [noreturn] [export <file>.bin|.prg] [{]
-  <address> banked <label>    a routine in ROM banked over the RAM, or one only there at run time
+  <address> banked <label>    a routine in ROM banked over the RAM, or one
+                              only there at run time
   <address> selfmod <label>   names a self-modified operand
   <address> [virtual] {       block: addresses inside are offsets
   }

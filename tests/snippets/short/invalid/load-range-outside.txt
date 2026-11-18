@@ -1,0 +1,13 @@
+>>> A .prg range must be inside what the .prg loads (issue 0133). <<<
+
+*=$c000
+		rts
+		rts
+===
+deflower test.prg
+load test.prg $c001-$c004 at $0111
+^^^
+test.prg loads at $c000-$c002, not all of $c001-$c004
+~~~
+~~~
+vvv
