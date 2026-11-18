@@ -112,6 +112,55 @@ proc absoluteOperand(subject: Subject, address: int): int =
 proc relativeOperand(subject: Subject, address: int): int =
   address + toSignedByte(subject.memory[address + 1].data) + 2
 
+proc bitSkip(subject: Subject, entry: CodeEntry, area: Area): int =
+  ## The BIT skip trick (issue 0140): an instruction falls through into a
+  ## one-byte data line holding `bit abs` ($2c) or `bit zp` ($24), whose
+  ## operand bytes are another instruction that other code jumps to. Running
+  ## into the byte executes the `bit`, which skips its operand, so the flow
+  ## goes on after it. Returns how many bytes the `bit` takes (3 or 2), or 0
+  ## when this isn't the trick.
+  if not entry.fallsThrough or entry.source == -1 or area.address != entry.address or area.size != 1:
+    return 0
+  let origin = subject.memory[entry.source].area
+  if origin == nil or not origin.isInstruction:
+    return 0
+  case subject.memory[entry.address].data
+  of 0x2c: 3
+  of 0x24: 2
+  else: 0
+
+proc branchTaken(subject: Subject, address: int, opcode: Opcode): Option[bool] =
+  ## Whether the branch at `address` is taken, when the instruction right
+  ## before it sets its flag to a known value (issue 0140): lda #$00 / beq,
+  ## clc / bcc.
+  let before = if address >= 2: subject.memory[address - 2].area else: nil
+  let single = if address >= 1: subject.memory[address - 1].area else: nil
+  if before != nil and before.isInstruction and before.address == address - 2 and
+      before.instruction.addressingMode == AddressingMode.Immediate and
+      before.instruction.opcode in {Opcode.LDA, Opcode.LDX, Opcode.LDY}:
+    let value = subject.memory[address - 1].data
+    case opcode
+    of Opcode.BEQ: return some(value == 0)
+    of Opcode.BNE: return some(value != 0)
+    of Opcode.BMI: return some(value >= 0x80)
+    of Opcode.BPL: return some(value < 0x80)
+    else: return none(bool)
+  if single != nil and single.isInstruction and single.address == address - 1:
+    let (taken, notTaken) = case single.instruction.opcode
+      of Opcode.CLC: (Opcode.BCC, Opcode.BCS)
+      of Opcode.SEC: (Opcode.BCS, Opcode.BCC)
+      of Opcode.CLV: (Opcode.BVC, Opcode.BVS)
+      else: return none(bool)
+    if opcode == taken: return some(true)
+    if opcode == notTaken: return some(false)
+  none(bool)
+
+proc isDeclaredData(subject: Subject, address: int): bool =
+  if address > 0xffff:
+    return false
+  let area = subject.memory[address].area
+  area != nil and area.isData and not area.isPlaceholder and not area.isVirtual
+
 proc analyseCodeFlow(subject: Subject, entry: CodeEntry) =
   let startAddress = entry.address
   let memoryLocation = subject.memory[startAddress]
@@ -120,6 +169,12 @@ proc analyseCodeFlow(subject: Subject, entry: CodeEntry) =
     # Issue 0077: a virtual area, like a KERNAL routine, is code that isn't
     # in the image, so calling it is fine.
     if area.isData and not area.isVirtual:
+      let skip = subject.bitSkip(entry, area)
+      if skip > 0:
+        # Issue 0140: no warning; the flow continues after the bit's operand.
+        if startAddress + skip <= 0xffff:
+          subject.addPotentialCodeLocation(startAddress + skip, false, entry.source)
+        return
       subject.warnFlow(entry, "data", "is data")
     elif area.isInstruction and area.address != startAddress:
       let instruction = "the instruction at " & asHexWord(area.address)
@@ -173,8 +228,17 @@ proc analyseCodeFlow(subject: Subject, entry: CodeEntry) =
     else:
       subject.addPotentialCodeLocation(subject.absoluteOperand(address), true, address)
   of Opcode.BCC, Opcode.BCS, Opcode.BEQ, Opcode.BMI, Opcode.BNE, Opcode.BPL, Opcode.BVC, Opcode.BVS:
-    subject.addPotentialCodeLocation(subject.relativeOperand(address), true, address)
-    subject.addPotentialCodeLocation(next, false, address)
+    # Issue 0140: a branch whose flag the instruction before it sets
+    # (lda #$00 / beq, clc / bcc) always or never goes. The way it can't go
+    # is still traced (dead code stays code), except into declared data:
+    # that is a table after an always-taken branch, not a flow into data,
+    # so it isn't followed and doesn't warn.
+    let target = subject.relativeOperand(address)
+    let taken = subject.branchTaken(address, instruction.opcode)
+    if not (taken == some(false) and subject.isDeclaredData(target)):
+      subject.addPotentialCodeLocation(target, true, address)
+    if not (taken == some(true) and subject.isDeclaredData(next)):
+      subject.addPotentialCodeLocation(next, false, address)
   else:
     # Every control-flow instruction has its own case above, so an absolute
     # operand here is a data reference.

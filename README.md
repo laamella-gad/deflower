@@ -194,6 +194,8 @@ Two lines may only cover the same memory if the earlier one is a placeholder (or
 
 A `jsr`, `jmp` or branch target in memory banked in over the binary's RAM when the program goes there, like a KERNAL routine while the RAM under the KERNAL holds the program's data. A jump or call to the address prints the label, and the tracing doesn't follow it; so does an `rta` value. An `.addr` value and an address setup's `#<`, `#>` print it when the RAM has no label on the address itself. The RAM at the address keeps its own lines: a read or write of it prints the RAM's name. A label with the same name at the same address names the same routine: an included one gives way to the other. The KERNAL and BASIC entry points of `c64.flo` are banked lines.
 
+It also names a routine that only exists at run time, outside the binary and not in ROM: RAM code a KERNAL or loader installs before the program runs, called where the binary doesn't load (`$0250 banked lda_bank1_fb`). The call then doesn't warn.
+
 The label is printed as `label = $addr` at the top of the output, with the line's comment and who calls or jumps to it; an included one only when something does. Takes nothing else: no range, type or `virtual`.
 
 A code line of the file itself at the same address wins over an included banked line, and is an error next to one of its own.
@@ -298,3 +300,7 @@ WS      : [ \t]+ -> skip ;
 Illegal opcodes need 64tass's `-i` (`--6502`) option: `64tass -i -o game.prg out/game.asm`.
 
 The warnings point at suspect spots without stopping the output, as `warning: $addr: text`: a flow into data, into the middle of an instruction or into memory the binary doesn't load, a `jsr` that returns into data, an instruction that runs into another area or past the end of the binary, a jam, a data line on memory the binary doesn't load, and an operand that refers into an `untouched_` or `unused_` range of the skeleton.
+
+Two flows into data are not suspect and don't warn:
+- the BIT skip trick: an instruction falls through into a one-byte data line holding `$2c` (`bit abs`) or `$24` (`bit zp`), whose operand is an instruction other code jumps to. Type the `$2c` as `byte` and give the hidden instruction a `code` line (or let a `jsr` reach it); the flow goes on after the `bit`'s operand, as the CPU does;
+- a branch whose flag the instruction right before it sets: `lda`/`ldx`/`ldy #` before `beq`, `bne`, `bmi` or `bpl`, and `clc`, `sec` or `clv` before a carry or overflow branch (`lda #$00` / `beq` and `clc` / `bcc` are relocatable `jmp`s). The way such a branch can't go isn't followed into declared data, like a table after it. Elsewhere it is still traced, so dead code stays code.

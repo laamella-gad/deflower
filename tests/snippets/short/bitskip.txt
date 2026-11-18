@@ -1,0 +1,134 @@
+>>> Issue 0140: the BIT skip trick. Falling into a one-byte data line holding
+$2c (bit abs) or $24 (bit zp) runs the bit, which skips the instruction hidden
+in its operand: no warning, and the flow goes on after the operand. An
+lda #$00 / beq is always taken: it does not fall through into the table after
+it, so that table gives no warning either, and neither do clc / bcc and
+lda #$80 / bmi. <<<
+
+*=$c000
+
+entry:
+		jsr set_one
+		jsr set_zero
+		jsr set_carry
+		jsr clear_carry
+		lda #$00
+		beq done
+table:
+		.byte	$01, $02
+done:
+		clc 
+		bcc done2
+table2:
+		.byte	$03
+done2:
+		lda #$80
+		bmi done3
+table3:
+		.byte	$04
+done3:
+		rts 
+
+set_one:
+		lda #$01
+skip_abs:
+		.byte	$2c
+set_zero:
+		lda #$00
+		sta $fb
+		rts 
+
+set_carry:
+		sec 
+skip_zp:
+		.byte	$24
+clear_carry:
+		clc 
+		rts 
+===
+deflower test.prg
+$c000 code entry
+$c010 byte[2] table
+$c015 byte table2
+$c01a byte table3
+$c01e byte skip_abs
+$c025 byte skip_zp
+^^^
+Writing out/test.asm
+Writing out/test.map
+Verify out/test.asm: 40 bytes emitted, 0 differ, 0 virtual, 0 gaps
+~~~
+
+*=$c000
+
+entry:
+		jsr lC01C
+		jsr lC01F
+		jsr lC024
+		jsr lC026
+		lda #$00
+		beq lC012
+
+table:
+		.byte	$01, $02
+
+; jumped to by: entry
+lC012:
+		clc 
+		bcc lC016
+
+table2:
+		.byte	$03
+
+; jumped to by: $c013
+lC016:
+		lda #$80
+		bmi lC01B
+
+table3:
+		.byte	$04
+
+; jumped to by: $c018
+lC01B:
+		rts 
+
+; called by: entry
+lC01C:
+		lda #$01
+
+skip_abs:
+		.byte	$2c
+
+; called by: entry
+lC01F:
+		lda #$00
+		sta $fb
+		rts 
+
+; called by: entry
+lC024:
+		sec 
+
+skip_zp:
+		.byte	$24
+
+; called by: entry
+lC026:
+		clc 
+		rts 
+~~~
+--- test.map
+$c000-$c010 code entry
+$c010-$c012 byte[2] table
+$c012-$c015 code lC012
+$c015-$c016 byte table2
+$c016-$c01a code lC016
+$c01a-$c01b byte table3
+$c01b-$c01c code lC01B
+$c01c-$c01e code lC01C
+$c01e-$c01f byte skip_abs
+$c01f-$c024 code lC01F
+$c024-$c025 code lC024
+$c025-$c026 byte skip_zp
+$c026-$c028 code lC026
+vvv

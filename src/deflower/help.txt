@@ -39,7 +39,7 @@ The .flo file, one statement per line:
   ; text   or   # text        comment on the next line's address
   <address or range> [virtual] [<type>[<size>]] [<label>] [(<parameters>)]
       [noreturn] [export <file>.bin|.prg] [{]
-  <address> banked <label>    a routine in ROM banked over the RAM
+  <address> banked <label>    a routine in ROM banked over the RAM, or one only there at run time
   <address> selfmod <label>   names a self-modified operand
   <address> [virtual] {       block: addresses inside are offsets
   }
